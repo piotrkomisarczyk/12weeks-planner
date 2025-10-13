@@ -3,9 +3,9 @@ description:
 globs: 
 alwaysApply: true
 ---
-# AI Rules for {app-name}
+# AI Rules for 12weeks-planner
 
-{project-description}
+12weeks-planner is a web application that is designed to plan and monitor long term goals.
 
 ## Tech Stack
 
