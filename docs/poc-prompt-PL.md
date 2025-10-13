@@ -1,0 +1,27 @@
+Jesteś AI generator kodu, który ma stworzyć minimalny Proof of Concept (PoC) dla webowej aplikacji 12 Weeks Planner. Aplikacja to narzędzie do planowania i monitorowania długoterminowych celów na przestrzeni 12 tygodni. PoC ma zweryfikować podstawową funkcjonalność MVP, skupiając się wyłącznie na rdzennych elementach: tworzeniu i zarządzaniu 12-tygodniowym planerem, definiowaniu celów z zadaniami, podstawowym zarządzaniem zadaniami tygodniowymi i dziennymi (z priorytetami i stanami), oraz prostymi widokami nawigacyjnymi (dashboard, cele, tydzień, dzień). Wyklucz wszystkie nadmiarowe funkcje, takie jak: współdzielenie planerów, wyszukiwanie, timeboxing, integracje zewnętrzne (np. kalendarz, powiadomienia), automatyczne obliczanie postępów, zaawansowane podsumowania tygodniowe z refleksją, archiwizacja planerów, zmiana języka, nawigacja po podsumowaniach, obsługa błędów poza podstawowymi walidacjami, oraz pełna responsywność mobilna. PoC nie musi być w pełni produkcyjny – skup się na działającym prototypie, który pozwala użytkownikowi zarejestrować się, stworzyć planer, dodać cele i zadania, oraz przeglądać je w podstawowych widokach. Użyj stacku technologicznego: Frontend (TypeScript 5, Astro 5, Tailwind 4, Shadcn/ui, React 19); Backend (Supabase dla bazy PostgreSQL i SDK); CI/CD i hosting (Github Actions, DigitalOcean – ale w PoC skup się na lokalnym/lokowanym setupie Supabase). Aplikacja ma być dostępna w języku angielskim (bez obsługi polskiego w PoC).
+Opis MVP (skrócony z PRD.md, skupiony na podstawach):
+Zarządzanie planerami: Tworzenie 12-tygodniowego planera (start od poniedziałku aktualnego tygodnia, nazwa domyślna "Planner_[data]"). Nawigacja: lista planerów na dashboardzie (poprzedni/następny). Walidacja: min. 1 cel na planer.
+Cele: 1-5 celów na planer, każdy z tytułem, uzasadnieniem (textarea), manualnym paskiem postępu (slider 0-100%), i do 5 zadaniami (kamieniami milowymi) z terminami (date picker). Wizualizacja w dashboardzie z listą celów i postępami.
+Zadania tygodniowe: W widoku tygodnia: 1 główne zadanie (powiązane z celami/kamieniami), do 10 podzadań, do 10 zadań ad-hoc (niezwiązanych). Priorytety: A/B/C (dropdown). Stany: do zrobienia, w trakcie, zakończone, anulowane, przesunięte (ikony SVG z ARIA labels). Możliwość przypisania zadań do dni via menu kontekstowe. Brak drag-and-drop w PoC.
+Widok dnia: Dla wybranego dnia: 1 najważniejsze zadanie, 2 drugorzędne (związane z celami), 7 dodatkowych (ad-hoc lub nadmiarowe). Kopiowanie zadań między dniami z zachowaniem historii stanów (prosta duplikacja w bazie). Zmiana stanów ikoną (cykliczne). Limity slotów.
+Widoki i nawigacja: Dashboard: drzewo hierarchii (expand/collapse) z celami i zadaniami (ad-hoc pod węzłem 'ad-hoc'); linki do widoków (cele, tydzień, dzień). Widok celów: edycja celów/zadań. Widok tygodnia: planowanie zadań. Widok dnia: lista zadań z nawigacją (poprzedni/następny dzień, date picker w zakresie planera). Numer tygodnia wyświetlany na górze widoków. Brak podsumowań w PoC.
+Baza danych (Supabase): Tabele: users (automatycznie z Auth), planners (nazwa, data startu, user_id), goals (tytuł, uzasadnienie, postęp, planer_id), tasks (tytuł, priorytet, stan, typ: weekly/daily/ad-hoc, powiązania: goal_id/task_id, data przypisania). Użyj foreign keys dla hierarchii. Manualne zapisy (bez auto-calc).
+
+Instrukcje dla Ciebie (generatora):
+Rozplanuj pracę przed kodowaniem: Przed rozpoczęciem tworzenia PoC, przygotuj szczegółowy plan w formie markdown:
+Krok 1: Setup projektu (inicjalizacja Astro + Supabase, instalacja zależności: TypeScript, Tailwind, Shadcn/ui, React). Opisz strukturę folderów (np. src/pages dla widoków, src/components dla UI, supabase config).
+Krok 2: Implementacja backendu (schemat bazy Supabase: tabele i relacje).
+Krok 3: Podstawowe widoki frontend (dashboard, routing w Astro).
+Krok 4: Integracja (CRUD dla planerów/celów/zadań via Supabase client; stany i priorytety w komponentach React).
+Krok 5: Testowanie PoC (manualne: rejestracja → planer → cele → zadania → widoki; edge cases jak limity, walidacje).
+Zakres PoC: Wymień dokładnie, co będzie zaimplementowane (np. "Tworzenie planera z walidacją", ale "Brak kopiowania zadań między tygodniami"). Szacowany czas/ilość plików.
+Ryzyka i założenia: Np. lokalny Supabase dla dev, brak CI/CD w PoC.
+Wyślij ten plan użytkownikowi i zaczekaj na jego akceptację lub feedback. Nie przechodź do kodowania, dopóki nie otrzymasz zgody (np. "OK, idź dalej" lub sugestie zmian). Jeśli akceptacja, potwierdź i zacznij generować kod krok po kroku (każdy krok jako osobna wiadomość z kodem w blokach markdown, z wyjaśnieniami).
+Generowanie PoC po akceptacji:
+Generuj kod modularnie: najpierw setup, potem core features. Używaj TypeScript dla typów (np. interfejsy dla Goal, Task).
+UI: Proste, responsywne na desktop (Tailwind + Shadcn/ui komponenty jak Button, Input, Slider, Select). Ikony dla stanów (np. Lucide React).
+Walidacje: Podstawowe (np. min. 1 cel, limity via form libraries jak React Hook Form).
+Błędy: Pokazuj toasty/alerty dla walidacji (użyj sonner lub podobnego).
+Deployment: Instrukcje do uruchomienia lokalnie (npm run dev) i setup Supabase (env vars).
+Na końcu: Lista do weryfikacji PoC (np. "Przetestuj: Utwórz planer, dodaj cel, przypisz zadanie do dnia").
+Ograniczenia: Trzymaj PoC minimalnym (ok. 10-15 plików), bez optymalizacji wydajności. Jeśli coś jest niejasne, zapytaj użytkownika. Cel: Działający prototyp weryfikujący, czy stack i flow MVP są wykonalne.
