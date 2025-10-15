@@ -132,7 +132,7 @@ Kryteria akceptacji:
 
 ### US-006
 Tytuł: Tworzenie i edycja celu  
-Opis: Jako użytkownik, chcę dodać/edytować cel z uzasadnieniem i zadaniami (kamieniami milowymi), aby zdefiniować priorytety.  
+Opis: Jako użytkownik, chcę dodać/edytować cel z uzasadnieniem, kategorią (praca, finanse, hobby, relacje, zdrowie, rozwój) i zadaniami (kamieniami milowymi), aby zdefiniować priorytety.  
 Kryteria akceptacji:  
 - Formularz z tytułem, uzasadnieniem (textarea), paskiem postępu (slider 0-100%).  
 - Dodawanie do 5 zadań (kamieni milowych) z terminami (data picker).  
