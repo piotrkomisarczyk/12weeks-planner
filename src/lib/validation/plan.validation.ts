@@ -14,10 +14,13 @@ import { z } from 'zod';
  * - offset: non-negative integer, defaults to 0
  */
 export const GetPlansQuerySchema = z.object({
-  status: z.enum(['active', 'completed', 'archived']).nullable().optional(),
+  status: z.enum(['active', 'completed', 'archived']).nullish(),
   limit: z.coerce.number().int().positive().max(100).catch(50),
   offset: z.coerce.number().int().min(0).catch(0)
-});
+}).transform((data) => ({
+  ...data,
+  status: data.status ?? undefined
+}));
 
 /**
  * Inferred TypeScript type from GetPlansQuerySchema
