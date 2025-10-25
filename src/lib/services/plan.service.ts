@@ -63,5 +63,83 @@ export class PlanService {
       offset
     };
   }
+
+  /**
+   * Pobiera aktywny planer dla danego użytkownika
+   * 
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @returns Promise z aktywnym planerem lub null jeśli nie istnieje
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const activePlan = await planService.getActivePlan(userId);
+   * if (!activePlan) {
+   *   // No active plan found
+   * }
+   * ```
+   */
+  async getActivePlan(userId: string): Promise<PlanDTO | null> {
+    // Query for active plan
+    const { data, error } = await this.supabase
+      .from('plans')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .limit(1)
+      .single();
+
+    // Handle not found (expected case)
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned - this is not an error, just no active plan
+        return null;
+      }
+      // Actual database error
+      throw new Error(`Failed to fetch active plan: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * Pobiera konkretny planer po ID
+   * Weryfikuje, że planer należy do danego użytkownika
+   * 
+   * @param planId - UUID planera
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @returns Promise z planerem lub null jeśli nie istnieje/nie należy do użytkownika
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const plan = await planService.getPlanById(planId, userId);
+   * if (!plan) {
+   *   // Plan not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async getPlanById(planId: string, userId: string): Promise<PlanDTO | null> {
+    // Query for plan by ID, filtered by user_id for security
+    const { data, error } = await this.supabase
+      .from('plans')
+      .select('*')
+      .eq('id', planId)
+      .eq('user_id', userId)
+      .limit(1)
+      .single();
+
+    // Handle not found (expected case)
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // No rows returned - either doesn't exist or belongs to another user
+        return null;
+      }
+      // Actual database error
+      throw new Error(`Failed to fetch plan: ${error.message}`);
+    }
+
+    return data;
+  }
 }
 

@@ -27,4 +27,16 @@ export const GetPlansQuerySchema = z.object({
  */
 export type GetPlansQuery = z.infer<typeof GetPlansQuerySchema>;
 
+/**
+ * Validation schema for GET /api/v1/plans/:id
+ * Validates UUID format for plan ID parameter
+ */
+export const GetPlanByIdParamsSchema = z.object({
+  id: z.string().uuid({ message: 'Invalid plan ID format' })
+});
+
+/**
+ * Inferred TypeScript type from GetPlanByIdParamsSchema
+ */
+export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 
