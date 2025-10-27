@@ -4,7 +4,15 @@
  */
 
 import type { SupabaseClient } from '../../db/supabase.client';
-import type { PlanDTO, PlanListParams, PaginatedResponse } from '../../types';
+import type { 
+  PlanDTO, 
+  PlanListParams, 
+  PaginatedResponse,
+  CreatePlanCommand,
+  UpdatePlanCommand,
+  PlanInsert,
+  PlanUpdate
+} from '../../types';
 
 export class PlanService {
   constructor(private supabase: SupabaseClient) {}
@@ -140,6 +148,155 @@ export class PlanService {
     }
 
     return data;
+  }
+
+  /**
+   * Tworzy nowy 12-tygodniowy planer
+   * 
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @param data - Dane planera (name, start_date)
+   * @returns Promise z utworzonym planerem
+   * @throws Error jeśli start_date nie jest poniedziałkiem (constraint violation)
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const plan = await planService.createPlan(userId, {
+   *   name: 'Q1 2025 Goals',
+   *   start_date: '2025-01-06'
+   * });
+   * ```
+   */
+  async createPlan(
+    userId: string,
+    data: CreatePlanCommand
+  ): Promise<PlanDTO> {
+    // Prepare insert data with user_id
+    const insertData: PlanInsert = {
+      user_id: userId,
+      name: data.name,
+      start_date: data.start_date,
+      status: 'active' // Default status
+    };
+
+    // Execute insert
+    const { data: plan, error } = await this.supabase
+      .from('plans')
+      .insert(insertData)
+      .select()
+      .single();
+
+    // Handle database errors
+    if (error) {
+      // Check for constraint violations
+      if (error.code === '23514') {  // CHECK constraint
+        throw new Error('Start date must be a Monday');
+      }
+      // Other database errors
+      throw new Error(`Failed to create plan: ${error.message}`);
+    }
+
+    return plan;
+  }
+
+  /**
+   * Aktualizuje istniejący planer (tylko nazwę)
+   * Weryfikuje, że planer należy do użytkownika
+   * 
+   * @param planId - UUID planera
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @param data - Dane do aktualizacji (name)
+   * @returns Promise z zaktualizowanym planerem lub null jeśli nie istnieje
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const plan = await planService.updatePlan(planId, userId, {
+   *   name: 'Updated Q1 2025 Goals'
+   * });
+   * if (!plan) {
+   *   // Plan not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async updatePlan(
+    planId: string,
+    userId: string,
+    data: UpdatePlanCommand
+  ): Promise<PlanDTO | null> {
+    // First verify plan exists and belongs to user
+    const existingPlan = await this.getPlanById(planId, userId);
+    
+    if (!existingPlan) {
+      return null;
+    }
+
+    // Prepare update data
+    const updateData: PlanUpdate = {
+      name: data.name,
+      // updated_at is automatically set by database trigger
+    };
+
+    // Execute update
+    const { data: plan, error } = await this.supabase
+      .from('plans')
+      .update(updateData)
+      .eq('id', planId)
+      .eq('user_id', userId)  // Security: ensure user owns the plan
+      .select()
+      .single();
+
+    // Handle database errors
+    if (error) {
+      throw new Error(`Failed to update plan: ${error.message}`);
+    }
+
+    return plan;
+  }
+
+  /**
+   * Archiwizuje planer (zmiana statusu na 'archived')
+   * Weryfikuje, że planer należy do użytkownika
+   * 
+   * @param planId - UUID planera
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @returns Promise z zarchiwizowanym planerem lub null jeśli nie istnieje
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const plan = await planService.archivePlan(planId, userId);
+   * if (!plan) {
+   *   // Plan not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async archivePlan(
+    planId: string,
+    userId: string
+  ): Promise<PlanDTO | null> {
+    // First verify plan exists and belongs to user
+    const existingPlan = await this.getPlanById(planId, userId);
+    
+    if (!existingPlan) {
+      return null;
+    }
+
+    // Update status to archived
+    const { data: plan, error } = await this.supabase
+      .from('plans')
+      .update({ status: 'archived' })
+      .eq('id', planId)
+      .eq('user_id', userId)  // Security: ensure user owns the plan
+      .select()
+      .single();
+
+    // Handle database errors
+    if (error) {
+      throw new Error(`Failed to archive plan: ${error.message}`);
+    }
+
+    return plan;
   }
 }
 
