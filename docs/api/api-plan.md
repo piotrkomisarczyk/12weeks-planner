@@ -61,7 +61,7 @@ Authentication is handled entirely by Supabase Auth SDK on the client side. No c
 Get all plans for the authenticated user.
 
 **Query Parameters:**
-- `status` (optional): Filter by status (`active`, `completed`, `archived`)
+- `status` (optional): Filter by status (`ready`, `active`, `completed`, `archived`)
 - `limit` (optional): Number of results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
@@ -74,7 +74,7 @@ Get all plans for the authenticated user.
       "user_id": "uuid",
       "name": "Planner_2025-01-06",
       "start_date": "2025-01-06",
-      "status": "active",
+      "status": "ready",
       "created_at": "2025-01-06T10:00:00Z",
       "updated_at": "2025-01-06T10:00:00Z"
     }
@@ -170,12 +170,17 @@ Create a new 12-week planner.
     "user_id": "uuid",
     "name": "Planner_2025-01-06",
     "start_date": "2025-01-06",
-    "status": "active",
+    "status": "ready",
     "created_at": "2025-01-06T10:00:00Z",
     "updated_at": "2025-01-06T10:00:00Z"
   }
 }
 ```
+
+**Notes:**
+- New plans are created with status `ready` by default
+- To activate a plan, use the PATCH endpoint to set status to `active`
+- When a plan is set to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger)
 
 **Error Responses:**
 - `400 Bad Request`: Invalid start_date (not Monday), missing required fields
@@ -187,12 +192,13 @@ Create a new 12-week planner.
 
 **PATCH** `/api/v1/plans/:id`
 
-Update plan details.
+Update plan details, including activation.
 
 **Request Body**:
 ```json
 {
-  "name": "My Q1 2025 Plan"
+  "name": "My Q1 2025 Plan",
+  "status": "active"
 }
 ```
 
@@ -211,9 +217,14 @@ Update plan details.
 }
 ```
 
+**Notes:**
+- When setting `status` to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger)
+- Only one plan can be `active` at a time per user
+- Valid status transitions: `ready` ↔ `active`, any status → `completed`, any status → `archived`
+
 **Error Responses:**
 - `404 Not Found`: Plan not found or doesn't belong to user
-- `400 Bad Request`: Invalid data
+- `400 Bad Request`: Invalid data or invalid status value
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -1707,10 +1718,12 @@ All API endpoints validate incoming data before processing:
 #### Plans
 - **Validation**:
   - `start_date` must be a Monday (enforced by database trigger)
-  - Status must be one of: `active`, `completed`, `archived`
-  - User can have multiple plans, but only one `active` at a time
+  - Status must be one of: `ready`, `active`, `completed`, `archived`
+  - User can have multiple plans, but only one `active` at a time (enforced by database trigger)
   
 - **Business Logic**:
+  - New plans are created with status `ready` by default
+  - When a plan is set to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger `ensure_single_active_plan`)
   - Creating a plan automatically updates user_metrics (via trigger)
   - Archiving a plan sets status to `archived` (soft delete)
   - Plan requires minimum 1 goal before creation (enforced at application level)
@@ -2146,7 +2159,8 @@ The following features are out of scope for MVP but may be considered for future
 ### 8.3 Database Enum Values
 
 **Plan Status:**
-- `active`
+- `ready` (default status when plan is created)
+- `active` (only one plan can be active at a time per user)
 - `completed`
 - `archived`
 

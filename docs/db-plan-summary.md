@@ -16,7 +16,7 @@ Strategia Kaskadowego Usuwania: Zgodnie z rekomendacją, relacja plan -> long_te
 Separacja Weekly Review: Zaakceptowano pomysł stworzenia osobnej tabeli weekly_reviews powiązanej z planem i numerem tygodnia, co zapewnia ustrukturyzowane i skalowalne przechowywanie tych danych.
 Elastyczne Daty Planu: Przyjęto model, w którym w tabeli plans przechowywana jest tylko start_date, a daty końcowe i granice poszczególnych tygodni są obliczane dynamicznie.
 Uporządkowane Milestones: Zgodnie z sugestią, do tabeli milestones zostanie dodana kolumna position (lub order), aby umożliwić użytkownikowi definiowanie kolejności kroków w ramach celu długoterminowego.
-Wartości Domyślne: Zaakceptowano użycie wartości domyślnych na poziomie bazy danych (np. is_completed = false dla zadań, status = 'active' dla planów) w celu uproszczenia logiki i zapewnienia spójności.
+Wartości Domyślne: Zaakceptowano użycie wartości domyślnych na poziomie bazy danych (np. is_completed = false dla zadań, status = 'ready' dla planów) w celu uproszczenia logiki i zapewnienia spójności.
 </matched_recommendations>
 <database_planning_summary>
 Na podstawie przeprowadzonej dyskusji, schemat bazy danych dla MVP będzie oparty na hierarchicznej strukturze, której centralnym punktem jest 12-tygodniowy plan. Uwierzytelnianie będzie obsługiwane przez Supabase.

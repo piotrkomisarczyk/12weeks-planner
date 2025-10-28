@@ -11,7 +11,7 @@ Centralna tabela przechowująca 12-tygodniowe planery użytkowników.
 | user_id | UUID | NOT NULL, REFERENCES auth.users(id) ON DELETE CASCADE | Właściciel planera |
 | name | TEXT | NOT NULL | Nazwa planera (domyślnie: "Planner_<data_startu>") |
 | start_date | DATE | NOT NULL | Data rozpoczęcia planera (zawsze poniedziałek) |
-| status | TEXT | NOT NULL, DEFAULT 'active', CHECK (status IN ('active', 'completed', 'archived')) | Status planera |
+| status | TEXT | NOT NULL, DEFAULT 'ready', CHECK (status IN ('ready', 'active', 'completed', 'archived')) | Status planera |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Data utworzenia |
 | updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Data ostatniej modyfikacji |
 
@@ -887,7 +887,35 @@ AFTER INSERT OR UPDATE OF progress_percentage ON long_term_goals
 FOR EACH ROW EXECUTE FUNCTION update_user_metrics_on_goal_completion();
 ```
 
-### 6.5. Trigger: validate_plan_start_date
+### 6.5. Trigger: ensure_single_active_plan
+Zapewnia, że użytkownik ma tylko jeden plan w stanie 'active'. Gdy plan jest zmieniany na 'active', wszystkie inne aktywne plany użytkownika są zmieniane na 'ready'.
+
+```sql
+-- Funkcja pomocnicza
+CREATE OR REPLACE FUNCTION ensure_single_active_plan()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Jeśli plan jest zmieniany na 'active'
+  IF NEW.status = 'active' AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'active') THEN
+    -- Zmień wszystkie inne aktywne plany tego użytkownika na 'ready'
+    UPDATE plans
+    SET status = 'ready', updated_at = NOW()
+    WHERE user_id = NEW.user_id
+    AND id != NEW.id
+    AND status = 'active';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+CREATE TRIGGER enforce_single_active_plan
+BEFORE INSERT OR UPDATE OF status ON plans
+FOR EACH ROW EXECUTE FUNCTION ensure_single_active_plan();
+```
+
+### 6.6. Trigger: validate_plan_start_date
 Walidacja, że data rozpoczęcia planera zawsze przypada na poniedziałek.
 
 ```sql
@@ -909,7 +937,7 @@ BEFORE INSERT OR UPDATE OF start_date ON plans
 FOR EACH ROW EXECUTE FUNCTION validate_plan_start_date();
 ```
 
-### 6.6. Trigger: validate_goal_count_per_plan
+### 6.7. Trigger: validate_goal_count_per_plan
 Walidacja liczby celów na planer (min 1, max 5).
 
 ```sql
@@ -939,7 +967,7 @@ BEFORE INSERT ON long_term_goals
 FOR EACH ROW EXECUTE FUNCTION validate_goal_count_per_plan();
 ```
 
-### 6.7. Trigger: validate_milestone_count_per_goal
+### 6.8. Trigger: validate_milestone_count_per_goal
 Walidacja liczby kamieni milowych na cel (max 5).
 
 ```sql
@@ -969,7 +997,7 @@ BEFORE INSERT ON milestones
 FOR EACH ROW EXECUTE FUNCTION validate_milestone_count_per_goal();
 ```
 
-### 6.8. Trigger: validate_weekly_subtask_count
+### 6.9. Trigger: validate_weekly_subtask_count
 Walidacja liczby podzadań tygodniowych (max 10).
 
 ```sql
@@ -1002,7 +1030,7 @@ BEFORE INSERT ON tasks
 FOR EACH ROW EXECUTE FUNCTION validate_weekly_subtask_count();
 ```
 
-### 6.9. Trigger: validate_ad_hoc_task_count
+### 6.10. Trigger: validate_ad_hoc_task_count
 Walidacja liczby zadań ad-hoc na tydzień (max 10).
 
 ```sql
@@ -1071,6 +1099,12 @@ Planery używają **soft delete** (flaga `status = 'archived'`):
 - Możliwość przywrócenia archiwalnych planerów
 - Zgodność z wymaganiem GDPR (dane można usunąć na żądanie użytkownika)
 
+**Stany planera:**
+- `ready` (domyślny): Plan utworzony, gotowy do aktywacji
+- `active`: Aktywny plan użytkownika (tylko jeden może być aktywny jednocześnie)
+- `completed`: Plan zakończony (wszystkie 12 tygodni minęło)
+- `archived`: Plan zarchiwizowany przez użytkownika
+
 Pozostałe encje używają **hard delete** z kaskadowym usuwaniem (ON DELETE CASCADE).
 
 ### 7.5. Constraints and Validation
@@ -1083,6 +1117,7 @@ Walidacja danych odbywa się na trzech poziomach:
 - Foreign keys dla integralności referencyjnej
 
 **Poziom 2: Database Triggers**
+- Zapewnienie pojedynczego aktywnego planu (tylko jeden plan może być 'active')
 - Walidacja liczby celów (1-5 na planer)
 - Walidacja liczby kamieni milowych (0-5 na cel)
 - Walidacja liczby podzadań (0-10 na cel tygodniowy)
@@ -1131,6 +1166,7 @@ Walidacja danych odbywa się na trzech poziomach:
 
 **Business Logic Integrity:**
 - Triggers walidują limity zgodnie z wymaganiami biznesowymi
+- Trigger zapewnia, że użytkownik ma tylko jeden aktywny plan
 - Check constraints zapewniają poprawność wartości enum
 - Unique constraints zapewniają unikalność tam, gdzie wymagana
 
