@@ -56,7 +56,7 @@ export type WeeklyReviewCompletionView = Database['public']['Views']['weekly_rev
 // ENUM TYPES
 // ============================================================================
 
-export type PlanStatus = 'active' | 'completed' | 'archived';
+export type PlanStatus = 'ready' | 'active' | 'completed' | 'archived';
 
 export type GoalCategory = 'work' | 'finance' | 'hobby' | 'relationships' | 'health' | 'development';
 
@@ -84,9 +84,9 @@ export type CreatePlanCommand = Pick<PlanInsert, 'name' | 'start_date'>;
 
 /**
  * Update Plan Command - PATCH /api/v1/plans/:id
- * Only name can be updated by user
+ * Name and status can be updated by user
  */
-export type UpdatePlanCommand = Pick<PlanUpdate, 'name'>;
+export type UpdatePlanCommand = Pick<PlanUpdate, 'name' | 'status'>;
 
 /**
  * Plan Dashboard DTO - GET /api/v1/plans/:id/dashboard
