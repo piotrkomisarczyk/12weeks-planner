@@ -11,7 +11,7 @@ Centralna tabela przechowująca 12-tygodniowe planery użytkowników.
 | user_id | UUID | NOT NULL, REFERENCES auth.users(id) ON DELETE CASCADE | Właściciel planera |
 | name | TEXT | NOT NULL | Nazwa planera (domyślnie: "Planner_<data_startu>") |
 | start_date | DATE | NOT NULL | Data rozpoczęcia planera (zawsze poniedziałek) |
-| status | TEXT | NOT NULL, DEFAULT 'active', CHECK (status IN ('active', 'completed', 'archived')) | Status planera |
+| status | TEXT | NOT NULL, DEFAULT 'ready', CHECK (status IN ('ready', 'active', 'completed', 'archived')) | Status planera |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Data utworzenia |
 | updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Data ostatniej modyfikacji |
 

@@ -192,7 +192,7 @@ Create a new 12-week planner.
 
 **PATCH** `/api/v1/plans/:id`
 
-Update plan details, including activation.
+Update plan details, including activation. Name and status can be updated independently.
 
 **Request Body**:
 ```json
@@ -229,11 +229,36 @@ Update plan details, including activation.
 
 ---
 
-#### 3.2.6 Archive Plan
+#### 3.2.6 Delete Plan
+
+**DELETE** `/api/v1/plans/:id`
+
+Permanently delete a plan and all associated data (hard delete). This operation is irreversible and will cascade delete all goals, milestones, weekly goals, tasks, task history, and weekly reviews.
+
+**Response** `200 OK`:
+```json
+{
+  "message": "Plan deleted successfully"
+}
+```
+
+**Notes:**
+- This is a hard delete operation that permanently removes the plan and all associated data
+- All related entities (goals, milestones, tasks, etc.) are automatically deleted via cascade
+- Consider using the Archive Plan endpoint instead for a recoverable soft delete
+- User metrics (total_plans_created) are not decremented when a plan is deleted
+
+**Error Responses:**
+- `404 Not Found`: Plan not found or doesn't belong to user
+- `401 Unauthorized`: Missing or invalid auth token
+
+---
+
+#### 3.2.7 Archive Plan
 
 **POST** `/api/v1/plans/:id/archive`
 
-Archive a plan (soft delete).
+Archive a plan (soft delete). This sets the plan status to 'archived' without permanently deleting it.
 
 **Response** `200 OK`:
 ```json
@@ -246,13 +271,18 @@ Archive a plan (soft delete).
 }
 ```
 
+**Notes:**
+- This is a soft delete operation - the plan and all its data remain in the database
+- Archived plans can be viewed but typically not edited
+- To permanently delete a plan, use the DELETE endpoint instead
+
 **Error Responses:**
 - `404 Not Found`: Plan not found or doesn't belong to user
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
 
-#### 3.2.7 Get Plan Dashboard Data
+#### 3.2.8 Get Plan Dashboard Data
 
 **GET** `/api/v1/plans/:id/dashboard`
 
@@ -1725,7 +1755,8 @@ All API endpoints validate incoming data before processing:
   - New plans are created with status `ready` by default
   - When a plan is set to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger `ensure_single_active_plan`)
   - Creating a plan automatically updates user_metrics (via trigger)
-  - Archiving a plan sets status to `archived` (soft delete)
+  - Archiving a plan sets status to `archived` (soft delete - data preserved)
+  - Deleting a plan permanently removes it and cascades to all related data (hard delete)
   - Plan requires minimum 1 goal before creation (enforced at application level)
 
 #### Long-term Goals
@@ -1917,7 +1948,8 @@ GET /api/v1/tasks?plan_id=abc-123&status=todo,in_progress&sort=-priority,positio
 ### 5.7 Data Integrity
 
 #### Cascade Deletes
-- Deleting a **plan** cascades to: goals, milestones, weekly_goals, tasks, task_history, weekly_reviews
+- Deleting a **plan** (DELETE endpoint - hard delete) cascades to: goals, milestones, weekly_goals, tasks, task_history, weekly_reviews
+- Archiving a **plan** (soft delete) preserves all data, only changes status to `archived`
 - Deleting a **goal** cascades to: milestones, sets `long_term_goal_id = NULL` in weekly_goals
 - Deleting a **milestone** sets `milestone_id = NULL` in tasks
 - Deleting a **weekly_goal** cascades to: tasks (subtasks only)
@@ -2217,5 +2249,6 @@ Content-Type: application/json
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2025-01-27 | Initial API plan |
+| 1.1 | 2025-10-29 | Added DELETE /api/v1/plans/:id endpoint for hard delete of plans |
 
 
