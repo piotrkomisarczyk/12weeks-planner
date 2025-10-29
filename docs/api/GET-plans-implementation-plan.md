@@ -34,7 +34,7 @@ Authorization: Bearer <supabase_jwt_token>
 
 | Parametr | Typ | Wymagany | Domyślna wartość | Walidacja | Opis |
 |----------|-----|----------|------------------|-----------|------|
-| `status` | string | Nie | - | enum: 'active', 'completed', 'archived' | Filtruje planery po statusie |
+| `status` | string | Nie | - | enum: 'ready', 'active', 'completed', 'archived' | Filtruje planery po statusie |
 | `limit` | number | Nie | 50 | min: 1, max: 100 | Liczba wyników na stronę |
 | `offset` | number | Nie | 0 | min: 0 | Przesunięcie dla paginacji |
 
@@ -46,6 +46,11 @@ Brak (endpoint GET nie przyjmuje body)
 **Pobranie wszystkich aktywnych planerów (pierwsza strona)**:
 ```
 GET /api/v1/plans?status=active&limit=10&offset=0
+```
+
+**Pobranie wszystkich gotowych planerów**:
+```
+GET /api/v1/plans?status=ready
 ```
 
 **Pobranie wszystkich planerów (domyślna paginacja)**:
@@ -74,7 +79,7 @@ export type PlanDTO = PlanEntity;
   user_id: string;         // UUID
   name: string;            // np. "Planner_2025-01-06"
   start_date: string;      // ISO date format
-  status: PlanStatus;      // 'active' | 'completed' | 'archived'
+  status: PlanStatus;      // 'ready' | 'active' | 'completed' | 'archived'
   created_at: string;      // ISO timestamp
   updated_at: string;      // ISO timestamp
 }
@@ -185,7 +190,7 @@ export interface ValidationErrorDetail {
   "details": [
     {
       "field": "status",
-      "message": "Invalid enum value. Expected 'active' | 'completed' | 'archived', received 'invalid'",
+      "message": "Invalid enum value. Expected 'ready' | 'active' | 'completed' | 'archived', received 'invalid'",
       "received": "invalid"
     }
   ]
@@ -543,7 +548,7 @@ headers: {
 import { z } from 'zod';
 
 export const GetPlansQuerySchema = z.object({
-  status: z.enum(['active', 'completed', 'archived']).optional(),
+  status: z.enum(['ready', 'active', 'completed', 'archived']).optional(),
   limit: z.coerce.number().int().positive().max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0)
 });
@@ -552,9 +557,10 @@ export type GetPlansQuery = z.infer<typeof GetPlansQuerySchema>;
 ```
 
 **Testy**:
-- Sprawdzić poprawną walidację prawidłowych parametrów
-- Sprawdzić odrzucenie nieprawidłowych wartości
-- Sprawdzić domyślne wartości
+- Sprawdzić poprawną walidację prawidłowych parametrów (w tym status='ready')
+- Sprawdzić odrzucenie nieprawidłowych wartości (np. status='invalid')
+- Sprawdzić domyślne wartości (limit=50, offset=0)
+- Sprawdzić wszystkie wartości enum dla status: 'ready', 'active', 'completed', 'archived'
 
 ---
 
@@ -564,13 +570,30 @@ export type GetPlansQuery = z.infer<typeof GetPlansQuerySchema>;
 
 **Zawartość**:
 ```typescript
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
-import type { PlanDTO, PlanListParams, PaginatedResponse } from '../../types';
+import type { SupabaseClient } from '../db/supabase.client';
+import type { Database } from '../db/database.types';
+import type { PlanDTO, PlanListParams, PaginatedResponse } from '../types';
 
 export class PlanService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  constructor(private supabase: SupabaseClient) {}
 
+  /**
+   * Pobiera listę planerów dla danego użytkownika z opcjonalnym filtrowaniem i paginacją
+   * 
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @param params - Parametry zapytania (status, limit, offset)
+   * @returns Promise z listą planerów i metadanymi paginacji
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const plans = await planService.getPlans(userId, {
+   *   status: 'active',
+   *   limit: 10,
+   *   offset: 0
+   * });
+   * ```
+   */
   async getPlans(
     userId: string,
     params: PlanListParams
@@ -620,32 +643,38 @@ export class PlanService {
 
 **Zawartość**:
 ```typescript
+/**
+ * API Endpoint: GET /api/v1/plans
+ * 
+ * Returns all plans for the authenticated user with optional filtering and pagination.
+ * 
+ * Query Parameters:
+ * - status: Filter by plan status (ready, active, completed, archived) - optional
+ * - limit: Number of results per page (1-100, default: 50) - optional
+ * - offset: Pagination offset (min: 0, default: 0) - optional
+ * 
+ * Responses:
+ * - 200: Success with paginated list of plans
+ * - 400: Invalid query parameters
+ * - 401: Unauthorized (missing or invalid token)
+ * - 500: Internal server error
+ */
+
 import type { APIRoute } from 'astro';
 import { PlanService } from '../../../lib/services/plan.service';
 import { GetPlansQuerySchema } from '../../../lib/validation/plan.validation';
+import { DEFAULT_USER_ID } from '../../../db/supabase.client';
 import type { ErrorResponse, ValidationErrorResponse } from '../../../types';
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals, url }) => {
   try {
-    // 1. Uwierzytelnianie
-    const { data: { user }, error: authError } = await locals.supabase.auth.getUser();
+    // Step 1: Authentication - Using default user for MVP/development
+    // TODO: Implement real authentication with JWT token verification
+    const userId = DEFAULT_USER_ID;
 
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Missing or invalid authentication token'
-        } as ErrorResponse),
-        {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // 2. Parsowanie i walidacja query parameters
+    // Step 2: Parse and validate query parameters
     const queryParams = {
       status: url.searchParams.get('status'),
       limit: url.searchParams.get('limit'),
@@ -673,11 +702,11 @@ export const GET: APIRoute = async ({ locals, url }) => {
       );
     }
 
-    // 3. Wywołanie serwisu
+    // Step 3: Call service to fetch plans
     const planService = new PlanService(locals.supabase);
-    const result = await planService.getPlans(user.id, validationResult.data);
+    const result = await planService.getPlans(userId, validationResult.data);
 
-    // 4. Zwrócenie odpowiedzi
+    // Step 4: Return successful response
     return new Response(
       JSON.stringify(result),
       {
@@ -706,7 +735,6 @@ export const GET: APIRoute = async ({ locals, url }) => {
 ```
 
 **Testy**:
-- Sprawdzić odpowiedź 401 dla braku tokenu
 - Sprawdzić odpowiedź 400 dla nieprawidłowych parametrów
 - Sprawdzić odpowiedź 200 z prawidłowymi danymi
 - Sprawdzić obsługę błędów serwera
@@ -717,25 +745,24 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
 **Scenariusze testowe**:
 
-1. **Test autoryzacji**:
-   - Żądanie bez tokenu → 401
-   - Żądanie z nieprawidłowym tokenem → 401
-   - Żądanie z prawidłowym tokenem → 200
-
-2. **Test walidacji**:
+1. **Test walidacji**:
    - `status=invalid` → 400
+   - `status=ready` → 200 (poprawny status)
+   - `status=active` → 200 (poprawny status)
+   - `status=completed` → 200 (poprawny status)
+   - `status=archived` → 200 (poprawny status)
    - `limit=-10` → 400
    - `limit=200` → 400 (przekracza max)
    - `offset=-5` → 400
-   - Brak parametrów → 200 z domyślnymi wartościami
+   - Brak parametrów → 200 z domyślnymi wartościami (limit=50, offset=0)
 
-3. **Test funkcjonalności**:
+2. **Test funkcjonalności**:
    - Pobranie wszystkich planerów → sprawdzić czy zwraca tylko planery użytkownika
    - Filtrowanie po status=active → sprawdzić czy zwraca tylko aktywne
    - Paginacja → sprawdzić czy limit i offset działają poprawnie
    - Sortowanie → sprawdzić czy najnowsze są na początku
 
-4. **Test edge cases**:
+3. **Test edge cases**:
    - Użytkownik bez planerów → `{ data: [], count: 0, limit: 50, offset: 0 }`
    - Offset większy niż liczba wyników → pusta tablica
    - Bardzo duży limit (100) → sprawdzić wydajność

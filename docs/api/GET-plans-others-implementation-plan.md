@@ -104,7 +104,7 @@ export type PlanEntity = Database['public']['Tables']['plans']['Row'];
   user_id: string;               // UUID
   name: string;                  // TEXT
   start_date: string;            // DATE (ISO format)
-  status: 'active' | 'completed' | 'archived';
+  status: 'ready' | 'active' | 'completed' | 'archived';
   created_at: string;            // TIMESTAMPTZ (ISO format)
   updated_at: string;            // TIMESTAMPTZ (ISO format)
 }
@@ -368,15 +368,20 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 
 ### 6.1. Uwierzytelnianie (Authentication)
 
-**Aktualny stan (MVP):**
+**Aktualny stan (MVP/Development):**
 - Używamy stałej `DEFAULT_USER_ID` zdefiniowanej w `src/db/supabase.client.ts`
 - Middleware w `src/middleware/index.ts` dodaje klienta Supabase do `context.locals`
+- Uproszczone podejście umożliwia szybkie testowanie manualne bez konfiguracji JWT
 
-**Przyszła implementacja:**
+**Przyszła implementacja (Production):**
 - Wyciągnąć JWT token z nagłówka `Authorization: Bearer <token>`
-- Zweryfikować token przez `supabase.auth.getUser(token)`
+- Zweryfikować token przez `locals.supabase.auth.getUser()`
 - Wyciągnąć `user_id` z zweryfikowanego tokena
 - Zwrócić 401 Unauthorized jeśli token jest nieprawidłowy lub brakuje
+
+**Zgodność z regułami backendu:**
+- Używamy `locals.supabase` zamiast importowania `supabaseClient` bezpośrednio
+- Typ `SupabaseClient` z `src/db/supabase.client.ts`, nie z `@supabase/supabase-js`
 
 ### 6.2. Autoryzacja (Authorization)
 
@@ -609,19 +614,14 @@ async getActivePlan(userId: string): Promise<PlanDTO | null> {
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'active')
-    .limit(1)
-    .single();
+    .maybeSingle();
 
-  // Handle not found (expected case)
+  // Handle database errors
   if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned - this is not an error, just no active plan
-      return null;
-    }
-    // Actual database error
     throw new Error(`Failed to fetch active plan: ${error.message}`);
   }
 
+  // Return null if no active plan found (not an error)
   return data;
 }
 
@@ -649,26 +649,21 @@ async getPlanById(planId: string, userId: string): Promise<PlanDTO | null> {
     .select('*')
     .eq('id', planId)
     .eq('user_id', userId)
-    .limit(1)
-    .single();
+    .maybeSingle();
 
-  // Handle not found (expected case)
+  // Handle database errors
   if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned - either doesn't exist or belongs to another user
-      return null;
-    }
-    // Actual database error
     throw new Error(`Failed to fetch plan: ${error.message}`);
   }
 
+  // Return null if not found (either doesn't exist or belongs to another user)
   return data;
 }
 ```
 
 **Uwagi implementacyjne:**
-- Użycie `.single()` zamiast `.limit(1)` zwraca pojedynczy obiekt zamiast tablicy
-- Kod błędu `PGRST116` to standardowy kod Supabase dla "no rows returned"
+- Użycie `.maybeSingle()` zamiast `.single()` - nie rzuca błędu gdy brak wyników, zwraca null
+- `.maybeSingle()` jest bezpieczniejsze niż `.single()` który rzuca błąd PGRST116 przy braku danych
 - Zawsze filtrujemy po `user_id` dla bezpieczeństwa
 - Zwracamy `null` gdy nie znaleziono (endpoint obsłuży 404)
 - Rzucamy Error tylko przy rzeczywistych błędach bazy danych
@@ -701,7 +696,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
+    // Step 1: Authentication - Using default user for MVP/development
     // TODO: Implement real authentication with JWT token verification
     const userId = DEFAULT_USER_ID;
 
@@ -794,7 +789,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
+    // Step 1: Authentication - Using default user for MVP/development
     // TODO: Implement real authentication with JWT token verification
     const userId = DEFAULT_USER_ID;
 
@@ -917,12 +912,12 @@ curl -X GET http://localhost:4321/api/v1/plans/00000000-0000-0000-0000-000000000
 # Expected: 404 Not Found
 ```
 
-**Test Case 6: GET /api/v1/plans/:id - Unauthorized Access**
+**Test Case 6: GET /api/v1/plans/:id - Different User**
 ```bash
 # Użyj UUID planera należącego do innego użytkownika
-# (symulacja - zmień DEFAULT_USER_ID lub stwórz plan dla innego usera)
+# (symulacja - zmień DEFAULT_USER_ID lub stwórz plan dla innego użytkownika)
 curl -X GET http://localhost:4321/api/v1/plans/{other-user-plan-uuid}
-# Expected: 404 Not Found (same as not existing)
+# Expected: 404 Not Found (same as not existing - bezpieczeństwo)
 ```
 
 ---
@@ -983,9 +978,10 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 ### Krok 8: Future improvements (dla następnych iteracji)
 
 **Uwierzytelnianie:**
-- [ ] Implementacja JWT token verification
-- [ ] Middleware do wyciągania userId z tokenu
+- [ ] Implementacja JWT token verification (przez locals.supabase.auth.getUser())
+- [ ] Wyciąganie userId z zweryfikowanego tokenu
 - [ ] Obsługa 401 Unauthorized dla brakujących/nieprawidłowych tokenów
+- [x] MVP: Używanie DEFAULT_USER_ID dla szybkich testów
 
 **Optymalizacja:**
 - [ ] Dodanie Redis cache dla getActivePlan
@@ -1038,12 +1034,13 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 **Możliwe przyczyny:**
 1. Plan należy do innego użytkownika (inny user_id)
 2. Status planera nie jest 'active'
-3. DEFAULT_USER_ID nie zgadza się z user_id w bazie
+3. Token JWT należy do innego użytkownika niż oczekiwany
 
 **Rozwiązanie:**
-- Sprawdź w bazie: `SELECT * FROM plans WHERE user_id = 'dac44a9c-c1a0-4c6b-bed0-127e367a4fe3' AND status = 'active';`
-- Zweryfikuj wartość DEFAULT_USER_ID
-- Sprawdź czy userId w handlerze jest poprawny
+- Sprawdź w bazie: `SELECT * FROM plans WHERE user_id = 'DEFAULT_USER_ID' AND status = 'active';`
+- Zweryfikuj wartość `DEFAULT_USER_ID` w `src/db/supabase.client.ts`
+- Sprawdź czy userId w handlerze jest poprawny (dodaj console.log)
+- Upewnij się że plan rzeczywiście istnieje dla tego użytkownika
 
 ### Problem: 400 Bad Request dla poprawnego UUID
 
