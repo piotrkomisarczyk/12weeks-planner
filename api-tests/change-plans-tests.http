@@ -1,0 +1,582 @@
+###
+# API Tests for Plan Management (Create, Update, Delete, Archive)
+# Test file for POST, PATCH, DELETE /api/v1/plans endpoints
+#
+# Prerequisites:
+# - Server running on http://localhost:3000
+# - Default user exists in database
+#
+# Instructions:
+# 1. Run tests in order (some tests depend on previous results)
+# 2. Update {{planId}} variables with actual IDs from responses
+# 3. Update dates to valid Mondays for your testing period
+###
+
+@baseUrl = http://localhost:3000
+
+### ============================================================================
+### POST /api/v1/plans - CREATE NEW PLAN
+### ============================================================================
+
+### Test 1.1: Create plan - Success (Happy path)
+# Expected: 201 Created with plan data, status='ready'
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Q1 2025 Goals",
+  "start_date": "2025-01-06"
+}
+
+### Test 1.2: Create another plan for testing
+# Expected: 201 Created
+# Note: Save the ID from response for later tests
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan for Updates",
+  "start_date": "2025-01-13"
+}
+
+### Test 1.3: Create plan for delete testing
+# Expected: 201 Created
+# Note: Save the ID from response for DELETE tests
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Plan to be Deleted",
+  "start_date": "2025-01-20"
+}
+
+### Test 1.4: Create plan for archive testing
+# Expected: 201 Created
+# Note: Save the ID from response for ARCHIVE tests
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Plan to be Archived",
+  "start_date": "2025-01-27"
+}
+
+### ============================================================================
+### POST /api/v1/plans - VALIDATION ERRORS
+### ============================================================================
+
+### Test 2.1: Missing name field
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "start_date": "2025-01-06"
+}
+
+### Test 2.2: Empty name (after trim)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "   ",
+  "start_date": "2025-01-06"
+}
+
+### Test 2.3: Name too long (> 255 characters)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "This is a very long plan name that exceeds the maximum allowed length of 255 characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "start_date": "2025-01-06"
+}
+
+### Test 2.4: Missing start_date field
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan"
+}
+
+### Test 2.5: Invalid date format
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan",
+  "start_date": "01/06/2025"
+}
+
+### Test 2.6: Invalid date (February 30th)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan",
+  "start_date": "2025-02-30"
+}
+
+### Test 2.7: Start date is not a Monday (Tuesday)
+# Expected: 400 Bad Request with constraint violation
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan",
+  "start_date": "2025-01-07"
+}
+
+### Test 2.8: Start date is not a Monday (Sunday)
+# Expected: 400 Bad Request with constraint violation
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan",
+  "start_date": "2025-01-05"
+}
+
+### Test 2.9: Invalid JSON format
+# Expected: 400 Bad Request with invalid JSON error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Test Plan"
+  "start_date": "2025-01-06"
+}
+
+### Test 2.10: Empty request body
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{}
+
+### ============================================================================
+### GET /api/v1/plans/:id - GET PLAN BY ID
+### ============================================================================
+
+### Test 3.1: Get plan by ID - Success
+# Replace with actual plan ID from create tests
+# Expected: 200 OK with plan data
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+
+### Test 3.2: Get plan - Invalid UUID format
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/invalid-uuid-format
+
+### Test 3.3: Get plan - Non-existent UUID
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/plans/00000000-0000-0000-0000-000000000000
+
+### Test 3.4: Get plan - UUID from different user (security test)
+# Expected: 404 Not Found (security by obscurity)
+# Note: In production with real auth, this would fail for other user's plans
+GET {{baseUrl}}/api/v1/plans/123e4567-e89b-12d3-a456-426614174000
+
+### ============================================================================
+### PATCH /api/v1/plans/:id - UPDATE PLAN
+### ============================================================================
+
+### Test 4.1: Update plan name only - Success
+# Replace with actual plan ID
+# Expected: 200 OK with updated plan data
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "name": "Updated Q1 2025 Goals"
+}
+
+### Test 4.2: Update plan status to active - Success
+# Replace with actual plan ID
+# Expected: 200 OK with status='active'
+# Note: This should set other active plans to 'ready' (database trigger)
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "active"
+}
+
+### Test 4.3: Update both name and status - Success
+# Replace with actual plan ID
+# Expected: 200 OK with both fields updated
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "name": "My Active Q1 Plan",
+  "status": "active"
+}
+
+### Test 4.4: Change status from active to ready
+# Replace with actual plan ID
+# Expected: 200 OK with status='ready'
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "ready"
+}
+
+### Test 4.5: Change status to completed
+# Replace with actual plan ID
+# Expected: 200 OK with status='completed'
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### ============================================================================
+### PATCH /api/v1/plans/:id - VALIDATION ERRORS
+### ============================================================================
+
+### Test 5.1: Update with empty name
+# Expected: 400 Bad Request with validation error
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### Test 5.2: Update with name too long
+# Expected: 400 Bad Request with validation error
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "name": "This is a very long plan name that exceeds the maximum allowed length of 255 characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+}
+
+### Test 5.3: Update with invalid status value
+# Expected: 400 Bad Request with validation error
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "invalid_status"
+}
+
+### Test 5.4: Update with neither name nor status (empty body)
+# Expected: 400 Bad Request with validation error
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{}
+
+### Test 5.5: Update with invalid UUID format
+# Expected: 400 Bad Request with validation error
+PATCH {{baseUrl}}/api/v1/plans/invalid-uuid
+Content-Type: application/json
+
+{
+  "name": "Test"
+}
+
+### Test 5.6: Update non-existent plan
+# Expected: 404 Not Found
+PATCH {{baseUrl}}/api/v1/plans/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "name": "Test"
+}
+
+### Test 5.7: Update with invalid JSON
+# Expected: 400 Bad Request with invalid JSON error
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "name": "Test"
+  "status": "active"
+}
+
+### Test 5.8: Update with whitespace-only name (should be trimmed and fail)
+# Expected: 400 Bad Request with validation error
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTUAL_PLAN_ID
+Content-Type: application/json
+
+{
+  "name": "    "
+}
+
+### ============================================================================
+### POST /api/v1/plans/:id/archive - ARCHIVE PLAN (SOFT DELETE)
+### ============================================================================
+
+### Test 6.1: Archive plan - Success
+# Replace with actual plan ID (use one created for archive testing)
+# Expected: 200 OK with minimal data (id, status='archived')
+POST {{baseUrl}}/api/v1/plans/REPLACE_WITH_ARCHIVE_TEST_PLAN_ID/archive
+
+### Test 6.2: Archive already archived plan
+# Replace with the same plan ID from 6.1
+# Expected: 200 OK (idempotent operation)
+POST {{baseUrl}}/api/v1/plans/REPLACE_WITH_ARCHIVE_TEST_PLAN_ID/archive
+
+### Test 6.3: Verify archived plan still exists (GET after archive)
+# Replace with archived plan ID
+# Expected: 200 OK with status='archived'
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_ARCHIVE_TEST_PLAN_ID
+
+### Test 6.4: Archive with invalid UUID format
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/plans/invalid-uuid/archive
+
+### Test 6.5: Archive non-existent plan
+# Expected: 404 Not Found
+POST {{baseUrl}}/api/v1/plans/00000000-0000-0000-0000-000000000000/archive
+
+### Test 6.6: Unarchive plan (change status back to ready)
+# Replace with archived plan ID
+# Expected: 200 OK with status='ready'
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_ARCHIVE_TEST_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "ready"
+}
+
+### ============================================================================
+### DELETE /api/v1/plans/:id - PERMANENT DELETE (HARD DELETE)
+### ============================================================================
+
+### Test 7.1: Delete plan - Success
+# Replace with actual plan ID (use one created for delete testing)
+# Expected: 200 OK with success message
+# WARNING: This is permanent! All related data will be deleted.
+DELETE {{baseUrl}}/api/v1/plans/REPLACE_WITH_DELETE_TEST_PLAN_ID
+
+### Test 7.2: Verify plan is deleted (GET after delete)
+# Replace with the same plan ID from 7.1
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_DELETE_TEST_PLAN_ID
+
+### Test 7.3: Delete already deleted plan
+# Replace with the same plan ID from 7.1
+# Expected: 404 Not Found
+DELETE {{baseUrl}}/api/v1/plans/REPLACE_WITH_DELETE_TEST_PLAN_ID
+
+### Test 7.4: Delete with invalid UUID format
+# Expected: 400 Bad Request with validation error
+DELETE {{baseUrl}}/api/v1/plans/invalid-uuid-format
+
+### Test 7.5: Delete non-existent plan
+# Expected: 404 Not Found
+DELETE {{baseUrl}}/api/v1/plans/00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### INTEGRATION TESTS - COMPLETE WORKFLOWS
+### ============================================================================
+
+### Workflow 1: Complete plan lifecycle (create → activate → complete → archive)
+# Step 1: Create new plan
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Workflow Test Plan",
+  "start_date": "2025-02-03"
+}
+
+### Step 2: Activate the plan (use ID from Step 1)
+# Expected: Other active plans should become 'ready'
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_WORKFLOW_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "active"
+}
+
+### Step 3: Verify only one active plan exists
+GET {{baseUrl}}/api/v1/plans?status=active
+
+### Step 4: Mark plan as completed
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_WORKFLOW_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### Step 5: Archive the completed plan
+POST {{baseUrl}}/api/v1/plans/REPLACE_WITH_WORKFLOW_PLAN_ID/archive
+
+### Step 6: Verify plan is archived
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_WORKFLOW_PLAN_ID
+
+### ============================================================================
+### Workflow 2: Test single active plan constraint
+# This tests that database trigger correctly sets other plans to 'ready'
+# when a new plan is activated
+### ============================================================================
+
+### Step 1: Create first plan
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "First Active Plan Test",
+  "start_date": "2025-02-10"
+}
+
+### Step 2: Activate first plan (use ID from Step 1)
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_FIRST_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "active"
+}
+
+### Step 3: Verify first plan is active
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_FIRST_PLAN_ID
+
+### Step 4: Create second plan
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Second Active Plan Test",
+  "start_date": "2025-02-17"
+}
+
+### Step 5: Activate second plan (use ID from Step 4)
+# This should set first plan to 'ready' automatically
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_SECOND_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "active"
+}
+
+### Step 6: Verify second plan is active
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_SECOND_PLAN_ID
+
+### Step 7: Verify first plan is now 'ready' (not active)
+GET {{baseUrl}}/api/v1/plans/REPLACE_WITH_FIRST_PLAN_ID
+
+### Step 8: Verify only one active plan exists
+GET {{baseUrl}}/api/v1/plans?status=active
+
+### ============================================================================
+### EDGE CASES AND SECURITY TESTS
+### ============================================================================
+
+### Edge Case 1: Update archived plan back to active
+# First archive a plan, then try to activate it
+# Expected: Should work - status changes to 'active'
+# Note: Use actual plan ID
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "archived"
+}
+
+# Then activate it
+PATCH {{baseUrl}}/api/v1/plans/REPLACE_WITH_PLAN_ID
+Content-Type: application/json
+
+{
+  "status": "active"
+}
+
+### Edge Case 2: Very long valid name (exactly 255 characters)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "This is exactly 255 characters long name test: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip.",
+  "start_date": "2025-02-24"
+}
+
+### Edge Case 3: Name with special characters and Unicode
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Plan with special chars: !@#$%^&*()_+-=[]{}|;':\",./<>? and émojis 🎯 📅",
+  "start_date": "2025-03-03"
+}
+
+### Edge Case 4: Name with leading/trailing whitespace (should be trimmed)
+# Expected: 201 Created with trimmed name
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "   Plan with spaces   ",
+  "start_date": "2025-03-10"
+}
+
+### Edge Case 5: Delete an active plan
+# Expected: 200 OK - active plan can be deleted
+# Note: Use actual active plan ID
+DELETE {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTIVE_PLAN_ID
+
+### Edge Case 6: Archive an active plan
+# Expected: 200 OK - active plan can be archived
+# Note: Use actual active plan ID
+POST {{baseUrl}}/api/v1/plans/REPLACE_WITH_ACTIVE_PLAN_ID/archive
+
+### ============================================================================
+### NOTES FOR MANUAL TESTING
+### ============================================================================
+
+# Testing Checklist:
+# ✓ Create plan with valid data (default status should be 'ready')
+# ✓ Create plan with invalid data (missing fields, invalid dates)
+# ✓ Create plan with non-Monday date (constraint violation)
+# ✓ Update plan name only
+# ✓ Update plan status only
+# ✓ Update both name and status
+# ✓ Update with invalid data (empty name, invalid status)
+# ✓ Update without name or status (should fail)
+# ✓ Activate plan (check single active plan trigger)
+# ✓ Archive plan (soft delete)
+# ✓ Unarchive plan (change status back)
+# ✓ Delete plan (hard delete - permanent)
+# ✓ Verify cascade deletion (related data removed)
+# ✓ Test invalid UUID formats
+# ✓ Test non-existent plan IDs (404 errors)
+# ✓ Test edge cases (long names, special characters, etc.)
+# ✓ Test workflow scenarios (complete lifecycle)
+
+# Important Database Behaviors to Verify:
+# 1. Default status is 'ready' for new plans
+# 2. Only one plan can have 'active' status at a time
+# 3. When plan is set to 'active', other active plans become 'ready'
+# 4. Archive (soft delete) preserves all related data
+# 5. Delete (hard delete) cascades to all related tables:
+#    - long_term_goals
+#    - milestones
+#    - weekly_goals
+#    - tasks
+#    - task_history
+#    - weekly_reviews
+# 6. updated_at timestamp is automatically updated on changes
+
+# Replace these placeholders with actual IDs from your tests:
+# - REPLACE_WITH_ACTUAL_PLAN_ID
+# - REPLACE_WITH_ARCHIVE_TEST_PLAN_ID
+# - REPLACE_WITH_DELETE_TEST_PLAN_ID
+# - REPLACE_WITH_WORKFLOW_PLAN_ID
+# - REPLACE_WITH_FIRST_PLAN_ID
+# - REPLACE_WITH_SECOND_PLAN_ID
+# - REPLACE_WITH_ACTIVE_PLAN_ID
+

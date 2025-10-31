@@ -87,17 +87,27 @@ export type CreatePlanBody = z.infer<typeof CreatePlanBodySchema>;
 
 /**
  * Request body schema for PATCH /api/v1/plans/:id
- * Validates plan update data
+ * Validates plan update data (both fields optional, but at least one required)
  * 
  * Validates:
- * - name: required string, 1-255 characters, trimmed
+ * - name: optional string, 1-255 characters, trimmed
+ * - status: optional enum ('ready', 'active', 'completed', 'archived')
+ * - At least one field must be provided
  */
 export const UpdatePlanBodySchema = z.object({
   name: z.string()
-    .trim()
-    .min(1, { message: 'Name is required' })
+    .min(1, { message: 'Name must not be empty' })
     .max(255, { message: 'Name must not exceed 255 characters' })
-});
+    .trim()
+    .optional(),
+  status: z.enum(['ready', 'active', 'completed', 'archived'], {
+    errorMap: () => ({ message: 'Status must be one of: ready, active, completed, archived' })
+  })
+    .optional()
+}).refine(
+  (data) => data.name !== undefined || data.status !== undefined,
+  { message: 'At least one field (name or status) must be provided' }
+);
 
 /**
  * Inferred TypeScript type from UpdatePlanBodySchema

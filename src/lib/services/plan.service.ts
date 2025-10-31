@@ -166,7 +166,7 @@ export class PlanService {
       user_id: userId,
       name: data.name,
       start_date: data.start_date,
-      status: 'active' // Default status
+      status: 'ready' // Default status
     };
 
     // Execute insert
@@ -190,23 +190,32 @@ export class PlanService {
   }
 
   /**
-   * Aktualizuje istniejący planer (tylko nazwę)
+   * Aktualizuje istniejący planer (nazwa i/lub status)
    * Weryfikuje, że planer należy do użytkownika
    * 
    * @param planId - UUID planera
    * @param userId - ID użytkownika (z tokenu JWT)
-   * @param data - Dane do aktualizacji (name)
+   * @param data - Dane do aktualizacji (name and/or status)
    * @returns Promise z zaktualizowanym planerem lub null jeśli nie istnieje
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    * 
    * @example
    * ```typescript
+   * // Update name only
    * const plan = await planService.updatePlan(planId, userId, {
    *   name: 'Updated Q1 2025 Goals'
    * });
-   * if (!plan) {
-   *   // Plan not found or doesn't belong to user
-   * }
+   * 
+   * // Activate plan
+   * const plan = await planService.updatePlan(planId, userId, {
+   *   status: 'active'
+   * });
+   * 
+   * // Update both
+   * const plan = await planService.updatePlan(planId, userId, {
+   *   name: 'My Active Plan',
+   *   status: 'active'
+   * });
    * ```
    */
   async updatePlan(
@@ -221,11 +230,18 @@ export class PlanService {
       return null;
     }
 
-    // Prepare update data
-    const updateData: PlanUpdate = {
-      name: data.name,
-      // updated_at is automatically set by database trigger
-    };
+    // Prepare update data with provided fields only
+    const updateData: PlanUpdate = {};
+    
+    if (data.name !== undefined) {
+      updateData.name = data.name;
+    }
+    
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+    }
+    
+    // updated_at is automatically set by database trigger
 
     // Execute update
     const { data: plan, error } = await this.supabase
@@ -240,6 +256,9 @@ export class PlanService {
     if (error) {
       throw new Error(`Failed to update plan: ${error.message}`);
     }
+
+    // Note: If status is set to 'active', database trigger automatically
+    // sets all other active plans for this user to 'ready'
 
     return plan;
   }
@@ -287,6 +306,52 @@ export class PlanService {
     }
 
     return plan;
+  }
+
+  /**
+   * Trwale usuwa planer i wszystkie powiązane dane (hard delete)
+   * Weryfikuje, że planer należy do użytkownika
+   * 
+   * @param planId - UUID planera
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @returns Promise z true jeśli usunięto lub false jeśli plan nie istnieje
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const success = await planService.deletePlan(planId, userId);
+   * if (!success) {
+   *   // Plan not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async deletePlan(
+    planId: string,
+    userId: string
+  ): Promise<boolean> {
+    // First verify plan exists and belongs to user
+    const existingPlan = await this.getPlanById(planId, userId);
+    
+    if (!existingPlan) {
+      return false;
+    }
+
+    // Execute delete - cascade will remove all related data
+    const { error } = await this.supabase
+      .from('plans')
+      .delete()
+      .eq('id', planId)
+      .eq('user_id', userId);  // Security: ensure user owns the plan
+
+    // Handle database errors
+    if (error) {
+      throw new Error(`Failed to delete plan: ${error.message}`);
+    }
+
+    // Note: Database CASCADE DELETE automatically removes:
+    // - long_term_goals, milestones, weekly_goals, tasks, task_history, weekly_reviews
+
+    return true;
   }
 }
 

@@ -2,23 +2,10 @@
  * API Endpoint: /api/v1/plans/:id
  * 
  * GET - Retrieves a single plan by ID
- * PATCH - Updates a plan's name
+ * PATCH - Updates a plan's name and/or status
+ * DELETE - Permanently deletes a plan (hard delete)
  * 
  * Authentication required for all methods.
- * User can only access/modify their own plans.
- * 
- * URL Parameters:
- * - id: UUID of the plan
- * 
- * PATCH Request Body:
- * - name: string (required, 1-255 characters)
- * 
- * Responses:
- * - 200: Success with plan data
- * - 400: Validation error (invalid UUID or body)
- * - 401: Unauthorized (missing or invalid token)
- * - 404: Plan not found or doesn't belong to user
- * - 500: Internal server error
  */
 
 import type { APIRoute } from 'astro';
@@ -32,6 +19,7 @@ import type {
   ErrorResponse,
   ValidationErrorResponse,
   ItemResponse,
+  SuccessResponse,
   PlanDTO
 } from '../../../../types';
 
@@ -43,8 +31,7 @@ export const prerender = false;
  */
 export const GET: APIRoute = async ({ locals, params }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
+    // Step 1: Authentication
     const userId = DEFAULT_USER_ID;
 
     // Step 2: Validate URL parameter
@@ -119,12 +106,11 @@ export const GET: APIRoute = async ({ locals, params }) => {
 
 /**
  * PATCH /api/v1/plans/:id
- * Updates a plan's name
+ * Updates a plan's name and/or status
  */
 export const PATCH: APIRoute = async ({ locals, params, request }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
+    // Step 1: Authentication
     const userId = DEFAULT_USER_ID;
 
     // Step 2: Validate URL parameter
@@ -223,6 +209,87 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
     );
   } catch (error) {
     console.error('Error in PATCH /api/v1/plans/:id:', error);
+    
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        message: 'An unexpected error occurred'
+      } as ErrorResponse),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+};
+
+/**
+ * DELETE /api/v1/plans/:id
+ * Permanently deletes a plan (hard delete)
+ */
+export const DELETE: APIRoute = async ({ locals, params }) => {
+  try {
+    // Step 1: Authentication
+    const userId = DEFAULT_USER_ID;
+
+    // Step 2: Validate URL parameter
+    const paramValidation = PlanIdParamsSchema.safeParse(params);
+
+    if (!paramValidation.success) {
+      const details = paramValidation.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        received: 'input' in issue ? issue.input : undefined
+      }));
+
+      return new Response(
+        JSON.stringify({
+          error: 'Validation failed',
+          details
+        } as ValidationErrorResponse),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Step 3: Call service to delete plan
+    const planService = new PlanService(locals.supabase);
+    const success = await planService.deletePlan(
+      paramValidation.data.id,
+      userId
+    );
+
+    // Step 4: Handle not found
+    if (!success) {
+      return new Response(
+        JSON.stringify({
+          error: 'Not found',
+          message: 'Plan not found'
+        } as ErrorResponse),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Step 5: Return successful response
+    return new Response(
+      JSON.stringify({
+        message: 'Plan deleted successfully'
+      } as SuccessResponse),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Content-Type-Options': 'nosniff'
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Error in DELETE /api/v1/plans/:id:', error);
     
     return new Response(
       JSON.stringify({

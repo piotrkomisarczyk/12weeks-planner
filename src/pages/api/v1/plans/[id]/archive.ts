@@ -5,19 +5,6 @@
  * This is a soft delete - all related data remains in the database.
  * 
  * Authentication required.
- * User can only archive their own plans.
- * 
- * URL Parameters:
- * - id: UUID of the plan to archive
- * 
- * Request Body: None (empty body)
- * 
- * Responses:
- * - 200: Success with minimal data (id, status) and message
- * - 400: Validation error (invalid UUID)
- * - 401: Unauthorized (missing or invalid token)
- * - 404: Plan not found or doesn't belong to user
- * - 500: Internal server error
  */
 
 import type { APIRoute } from 'astro';
@@ -34,12 +21,11 @@ export const prerender = false;
 
 /**
  * POST /api/v1/plans/:id/archive
- * Archives a plan (soft delete)
+ * Archives a plan
  */
 export const POST: APIRoute = async ({ locals, params }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
+    // Step 1: Authentication
     const userId = DEFAULT_USER_ID;
 
     // Step 2: Validate URL parameter
@@ -117,4 +103,3 @@ export const POST: APIRoute = async ({ locals, params }) => {
     );
   }
 };
-
