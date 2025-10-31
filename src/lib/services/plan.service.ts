@@ -94,19 +94,14 @@ export class PlanService {
       .select('*')
       .eq('user_id', userId)
       .eq('status', 'active')
-      .limit(1)
-      .single();
+      .maybeSingle();
 
-    // Handle not found (expected case)
+    // Handle database errors
     if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned - this is not an error, just no active plan
-        return null;
-      }
-      // Actual database error
       throw new Error(`Failed to fetch active plan: ${error.message}`);
     }
 
+    // Return null if no active plan found (not an error)
     return data;
   }
 
@@ -134,19 +129,14 @@ export class PlanService {
       .select('*')
       .eq('id', planId)
       .eq('user_id', userId)
-      .limit(1)
-      .single();
+      .maybeSingle();
 
-    // Handle not found (expected case)
+    // Handle database errors
     if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned - either doesn't exist or belongs to another user
-        return null;
-      }
-      // Actual database error
       throw new Error(`Failed to fetch plan: ${error.message}`);
     }
 
+    // Return null if not found (either doesn't exist or belongs to another user)
     return data;
   }
 

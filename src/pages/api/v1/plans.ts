@@ -5,7 +5,7 @@
  * POST - Creates a new 12-week planner
  * 
  * GET Query Parameters:
- * - status: 'active' | 'completed' | 'archived' (optional)
+ * - status: 'ready' | 'active' | 'completed' | 'archived' (optional)
  * - limit: number (1-100, default: 50)
  * - offset: number (min: 0, default: 0)
  * 

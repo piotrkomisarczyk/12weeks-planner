@@ -1,0 +1,297 @@
+###
+# API Tests for Plans Endpoints
+# Complete test suite for all plan-related API endpoints
+###
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+################################################################################
+### GET /api/v1/plans - List all plans with pagination and filters
+################################################################################
+
+###
+ 
+# Test 1: Get all plans (default pagination)
+# Expected: 200 OK with data array, count, limit=50, offset=0
+GET {{baseUrl}}/api/v1/plans
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 2: Get plans with status filter - ready
+# Expected: 200 OK with only plans in 'ready' status
+GET {{baseUrl}}/api/v1/plans?status=ready
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 3: Get plans with status filter - active
+# Expected: 200 OK with only plans in 'active' status
+GET {{baseUrl}}/api/v1/plans?status=active
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 4: Get plans with status filter - completed
+# Expected: 200 OK with only plans in 'completed' status
+GET {{baseUrl}}/api/v1/plans?status=completed
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 5: Get plans with status filter - archived
+# Expected: 200 OK with only plans in 'archived' status
+GET {{baseUrl}}/api/v1/plans?status=archived
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 6: Get plans with custom limit
+# Expected: 200 OK with limit=10 in response
+GET {{baseUrl}}/api/v1/plans?limit=10
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 7: Get plans with custom offset
+# Expected: 200 OK with offset=5 in response
+GET {{baseUrl}}/api/v1/plans?offset=5
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 8: Get plans with limit and offset (pagination)
+# Expected: 200 OK with limit=20, offset=10
+GET {{baseUrl}}/api/v1/plans?limit=20&offset=10
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 9: Get plans with status and pagination
+# Expected: 200 OK with filtered and paginated results
+GET {{baseUrl}}/api/v1/plans?status=active&limit=5&offset=0
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 10: Get plans with maximum limit (100)
+# Expected: 200 OK with limit=100
+GET {{baseUrl}}/api/v1/plans?limit=100
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 11: VALIDATION ERROR - Invalid status
+# Expected: 400 Bad Request with validation error details
+GET {{baseUrl}}/api/v1/plans?status=invalid
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 12: VALIDATION ERROR - Limit exceeds maximum (>100)
+# Expected: 400 Bad Request with validation error details
+GET {{baseUrl}}/api/v1/plans?limit=200
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 13: VALIDATION ERROR - Negative limit
+# Expected: 400 Bad Request with validation error details
+GET {{baseUrl}}/api/v1/plans?limit=-10
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 14: VALIDATION ERROR - Negative offset
+# Expected: 400 Bad Request with validation error details
+GET {{baseUrl}}/api/v1/plans?offset=-5
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 15: VALIDATION ERROR - Invalid limit (not a number)
+# Expected: 400 Bad Request with validation error details
+GET {{baseUrl}}/api/v1/plans?limit=abc
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 16: VALIDATION ERROR - Invalid offset (not a number)
+# Expected: 400 Bad Request with validation error details
+GET {{baseUrl}}/api/v1/plans?offset=xyz
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 17: EDGE CASE - Zero limit (should fail)
+# Expected: 400 Bad Request (limit must be positive)
+GET {{baseUrl}}/api/v1/plans?limit=0
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 18: EDGE CASE - Very large offset (beyond available data)
+# Expected: 200 OK with empty data array
+GET {{baseUrl}}/api/v1/plans?offset=99999
+Content-Type: {{contentType}}
+
+❌ Failed
+###
+# Test 19: EDGE CASE - Minimum valid limit (1)
+# Expected: 200 OK with limit=1, returns at most 1 plan
+GET {{baseUrl}}/api/v1/plans?limit=1
+Content-Type: {{contentType}}
+
+###
+# Test 20: EDGE CASE - Multiple query parameters with valid values
+# Expected: 200 OK with all filters applied correctly
+GET {{baseUrl}}/api/v1/plans?status=active&limit=25&offset=5
+Content-Type: {{contentType}}
+
+###
+# Test 21: EDGE CASE - Empty status parameter (should use default - no filter)
+# Expected: 200 OK with all plans (no status filter)
+GET {{baseUrl}}/api/v1/plans?status=
+Content-Type: {{contentType}}
+
+###
+# Test 22: EDGE CASE - Only offset without limit
+# Expected: 200 OK with default limit=50 and custom offset
+GET {{baseUrl}}/api/v1/plans?offset=3
+Content-Type: {{contentType}}
+
+###
+# Test 23: Performance test - Request with all parameters
+# Expected: 200 OK, measure response time
+GET {{baseUrl}}/api/v1/plans?status=completed&limit=50&offset=0
+Content-Type: {{contentType}}
+
+
+################################################################################
+### GET /api/v1/plans/active - Get currently active plan
+################################################################################
+
+###
+# Test 24: GET active plan - Success (200 OK)
+# Prerequisites: Ensure DEFAULT_USER_ID has an active plan in database
+# Expected: 200 OK with active plan data
+GET {{baseUrl}}/api/v1/plans/active
+Content-Type: {{contentType}}
+
+###
+# Test 25: GET active plan - Not Found (404 Not Found)
+# Prerequisites: Change all user's plans to status='archived' or 'completed' in database
+# Expected: 404 Not Found with message "No active plan found"
+# Note: This test requires manual database manipulation
+GET {{baseUrl}}/api/v1/plans/active
+Content-Type: {{contentType}}
+
+###
+# Test 26: GET active plan - Multiple active plans check
+# Prerequisites: Manually create multiple active plans for same user (bypassing trigger)
+# Expected: 200 OK (should return one active plan due to database constraint)
+# Note: This should be prevented by database trigger, but test for robustness
+GET {{baseUrl}}/api/v1/plans/active
+Content-Type: {{contentType}}
+
+###
+# Test 27: GET active plan - Verify response structure
+# Expected: Response should have "data" field with plan properties:
+# - id (UUID)
+# - user_id (UUID)
+# - name (string)
+# - start_date (YYYY-MM-DD)
+# - status (should be "active")
+# - created_at (ISO timestamp)
+# - updated_at (ISO timestamp)
+GET {{baseUrl}}/api/v1/plans/active
+Content-Type: {{contentType}}
+
+###
+# Test 28: GET active plan - Verify security headers
+# Expected: Response should include header "X-Content-Type-Options: nosniff"
+GET {{baseUrl}}/api/v1/plans/active
+Content-Type: {{contentType}}
+
+
+################################################################################
+### GET /api/v1/plans/:id - Get specific plan by ID
+################################################################################
+
+###
+# Test 29: GET plan by ID - Success (200 OK)
+# Prerequisites: Replace UUID below with an actual plan ID from your database
+# Expected: 200 OK with plan data
+GET {{baseUrl}}/api/v1/plans/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d
+Content-Type: {{contentType}}
+
+###
+# Test 30: GET plan by ID - Invalid UUID format (400 Bad Request)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/not-a-uuid
+Content-Type: {{contentType}}
+
+###
+# Test 31: GET plan by ID - Invalid UUID format - numeric only (400 Bad Request)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/123
+Content-Type: {{contentType}}
+
+###
+# Test 32: GET plan by ID - Not Found (404 Not Found)
+# Using valid UUID format but non-existent plan
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/plans/00000000-0000-0000-0000-000000000000
+Content-Type: {{contentType}}
+
+###
+# Test 33: GET plan by ID - Different User's Plan
+# Prerequisites: Replace UUID below with a plan belonging to a different user
+# Expected: 404 Not Found (security - same response as non-existent)
+# Note: This test requires manual setup in database
+GET {{baseUrl}}/api/v1/plans/{other-user-plan-id}
+Content-Type: {{contentType}}
+
+###
+# Test 34: GET plan by ID - Invalid UUID with special characters
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/abc-123-xyz
+Content-Type: {{contentType}}
+
+###
+# Test 35: GET plan by ID - Empty ID (routing test)
+# Expected: 404 or redirects to /api/v1/plans depending on routing
+GET {{baseUrl}}/api/v1/plans/
+Content-Type: {{contentType}}
+
+###
+# Test 36: GET plan by ID - Verify response structure
+# Prerequisites: Use a valid plan ID
+# Expected: Response should have "data" field with complete plan object
+GET {{baseUrl}}/api/v1/plans/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d
+Content-Type: {{contentType}}
+
+###
+# Test 37: GET plan by ID - Verify security headers
+# Prerequisites: Use a valid plan ID
+# Expected: Response should include header "X-Content-Type-Options: nosniff"
+GET {{baseUrl}}/api/v1/plans/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d
+Content-Type: {{contentType}}

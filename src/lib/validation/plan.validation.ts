@@ -9,14 +9,18 @@ import { z } from 'zod';
  * Query parameters schema for GET /api/v1/plans
  * 
  * Validates:
- * - status: must be one of 'active', 'completed', 'archived' (optional)
+ * - status: must be one of 'ready', 'active', 'completed', 'archived' (optional)
  * - limit: positive integer, max 100, defaults to 50
  * - offset: non-negative integer, defaults to 0
  */
 export const GetPlansQuerySchema = z.object({
-  status: z.enum(['active', 'completed', 'archived']).nullish(),
-  limit: z.coerce.number().int().positive().max(100).catch(50),
-  offset: z.coerce.number().int().min(0).catch(0)
+  status: z.enum(['ready', 'active', 'completed', 'archived']).nullish(),
+  limit: z.string().nullish()
+    .transform((val) => val === null || val === undefined ? '50' : val)
+    .pipe(z.coerce.number().int().positive().max(100)),
+  offset: z.string().nullish()
+    .transform((val) => val === null || val === undefined ? '0' : val)
+    .pipe(z.coerce.number().int().min(0))
 }).transform((data) => ({
   ...data,
   status: data.status ?? undefined
