@@ -1,0 +1,441 @@
+### Variables
+@baseUrl = http://localhost:3000
+@goalId = REPLACE_WITH_VALID_GOAL_ID
+@invalidGoalId = not-a-uuid
+@nonExistentGoalId = 00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### PATCH TESTS - POSITIVE (Success Cases)
+### ============================================================================
+
+### PATCH /api/v1/goals/:id - Update single field (title)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Goal Title"
+}
+
+### PATCH /api/v1/goals/:id - Update multiple fields
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "Launch MVP v2.0",
+  "progress_percentage": 75,
+  "category": "work"
+}
+
+### PATCH /api/v1/goals/:id - Update only description
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "description": "Updated description with more context"
+}
+
+### PATCH /api/v1/goals/:id - Update only category
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "finance"
+}
+
+### PATCH /api/v1/goals/:id - Update only progress
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 50
+}
+
+### PATCH /api/v1/goals/:id - Update only position
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "position": 3
+}
+
+### PATCH /api/v1/goals/:id - Set description to null
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "description": null
+}
+
+### PATCH /api/v1/goals/:id - Set category to null
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": null
+}
+
+### PATCH /api/v1/goals/:id - Update all fields at once
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "Complete Overhaul",
+  "description": "Comprehensive update to all goal attributes",
+  "category": "development",
+  "progress_percentage": 80,
+  "position": 2
+}
+
+### PATCH /api/v1/goals/:id - Set both description and category to null
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "description": null,
+  "category": null
+}
+
+### ============================================================================
+### PATCH TESTS - VALIDATION ERRORS (400 Bad Request)
+### ============================================================================
+
+### PATCH /api/v1/goals/:id - Error: Invalid UUID
+PATCH {{baseUrl}}/api/v1/goals/{{invalidGoalId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Title"
+}
+
+### PATCH /api/v1/goals/:id - Error: Empty body (no fields provided)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{}
+
+### PATCH /api/v1/goals/:id - Error: Title too short (empty string)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+### PATCH /api/v1/goals/:id - Error: Title too long (>255 characters)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet."
+}
+
+### PATCH /api/v1/goals/:id - Error: Invalid category
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "invalid_category"
+}
+
+### PATCH /api/v1/goals/:id - Error: Progress out of range (negative)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": -10
+}
+
+### PATCH /api/v1/goals/:id - Error: Progress out of range (>100)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 150
+}
+
+### PATCH /api/v1/goals/:id - Error: Progress not an integer
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 55.5
+}
+
+### PATCH /api/v1/goals/:id - Error: Position out of range (<1)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "position": 0
+}
+
+### PATCH /api/v1/goals/:id - Error: Position out of range (>5)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "position": 10
+}
+
+### PATCH /api/v1/goals/:id - Error: Position not an integer
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "position": 2.5
+}
+
+### PATCH /api/v1/goals/:id - Error: Unknown field (strict mode)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "Valid Title",
+  "unknown_field": "should be rejected"
+}
+
+### PATCH /api/v1/goals/:id - Error: Attempt to change plan_id (should be rejected)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "plan_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Should fail"
+}
+
+### PATCH /api/v1/goals/:id - Error: Invalid JSON
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "Test",
+  invalid json
+}
+
+### PATCH /api/v1/goals/:id - Error: Title with only whitespace
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "   "
+}
+
+### ============================================================================
+### PATCH TESTS - NOT FOUND ERRORS (404 Not Found)
+### ============================================================================
+
+### PATCH /api/v1/goals/:id - Error: Goal not found (non-existent UUID)
+PATCH {{baseUrl}}/api/v1/goals/{{nonExistentGoalId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Title"
+}
+
+### ============================================================================
+### PATCH TESTS - BOUNDARY CASES
+### ============================================================================
+
+### PATCH /api/v1/goals/:id - Boundary: Progress at 0
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 0
+}
+
+### PATCH /api/v1/goals/:id - Boundary: Progress at 100
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 100
+}
+
+### PATCH /api/v1/goals/:id - Boundary: Position 1
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "position": 1
+}
+
+### PATCH /api/v1/goals/:id - Boundary: Position 5
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "position": 5
+}
+
+### PATCH /api/v1/goals/:id - Boundary: Title exactly 255 characters
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "This is exactly two hundred and fifty-five characters long title that should pass validation because it meets the exact maximum length requirement specified in the schema validation rules for the goal title field which is set to maximum of 255 chars12345"
+}
+
+### PATCH /api/v1/goals/:id - Boundary: Title with 1 character
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "A"
+}
+
+### PATCH /api/v1/goals/:id - Test all valid categories: work
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "work"
+}
+
+### PATCH /api/v1/goals/:id - Test all valid categories: finance
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "finance"
+}
+
+### PATCH /api/v1/goals/:id - Test all valid categories: hobby
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "hobby"
+}
+
+### PATCH /api/v1/goals/:id - Test all valid categories: relationships
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "relationships"
+}
+
+### PATCH /api/v1/goals/:id - Test all valid categories: health
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "health"
+}
+
+### PATCH /api/v1/goals/:id - Test all valid categories: development
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "category": "development"
+}
+
+### PATCH /api/v1/goals/:id - Very long description (no limit)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is a very long description that continues for many lines to test that there is no limit on description length. The system should accept this without any problems because the description field has no maximum length constraint in the database schema or validation rules. Let's add even more text to make this really comprehensive and thorough."
+}
+
+### ============================================================================
+### DELETE TESTS - POSITIVE (Success Cases)
+### ============================================================================
+
+### DELETE /api/v1/goals/:id - Delete existing goal
+### WARNING: This will permanently delete the goal and all related milestones!
+### Make sure to use a test goal ID that can be safely deleted
+DELETE {{baseUrl}}/api/v1/goals/{{goalId}}
+
+### ============================================================================
+### DELETE TESTS - VALIDATION ERRORS (400 Bad Request)
+### ============================================================================
+
+### DELETE /api/v1/goals/:id - Error: Invalid UUID
+DELETE {{baseUrl}}/api/v1/goals/{{invalidGoalId}}
+
+### ============================================================================
+### DELETE TESTS - NOT FOUND ERRORS (404 Not Found)
+### ============================================================================
+
+### DELETE /api/v1/goals/:id - Error: Goal not found (non-existent UUID)
+DELETE {{baseUrl}}/api/v1/goals/{{nonExistentGoalId}}
+
+### DELETE /api/v1/goals/:id - Error: Already deleted (idempotency test)
+### Run this after successfully deleting a goal - should return 404
+DELETE {{baseUrl}}/api/v1/goals/{{goalId}}
+
+### ============================================================================
+### INTEGRATION TESTS - Testing CASCADE and SET NULL behavior
+### ============================================================================
+
+### NOTE: These tests require database inspection to verify
+### 1. Create a goal with milestones
+### 2. Create weekly goals linked to this long-term goal
+### 3. Delete the long-term goal
+### 4. Verify in database:
+###    - All milestones are deleted (CASCADE)
+###    - weekly_goals.long_term_goal_id is set to NULL (SET NULL)
+
+### ============================================================================
+### EDGE CASES AND SPECIAL SCENARIOS
+### ============================================================================
+
+### PATCH /api/v1/goals/:id - Update with trimmed title (leading/trailing spaces)
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "title": "  Title with spaces  "
+}
+
+### PATCH /api/v1/goals/:id - Multiple rapid updates (test updated_at trigger)
+### Run these in quick succession and verify updated_at changes
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 10
+}
+
+### Second rapid update
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 20
+}
+
+### Third rapid update
+PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
+Content-Type: application/json
+
+{
+  "progress_percentage": 30
+}
+
+### ============================================================================
+### NOTES FOR TESTING
+### ============================================================================
+
+# Before running these tests:
+# 1. Replace {{goalId}} with a valid goal ID from your database
+# 2. Make sure you have a goal that can be safely deleted for DELETE tests
+# 3. For CASCADE testing, ensure the goal has milestones attached
+# 4. For SET NULL testing, ensure the goal is referenced in weekly_goals
+
+# Expected Response Codes:
+# - 200 OK: Successful PATCH or DELETE
+# - 400 Bad Request: Validation errors, invalid UUID, empty body
+# - 404 Not Found: Goal doesn't exist or doesn't belong to user
+# - 500 Internal Server Error: Unexpected server errors
+
+# Testing Strategy:
+# 1. Start with positive tests to ensure basic functionality works
+# 2. Run validation error tests to ensure proper input validation
+# 3. Test boundary cases to ensure limits are enforced correctly
+# 4. Test DELETE with CASCADE/SET NULL by inspecting database
+# 5. Verify updated_at timestamp changes on PATCH operations
+

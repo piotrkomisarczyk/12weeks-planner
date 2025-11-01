@@ -1,0 +1,360 @@
+### Variables
+@baseUrl = http://localhost:3000
+@planId = REPLACE_WITH_VALID_PLAN_ID
+
+### ============================================================================
+### POSITIVE TESTS - Goal Creation
+### ============================================================================
+
+### POST /api/v1/goals - Create goal with minimal data
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Launch MVP"
+}
+
+### POST /api/v1/goals - Create goal with all fields
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Achieve Financial Independence",
+  "description": "Build passive income streams and reduce expenses",
+  "category": "finance",
+  "progress_percentage": 10,
+  "position": 2
+}
+
+### POST /api/v1/goals - Create goal with work category
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Get promoted to Senior Engineer",
+  "description": "Demonstrate leadership and technical excellence",
+  "category": "work",
+  "progress_percentage": 25,
+  "position": 1
+}
+
+### POST /api/v1/goals - Create goal with health category
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Run a marathon",
+  "description": "Complete training program and run first marathon",
+  "category": "health",
+  "progress_percentage": 0,
+  "position": 3
+}
+
+### POST /api/v1/goals - Create goal with development category
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Learn TypeScript deeply",
+  "description": "Master advanced TypeScript patterns",
+  "category": "development",
+  "progress_percentage": 15,
+  "position": 4
+}
+
+### POST /api/v1/goals - Create goal with hobby category
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Learn to play guitar",
+  "category": "hobby",
+  "position": 5
+}
+
+### ============================================================================
+### VALIDATION ERROR TESTS
+### ============================================================================
+
+### POST /api/v1/goals - Error: Missing required field (plan_id)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "title": "Test Goal"
+}
+
+### POST /api/v1/goals - Error: Missing required field (title)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}"
+}
+
+### POST /api/v1/goals - Error: Invalid UUID format
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "not-a-uuid",
+  "title": "Test Goal"
+}
+
+### POST /api/v1/goals - Error: Title too long (>255 characters)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet."
+}
+
+### POST /api/v1/goals - Error: Invalid category
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Goal",
+  "category": "invalid_category"
+}
+
+### POST /api/v1/goals - Error: Progress out of range (negative)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Goal",
+  "progress_percentage": -10
+}
+
+### POST /api/v1/goals - Error: Progress out of range (>100)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Goal",
+  "progress_percentage": 150
+}
+
+### POST /api/v1/goals - Error: Position out of range (<1)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Goal",
+  "position": 0
+}
+
+### POST /api/v1/goals - Error: Position out of range (>5)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Goal",
+  "position": 10
+}
+
+### POST /api/v1/goals - Error: Empty title
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": ""
+}
+
+### POST /api/v1/goals - Error: Title with only whitespace
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "   "
+}
+
+### ============================================================================
+### BUSINESS LOGIC ERROR TESTS
+### ============================================================================
+
+### POST /api/v1/goals - Error: Plan not found
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Test Goal"
+}
+
+### POST /api/v1/goals - Error: Invalid JSON
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Goal",
+  invalid json
+}
+
+### ============================================================================
+### CONSTRAINT TESTS - Maximum 5 goals per plan
+### ============================================================================
+
+### Create 5 goals to test constraint (use a fresh plan)
+### NOTE: Replace {{planId}} with a plan that has 0 goals
+
+### Goal 1
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 1",
+  "position": 1
+}
+
+### Goal 2
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 2",
+  "position": 2
+}
+
+### Goal 3
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 3",
+  "position": 3
+}
+
+### Goal 4
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 4",
+  "position": 4
+}
+
+### Goal 5
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 5",
+  "position": 5
+}
+
+### Goal 6 - Should fail with max 5 goals constraint
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 6 - This should fail",
+  "position": 1
+}
+
+### ============================================================================
+### EDGE CASE TESTS
+### ============================================================================
+
+### POST /api/v1/goals - Boundary: Progress at 0
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal at 0% progress",
+  "progress_percentage": 0
+}
+
+### POST /api/v1/goals - Boundary: Progress at 100
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal at 100% progress",
+  "progress_percentage": 100
+}
+
+### POST /api/v1/goals - Boundary: Position 1
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal at position 1",
+  "position": 1
+}
+
+### POST /api/v1/goals - Boundary: Position 5
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal at position 5",
+  "position": 5
+}
+
+### POST /api/v1/goals - Boundary: Title exactly 255 characters
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "This is exactly two hundred and fifty-five characters long title that should pass validation because it meets the exact maximum length requirement specified in the schema validation rules for the goal title field which is set to maximum of 255 chars12345"
+}
+
+### POST /api/v1/goals - Category: relationships
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Strengthen family bonds",
+  "category": "relationships"
+}
+
+### POST /api/v1/goals - Null description and category (explicit nulls)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal with nulls",
+  "description": null,
+  "category": null
+}
+
+### POST /api/v1/goals - Long description (no limit)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal with very long description",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is a very long description that continues for many lines to test that there is no limit on description length. The system should accept this without any problems because the description field has no maximum length constraint in the database schema or validation rules."
+}
+

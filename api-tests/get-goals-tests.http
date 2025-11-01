@@ -1,0 +1,347 @@
+###
+# API Tests for Goals Endpoints (GET)
+# Complete test suite for all goal-related GET API endpoints
+###
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+# Test data - replace with actual UUIDs from your database
+@validPlanId = 00000000-0000-0000-0000-000000000001
+@validGoalId = 00000000-0000-0000-0000-000000000001
+@invalidUuid = not-a-valid-uuid
+@nonExistentPlanId = 99999999-9999-9999-9999-999999999999
+@nonExistentGoalId = 99999999-9999-9999-9999-999999999999
+
+################################################################################
+### GET /api/v1/goals - List all goals with pagination and filters
+################################################################################
+
+###
+# Test 1: Get all goals (default pagination)
+# Expected: 200 OK with data array, count, limit=50, offset=0
+GET {{baseUrl}}/api/v1/goals
+Content-Type: {{contentType}}
+
+###
+# Test 2: Get goals with custom limit
+# Expected: 200 OK with max 10 goals
+GET {{baseUrl}}/api/v1/goals?limit=10
+Content-Type: {{contentType}}
+
+###
+# Test 3: Get goals with pagination (offset)
+# Expected: 200 OK with goals starting from offset 5
+GET {{baseUrl}}/api/v1/goals?limit=10&offset=5
+Content-Type: {{contentType}}
+
+###
+# Test 4: Get goals filtered by plan_id
+# Expected: 200 OK with goals only for specific plan
+GET {{baseUrl}}/api/v1/goals?plan_id={{validPlanId}}
+Content-Type: {{contentType}}
+
+###
+# Test 5: Get goals with plan_id filter and pagination
+# Expected: 200 OK with filtered and paginated goals
+GET {{baseUrl}}/api/v1/goals?plan_id={{validPlanId}}&limit=5&offset=0
+Content-Type: {{contentType}}
+
+###
+# Test 6: Get goals with maximum allowed limit (100)
+# Expected: 200 OK with max 100 goals
+GET {{baseUrl}}/api/v1/goals?limit=100
+Content-Type: {{contentType}}
+
+###
+# Test 7: Invalid limit - exceeds maximum (100)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals?limit=101
+Content-Type: {{contentType}}
+
+###
+# Test 8: Invalid limit - negative number
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals?limit=-10
+Content-Type: {{contentType}}
+
+###
+# Test 9: Invalid limit - zero
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals?limit=0
+Content-Type: {{contentType}}
+
+###
+# Test 10: Invalid offset - negative number
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals?offset=-5
+Content-Type: {{contentType}}
+
+###
+# Test 11: Invalid plan_id - not a UUID
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals?plan_id={{invalidUuid}}
+Content-Type: {{contentType}}
+
+###
+# Test 12: Valid plan_id but doesn't exist
+# Expected: 200 OK with empty data array
+GET {{baseUrl}}/api/v1/goals?plan_id={{nonExistentPlanId}}
+Content-Type: {{contentType}}
+
+###
+# Test 13: Empty result set with high offset
+# Expected: 200 OK with empty data array, count shows total
+GET {{baseUrl}}/api/v1/goals?offset=10000
+Content-Type: {{contentType}}
+
+###
+# Test 14: Multiple parameters - all valid
+# Expected: 200 OK with filtered, paginated results
+GET {{baseUrl}}/api/v1/goals?plan_id={{validPlanId}}&limit=20&offset=0
+Content-Type: {{contentType}}
+
+################################################################################
+### GET /api/v1/plans/:planId/goals - Get all goals for a specific plan
+################################################################################
+
+###
+# Test 15: Get goals for valid plan
+# Expected: 200 OK with data array (goals for this plan)
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/goals
+Content-Type: {{contentType}}
+
+###
+# Test 16: Get goals for plan with no goals
+# Expected: 200 OK with empty data array
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/goals
+Content-Type: {{contentType}}
+
+###
+# Test 17: Invalid planId - not a UUID
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/{{invalidUuid}}/goals
+Content-Type: {{contentType}}
+
+###
+# Test 18: Valid UUID but plan doesn't exist
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/plans/{{nonExistentPlanId}}/goals
+Content-Type: {{contentType}}
+
+###
+# Test 19: planId with incorrect format (missing hyphens)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/00000000000000000000000000000001/goals
+Content-Type: {{contentType}}
+
+###
+# Test 20: Empty planId
+# Expected: 404 Not Found (route not matched) or 400 Bad Request
+GET {{baseUrl}}/api/v1/plans//goals
+Content-Type: {{contentType}}
+
+################################################################################
+### GET /api/v1/goals/:id - Get a specific goal with its milestones
+################################################################################
+
+###
+# Test 21: Get goal by valid ID (with milestones)
+# Expected: 200 OK with data object containing goal and milestones array
+GET {{baseUrl}}/api/v1/goals/{{validGoalId}}
+Content-Type: {{contentType}}
+
+###
+# Test 22: Get goal that has no milestones
+# Expected: 200 OK with data object and empty milestones array
+GET {{baseUrl}}/api/v1/goals/{{validGoalId}}
+Content-Type: {{contentType}}
+
+###
+# Test 23: Invalid goal ID - not a UUID
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals/{{invalidUuid}}
+Content-Type: {{contentType}}
+
+###
+# Test 24: Valid UUID but goal doesn't exist
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/goals/{{nonExistentGoalId}}
+Content-Type: {{contentType}}
+
+###
+# Test 25: Goal ID with incorrect format (missing hyphens)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals/00000000000000000000000000000001
+Content-Type: {{contentType}}
+
+###
+# Test 26: Empty goal ID
+# Expected: 404 Not Found (route matches /api/v1/goals index)
+GET {{baseUrl}}/api/v1/goals/
+Content-Type: {{contentType}}
+
+################################################################################
+### Edge Cases and Security Tests
+################################################################################
+
+###
+# Test 27: Very long UUID-like string
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals/00000000-0000-0000-0000-000000000001-extra
+Content-Type: {{contentType}}
+
+###
+# Test 28: SQL injection attempt in plan_id
+# Expected: 400 Bad Request with validation error (not a valid UUID)
+GET {{baseUrl}}/api/v1/goals?plan_id='; DROP TABLE plans; --
+Content-Type: {{contentType}}
+
+###
+# Test 29: XSS attempt in limit parameter
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/goals?limit=<script>alert('xss')</script>
+Content-Type: {{contentType}}
+
+###
+# Test 30: Multiple plan_id parameters (query param pollution)
+# Expected: 400 or uses first/last value (depends on implementation)
+GET {{baseUrl}}/api/v1/goals?plan_id={{validPlanId}}&plan_id={{nonExistentPlanId}}
+Content-Type: {{contentType}}
+
+################################################################################
+### Response Format Validation Tests
+################################################################################
+
+###
+# Test 31: Verify response has correct structure for list endpoint
+# Expected: 200 OK with { data: [], count: number, limit: number, offset: number }
+GET {{baseUrl}}/api/v1/goals?limit=5
+Content-Type: {{contentType}}
+
+###
+# Test 32: Verify response has correct structure for plan goals endpoint
+# Expected: 200 OK with { data: [] }
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/goals
+Content-Type: {{contentType}}
+
+###
+# Test 33: Verify response has correct structure for single goal endpoint
+# Expected: 200 OK with { data: { ...goal, milestones: [] } }
+GET {{baseUrl}}/api/v1/goals/{{validGoalId}}
+Content-Type: {{contentType}}
+
+###
+# Test 34: Verify goals are ordered by position (ascending)
+# Expected: 200 OK with goals sorted by position field
+GET {{baseUrl}}/api/v1/goals?plan_id={{validPlanId}}
+Content-Type: {{contentType}}
+
+###
+# Test 35: Verify milestones are ordered by position (ascending)
+# Expected: 200 OK with milestones array sorted by position field
+GET {{baseUrl}}/api/v1/goals/{{validGoalId}}
+Content-Type: {{contentType}}
+
+################################################################################
+### Performance and Load Tests (Optional - run manually)
+################################################################################
+
+###
+# Test 36: Request with max limit multiple times
+# Expected: Consistent response times, no timeout
+GET {{baseUrl}}/api/v1/goals?limit=100
+Content-Type: {{contentType}}
+
+###
+# Test 37: Rapid successive requests
+# Expected: All requests succeed without rate limiting (for now)
+GET {{baseUrl}}/api/v1/goals
+Content-Type: {{contentType}}
+
+###
+GET {{baseUrl}}/api/v1/goals
+Content-Type: {{contentType}}
+
+###
+GET {{baseUrl}}/api/v1/goals
+Content-Type: {{contentType}}
+
+################################################################################
+### Data Integrity Tests
+################################################################################
+
+###
+# Test 38: Verify goal fields are present and correctly typed
+# Expected: 200 OK, check response contains all required fields
+# Fields: id, plan_id, title, description, category, progress_percentage, position, created_at, updated_at
+GET {{baseUrl}}/api/v1/goals/{{validGoalId}}
+Content-Type: {{contentType}}
+
+###
+# Test 39: Verify milestone fields are present and correctly typed
+# Expected: 200 OK, check milestones contain all required fields
+# Fields: id, long_term_goal_id, title, description, due_date, is_completed, position, created_at, updated_at
+GET {{baseUrl}}/api/v1/goals/{{validGoalId}}
+Content-Type: {{contentType}}
+
+###
+# Test 40: Verify count matches actual data length (when total < limit)
+# Expected: 200 OK with count === data.length
+GET {{baseUrl}}/api/v1/goals?limit=100
+Content-Type: {{contentType}}
+
+################################################################################
+### Notes for Manual Testing
+################################################################################
+
+# Before running these tests:
+# 1. Start your development server: npm run dev
+# 2. Ensure your database is running and has test data
+# 3. Replace @validPlanId and @validGoalId with actual UUIDs from your database
+# 4. Run tests in order or individually
+# 5. Verify response structure matches specification in implementation plan
+# 6. Check console logs for any errors
+# 7. Verify security headers are present (X-Content-Type-Options: nosniff)
+
+# Expected Response Formats:
+# 
+# GET /api/v1/goals:
+# {
+#   "data": [{ ...goal }],
+#   "count": 10,
+#   "limit": 50,
+#   "offset": 0
+# }
+#
+# GET /api/v1/plans/:planId/goals:
+# {
+#   "data": [{ ...goal }]
+# }
+#
+# GET /api/v1/goals/:id:
+# {
+#   "data": {
+#     ...goal,
+#     "milestones": [{ ...milestone }]
+#   }
+# }
+#
+# Error Response (400):
+# {
+#   "error": "Validation failed",
+#   "details": [{ "field": "...", "message": "...", "received": "..." }]
+# }
+#
+# Error Response (404):
+# {
+#   "error": "Not found",
+#   "message": "Goal not found" | "Plan not found"
+# }
+#
+# Error Response (500):
+# {
+#   "error": "Internal server error",
+#   "message": "An unexpected error occurred"
+# }
+
