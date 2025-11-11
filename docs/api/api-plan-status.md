@@ -6,9 +6,9 @@ Status aktualnej implementacji endpointów REST API zgodnie z dokumentem `api-pl
 - ✅ [x] - Endpoint zaimplementowany
 - ⬜ [ ] - Endpoint niezaimplementowany
 
-**Stan:** 10 / 69 endpointów zaimplementowanych (14.5%)
+**Stan:** 11 / 69 endpointów zaimplementowanych (15.9%)
 
-Ostatnia aktualizacja: 2025-11-01
+Ostatnia aktualizacja: 2025-11-10
 
 ---
 
@@ -19,7 +19,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 ---
 
-### 3.2 Plans (6 / 8 zaimplementowane)
+### 3.2 Plans (7 / 8 zaimplementowane)
 
 - [x] **3.2.1** Get User's Plans - **GET** `/api/v1/plans`
   - Query params: `status`, `limit`, `offset`
@@ -39,9 +39,10 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
   - Request body: `name`, `status`
   - Plik: `src/pages/api/v1/plans/[id].ts`
 
-- [ ] **3.2.6** Delete Plan - **DELETE** `/api/v1/plans/:id`
+- [x] **3.2.6** Delete Plan - **DELETE** `/api/v1/plans/:id`
   - Permanent delete (hard delete) z cascade
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/plans/[id].ts`
+  - Service: `PlanService.deletePlan()`
 
 - [x] **3.2.7** Archive Plan - **POST** `/api/v1/plans/:id/archive`
   - Soft delete (zmiana status na 'archived')
@@ -233,7 +234,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 | Zasób | Zaimplementowane | Wszystkie | Procent |
 |-------|------------------|-----------|---------|
-| Plans | 6 | 8 | 75.0% |
+| Plans | 7 | 8 | 87.5% |
 | Goals | 4 | 6 | 66.7% |
 | Milestones | 0 | 6 | 0.0% |
 | Weekly Goals | 0 | 5 | 0.0% |
@@ -242,7 +243,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 | Weekly Reviews | 0 | 7 | 0.0% |
 | User Metrics | 0 | 1 | 0.0% |
 | Data Export | 0 | 1 | 0.0% |
-| **RAZEM** | **10** | **42** | **23.8%** |
+| **RAZEM** | **11** | **42** | **26.2%** |
 
 *(Uwaga: Authentication nie jest liczone, bo jest obsługiwane przez Supabase Auth SDK)*
 
@@ -250,9 +251,9 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 ## Priorytety implementacji
 
-### Faza 1: Core Planning ✅ **ZAKOŃCZONA WIĘKSZOŚCIOWO**
+### Faza 1: Core Planning ✅ **ZAKOŃCZONA PRAWIE W PEŁNI**
 - [x] Plans - podstawowe operacje (GET, POST, PATCH, Archive)
-- [ ] Plans - DELETE endpoint (hard delete - opcjonalny)
+- [x] Plans - DELETE endpoint (hard delete) ✅
 - [ ] Plans - Dashboard endpoint (agregowane dane - do późniejszej implementacji)
 
 ### Faza 2: Goals & Milestones 🔄 **W TRAKCIE**
@@ -328,7 +329,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 5. ⬜ **Tasks** - operacje CRUD dla zadań
 
 #### Priorytet NISKI (nice to have):
-6. ⬜ **DELETE /api/v1/plans/:id** - hard delete planera
+6. ✅ **DELETE /api/v1/plans/:id** - hard delete planera ✅ **ZAIMPLEMENTOWANE**
 7. ⬜ **GET /api/v1/plans/:id/dashboard** - zagregowane dane
 
 ### Uwagi techniczne:
@@ -534,6 +535,13 @@ if (data.title !== undefined) updateData.title = data.title;
 ---
 
 ## Changelog
+
+### 2025-11-10
+- ✅ Potwierdzono implementację DELETE /api/v1/plans/:id (Hard Delete Plan)
+- ✅ Endpoint zaimplementowany w pliku `src/pages/api/v1/plans/[id].ts` (linie 227-305)
+- ✅ Service method `PlanService.deletePlan()` dostępny
+- 📊 Postęp: 11/42 endpointów (26.2%)
+- 📊 Plans: 7/8 endpointów (87.5%) - prawie pełna implementacja!
 
 ### 2025-11-01
 - ✅ Zaimplementowano POST /api/v1/goals (Create Goal)

@@ -1,0 +1,513 @@
+### Variables
+@baseUrl = http://localhost:3000
+@goalId = REPLACE_WITH_VALID_GOAL_ID
+@milestoneId = REPLACE_WITH_VALID_MILESTONE_ID
+
+### ============================================================================
+### POSITIVE TESTS - Milestone Operations
+### ============================================================================
+
+### GET /api/v1/milestones - List all milestones
+GET {{baseUrl}}/api/v1/milestones
+
+### GET /api/v1/milestones - Filter by goal
+GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}
+
+### GET /api/v1/milestones - Filter by completion status (incomplete)
+GET {{baseUrl}}/api/v1/milestones?is_completed=false
+
+### GET /api/v1/milestones - Filter by completion status (completed)
+GET {{baseUrl}}/api/v1/milestones?is_completed=true
+
+### GET /api/v1/milestones - With pagination
+GET {{baseUrl}}/api/v1/milestones?limit=10&offset=0
+
+### GET /api/v1/milestones - Combined filters
+GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}&is_completed=false&limit=20
+
+### GET /api/v1/goals/:goalId/milestones - Milestones for specific goal
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/milestones
+
+### GET /api/v1/milestones/:id - Get single milestone
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+
+### POST /api/v1/milestones - Create milestone with minimal data
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Complete API design"
+}
+
+### POST /api/v1/milestones - Create milestone with all fields
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Complete API implementation",
+  "description": "Implement all REST endpoints for milestones",
+  "due_date": "2025-12-31",
+  "position": 1
+}
+
+### POST /api/v1/milestones - Create milestone at position 2
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Write comprehensive tests",
+  "description": "Unit and integration tests for all endpoints",
+  "due_date": "2025-11-30",
+  "position": 2
+}
+
+### POST /api/v1/milestones - Create milestone at position 3
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Deploy to production",
+  "description": "Set up CI/CD and deploy",
+  "due_date": "2026-01-15",
+  "position": 3
+}
+
+### PATCH /api/v1/milestones/:id - Update milestone title
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Milestone Title"
+}
+
+### PATCH /api/v1/milestones/:id - Mark milestone as completed
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "is_completed": true
+}
+
+### PATCH /api/v1/milestones/:id - Update multiple fields
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Title",
+  "description": "Updated description with more details",
+  "due_date": "2025-12-25",
+  "position": 2
+}
+
+### PATCH /api/v1/milestones/:id - Update description only
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "description": "New detailed description of the milestone"
+}
+
+### PATCH /api/v1/milestones/:id - Clear description (set to null)
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "description": null
+}
+
+### PATCH /api/v1/milestones/:id - Update position
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "position": 4
+}
+
+### DELETE /api/v1/milestones/:id - Delete milestone
+DELETE {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+
+### ============================================================================
+### VALIDATION ERROR TESTS
+### ============================================================================
+
+### POST /api/v1/milestones - Error: Missing required field (long_term_goal_id)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "title": "Test Milestone"
+}
+
+### POST /api/v1/milestones - Error: Missing required field (title)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}"
+}
+
+### POST /api/v1/milestones - Error: Invalid UUID format
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "not-a-uuid",
+  "title": "Test Milestone"
+}
+
+### POST /api/v1/milestones - Error: Title too long (>255 characters)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+}
+
+### POST /api/v1/milestones - Error: Empty title
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": ""
+}
+
+### POST /api/v1/milestones - Error: Invalid date format
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test Milestone",
+  "due_date": "31/12/2025"
+}
+
+### POST /api/v1/milestones - Error: Invalid date format (ISO datetime)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test Milestone",
+  "due_date": "2025-12-31T10:00:00Z"
+}
+
+### POST /api/v1/milestones - Error: Position out of range (<1)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test Milestone",
+  "position": 0
+}
+
+### POST /api/v1/milestones - Error: Position out of range (>5)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test Milestone",
+  "position": 10
+}
+
+### POST /api/v1/milestones - Error: Position not an integer
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test Milestone",
+  "position": 1.5
+}
+
+### GET /api/v1/milestones - Error: Invalid UUID in query parameter
+GET {{baseUrl}}/api/v1/milestones?long_term_goal_id=not-a-uuid
+
+### GET /api/v1/milestones - Error: Invalid is_completed value
+GET {{baseUrl}}/api/v1/milestones?is_completed=yes
+
+### GET /api/v1/milestones - Error: Limit out of range (>100)
+GET {{baseUrl}}/api/v1/milestones?limit=150
+
+### GET /api/v1/milestones - Error: Limit out of range (<1)
+GET {{baseUrl}}/api/v1/milestones?limit=0
+
+### GET /api/v1/milestones - Error: Negative offset
+GET {{baseUrl}}/api/v1/milestones?offset=-1
+
+### GET /api/v1/milestones/:id - Error: Invalid UUID
+GET {{baseUrl}}/api/v1/milestones/invalid-uuid
+
+### GET /api/v1/goals/:goalId/milestones - Error: Invalid goal UUID
+GET {{baseUrl}}/api/v1/goals/invalid-uuid/milestones
+
+### PATCH /api/v1/milestones/:id - Error: No fields provided
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{}
+
+### PATCH /api/v1/milestones/:id - Error: Empty title
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+### PATCH /api/v1/milestones/:id - Error: Title too long
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+}
+
+### PATCH /api/v1/milestones/:id - Error: Invalid date format
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "due_date": "12-31-2025"
+}
+
+### PATCH /api/v1/milestones/:id - Error: Invalid is_completed type
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "is_completed": "yes"
+}
+
+### PATCH /api/v1/milestones/:id - Error: Position out of range
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "position": 6
+}
+
+### POST /api/v1/milestones - Error: Invalid JSON
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test",
+  invalid json
+}
+
+### ============================================================================
+### BUSINESS LOGIC ERROR TESTS
+### ============================================================================
+
+### POST /api/v1/milestones - Error: Goal not found
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Test Milestone"
+}
+
+### GET /api/v1/milestones/:id - Error: Milestone not found
+GET {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
+
+### GET /api/v1/goals/:goalId/milestones - Error: Goal not found
+GET {{baseUrl}}/api/v1/goals/00000000-0000-0000-0000-000000000000/milestones
+
+### PATCH /api/v1/milestones/:id - Error: Milestone not found
+PATCH {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "Updated Title"
+}
+
+### DELETE /api/v1/milestones/:id - Error: Milestone not found
+DELETE {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### CONSTRAINT TESTS - Maximum 5 milestones per goal
+### ============================================================================
+
+### Create 5 milestones to test constraint (use a goal with 0 milestones)
+### NOTE: Replace {{goalId}} with a goal that has 0 milestones
+
+### Milestone 1
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone 1",
+  "position": 1
+}
+
+### Milestone 2
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone 2",
+  "position": 2
+}
+
+### Milestone 3
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone 3",
+  "position": 3
+}
+
+### Milestone 4
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone 4",
+  "position": 4
+}
+
+### Milestone 5
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone 5",
+  "position": 5
+}
+
+### Milestone 6 - Should fail with max 5 milestones constraint
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone 6 - This should fail"
+}
+
+### ============================================================================
+### EDGE CASE TESTS
+### ============================================================================
+
+### POST /api/v1/milestones - Boundary: Position 1
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone at position 1",
+  "position": 1
+}
+
+### POST /api/v1/milestones - Boundary: Position 5
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone at position 5",
+  "position": 5
+}
+
+### POST /api/v1/milestones - Boundary: Title exactly 255 characters
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "This is exactly two hundred and fifty-five characters long title that should pass validation because it meets the exact maximum length requirement specified in the schema validation rules for the milestone title field which is set to maximum of 255 char"
+}
+
+### POST /api/v1/milestones - Null description and due_date (explicit nulls)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone with nulls",
+  "description": null,
+  "due_date": null
+}
+
+### POST /api/v1/milestones - Long description (no limit)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Milestone with very long description",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is a very long description that continues for many lines to test that there is no limit on description length."
+}
+
+### POST /api/v1/milestones - Past due date (should be allowed)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Past due milestone",
+  "due_date": "2020-01-01"
+}
+
+### POST /api/v1/milestones - Far future due date (should be allowed)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Far future milestone",
+  "due_date": "2099-12-31"
+}
+
+### PATCH /api/v1/milestones/:id - Toggle completion status
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "is_completed": false
+}
+
+### PATCH /api/v1/milestones/:id - Update only due date
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "due_date": "2026-06-30"
+}
+
+### PATCH /api/v1/milestones/:id - Clear due date (set to null)
+PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+Content-Type: application/json
+
+{
+  "due_date": null
+}
+
+### GET /api/v1/milestones - Boundary: Limit exactly 100
+GET {{baseUrl}}/api/v1/milestones?limit=100
+
+### GET /api/v1/milestones - Boundary: Limit 1
+GET {{baseUrl}}/api/v1/milestones?limit=1
+
+### GET /api/v1/milestones - Large offset (pagination)
+GET {{baseUrl}}/api/v1/milestones?offset=100
+
+### GET /api/v1/milestones - Combined filters with pagination
+GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}&is_completed=false&limit=5&offset=0
+
+
