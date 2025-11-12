@@ -1,0 +1,385 @@
+/**
+ * Weekly Goal Service
+ * Handles business logic for weekly goal operations
+ */
+
+import type { SupabaseClient } from '../../db/supabase.client';
+import type {
+  WeeklyGoalDTO,
+  WeeklyGoalWithSubtasksDTO,
+  CreateWeeklyGoalCommand,
+  UpdateWeeklyGoalCommand,
+  WeeklyGoalListParams,
+  WeeklyGoalInsert,
+  WeeklyGoalUpdate,
+  TaskDTO
+} from '../../types';
+import { PlanService } from './plan.service';
+import { GoalService } from './goal.service';
+
+export class WeeklyGoalService {
+  constructor(private supabase: SupabaseClient) {}
+
+  /**
+   * Tworzy nowy cel tygodniowy
+   * 
+   * @param userId - ID użytkownika (z tokenu JWT)
+   * @param data - Dane celu tygodniowego (plan_id, week_number, title, etc.)
+   * @returns Promise z utworzonym celem tygodniowym
+   * @throws Error jeśli plan nie istnieje lub nie należy do użytkownika
+   * @throws Error jeśli long_term_goal_id nie istnieje lub nie należy do tego samego planu
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoal = await weeklyGoalService.createWeeklyGoal(userId, {
+   *   plan_id: 'uuid',
+   *   long_term_goal_id: 'uuid',
+   *   week_number: 3,
+   *   title: 'Complete authentication system',
+   *   description: 'Implement auth with Supabase',
+   *   position: 1
+   * });
+   * ```
+   */
+  async createWeeklyGoal(
+    userId: string,
+    data: CreateWeeklyGoalCommand
+  ): Promise<WeeklyGoalDTO> {
+    // Step 1: Verify plan exists and belongs to user
+    const planService = new PlanService(this.supabase);
+    const plan = await planService.getPlanById(data.plan_id, userId);
+    
+    if (!plan) {
+      throw new Error('Plan not found or does not belong to user');
+    }
+
+    // Step 2: If long_term_goal_id provided, verify it exists and belongs to same plan
+    if (data.long_term_goal_id) {
+      const goalService = new GoalService(this.supabase);
+      const goal = await goalService.getGoalById(data.long_term_goal_id, userId);
+      
+      if (!goal) {
+        throw new Error('Long-term goal not found or does not belong to user');
+      }
+      
+      // Verify goal belongs to same plan
+      if (goal.plan_id !== data.plan_id) {
+        throw new Error('Long-term goal does not belong to the specified plan');
+      }
+    }
+
+    // Step 3: Prepare insert data
+    const insertData: WeeklyGoalInsert = {
+      plan_id: data.plan_id,
+      long_term_goal_id: data.long_term_goal_id ?? null,
+      week_number: data.week_number,
+      title: data.title,
+      description: data.description ?? null,
+      position: data.position ?? 1
+    };
+
+    // Step 4: Execute insert
+    const { data: weeklyGoal, error } = await this.supabase
+      .from('weekly_goals')
+      .insert(insertData)
+      .select()
+      .single();
+
+    // Step 5: Handle database errors
+    if (error) {
+      throw new Error(`Failed to create weekly goal: ${error.message}`);
+    }
+
+    return weeklyGoal;
+  }
+
+  /**
+   * Pobiera cel tygodniowy po ID
+   * Weryfikuje, że cel należy do użytkownika (przez plan_id)
+   * 
+   * @param id - UUID celu tygodniowego
+   * @param userId - ID użytkownika
+   * @returns Promise z celem tygodniowym lub null jeśli nie istnieje/nie należy do użytkownika
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoal = await weeklyGoalService.getWeeklyGoalById(id, userId);
+   * if (!weeklyGoal) {
+   *   // Weekly goal not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async getWeeklyGoalById(id: string, userId: string): Promise<WeeklyGoalDTO | null> {
+    // Join with plans to verify user ownership
+    const { data, error } = await this.supabase
+      .from('weekly_goals')
+      .select(`
+        *,
+        plans!inner(user_id)
+      `)
+      .eq('id', id)
+      .eq('plans.user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to fetch weekly goal: ${error.message}`);
+    }
+
+    // Remove nested plans data before returning
+    if (data) {
+      const { plans, ...weeklyGoal } = data as any;
+      return weeklyGoal as WeeklyGoalDTO;
+    }
+
+    return null;
+  }
+
+  /**
+   * Pobiera cel tygodniowy z podzadaniami
+   * Weryfikuje, że cel należy do użytkownika (przez plan_id)
+   * 
+   * @param id - UUID celu tygodniowego
+   * @param userId - ID użytkownika
+   * @returns Promise z celem tygodniowym i podzadaniami lub null jeśli nie istnieje
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoal = await weeklyGoalService.getWeeklyGoalWithSubtasks(id, userId);
+   * if (!weeklyGoal) {
+   *   // Weekly goal not found
+   * }
+   * // weeklyGoal.subtasks contains array of subtasks
+   * ```
+   */
+  async getWeeklyGoalWithSubtasks(
+    id: string,
+    userId: string
+  ): Promise<WeeklyGoalWithSubtasksDTO | null> {
+    // Step 1: Get weekly goal
+    const weeklyGoal = await this.getWeeklyGoalById(id, userId);
+    
+    if (!weeklyGoal) {
+      return null;
+    }
+
+    // Step 2: Query tasks table for subtasks
+    const { data: tasks, error } = await this.supabase
+      .from('tasks')
+      .select('id, title, priority, status')
+      .eq('weekly_goal_id', id)
+      .eq('task_type', 'weekly_sub')
+      .order('position', { ascending: true });
+
+    if (error) {
+      throw new Error(`Failed to fetch subtasks: ${error.message}`);
+    }
+
+    // Step 3: Combine weekly goal + subtasks
+    return {
+      ...weeklyGoal,
+      subtasks: tasks || []
+    };
+  }
+
+  /**
+   * Pobiera listę celów tygodniowych z filtrami
+   * Weryfikuje, że plan należy do użytkownika
+   * 
+   * @param params - Parametry zapytania (plan_id, week_number, long_term_goal_id, limit, offset)
+   * @param userId - ID użytkownika
+   * @returns Promise z tablicą celów tygodniowych
+   * @throws Error jeśli plan nie istnieje lub nie należy do użytkownika
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoals = await weeklyGoalService.listWeeklyGoals({
+   *   plan_id: 'uuid',
+   *   week_number: 3,
+   *   limit: 50,
+   *   offset: 0
+   * }, userId);
+   * // Returns weekly goals sorted by position
+   * ```
+   */
+  async listWeeklyGoals(
+    params: WeeklyGoalListParams,
+    userId: string
+  ): Promise<WeeklyGoalDTO[]> {
+    // Step 1: Verify plan exists and belongs to user
+    const planService = new PlanService(this.supabase);
+    const plan = await planService.getPlanById(params.plan_id, userId);
+    
+    if (!plan) {
+      throw new Error('Plan not found or does not belong to user');
+    }
+
+    // Step 2: Build query with filters
+    let query = this.supabase
+      .from('weekly_goals')
+      .select('*')
+      .eq('plan_id', params.plan_id);
+
+    // Apply optional filters
+    if (params.week_number !== undefined) {
+      query = query.eq('week_number', params.week_number);
+    }
+
+    if (params.long_term_goal_id !== undefined) {
+      query = query.eq('long_term_goal_id', params.long_term_goal_id);
+    }
+
+    // Apply pagination
+    const limit = params.limit ?? 50;
+    const offset = params.offset ?? 0;
+    query = query.range(offset, offset + limit - 1);
+
+    // Order by position
+    query = query.order('position', { ascending: true });
+
+    // Step 3: Execute query
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Failed to fetch weekly goals: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  /**
+   * Aktualizuje cel tygodniowy (partial update)
+   * Weryfikuje, że cel należy do użytkownika przez relację weekly_goal → plan → user
+   * 
+   * @param id - UUID celu tygodniowego
+   * @param userId - ID użytkownika (z DEFAULT_USER_ID)
+   * @param data - Dane do aktualizacji (wszystkie pola opcjonalne)
+   * @returns Promise z zaktualizowanym celem lub null jeśli nie istnieje
+   * @throws Error jeśli long_term_goal_id nie istnieje lub nie należy do tego samego planu
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoal = await weeklyGoalService.updateWeeklyGoal(id, userId, {
+   *   title: 'Updated Title',
+   *   position: 2
+   * });
+   * if (!weeklyGoal) {
+   *   // Weekly goal not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async updateWeeklyGoal(
+    id: string,
+    userId: string,
+    data: UpdateWeeklyGoalCommand
+  ): Promise<WeeklyGoalDTO | null> {
+    // Step 1: Verify weekly goal exists and belongs to user
+    const existingWeeklyGoal = await this.getWeeklyGoalById(id, userId);
+    
+    if (!existingWeeklyGoal) {
+      return null;
+    }
+
+    // Step 2: If long_term_goal_id changed and not null, verify it
+    if (data.long_term_goal_id !== undefined && data.long_term_goal_id !== null) {
+      const goalService = new GoalService(this.supabase);
+      const goal = await goalService.getGoalById(data.long_term_goal_id, userId);
+      
+      if (!goal) {
+        throw new Error('Long-term goal not found or does not belong to user');
+      }
+      
+      // Verify goal belongs to same plan
+      if (goal.plan_id !== existingWeeklyGoal.plan_id) {
+        throw new Error('Long-term goal does not belong to the same plan');
+      }
+    }
+
+    // Step 3: Prepare partial update data
+    const updateData: WeeklyGoalUpdate = {};
+    
+    if (data.long_term_goal_id !== undefined) {
+      updateData.long_term_goal_id = data.long_term_goal_id;
+    }
+    
+    if (data.title !== undefined) {
+      updateData.title = data.title;
+    }
+    
+    if (data.description !== undefined) {
+      updateData.description = data.description;
+    }
+    
+    if (data.position !== undefined) {
+      updateData.position = data.position;
+    }
+    
+    // updated_at is automatically set by database trigger
+
+    // Step 4: Execute update
+    const { data: weeklyGoal, error } = await this.supabase
+      .from('weekly_goals')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    // Step 5: Handle database errors
+    if (error) {
+      throw new Error(`Failed to update weekly goal: ${error.message}`);
+    }
+
+    return weeklyGoal;
+  }
+
+  /**
+   * Usuwa cel tygodniowy
+   * Weryfikuje, że cel należy do użytkownika przez relację weekly_goal → plan → user
+   * Automatycznie usuwa powiązane subtasks (CASCADE)
+   * 
+   * @param id - UUID celu tygodniowego
+   * @param userId - ID użytkownika (z DEFAULT_USER_ID)
+   * @returns Promise z true jeśli usunięto lub false jeśli cel nie istnieje
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const deleted = await weeklyGoalService.deleteWeeklyGoal(id, userId);
+   * if (!deleted) {
+   *   // Weekly goal not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async deleteWeeklyGoal(
+    id: string,
+    userId: string
+  ): Promise<boolean> {
+    // Step 1: Verify weekly goal exists and belongs to user
+    const existingWeeklyGoal = await this.getWeeklyGoalById(id, userId);
+    
+    if (!existingWeeklyGoal) {
+      return false;
+    }
+
+    // Step 2: Execute delete - cascade will remove all related subtasks
+    const { error } = await this.supabase
+      .from('weekly_goals')
+      .delete()
+      .eq('id', id);
+
+    // Step 3: Handle database errors
+    if (error) {
+      throw new Error(`Failed to delete weekly goal: ${error.message}`);
+    }
+
+    // Note: Database CASCADE DELETE automatically removes:
+    // - tasks with task_type = 'weekly_sub' (ON DELETE CASCADE)
+
+    return true;
+  }
+}
+

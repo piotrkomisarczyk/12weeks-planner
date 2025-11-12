@@ -1,0 +1,640 @@
+### Variables
+@baseUrl = http://localhost:4321
+@planId = REPLACE_WITH_VALID_PLAN_ID
+@goalId = REPLACE_WITH_VALID_LONG_TERM_GOAL_ID
+@weeklyGoalId = REPLACE_WITH_VALID_WEEKLY_GOAL_ID
+
+### ============================================================================
+### POSITIVE TESTS - Weekly Goal Operations
+### ============================================================================
+
+### GET /api/v1/weekly-goals - List all weekly goals for a plan
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}
+
+### GET /api/v1/weekly-goals - Filter by week number
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=3
+
+### GET /api/v1/weekly-goals - Filter by long-term goal
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&long_term_goal_id={{goalId}}
+
+### GET /api/v1/weekly-goals - Combined filters
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=5&long_term_goal_id={{goalId}}
+
+### GET /api/v1/weekly-goals - With pagination
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&limit=10&offset=0
+
+### GET /api/v1/weekly-goals - Multiple weeks
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=1
+
+### GET /api/v1/weekly-goals/:id - Get single weekly goal with subtasks
+GET {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+
+### POST /api/v1/weekly-goals - Create weekly goal with minimal data
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 1,
+  "title": "Complete authentication system"
+}
+
+### POST /api/v1/weekly-goals - Create weekly goal with all fields
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "week_number": 2,
+  "title": "Implement API endpoints",
+  "description": "Create all REST endpoints for weekly goals management",
+  "position": 1
+}
+
+### POST /api/v1/weekly-goals - Create weekly goal at position 2
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "week_number": 3,
+  "title": "Write comprehensive tests",
+  "description": "Unit and integration tests for all endpoints",
+  "position": 2
+}
+
+### POST /api/v1/weekly-goals - Create weekly goal for week 12
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "week_number": 12,
+  "title": "Final review and deployment",
+  "description": "Review all work and deploy to production",
+  "position": 1
+}
+
+### POST /api/v1/weekly-goals - Create without long_term_goal_id (standalone goal)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 4,
+  "title": "Personal development goal",
+  "description": "Not tied to any long-term goal"
+}
+
+### POST /api/v1/weekly-goals - Create with null long_term_goal_id (explicit)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": null,
+  "week_number": 5,
+  "title": "Ad-hoc weekly goal"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update weekly goal title
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Weekly Goal Title"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update description only
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "description": "New detailed description of the weekly goal"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Clear description (set to null)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "description": null
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update position
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "position": 3
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update long_term_goal_id (associate with goal)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Remove long_term_goal_id (set to null)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": null
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update multiple fields
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Title",
+  "description": "Updated description with more details",
+  "position": 2
+}
+
+### DELETE /api/v1/weekly-goals/:id - Delete weekly goal
+DELETE {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+
+### ============================================================================
+### VALIDATION ERROR TESTS
+### ============================================================================
+
+### GET /api/v1/weekly-goals - Error: Missing required plan_id
+GET {{baseUrl}}/api/v1/weekly-goals
+
+### GET /api/v1/weekly-goals - Error: Invalid plan_id UUID format
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id=not-a-uuid
+
+### GET /api/v1/weekly-goals - Error: Invalid week_number (< 1)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=0
+
+### GET /api/v1/weekly-goals - Error: Invalid week_number (> 12)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=13
+
+### GET /api/v1/weekly-goals - Error: Invalid week_number (not an integer)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=3.5
+
+### GET /api/v1/weekly-goals - Error: Invalid long_term_goal_id UUID
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&long_term_goal_id=invalid-uuid
+
+### GET /api/v1/weekly-goals - Error: Limit out of range (> 100)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&limit=150
+
+### GET /api/v1/weekly-goals - Error: Limit out of range (< 1)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&limit=0
+
+### GET /api/v1/weekly-goals - Error: Negative offset
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&offset=-1
+
+### GET /api/v1/weekly-goals/:id - Error: Invalid UUID
+GET {{baseUrl}}/api/v1/weekly-goals/invalid-uuid
+
+### POST /api/v1/weekly-goals - Error: Missing required field (plan_id)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "week_number": 3,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Missing required field (week_number)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Missing required field (title)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3
+}
+
+### POST /api/v1/weekly-goals - Error: Invalid plan_id UUID format
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "not-a-uuid",
+  "week_number": 3,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Invalid long_term_goal_id UUID format
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "not-a-uuid",
+  "week_number": 3,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Week number out of range (< 1)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 0,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Week number out of range (> 12)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 13,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Week number not an integer
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3.5,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Empty title
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "title": ""
+}
+
+### POST /api/v1/weekly-goals - Error: Title too long (> 255 characters)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+}
+
+### POST /api/v1/weekly-goals - Error: Position out of range (< 1)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "title": "Test Weekly Goal",
+  "position": 0
+}
+
+### POST /api/v1/weekly-goals - Error: Position not an integer
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "title": "Test Weekly Goal",
+  "position": 1.5
+}
+
+### POST /api/v1/weekly-goals - Error: Invalid JSON
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "title": "Test",
+  invalid json
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: No fields provided
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Empty title
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Title too long
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Invalid long_term_goal_id UUID
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "not-a-uuid"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Position out of range (< 1)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "position": 0
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Position not an integer
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "position": 2.5
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Unknown field (strict mode)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Title",
+  "week_number": 5
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Invalid UUID in path
+PATCH {{baseUrl}}/api/v1/weekly-goals/invalid-uuid
+Content-Type: application/json
+
+{
+  "title": "Updated Title"
+}
+
+### DELETE /api/v1/weekly-goals/:id - Error: Invalid UUID
+DELETE {{baseUrl}}/api/v1/weekly-goals/invalid-uuid
+
+### ============================================================================
+### BUSINESS LOGIC ERROR TESTS
+### ============================================================================
+
+### GET /api/v1/weekly-goals - Error: Plan not found
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id=00000000-0000-0000-0000-000000000000
+
+### GET /api/v1/weekly-goals/:id - Error: Weekly goal not found
+GET {{baseUrl}}/api/v1/weekly-goals/00000000-0000-0000-0000-000000000000
+
+### POST /api/v1/weekly-goals - Error: Plan not found
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "00000000-0000-0000-0000-000000000000",
+  "week_number": 3,
+  "title": "Test Weekly Goal"
+}
+
+### POST /api/v1/weekly-goals - Error: Long-term goal not found
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "00000000-0000-0000-0000-000000000000",
+  "week_number": 3,
+  "title": "Test Weekly Goal"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Weekly goal not found
+PATCH {{baseUrl}}/api/v1/weekly-goals/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "Updated Title"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Long-term goal not found (when updating)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "00000000-0000-0000-0000-000000000000"
+}
+
+### DELETE /api/v1/weekly-goals/:id - Error: Weekly goal not found
+DELETE {{baseUrl}}/api/v1/weekly-goals/00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### EDGE CASE TESTS
+### ============================================================================
+
+### POST /api/v1/weekly-goals - Boundary: Week 1
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 1,
+  "title": "Week 1 goal"
+}
+
+### POST /api/v1/weekly-goals - Boundary: Week 12
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 12,
+  "title": "Week 12 goal"
+}
+
+### POST /api/v1/weekly-goals - Boundary: Position 1
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 6,
+  "title": "Goal at position 1",
+  "position": 1
+}
+
+### POST /api/v1/weekly-goals - Boundary: Large position (allowed, no upper limit)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 7,
+  "title": "Goal at position 100",
+  "position": 100
+}
+
+### POST /api/v1/weekly-goals - Boundary: Title exactly 255 characters
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 8,
+  "title": "This is exactly two hundred and fifty-five characters long title that should pass validation because it meets the exact maximum length requirement specified in the schema validation rules for the weekly goal title field which is set to maximum of 255 char"
+}
+
+### POST /api/v1/weekly-goals - Null description and long_term_goal_id (explicit nulls)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 9,
+  "title": "Weekly goal with nulls",
+  "long_term_goal_id": null,
+  "description": null
+}
+
+### POST /api/v1/weekly-goals - Long description (no limit)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 10,
+  "title": "Weekly goal with very long description",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is a very long description that continues for many lines to test that there is no limit on description length in weekly goals."
+}
+
+### POST /api/v1/weekly-goals - Duplicate position in same week (should be allowed)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 11,
+  "title": "First goal at position 1",
+  "position": 1
+}
+
+### POST /api/v1/weekly-goals - Another goal at same position (allowed)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 11,
+  "title": "Second goal also at position 1",
+  "position": 1
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update only position to very large number
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "position": 999
+}
+
+### GET /api/v1/weekly-goals - Boundary: Limit exactly 100
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&limit=100
+
+### GET /api/v1/weekly-goals - Boundary: Limit 1
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&limit=1
+
+### GET /api/v1/weekly-goals - Large offset (pagination)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&offset=100
+
+### GET /api/v1/weekly-goals - Combined filters with pagination
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=3&limit=5&offset=0
+
+### ============================================================================
+### CASCADE DELETE TEST
+### ============================================================================
+
+### NOTE: When a weekly goal is deleted, all subtasks (task_type = 'weekly_sub') 
+### should be automatically deleted by CASCADE constraint
+### Create a weekly goal, add subtasks to it, then delete the weekly goal and verify
+### that the subtasks are also deleted
+
+### Step 1: Create a weekly goal for cascade test
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 12,
+  "title": "Weekly goal for cascade delete test",
+  "description": "This goal will be deleted to test CASCADE"
+}
+
+### Step 2: Note the returned weekly goal ID and use it to create subtasks
+### (Requires task creation endpoint - /api/v1/tasks)
+
+### Step 3: Delete the weekly goal
+### DELETE {{baseUrl}}/api/v1/weekly-goals/{weekly_goal_id_from_step_1}
+
+### Step 4: Verify subtasks are deleted by querying tasks endpoint
+### GET {{baseUrl}}/api/v1/tasks?weekly_goal_id={weekly_goal_id_from_step_1}
+### Should return empty array
+
+### ============================================================================
+### MULTIPLE WEEKLY GOALS PER WEEK TEST
+### ============================================================================
+
+### NOTE: Unlike milestones (max 5 per goal), there is no hard limit on weekly goals
+### Multiple weekly goals can exist for the same week in the same plan
+
+### Create multiple goals for week 5
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 5,
+  "title": "First goal for week 5",
+  "position": 1
+}
+
+### Second goal for week 5
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 5,
+  "title": "Second goal for week 5",
+  "position": 2
+}
+
+### Third goal for week 5
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 5,
+  "title": "Third goal for week 5",
+  "position": 3
+}
+
+### List all goals for week 5
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=5
+
+
+
