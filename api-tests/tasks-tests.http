@@ -1,0 +1,1185 @@
+###
+# API Tests for Tasks Management
+# Test file for all task endpoints: GET, POST, PATCH, DELETE, COPY
+#
+# Prerequisites:
+# - Server running on http://localhost:3000
+# - Default user exists in database
+# - At least one plan exists
+# - Optional: weekly goals and milestones for full testing
+#
+# Instructions:
+# 1. Run tests in order (some tests depend on previous results)
+# 2. Update {{planId}}, {{taskId}}, {{weeklyGoalId}}, {{milestoneId}} variables with actual IDs
+# 3. Create test data first (plan, goals) before running task tests
+###
+
+@baseUrl = http://localhost:3000
+
+### ============================================================================
+### SETUP - Create test data
+### ============================================================================
+
+### Setup 1: Create a test plan
+POST {{baseUrl}}/api/v1/plans
+Content-Type: application/json
+
+{
+  "name": "Task Test Plan",
+  "start_date": "2025-01-06"
+}
+
+@planId = REPLACE_WITH_ACTUAL_PLAN_ID
+
+### Setup 2: Create a weekly goal for testing (optional)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 1,
+  "title": "Test Weekly Goal",
+  "position": 1
+}
+
+@weeklyGoalId = REPLACE_WITH_ACTUAL_WEEKLY_GOAL_ID
+
+### Setup 3: Get existing plan ID for testing
+GET {{baseUrl}}/api/v1/plans?status=ready&limit=1
+
+### ============================================================================
+### POST /api/v1/tasks - CREATE NEW TASK
+### ============================================================================
+
+### Test 1.1: Create task - Success (Happy path - weekly_sub task)
+# Expected: 201 Created with task data
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Complete project proposal",
+  "description": "Write and submit Q1 project proposal",
+  "priority": "A",
+  "status": "todo",
+  "task_type": "weekly_sub",
+  "week_number": 1,
+  "due_day": 1,
+  "position": 1
+}
+
+@taskId1 = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.2: Create task with weekly_goal_id
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "weekly_goal_id": "{{weeklyGoalId}}",
+  "title": "Subtask for weekly goal",
+  "priority": "B",
+  "task_type": "weekly_sub",
+  "week_number": 1,
+  "due_day": 2,
+  "position": 1
+}
+
+@taskId2 = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.3: Create ad-hoc task (no weekly_goal_id)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Ad-hoc urgent task",
+  "priority": "A",
+  "status": "todo",
+  "task_type": "ad_hoc",
+  "week_number": 1,
+  "due_day": 3,
+  "position": 1
+}
+
+@taskId3 = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.4: Create task with default values (minimal required fields)
+# Expected: 201 Created with defaults (priority: C, status: todo, task_type: weekly_sub)
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with defaults"
+}
+
+@taskId4 = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.5: Create task for different week
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Week 2 task",
+  "priority": "C",
+  "week_number": 2,
+  "due_day": 1,
+  "position": 1
+}
+
+@taskIdWeek2 = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.6: Create task for different day
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Friday task",
+  "priority": "B",
+  "week_number": 1,
+  "due_day": 5,
+  "position": 1
+}
+
+@taskIdFriday = REPLACE_WITH_ACTUAL_TASK_ID
+
+### ============================================================================
+### POST /api/v1/tasks - VALIDATION ERRORS
+### ============================================================================
+
+### Test 2.1: Missing plan_id
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "title": "Task without plan"
+}
+
+### Test 2.2: Missing title
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}"
+}
+
+### Test 2.3: Empty title
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": ""
+}
+
+### Test 2.4: Title too long (> 255 characters)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "This is a very long task title that exceeds the maximum allowed length of 255 characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
+}
+
+### Test 2.5: Invalid priority value
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid priority",
+  "priority": "D"
+}
+
+### Test 2.6: Invalid status value
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid status",
+  "status": "invalid_status"
+}
+
+### Test 2.7: Invalid task_type value
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid type",
+  "task_type": "invalid_type"
+}
+
+### Test 2.8: Week number out of range (< 1)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid week",
+  "week_number": 0
+}
+
+### Test 2.9: Week number out of range (> 12)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid week",
+  "week_number": 13
+}
+
+### Test 2.10: Due day out of range (< 1)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid day",
+  "due_day": 0
+}
+
+### Test 2.11: Due day out of range (> 7)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with invalid day",
+  "due_day": 8
+}
+
+### Test 2.12: Invalid plan_id (not UUID)
+# Expected: 400 Bad Request with validation error
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "invalid-uuid",
+  "title": "Task with invalid plan ID"
+}
+
+### Test 2.13: Non-existent plan_id (valid UUID)
+# Expected: 404 Not Found
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Task for non-existent plan"
+}
+
+### Test 2.14: Non-existent weekly_goal_id
+# Expected: 404 Not Found
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "weekly_goal_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Task with non-existent goal"
+}
+
+### Test 2.15: Invalid JSON format
+# Expected: 400 Bad Request
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}"
+  "title": "Invalid JSON"
+}
+
+### Test 2.16: Empty request body
+# Expected: 400 Bad Request
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{}
+
+### ============================================================================
+### GET /api/v1/tasks - LIST TASKS WITH FILTERS
+### ============================================================================
+
+### Test 3.1: List all tasks for a plan - Success
+# Expected: 200 OK with array of tasks
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}
+
+### Test 3.2: List tasks with pagination (limit)
+# Expected: 200 OK with limited results
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&limit=2
+
+### Test 3.3: List tasks with pagination (offset)
+# Expected: 200 OK with offset results
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&limit=2&offset=2
+
+### Test 3.4: Filter by week_number
+# Expected: 200 OK with tasks from week 1
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&week_number=1
+
+### Test 3.5: Filter by due_day
+# Expected: 200 OK with tasks for day 1 (Monday)
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&due_day=1
+
+### Test 3.6: Filter by week_number and due_day
+# Expected: 200 OK with tasks for specific day in specific week
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&week_number=1&due_day=1
+
+### Test 3.7: Filter by priority
+# Expected: 200 OK with priority A tasks
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&priority=A
+
+### Test 3.8: Filter by status
+# Expected: 200 OK with todo tasks
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&status=todo
+
+### Test 3.9: Filter by task_type
+# Expected: 200 OK with ad_hoc tasks
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&task_type=ad_hoc
+
+### Test 3.10: Filter by weekly_goal_id
+# Expected: 200 OK with tasks for specific weekly goal
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&weekly_goal_id={{weeklyGoalId}}
+
+### Test 3.11: Multiple filters combined
+# Expected: 200 OK with filtered results
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&week_number=1&priority=A&status=todo
+
+### Test 3.12: List with custom limit (max 100)
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&limit=10
+
+### ============================================================================
+### GET /api/v1/tasks - VALIDATION ERRORS
+### ============================================================================
+
+### Test 4.1: Missing required plan_id
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks
+
+### Test 4.2: Invalid plan_id (not UUID)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id=invalid-uuid
+
+### Test 4.3: Invalid week_number
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&week_number=15
+
+### Test 4.4: Invalid due_day
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&due_day=10
+
+### Test 4.5: Invalid priority
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&priority=Z
+
+### Test 4.6: Invalid status
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&status=invalid
+
+### Test 4.7: Invalid task_type
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&task_type=invalid
+
+### Test 4.8: Limit too large (> 100)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&limit=200
+
+### Test 4.9: Negative offset
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&offset=-1
+
+### ============================================================================
+### GET /api/v1/tasks/daily - DAILY TASKS WITH A/B/C CATEGORIZATION
+### ============================================================================
+
+### Test 5.1: Get daily tasks - Success
+# Expected: 200 OK with categorized tasks (most_important, secondary, additional)
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=1&due_day=1
+
+### Test 5.2: Get daily tasks for different day
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=1&due_day=5
+
+### Test 5.3: Get daily tasks for different week
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=2&due_day=1
+
+### Test 5.4: Get daily tasks for last week
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=12&due_day=7
+
+### Test 5.5: Get daily tasks for day with no tasks
+# Expected: 200 OK with empty arrays
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=10&due_day=1
+
+### ============================================================================
+### GET /api/v1/tasks/daily - VALIDATION ERRORS
+### ============================================================================
+
+### Test 6.1: Missing plan_id
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/daily?week_number=1&due_day=1
+
+### Test 6.2: Missing week_number
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&due_day=1
+
+### Test 6.3: Missing due_day
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=1
+
+### Test 6.4: Invalid plan_id
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id=invalid-uuid&week_number=1&due_day=1
+
+### Test 6.5: Week number out of range
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=15&due_day=1
+
+### Test 6.6: Due day out of range
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=1&due_day=8
+
+### Test 6.7: Non-existent plan_id
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id=00000000-0000-0000-0000-000000000000&week_number=1&due_day=1
+
+### ============================================================================
+### GET /api/v1/tasks/:id - GET TASK BY ID WITH HISTORY
+### ============================================================================
+
+### Test 7.1: Get task by ID - Success
+# Expected: 200 OK with task details and history array
+GET {{baseUrl}}/api/v1/tasks/{{taskId1}}
+
+### Test 7.2: Get task with history (after status changes)
+# Expected: 200 OK with task and populated history
+GET {{baseUrl}}/api/v1/tasks/{{taskId1}}
+
+### Test 7.3: Get different task
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks/{{taskId2}}
+
+### ============================================================================
+### GET /api/v1/tasks/:id - VALIDATION ERRORS
+### ============================================================================
+
+### Test 8.1: Invalid task ID (not UUID)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/tasks/invalid-uuid
+
+### Test 8.2: Non-existent task ID
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/tasks/00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### PATCH /api/v1/tasks/:id - UPDATE TASK
+### ============================================================================
+
+### Test 9.1: Update task title - Success
+# Expected: 200 OK with updated task
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "title": "Updated project proposal"
+}
+
+### Test 9.2: Update task status - Success (triggers history log)
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "status": "in_progress"
+}
+
+### Test 9.3: Update task priority - Success
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "priority": "B"
+}
+
+### Test 9.4: Update task description - Success
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "description": "Updated description with more details"
+}
+
+### Test 9.5: Update multiple fields - Success
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "title": "Final updated title",
+  "priority": "A",
+  "status": "completed"
+}
+
+### Test 9.6: Update week_number and due_day
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId2}}
+Content-Type: application/json
+
+{
+  "week_number": 2,
+  "due_day": 3
+}
+
+### Test 9.7: Update task_type
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId3}}
+Content-Type: application/json
+
+{
+  "task_type": "weekly_main"
+}
+
+### Test 9.8: Update position
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId2}}
+Content-Type: application/json
+
+{
+  "position": 5
+}
+
+### Test 9.9: Set weekly_goal_id to null (remove association)
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId2}}
+Content-Type: application/json
+
+{
+  "weekly_goal_id": null
+}
+
+### Test 9.10: Change status to cancelled
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId3}}
+Content-Type: application/json
+
+{
+  "status": "cancelled"
+}
+
+### Test 9.11: Change status to postponed
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId3}}
+Content-Type: application/json
+
+{
+  "status": "postponed"
+}
+
+### ============================================================================
+### PATCH /api/v1/tasks/:id - VALIDATION ERRORS
+### ============================================================================
+
+### Test 10.1: Update with empty title
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+### Test 10.2: Update with title too long
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "title": "This is a very long task title that exceeds the maximum allowed length of 255 characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
+}
+
+### Test 10.3: Update with invalid priority
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "priority": "Z"
+}
+
+### Test 10.4: Update with invalid status
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "status": "invalid_status"
+}
+
+### Test 10.5: Update with invalid task_type
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "task_type": "invalid_type"
+}
+
+### Test 10.6: Update with week_number out of range
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "week_number": 15
+}
+
+### Test 10.7: Update with due_day out of range
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "due_day": 10
+}
+
+### Test 10.8: Update with no fields provided (empty body)
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{}
+
+### Test 10.9: Update with invalid task ID
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/invalid-uuid
+Content-Type: application/json
+
+{
+  "title": "Updated"
+}
+
+### Test 10.10: Update non-existent task
+# Expected: 404 Not Found
+PATCH {{baseUrl}}/api/v1/tasks/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "Updated"
+}
+
+### Test 10.11: Update with non-existent weekly_goal_id
+# Expected: 404 Not Found
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "weekly_goal_id": "00000000-0000-0000-0000-000000000000"
+}
+
+### Test 10.12: Update with invalid JSON
+# Expected: 400 Bad Request
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "title": "Updated"
+  "status": "todo"
+}
+
+### ============================================================================
+### POST /api/v1/tasks/:id/copy - COPY TASK
+### ============================================================================
+
+### Test 11.1: Copy task to different week - Success
+# Expected: 201 Created with copied task (status reset to 'todo')
+POST {{baseUrl}}/api/v1/tasks/{{taskId1}}/copy
+Content-Type: application/json
+
+{
+  "week_number": 3,
+  "due_day": 1
+}
+
+@copiedTaskId1 = REPLACE_WITH_COPIED_TASK_ID
+
+### Test 11.2: Copy task to different day only
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks/{{taskId1}}/copy
+Content-Type: application/json
+
+{
+  "due_day": 5
+}
+
+@copiedTaskId2 = REPLACE_WITH_COPIED_TASK_ID
+
+### Test 11.3: Copy task to different week only
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks/{{taskId2}}/copy
+Content-Type: application/json
+
+{
+  "week_number": 4
+}
+
+@copiedTaskId3 = REPLACE_WITH_COPIED_TASK_ID
+
+### Test 11.4: Copy task with empty body (keeps original week/day)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks/{{taskId3}}/copy
+Content-Type: application/json
+
+{}
+
+@copiedTaskId4 = REPLACE_WITH_COPIED_TASK_ID
+
+### Test 11.5: Copy task to null week_number
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks/{{taskId1}}/copy
+Content-Type: application/json
+
+{
+  "week_number": null
+}
+
+### Test 11.6: Verify copied task has status='todo'
+# Expected: 200 OK with status='todo'
+GET {{baseUrl}}/api/v1/tasks/{{copiedTaskId1}}
+
+### Test 11.7: Verify original task unchanged
+# Expected: 200 OK with original data
+GET {{baseUrl}}/api/v1/tasks/{{taskId1}}
+
+### ============================================================================
+### POST /api/v1/tasks/:id/copy - VALIDATION ERRORS
+### ============================================================================
+
+### Test 12.1: Copy with invalid task ID
+# Expected: 400 Bad Request
+POST {{baseUrl}}/api/v1/tasks/invalid-uuid/copy
+Content-Type: application/json
+
+{
+  "week_number": 2
+}
+
+### Test 12.2: Copy non-existent task
+# Expected: 404 Not Found
+POST {{baseUrl}}/api/v1/tasks/00000000-0000-0000-0000-000000000000/copy
+Content-Type: application/json
+
+{
+  "week_number": 2
+}
+
+### Test 12.3: Copy with invalid week_number
+# Expected: 400 Bad Request
+POST {{baseUrl}}/api/v1/tasks/{{taskId1}}/copy
+Content-Type: application/json
+
+{
+  "week_number": 15
+}
+
+### Test 12.4: Copy with invalid due_day
+# Expected: 400 Bad Request
+POST {{baseUrl}}/api/v1/tasks/{{taskId1}}/copy
+Content-Type: application/json
+
+{
+  "due_day": 10
+}
+
+### Test 12.5: Copy with invalid JSON
+# Expected: 400 Bad Request
+POST {{baseUrl}}/api/v1/tasks/{{taskId1}}/copy
+Content-Type: application/json
+
+{
+  "week_number": 2
+  "due_day": 1
+}
+
+### ============================================================================
+### DELETE /api/v1/tasks/:id - DELETE TASK
+### ============================================================================
+
+### Test 13.1: Delete task - Success
+# Expected: 200 OK with success message
+DELETE {{baseUrl}}/api/v1/tasks/{{copiedTaskId1}}
+
+### Test 13.2: Verify task is deleted (GET after delete)
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/tasks/{{copiedTaskId1}}
+
+### Test 13.3: Delete another task
+# Expected: 200 OK
+DELETE {{baseUrl}}/api/v1/tasks/{{copiedTaskId2}}
+
+### Test 13.4: Delete task with history (history should cascade delete)
+# Expected: 200 OK
+DELETE {{baseUrl}}/api/v1/tasks/{{taskId1}}
+
+### Test 13.5: Delete ad-hoc task
+# Expected: 200 OK
+DELETE {{baseUrl}}/api/v1/tasks/{{taskId3}}
+
+### ============================================================================
+### DELETE /api/v1/tasks/:id - VALIDATION ERRORS
+### ============================================================================
+
+### Test 14.1: Delete with invalid task ID
+# Expected: 400 Bad Request
+DELETE {{baseUrl}}/api/v1/tasks/invalid-uuid
+
+### Test 14.2: Delete non-existent task
+# Expected: 404 Not Found
+DELETE {{baseUrl}}/api/v1/tasks/00000000-0000-0000-0000-000000000000
+
+### Test 14.3: Delete already deleted task
+# Expected: 404 Not Found
+DELETE {{baseUrl}}/api/v1/tasks/{{copiedTaskId1}}
+
+### ============================================================================
+### INTEGRATION TESTS - COMPLETE WORKFLOWS
+### ============================================================================
+
+### Workflow 1: Complete task lifecycle (create → update → copy → delete)
+
+### Step 1: Create new task
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Workflow test task",
+  "priority": "A",
+  "week_number": 1,
+  "due_day": 1,
+  "position": 1
+}
+
+@workflowTaskId = REPLACE_WITH_WORKFLOW_TASK_ID
+
+### Step 2: Get task details
+GET {{baseUrl}}/api/v1/tasks/{{workflowTaskId}}
+
+### Step 3: Update task status to in_progress
+PATCH {{baseUrl}}/api/v1/tasks/{{workflowTaskId}}
+Content-Type: application/json
+
+{
+  "status": "in_progress"
+}
+
+### Step 4: Update task status to completed
+PATCH {{baseUrl}}/api/v1/tasks/{{workflowTaskId}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### Step 5: Get task with history
+GET {{baseUrl}}/api/v1/tasks/{{workflowTaskId}}
+
+### Step 6: Copy completed task to next week
+POST {{baseUrl}}/api/v1/tasks/{{workflowTaskId}}/copy
+Content-Type: application/json
+
+{
+  "week_number": 2
+}
+
+@workflowCopiedTaskId = REPLACE_WITH_COPIED_TASK_ID
+
+### Step 7: Verify copied task has status='todo'
+GET {{baseUrl}}/api/v1/tasks/{{workflowCopiedTaskId}}
+
+### Step 8: Delete original task
+DELETE {{baseUrl}}/api/v1/tasks/{{workflowTaskId}}
+
+### Step 9: Delete copied task
+DELETE {{baseUrl}}/api/v1/tasks/{{workflowCopiedTaskId}}
+
+### ============================================================================
+### Workflow 2: Daily task planning (A/B/C priorities)
+### ============================================================================
+
+### Step 1: Create priority A task (most important)
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Most important task of the day",
+  "priority": "A",
+  "week_number": 5,
+  "due_day": 1,
+  "position": 1
+}
+
+### Step 2: Create priority B tasks (secondary)
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Secondary task 1",
+  "priority": "B",
+  "week_number": 5,
+  "due_day": 1,
+  "position": 2
+}
+
+### Step 3: Create another priority B task
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Secondary task 2",
+  "priority": "B",
+  "week_number": 5,
+  "due_day": 1,
+  "position": 3
+}
+
+### Step 4: Create priority C tasks (additional)
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Additional task 1",
+  "priority": "C",
+  "week_number": 5,
+  "due_day": 1,
+  "position": 4
+}
+
+### Step 5: Create another priority C task
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Additional task 2",
+  "priority": "C",
+  "week_number": 5,
+  "due_day": 1,
+  "position": 5
+}
+
+### Step 6: Get daily tasks (verify A/B/C categorization)
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=5&due_day=1
+
+### ============================================================================
+### Workflow 3: Test task history tracking
+### ============================================================================
+
+### Step 1: Create task for history testing
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task for history testing",
+  "priority": "A",
+  "status": "todo",
+  "week_number": 6,
+  "due_day": 1,
+  "position": 1
+}
+
+@historyTaskId = REPLACE_WITH_HISTORY_TASK_ID
+
+### Step 2: Get initial task (should have one history entry)
+GET {{baseUrl}}/api/v1/tasks/{{historyTaskId}}
+
+### Step 3: Change status to in_progress
+PATCH {{baseUrl}}/api/v1/tasks/{{historyTaskId}}
+Content-Type: application/json
+
+{
+  "status": "in_progress"
+}
+
+### Step 4: Get task (should have two history entries)
+GET {{baseUrl}}/api/v1/tasks/{{historyTaskId}}
+
+### Step 5: Change status to completed
+PATCH {{baseUrl}}/api/v1/tasks/{{historyTaskId}}
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+
+### Step 6: Get final task (should have three history entries)
+GET {{baseUrl}}/api/v1/tasks/{{historyTaskId}}
+
+### ============================================================================
+### EDGE CASES AND SPECIAL SCENARIOS
+### ============================================================================
+
+### Edge Case 1: Task with very long title (exactly 255 characters)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "This is exactly 255 characters long title test: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex."
+}
+
+### Edge Case 2: Task with special characters and Unicode in title
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with émojis 🎯 📅 and special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?"
+}
+
+### Edge Case 3: Task with null description
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with null description",
+  "description": null
+}
+
+### Edge Case 4: Task with null week_number and due_day
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Unscheduled task",
+  "week_number": null,
+  "due_day": null
+}
+
+### Edge Case 5: Update task to remove week and day
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId2}}
+Content-Type: application/json
+
+{
+  "week_number": null,
+  "due_day": null
+}
+
+### Edge Case 6: Copy task multiple times (create duplicates)
+# Expected: 201 Created for each copy
+POST {{baseUrl}}/api/v1/tasks/{{taskId2}}/copy
+Content-Type: application/json
+
+{
+  "week_number": 7,
+  "due_day": 1
+}
+
+### Edge Case 7: List tasks with all filters at once
+# Expected: 200 OK (possibly empty results)
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&week_number=1&due_day=1&priority=A&status=completed&task_type=weekly_sub&limit=50&offset=0
+
+### Edge Case 8: Get daily tasks for first day of plan
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=1&due_day=1
+
+### Edge Case 9: Get daily tasks for last day of plan
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks/daily?plan_id={{planId}}&week_number=12&due_day=7
+
+### Edge Case 10: Create task with position 0 (should be valid positive number)
+# Expected: 400 Bad Request or auto-corrected to 1
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Task with position 0",
+  "position": 0
+}
+
+### ============================================================================
+### NOTES FOR MANUAL TESTING
+### ============================================================================
+
+# Testing Checklist:
+# □ Create task with all fields
+# □ Create task with minimal fields (defaults applied)
+# □ Create task with weekly_goal_id
+# □ Create task without weekly_goal_id (ad-hoc)
+# □ Create task with milestone_id (if milestones implemented)
+# □ List all tasks for a plan
+# □ List tasks with each filter type (week, day, priority, status, type)
+# □ List tasks with combined filters
+# □ List tasks with pagination (limit, offset)
+# □ Get daily tasks (verify A/B/C categorization)
+# □ Get daily tasks for different days/weeks
+# □ Get task by ID (verify history included)
+# □ Update task (single field)
+# □ Update task (multiple fields)
+# □ Update task status (verify history logging)
+# □ Copy task to different week
+# □ Copy task to different day
+# □ Copy task with empty body
+# □ Delete task
+# □ Verify cascade delete of task_history
+# □ Test all validation errors
+# □ Test edge cases (long titles, special characters, nulls)
+# □ Test complete workflows
+
+# Important Database Behaviors to Verify:
+# 1. Default values: priority='C', status='todo', task_type='weekly_sub', position=1
+# 2. Status changes automatically logged to task_history (trigger)
+# 3. Copy operation resets status to 'todo'
+# 4. Delete cascades to task_history
+# 5. Weekly subtask count limit (max 10 per weekly_goal) - trigger
+# 6. Ad-hoc task count limit (max 10 per week) - trigger
+# 7. updated_at timestamp automatically updated
+# 8. Daily tasks properly categorized by priority (A/B/C)
+# 9. Date calculation correct for daily tasks endpoint
+
+# Replace these placeholders with actual IDs from your tests:
+# - {{planId}}
+# - {{weeklyGoalId}}
+# - {{milestoneId}}
+# - {{taskId1}}, {{taskId2}}, {{taskId3}}, {{taskId4}}
+# - {{copiedTaskId1}}, {{copiedTaskId2}}, etc.
+# - {{workflowTaskId}}
+# - {{historyTaskId}}
+
+
