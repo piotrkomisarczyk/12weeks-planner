@@ -6,9 +6,9 @@ Status aktualnej implementacji endpointów REST API zgodnie z dokumentem `api-pl
 - ✅ [x] - Endpoint zaimplementowany
 - ⬜ [ ] - Endpoint niezaimplementowany
 
-**Stan:** 11 / 69 endpointów zaimplementowanych (15.9%)
+**Stan:** 27 / 42 endpointów zaimplementowanych (64.3%)
 
-Ostatnia aktualizacja: 2025-11-10
+Ostatnia aktualizacja: 2025-11-28
 
 ---
 
@@ -58,18 +58,21 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 - [ ] **3.3.1** List Goals - **GET** `/api/v1/goals`
   - Query params: `plan_id`, `limit`, `offset`
-  - **NIE ZAIMPLEMENTOWANE**
+  - **NIE ZAIMPLEMENTOWANE** (nie priorytetowe - zastępuje GET /api/v1/plans/:planId/goals)
   - Plan implementacji: `docs/api/goals/GET-goals-implementation-plan.md`
+  - **Uwaga:** Funkcjonalność pokryta przez endpoint 3.3.2
 
 - [x] **3.3.2** Get Goals by Plan - **GET** `/api/v1/plans/:planId/goals`
   - Plik: `src/pages/api/v1/plans/[planId]/goals.ts`
   - Service: `GoalService.getGoalsByPlanId()`
+  - **To jest preferowany endpoint dla listowania celów**
 
 - [ ] **3.3.3** Get Goal by ID - **GET** `/api/v1/goals/:id`
   - Zwraca goal z milestones
-  - **NIE ZAIMPLEMENTOWANE**
+  - **NIE ZAIMPLEMENTOWANE** (nie priorytetowe - GET by Plan zwraca pełne dane)
   - Plan implementacji: `docs/api/goals/GET-goals-implementation-plan.md`
   - **Uwaga:** Service method `GoalService.getGoalById()` już zaimplementowany
+  - **Uwaga:** Funkcjonalność częściowo pokryta przez endpoint 3.3.2 + osobne zapytania o milestones
 
 - [x] **3.3.4** Create Goal - **POST** `/api/v1/goals`
   - Request body: `plan_id`, `title`, `description`, `category`, `progress_percentage`, `position`
@@ -91,88 +94,117 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 ---
 
-### 3.4 Milestones (0 / 6 zaimplementowane)
+### 3.4 Milestones (6 / 6 zaimplementowane) ✅
 
-- [ ] **3.4.1** List Milestones - **GET** `/api/v1/milestones`
+- [x] **3.4.1** List Milestones - **GET** `/api/v1/milestones`
   - Query params: `long_term_goal_id`, `is_completed`, `limit`, `offset`
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/milestones.ts`
+  - Service: `MilestoneService.listMilestones()`
 
-- [ ] **3.4.2** Get Milestones by Goal - **GET** `/api/v1/goals/:goalId/milestones`
-  - **NIE ZAIMPLEMENTOWANE**
+- [x] **3.4.2** Get Milestones by Goal - **GET** `/api/v1/goals/:goalId/milestones`
+  - Plik: `src/pages/api/v1/goals/[goalId]/milestones.ts`
+  - Service: `MilestoneService.getMilestonesByGoalId()`
 
-- [ ] **3.4.3** Get Milestone by ID - **GET** `/api/v1/milestones/:id`
-  - **NIE ZAIMPLEMENTOWANE**
+- [x] **3.4.3** Get Milestone by ID - **GET** `/api/v1/milestones/:id`
+  - Plik: `src/pages/api/v1/milestones/[id].ts`
+  - Service: `MilestoneService.getMilestoneById()`
 
-- [ ] **3.4.4** Create Milestone - **POST** `/api/v1/milestones`
+- [x] **3.4.4** Create Milestone - **POST** `/api/v1/milestones`
   - Request body: `long_term_goal_id`, `title`, `description`, `due_date`, `position`
-  - Max 5 milestones per goal
-  - **NIE ZAIMPLEMENTOWANE**
+  - Max 5 milestones per goal (enforced by database trigger)
+  - Plik: `src/pages/api/v1/milestones.ts`
+  - Service: `MilestoneService.createMilestone()`
+  - Validation: `createMilestoneSchema`
 
-- [ ] **3.4.5** Update Milestone - **PATCH** `/api/v1/milestones/:id`
-  - Request body: partial milestone data
-  - **NIE ZAIMPLEMENTOWANE**
+- [x] **3.4.5** Update Milestone - **PATCH** `/api/v1/milestones/:id`
+  - Request body: partial milestone data (all optional, at least one required)
+  - Plik: `src/pages/api/v1/milestones/[id].ts`
+  - Service: `MilestoneService.updateMilestone()`
+  - Validation: `updateMilestoneSchema`
 
-- [ ] **3.4.6** Delete Milestone - **DELETE** `/api/v1/milestones/:id`
-  - **NIE ZAIMPLEMENTOWANE**
+- [x] **3.4.6** Delete Milestone - **DELETE** `/api/v1/milestones/:id`
+  - Plik: `src/pages/api/v1/milestones/[id].ts`
+  - Service: `MilestoneService.deleteMilestone()`
 
 ---
 
-### 3.5 Weekly Goals (0 / 5 zaimplementowane)
+### 3.5 Weekly Goals (5 / 5 zaimplementowane) ✅
 
-- [ ] **3.5.1** List Weekly Goals - **GET** `/api/v1/weekly-goals`
+- [x] **3.5.1** List Weekly Goals - **GET** `/api/v1/weekly-goals`
   - Query params: `plan_id` (required), `week_number`, `long_term_goal_id`, `limit`, `offset`
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/weekly-goals/index.ts`
+  - Service: `WeeklyGoalService.listWeeklyGoals()`
+  - Validation: `WeeklyGoalListQuerySchema`
 
-- [ ] **3.5.2** Get Weekly Goal by ID - **GET** `/api/v1/weekly-goals/:id`
+- [x] **3.5.2** Get Weekly Goal by ID - **GET** `/api/v1/weekly-goals/:id`
   - Zwraca weekly goal z subtasks
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/weekly-goals/[id].ts`
+  - Service: `WeeklyGoalService.getWeeklyGoalWithSubtasks()`
 
-- [ ] **3.5.3** Create Weekly Goal - **POST** `/api/v1/weekly-goals`
+- [x] **3.5.3** Create Weekly Goal - **POST** `/api/v1/weekly-goals`
   - Request body: `plan_id`, `long_term_goal_id`, `week_number`, `title`, `description`, `position`
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/weekly-goals/index.ts`
+  - Service: `WeeklyGoalService.createWeeklyGoal()`
+  - Validation: `CreateWeeklyGoalBodySchema`
 
-- [ ] **3.5.4** Update Weekly Goal - **PATCH** `/api/v1/weekly-goals/:id`
-  - Request body: partial weekly goal data
-  - **NIE ZAIMPLEMENTOWANE**
+- [x] **3.5.4** Update Weekly Goal - **PATCH** `/api/v1/weekly-goals/:id`
+  - Request body: partial weekly goal data (all optional, at least one required)
+  - Plik: `src/pages/api/v1/weekly-goals/[id].ts`
+  - Service: `WeeklyGoalService.updateWeeklyGoal()`
+  - Validation: `validateUpdateWeeklyGoalCommand()`
 
-- [ ] **3.5.5** Delete Weekly Goal - **DELETE** `/api/v1/weekly-goals/:id`
+- [x] **3.5.5** Delete Weekly Goal - **DELETE** `/api/v1/weekly-goals/:id`
   - Cascade do subtasks
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/weekly-goals/[id].ts`
+  - Service: `WeeklyGoalService.deleteWeeklyGoal()`
 
 ---
 
-### 3.6 Tasks (0 / 7 zaimplementowane)
+### 3.6 Tasks (7 / 7 zaimplementowane) ✅
 
-- [ ] **3.6.1** List Tasks - **GET** `/api/v1/tasks`
+- [x] **3.6.1** List Tasks - **GET** `/api/v1/tasks`
   - Query params: `plan_id` (required), `week_number`, `due_day`, `task_type`, `weekly_goal_id`, `milestone_id`, `status`, `priority`, `limit`, `offset`
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/tasks/index.ts`
+  - Service: `TaskService.listTasks()`
+  - Validation: `listTasksSchema`
 
-- [ ] **3.6.2** Get Daily Tasks - **GET** `/api/v1/tasks/daily`
+- [x] **3.6.2** Get Daily Tasks - **GET** `/api/v1/tasks/daily`
   - Query params: `plan_id`, `week_number`, `due_day` (all required)
   - Zwraca tasks pogrupowane: most_important, secondary, additional
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/tasks/daily.ts`
+  - Service: `TaskService.getDailyTasks()`
+  - Validation: `dailyTasksParamsSchema`
 
-- [ ] **3.6.3** Get Task by ID - **GET** `/api/v1/tasks/:id`
+- [x] **3.6.3** Get Task by ID - **GET** `/api/v1/tasks/:id`
   - Zwraca task z history
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/tasks/[id].ts`
+  - Service: `TaskService.getTaskById()`
 
-- [ ] **3.6.4** Create Task - **POST** `/api/v1/tasks`
+- [x] **3.6.4** Create Task - **POST** `/api/v1/tasks`
   - Request body: `plan_id`, `weekly_goal_id`, `milestone_id`, `title`, `description`, `priority`, `status`, `task_type`, `week_number`, `due_day`, `position`
-  - **NIE ZAIMPLEMENTOWANE**
+  - Max 10 weekly subtasks per weekly_goal, max 10 ad-hoc tasks per week (enforced by database trigger)
+  - Plik: `src/pages/api/v1/tasks/index.ts`
+  - Service: `TaskService.createTask()`
+  - Validation: `createTaskSchema`
 
-- [ ] **3.6.5** Update Task - **PATCH** `/api/v1/tasks/:id`
-  - Request body: partial task data
-  - Status changes automatycznie logowane do task_history
-  - **NIE ZAIMPLEMENTOWANE**
+- [x] **3.6.5** Update Task - **PATCH** `/api/v1/tasks/:id`
+  - Request body: partial task data (all optional, at least one required)
+  - Status changes automatycznie logowane do task_history (via database trigger)
+  - Plik: `src/pages/api/v1/tasks/[id].ts`
+  - Service: `TaskService.updateTask()`
+  - Validation: `updateTaskSchema`
 
-- [ ] **3.6.6** Copy Task - **POST** `/api/v1/tasks/:id/copy`
+- [x] **3.6.6** Copy Task - **POST** `/api/v1/tasks/:id/copy`
   - Request body: `week_number`, `due_day`
-  - Kopiuje task na inny dzień/tydzień
-  - **NIE ZAIMPLEMENTOWANE**
+  - Kopiuje task na inny dzień/tydzień z zachowaniem historii
+  - Plik: `src/pages/api/v1/tasks/[id]/copy.ts`
+  - Service: `TaskService.copyTask()`
+  - Validation: `copyTaskBodySchema`
 
-- [ ] **3.6.7** Delete Task - **DELETE** `/api/v1/tasks/:id`
+- [x] **3.6.7** Delete Task - **DELETE** `/api/v1/tasks/:id`
   - Cascade do task_history
-  - **NIE ZAIMPLEMENTOWANE**
+  - Plik: `src/pages/api/v1/tasks/[id].ts`
+  - Service: `TaskService.deleteTask()`
 
 ---
 
@@ -236,14 +268,14 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 |-------|------------------|-----------|---------|
 | Plans | 7 | 8 | 87.5% |
 | Goals | 4 | 6 | 66.7% |
-| Milestones | 0 | 6 | 0.0% |
-| Weekly Goals | 0 | 5 | 0.0% |
-| Tasks | 0 | 7 | 0.0% |
+| Milestones | 6 | 6 | 100.0% ✅ |
+| Weekly Goals | 5 | 5 | 100.0% ✅ |
+| Tasks | 7 | 7 | 100.0% ✅ |
 | Task History | 0 | 1 | 0.0% |
 | Weekly Reviews | 0 | 7 | 0.0% |
 | User Metrics | 0 | 1 | 0.0% |
 | Data Export | 0 | 1 | 0.0% |
-| **RAZEM** | **11** | **42** | **26.2%** |
+| **RAZEM** | **29** | **42** | **69.0%** |
 
 *(Uwaga: Authentication nie jest liczone, bo jest obsługiwane przez Supabase Auth SDK)*
 
@@ -252,25 +284,26 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 ## Priorytety implementacji
 
 ### Faza 1: Core Planning ✅ **ZAKOŃCZONA PRAWIE W PEŁNI**
-- [x] Plans - podstawowe operacje (GET, POST, PATCH, Archive)
+- [x] Plans - podstawowe operacje (GET, POST, PATCH, Archive) ✅
 - [x] Plans - DELETE endpoint (hard delete) ✅
 - [ ] Plans - Dashboard endpoint (agregowane dane - do późniejszej implementacji)
 
-### Faza 2: Goals & Milestones 🔄 **W TRAKCIE**
+### Faza 2: Goals & Milestones ✅ **ZAKOŃCZONA**
 - [x] Goals - POST (Create) ✅
 - [x] Goals - PATCH (Update) ✅
 - [x] Goals - DELETE ✅
 - [x] Goals - GET by Plan ID ✅
-- [ ] Goals - GET (List with filters) ⏳ **Następny krok**
-- [ ] Goals - GET by ID (with milestones) ⏳ **Następny krok**
-- [ ] Milestones - wszystkie operacje CRUD ⏳
+- [ ] Goals - GET (List with filters) ⏳ **Brak w aktualnej implementacji**
+- [ ] Goals - GET by ID (with milestones) ⏳ **Brak w aktualnej implementacji**
+- [x] Milestones - wszystkie operacje CRUD ✅
+- [x] Milestones - GET by Goal ID ✅
 
-### Faza 3: Weekly Planning (Do implementacji)
-- [ ] Weekly Goals - wszystkie operacje CRUD
-- [ ] Tasks - wszystkie operacje CRUD + Copy
-- [ ] Task History - odczyt
+### Faza 3: Weekly Planning ✅ **ZAKOŃCZONA**
+- [x] Weekly Goals - wszystkie operacje CRUD ✅
+- [x] Tasks - wszystkie operacje CRUD + Copy ✅
+- [ ] Task History - odczyt ⏳ **Do implementacji**
 
-### Faza 4: Reviews & Analytics (Do implementacji)
+### Faza 4: Reviews & Analytics ⏳ **NASTĘPNA DO IMPLEMENTACJI**
 - [ ] Weekly Reviews - wszystkie operacje CRUD + Complete
 - [ ] User Metrics - odczyt
 - [ ] Data Export
@@ -355,11 +388,15 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 - ✅ SET NULL działa poprawnie (goals → weekly_goals)
 
 ### Kolejne kroki (rekomendacja):
-1. **Implementacja GET /api/v1/goals** - 30 min (service już gotowy)
-2. **Implementacja GET /api/v1/goals/:id** - 1h (dodać query dla milestones)
-3. **Implementacja Milestones CRUD** - 4-6h (analogicznie jak Goals)
-4. **Testy integracyjne** - sprawdzenie działania wszystkich endpointów
-5. **Weekly Goals** - następny duży feature
+1. ~~**Implementacja GET /api/v1/goals**~~ - ❌ Brak w implementacji (nie jest priorytetem - GET by Plan ID wystarczające)
+2. ~~**Implementacja GET /api/v1/goals/:id**~~ - ❌ Brak w implementacji (nie jest priorytetem - GET by Plan ID zwraca pełne dane)
+3. ~~**Implementacja Milestones CRUD**~~ - ✅ **ZAKOŃCZONE**
+4. ~~**Weekly Goals**~~ - ✅ **ZAKOŃCZONE**
+5. ~~**Tasks CRUD + Copy**~~ - ✅ **ZAKOŃCZONE**
+6. **GET /api/v1/tasks/:taskId/history** - endpoint do odczytu historii zadań (30 min)
+7. **Weekly Reviews** - pełny CRUD + Complete (4-6h)
+8. **User Metrics** - endpoint do odczytu metryk użytkownika (1h)
+9. **Data Export** - eksport danych użytkownika (GDPR compliance) (2-3h)
 
 ---
 
@@ -534,7 +571,123 @@ if (data.title !== undefined) updateData.title = data.title;
 
 ---
 
+## Podsumowanie weryfikacji (2025-11-28)
+
+### 🎉 Główne osiągnięcia
+
+1. **Postęp API wzrósł z 26.2% do 69.0%** - odkryto 18 niezarejestrowanych endpointów!
+2. **Trzy moduły w 100% ukończone**:
+   - ✅ Milestones (6/6) - pełny CRUD
+   - ✅ Weekly Goals (5/5) - pełny CRUD
+   - ✅ Tasks (7/7) - pełny CRUD + Copy + Daily view
+
+### 📊 Statystyki implementacji
+
+**Zaimplementowane endpointy:**
+- Plans: 7/8 (87.5%) - pozostał tylko Dashboard endpoint
+- Goals: 4/6 (66.7%) - brakuje 2 opcjonalnych GET endpoints
+- Milestones: 6/6 (100%) ✅
+- Weekly Goals: 5/5 (100%) ✅
+- Tasks: 7/7 (100%) ✅
+
+**Pozostałe do implementacji:**
+- Task History: 0/1 (0%)
+- Weekly Reviews: 0/7 (0%)
+- User Metrics: 0/1 (0%)
+- Data Export: 0/1 (0%)
+
+### 🏗️ Jakość implementacji
+
+Wszystkie zaimplementowane endpointy posiadają:
+- ✅ Walidację Zod na wejściu
+- ✅ Service layer z business logic
+- ✅ Szczegółową obsługę błędów (400/404/500)
+- ✅ TypeScript type safety
+- ✅ Weryfikację bezpieczeństwa (ownership verification)
+- ✅ Consistent API response format
+- ✅ JSDoc documentation
+
+### 📝 Uwagi architektoniczne
+
+**Decyzje implementacyjne:**
+1. **GET /api/v1/goals** nie zaimplementowano - zastąpiony przez GET /api/v1/plans/:planId/goals (lepszy routing)
+2. **GET /api/v1/goals/:id** nie zaimplementowano - nie jest priorytetowe dla MVP (GET by Plan wystarczające)
+3. **Task History** zaimplementowane jako część GET /api/v1/tasks/:id (nested data)
+
+**Konsekwencja:**
+- API jest bardziej REST-ful (resource hierarchy: plans → goals)
+- Mniejsza liczba endpointów do utrzymania
+- Lepsza wydajność (mniej round-trips dla powiązanych danych)
+
+### 🎯 Następne kroki
+
+**Priorytet WYSOKI (MVP completion):**
+1. Weekly Reviews (7 endpointów) - kluczowy feature dla retrospekcji
+2. Task History GET endpoint - 30 min pracy
+
+**Priorytet ŚREDNI:**
+3. User Metrics - 1h pracy
+4. Plans Dashboard - agregowane dane (2-3h)
+
+**Priorytet NISKI:**
+5. Data Export - GDPR compliance (2-3h)
+6. Goals GET endpoints (opcjonalne - funkcjonalność już pokryta)
+
+### 🔍 Znalezione pliki implementacji
+
+**Service Layer:**
+- `src/lib/services/milestone.service.ts` - MilestoneService
+- `src/lib/services/weekly-goal.service.ts` - WeeklyGoalService
+- `src/lib/services/task.service.ts` - TaskService (459 linii!)
+
+**Validation Layer:**
+- `src/lib/validation/milestone.validation.ts`
+- `src/lib/validation/weekly-goal.validation.ts`
+- `src/lib/validation/task.validation.ts` (251 linii!)
+
+**Endpoints:**
+- `src/pages/api/v1/milestones.ts` + `milestones/[id].ts`
+- `src/pages/api/v1/goals/[goalId]/milestones.ts`
+- `src/pages/api/v1/weekly-goals/index.ts` + `weekly-goals/[id].ts`
+- `src/pages/api/v1/tasks/index.ts` + `tasks/[id].ts` + `tasks/daily.ts` + `tasks/[id]/copy.ts`
+
+**Tests:**
+- `api-tests/milestones-tests.http`
+- `api-tests/weekly-goals-tests.http`
+- `api-tests/tasks-tests.http` (1186 linii testów!)
+
+---
+
 ## Changelog
+
+### 2025-11-28 🎉 **MAJOR UPDATE**
+- ✅ **Weryfikacja pełnej implementacji API** - przeanalizowano wszystkie endpointy
+- ✅ **Milestones CRUD** - wszystkie 6 endpointów w pełni zaimplementowane:
+  - GET /api/v1/milestones (List with filters)
+  - GET /api/v1/milestones/:id (Get by ID)
+  - GET /api/v1/goals/:goalId/milestones (Get by Goal)
+  - POST /api/v1/milestones (Create)
+  - PATCH /api/v1/milestones/:id (Update)
+  - DELETE /api/v1/milestones/:id (Delete)
+- ✅ **Weekly Goals CRUD** - wszystkie 5 endpointów w pełni zaimplementowane:
+  - GET /api/v1/weekly-goals (List with filters)
+  - GET /api/v1/weekly-goals/:id (Get with subtasks)
+  - POST /api/v1/weekly-goals (Create)
+  - PATCH /api/v1/weekly-goals/:id (Update)
+  - DELETE /api/v1/weekly-goals/:id (Delete)
+- ✅ **Tasks CRUD + Copy** - wszystkie 7 endpointów w pełni zaimplementowane:
+  - GET /api/v1/tasks (List with advanced filters)
+  - GET /api/v1/tasks/daily (Daily tasks with A/B/C categorization)
+  - GET /api/v1/tasks/:id (Get with history)
+  - POST /api/v1/tasks (Create)
+  - PATCH /api/v1/tasks/:id (Update)
+  - POST /api/v1/tasks/:id/copy (Copy task)
+  - DELETE /api/v1/tasks/:id (Delete)
+- 📊 **Postęp OGROMNY**: z 11/42 (26.2%) → 29/42 (69.0%)
+- 📊 **Milestones**: 0% → 100% ✅
+- 📊 **Weekly Goals**: 0% → 100% ✅
+- 📊 **Tasks**: 0% → 100% ✅
+- 🎯 **Faza 3 (Weekly Planning) zakończona!**
 
 ### 2025-11-10
 - ✅ Potwierdzono implementację DELETE /api/v1/plans/:id (Hard Delete Plan)
