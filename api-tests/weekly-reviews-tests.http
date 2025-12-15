@@ -1,0 +1,605 @@
+### Variables
+@baseUrl = http://localhost:3000
+@planId = REPLACE_WITH_VALID_PLAN_ID
+@weeklyReviewId = REPLACE_WITH_VALID_WEEKLY_REVIEW_ID
+
+### ============================================================================
+### POSITIVE TESTS - Weekly Review Operations
+### ============================================================================
+
+### GET /api/v1/weekly-reviews - List all weekly reviews for a plan
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}
+
+### GET /api/v1/weekly-reviews - Filter by week number
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=3
+
+### GET /api/v1/weekly-reviews - Filter by is_completed (true)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=true
+
+### GET /api/v1/weekly-reviews - Filter by is_completed (false)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=false
+
+### GET /api/v1/weekly-reviews - Combined filters (week + completed)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=5&is_completed=false
+
+### GET /api/v1/weekly-reviews - With pagination
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&limit=10&offset=0
+
+### GET /api/v1/weekly-reviews - Multiple weeks
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=1
+
+### GET /api/v1/weekly-reviews/:id - Get single weekly review by ID
+GET {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Get review for specific week
+GET {{baseUrl}}/api/v1/weekly-reviews/week/3?plan_id={{planId}}
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Get review for week 1
+GET {{baseUrl}}/api/v1/weekly-reviews/week/1?plan_id={{planId}}
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Get review for week 12
+GET {{baseUrl}}/api/v1/weekly-reviews/week/12?plan_id={{planId}}
+
+### POST /api/v1/weekly-reviews - Create weekly review with empty fields (auto-save)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 1
+}
+
+### POST /api/v1/weekly-reviews - Create weekly review with all fields
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 2,
+  "what_worked": "Early morning sessions were highly productive",
+  "what_did_not_work": "Too many meetings interrupted deep work time",
+  "what_to_improve": "Block calendar for 2-hour deep work sessions"
+}
+
+### POST /api/v1/weekly-reviews - Create weekly review with partial fields
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "what_worked": "Good progress on API development"
+}
+
+### POST /api/v1/weekly-reviews - Create weekly review with null fields (explicit)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 4,
+  "what_worked": null,
+  "what_did_not_work": null,
+  "what_to_improve": null
+}
+
+### POST /api/v1/weekly-reviews - Create for week 12
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 12,
+  "what_worked": "Final week completed successfully",
+  "what_did_not_work": "Some tasks carried over",
+  "what_to_improve": "Better time estimation for future"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Auto-save: Update only what_worked
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_worked": "Early morning sessions were productive"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Auto-save: Update only what_did_not_work
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_did_not_work": "Too many interruptions from Slack"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Auto-save: Update only what_to_improve
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_to_improve": "Set Slack to do not disturb mode"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Update all text fields at once
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_worked": "Completed all planned tasks on time",
+  "what_did_not_work": "Exercise routine was inconsistent",
+  "what_to_improve": "Schedule workouts as non-negotiable appointments"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Clear a field (set to null)
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_did_not_work": null
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Mark as completed manually
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "is_completed": true
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Reopen review (unmark completed)
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "is_completed": false
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Update text and completion status together
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_worked": "All goals achieved",
+  "what_did_not_work": "Nothing major",
+  "what_to_improve": "Keep momentum",
+  "is_completed": true
+}
+
+### POST /api/v1/weekly-reviews/:id/complete - Mark review as complete
+POST {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}/complete
+
+### DELETE /api/v1/weekly-reviews/:id - Delete weekly review
+DELETE {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+
+### ============================================================================
+### VALIDATION ERROR TESTS
+### ============================================================================
+
+### GET /api/v1/weekly-reviews - Error: Missing required plan_id
+GET {{baseUrl}}/api/v1/weekly-reviews
+
+### GET /api/v1/weekly-reviews - Error: Invalid plan_id UUID format
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id=not-a-uuid
+
+### GET /api/v1/weekly-reviews - Error: Invalid week_number (< 1)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=0
+
+### GET /api/v1/weekly-reviews - Error: Invalid week_number (> 12)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=13
+
+### GET /api/v1/weekly-reviews - Error: Invalid week_number (not an integer)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=3.5
+
+### GET /api/v1/weekly-reviews - Error: Invalid is_completed (not boolean)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=maybe
+
+### GET /api/v1/weekly-reviews - Error: Limit out of range (> 100)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&limit=150
+
+### GET /api/v1/weekly-reviews - Error: Limit out of range (< 1)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&limit=0
+
+### GET /api/v1/weekly-reviews - Error: Negative offset
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&offset=-1
+
+### GET /api/v1/weekly-reviews/:id - Error: Invalid UUID
+GET {{baseUrl}}/api/v1/weekly-reviews/invalid-uuid
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Missing plan_id
+GET {{baseUrl}}/api/v1/weekly-reviews/week/3
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Invalid plan_id
+GET {{baseUrl}}/api/v1/weekly-reviews/week/3?plan_id=not-a-uuid
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Week number < 1
+GET {{baseUrl}}/api/v1/weekly-reviews/week/0?plan_id={{planId}}
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Week number > 12
+GET {{baseUrl}}/api/v1/weekly-reviews/week/13?plan_id={{planId}}
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Week number not integer
+GET {{baseUrl}}/api/v1/weekly-reviews/week/3.5?plan_id={{planId}}
+
+### POST /api/v1/weekly-reviews - Error: Missing required field (plan_id)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "week_number": 3
+}
+
+### POST /api/v1/weekly-reviews - Error: Missing required field (week_number)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}"
+}
+
+### POST /api/v1/weekly-reviews - Error: Invalid plan_id UUID format
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "not-a-uuid",
+  "week_number": 3
+}
+
+### POST /api/v1/weekly-reviews - Error: Week number out of range (< 1)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 0
+}
+
+### POST /api/v1/weekly-reviews - Error: Week number out of range (> 12)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 13
+}
+
+### POST /api/v1/weekly-reviews - Error: Week number not an integer
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3.5
+}
+
+### POST /api/v1/weekly-reviews - Error: Invalid JSON
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  invalid json
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Error: No fields provided
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{}
+
+### PATCH /api/v1/weekly-reviews/:id - Error: Unknown field (strict mode)
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_worked": "Good progress",
+  "week_number": 5
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Error: Invalid is_completed type
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "is_completed": "yes"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Error: Invalid UUID in path
+PATCH {{baseUrl}}/api/v1/weekly-reviews/invalid-uuid
+Content-Type: application/json
+
+{
+  "what_worked": "Good progress"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Error: Invalid JSON
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_worked": "Good progress",
+  invalid json
+}
+
+### POST /api/v1/weekly-reviews/:id/complete - Error: Invalid UUID
+POST {{baseUrl}}/api/v1/weekly-reviews/invalid-uuid/complete
+
+### DELETE /api/v1/weekly-reviews/:id - Error: Invalid UUID
+DELETE {{baseUrl}}/api/v1/weekly-reviews/invalid-uuid
+
+### ============================================================================
+### BUSINESS LOGIC ERROR TESTS
+### ============================================================================
+
+### GET /api/v1/weekly-reviews - Error: Plan not found
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id=00000000-0000-0000-0000-000000000000
+
+### GET /api/v1/weekly-reviews/:id - Error: Weekly review not found
+GET {{baseUrl}}/api/v1/weekly-reviews/00000000-0000-0000-0000-000000000000
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Plan not found
+GET {{baseUrl}}/api/v1/weekly-reviews/week/3?plan_id=00000000-0000-0000-0000-000000000000
+
+### GET /api/v1/weekly-reviews/week/:weekNumber - Error: Review not found for week
+GET {{baseUrl}}/api/v1/weekly-reviews/week/10?plan_id={{planId}}
+
+### POST /api/v1/weekly-reviews - Error: Plan not found
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "00000000-0000-0000-0000-000000000000",
+  "week_number": 3
+}
+
+### POST /api/v1/weekly-reviews - Error: Duplicate (409 Conflict)
+### First create a review
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3
+}
+
+### Then try to create another for the same plan + week
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Error: Weekly review not found
+PATCH {{baseUrl}}/api/v1/weekly-reviews/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "what_worked": "Something"
+}
+
+### POST /api/v1/weekly-reviews/:id/complete - Error: Review not found
+POST {{baseUrl}}/api/v1/weekly-reviews/00000000-0000-0000-0000-000000000000/complete
+
+### DELETE /api/v1/weekly-reviews/:id - Error: Weekly review not found
+DELETE {{baseUrl}}/api/v1/weekly-reviews/00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### EDGE CASE TESTS
+### ============================================================================
+
+### POST /api/v1/weekly-reviews - Boundary: Week 1
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 1
+}
+
+### POST /api/v1/weekly-reviews - Boundary: Week 12
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 12
+}
+
+### POST /api/v1/weekly-reviews - Very long text fields (no limit)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 5,
+  "what_worked": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. This is a very long text that continues for many lines to test that there is no limit on text field length in weekly reviews. We can write as much as we want here to describe what worked during the week.",
+  "what_did_not_work": "Another very long text field with multiple paragraphs. This field can contain detailed analysis of what didn't work during the week. It should support any length of text that the user wants to write, including multiple paragraphs, lists, and detailed explanations.",
+  "what_to_improve": "Yet another long text field for improvements. This should also support unlimited text length so users can write detailed action plans and improvement strategies for the next week."
+}
+
+### POST /api/v1/weekly-reviews - Empty strings (should be trimmed/handled)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 6,
+  "what_worked": "",
+  "what_did_not_work": "",
+  "what_to_improve": ""
+}
+
+### POST /api/v1/weekly-reviews - Whitespace only (should be trimmed)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 7,
+  "what_worked": "   ",
+  "what_did_not_work": "  \n  ",
+  "what_to_improve": "\t\t"
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Update with empty string
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_worked": ""
+}
+
+### PATCH /api/v1/weekly-reviews/:id - Update with whitespace
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{{weeklyReviewId}}
+Content-Type: application/json
+
+{
+  "what_did_not_work": "   "
+}
+
+### GET /api/v1/weekly-reviews - Boundary: Limit exactly 100
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&limit=100
+
+### GET /api/v1/weekly-reviews - Boundary: Limit 1
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&limit=1
+
+### GET /api/v1/weekly-reviews - Large offset (pagination)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&offset=100
+
+### GET /api/v1/weekly-reviews - Combined filters with pagination
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&week_number=3&is_completed=false&limit=5&offset=0
+
+### GET /api/v1/weekly-reviews - Boolean coercion: is_completed=1 (truthy)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=1
+
+### GET /api/v1/weekly-reviews - Boolean coercion: is_completed=0 (falsy)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=0
+
+### ============================================================================
+### UNIQUE CONSTRAINT TEST (plan_id + week_number)
+### ============================================================================
+
+### NOTE: Only ONE review can exist per plan_id + week_number combination
+### Creating a duplicate should return 409 Conflict
+
+### Step 1: Create first review for week 8
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 8,
+  "what_worked": "First review for week 8"
+}
+
+### Step 2: Try to create second review for same plan + week (should fail with 409)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 8,
+  "what_worked": "Second review for week 8 - this should conflict"
+}
+
+### Step 3: Verify only one review exists for week 8
+GET {{baseUrl}}/api/v1/weekly-reviews/week/8?plan_id={{planId}}
+
+### ============================================================================
+### AUTO-SAVE WORKFLOW TEST
+### ============================================================================
+
+### NOTE: Weekly reviews support auto-save functionality
+### Users can create empty reviews and gradually fill them in
+
+### Step 1: Create empty review for week 9 (auto-save initialized)
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 9
+}
+
+### Step 2: Auto-save - Add what_worked (first field)
+### Use the ID returned from Step 1
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{review_id_from_step_1}
+Content-Type: application/json
+
+{
+  "what_worked": "Started writing the weekly review"
+}
+
+### Step 3: Auto-save - Add what_did_not_work (second field)
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{review_id_from_step_1}
+Content-Type: application/json
+
+{
+  "what_did_not_work": "Took too long to start the review"
+}
+
+### Step 4: Auto-save - Add what_to_improve (third field)
+PATCH {{baseUrl}}/api/v1/weekly-reviews/{review_id_from_step_1}
+Content-Type: application/json
+
+{
+  "what_to_improve": "Do the review on Friday evening"
+}
+
+### Step 5: Mark as complete
+POST {{baseUrl}}/api/v1/weekly-reviews/{review_id_from_step_1}/complete
+
+### Step 6: Verify completed review
+GET {{baseUrl}}/api/v1/weekly-reviews/{review_id_from_step_1}
+
+### ============================================================================
+### COMPLETE WORKFLOW TEST (All 12 Weeks)
+### ============================================================================
+
+### Create reviews for all 12 weeks
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 1,
+  "what_worked": "Week 1 - Good start",
+  "what_did_not_work": "Week 1 - Some initial confusion",
+  "what_to_improve": "Week 1 - Better planning"
+}
+
+###
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 2,
+  "what_worked": "Week 2 - Better momentum",
+  "is_completed": true
+}
+
+###
+POST {{baseUrl}}/api/v1/weekly-reviews
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 3,
+  "what_worked": "Week 3 - Hitting stride"
+}
+
+### List all reviews (should show all 12 eventually)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}
+
+### List only completed reviews
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=true
+
+### List only incomplete reviews
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&is_completed=false
+
+### Get reviews sorted by week (default ordering)
+GET {{baseUrl}}/api/v1/weekly-reviews?plan_id={{planId}}&limit=12
+

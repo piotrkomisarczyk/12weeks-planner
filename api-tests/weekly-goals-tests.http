@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = http://localhost:4321
+@baseUrl = http://localhost:3000
 @planId = REPLACE_WITH_VALID_PLAN_ID
 @goalId = REPLACE_WITH_VALID_LONG_TERM_GOAL_ID
 @weeklyGoalId = REPLACE_WITH_VALID_WEEKLY_GOAL_ID
