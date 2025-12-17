@@ -8,30 +8,39 @@
 ### ============================================================================
 
 ### GET /api/v1/milestones - List all milestones
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones
 
 ### GET /api/v1/milestones - Filter by goal
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}
 
 ### GET /api/v1/milestones - Filter by completion status (incomplete)
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?is_completed=false
 
 ### GET /api/v1/milestones - Filter by completion status (completed)
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?is_completed=true
 
 ### GET /api/v1/milestones - With pagination
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?limit=10&offset=0
 
 ### GET /api/v1/milestones - Combined filters
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}&is_completed=false&limit=20
 
 ### GET /api/v1/goals/:goalId/milestones - Milestones for specific goal
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/goals/{{goalId}}/milestones
 
 ### GET /api/v1/milestones/:id - Get single milestone
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 
 ### POST /api/v1/milestones - Create milestone with minimal data
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -41,6 +50,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Create milestone with all fields
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -53,6 +63,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Create milestone at position 2
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -65,6 +76,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Create milestone at position 3
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -77,6 +89,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Update milestone title
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -85,6 +98,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Mark milestone as completed
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -93,6 +107,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Update multiple fields
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -104,6 +119,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Update description only
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -112,6 +128,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Clear description (set to null)
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -120,6 +137,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Update position
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -128,6 +146,7 @@ Content-Type: application/json
 }
 
 ### DELETE /api/v1/milestones/:id - Delete milestone
+# Expected: 200 OK
 DELETE {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 
 ### ============================================================================
@@ -135,6 +154,7 @@ DELETE {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 ### ============================================================================
 
 ### POST /api/v1/milestones - Error: Missing required field (long_term_goal_id)
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -143,6 +163,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Missing required field (title)
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -151,6 +172,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Invalid UUID format
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -160,6 +182,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Title too long (>255 characters)
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -169,6 +192,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Empty title
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -178,6 +202,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Invalid date format
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -188,6 +213,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Invalid date format (ISO datetime)
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -198,6 +224,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Position out of range (<1)
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -208,6 +235,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Position out of range (>5)
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -218,6 +246,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Position not an integer
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -228,33 +257,42 @@ Content-Type: application/json
 }
 
 ### GET /api/v1/milestones - Error: Invalid UUID in query parameter
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/milestones?long_term_goal_id=not-a-uuid
 
 ### GET /api/v1/milestones - Error: Invalid is_completed value
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/milestones?is_completed=yes
 
 ### GET /api/v1/milestones - Error: Limit out of range (>100)
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/milestones?limit=150
 
 ### GET /api/v1/milestones - Error: Limit out of range (<1)
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/milestones?limit=0
 
 ### GET /api/v1/milestones - Error: Negative offset
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/milestones?offset=-1
 
 ### GET /api/v1/milestones/:id - Error: Invalid UUID
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/milestones/invalid-uuid
 
 ### GET /api/v1/goals/:goalId/milestones - Error: Invalid goal UUID
+# Expected: 400 Bad Request
 GET {{baseUrl}}/api/v1/goals/invalid-uuid/milestones
 
 ### PATCH /api/v1/milestones/:id - Error: No fields provided
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
 {}
 
 ### PATCH /api/v1/milestones/:id - Error: Empty title
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -263,6 +301,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Error: Title too long
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -271,6 +310,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Error: Invalid date format
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -279,6 +319,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Error: Invalid is_completed type
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -287,6 +328,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Error: Position out of range
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -295,6 +337,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Error: Invalid JSON
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -309,6 +352,7 @@ Content-Type: application/json
 ### ============================================================================
 
 ### POST /api/v1/milestones - Error: Goal not found
+# Expected: 404 Not Found
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -318,12 +362,15 @@ Content-Type: application/json
 }
 
 ### GET /api/v1/milestones/:id - Error: Milestone not found
+# Expected: 404 Not Found
 GET {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
 
 ### GET /api/v1/goals/:goalId/milestones - Error: Goal not found
+# Expected: 404 Not Found
 GET {{baseUrl}}/api/v1/goals/00000000-0000-0000-0000-000000000000/milestones
 
 ### PATCH /api/v1/milestones/:id - Error: Milestone not found
+# Expected: 404 Not Found
 PATCH {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
 Content-Type: application/json
 
@@ -332,6 +379,7 @@ Content-Type: application/json
 }
 
 ### DELETE /api/v1/milestones/:id - Error: Milestone not found
+# Expected: 404 Not Found
 DELETE {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
 
 ### ============================================================================
@@ -342,6 +390,7 @@ DELETE {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000
 ### NOTE: Replace {{goalId}} with a goal that has 0 milestones
 
 ### Milestone 1
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -352,6 +401,7 @@ Content-Type: application/json
 }
 
 ### Milestone 2
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -362,6 +412,7 @@ Content-Type: application/json
 }
 
 ### Milestone 3
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -372,6 +423,7 @@ Content-Type: application/json
 }
 
 ### Milestone 4
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -382,6 +434,7 @@ Content-Type: application/json
 }
 
 ### Milestone 5
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -392,6 +445,7 @@ Content-Type: application/json
 }
 
 ### Milestone 6 - Should fail with max 5 milestones constraint
+# Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -405,6 +459,7 @@ Content-Type: application/json
 ### ============================================================================
 
 ### POST /api/v1/milestones - Boundary: Position 1
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -415,6 +470,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Boundary: Position 5
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -425,6 +481,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Boundary: Title exactly 255 characters
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -434,6 +491,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Null description and due_date (explicit nulls)
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -445,6 +503,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Long description (no limit)
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -455,6 +514,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Past due date (should be allowed)
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -465,6 +525,7 @@ Content-Type: application/json
 }
 
 ### POST /api/v1/milestones - Far future due date (should be allowed)
+# Expected: 201 Created
 POST {{baseUrl}}/api/v1/milestones
 Content-Type: application/json
 
@@ -475,6 +536,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Toggle completion status
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -483,6 +545,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Update only due date
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -491,6 +554,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/milestones/:id - Clear due date (set to null)
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/milestones/{{milestoneId}}
 Content-Type: application/json
 
@@ -499,15 +563,18 @@ Content-Type: application/json
 }
 
 ### GET /api/v1/milestones - Boundary: Limit exactly 100
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?limit=100
 
 ### GET /api/v1/milestones - Boundary: Limit 1
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?limit=1
 
 ### GET /api/v1/milestones - Large offset (pagination)
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?offset=100
 
 ### GET /api/v1/milestones - Combined filters with pagination
+# Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}&is_completed=false&limit=5&offset=0
-
 

@@ -9,6 +9,7 @@
 ### ============================================================================
 
 ### PATCH /api/v1/goals/:id - Update single field (title)
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -17,6 +18,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Update multiple fields
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -27,6 +29,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Update only description
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -35,6 +38,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Update only category
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -43,6 +47,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Update only progress
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -51,6 +56,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Update only position
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -59,6 +65,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Set description to null
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -67,6 +74,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Set category to null
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -75,6 +83,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Update all fields at once
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -87,6 +96,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Set both description and category to null
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -100,6 +110,7 @@ Content-Type: application/json
 ### ============================================================================
 
 ### PATCH /api/v1/goals/:id - Error: Invalid UUID
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{invalidGoalId}}
 Content-Type: application/json
 
@@ -108,12 +119,14 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Empty body (no fields provided)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
 {}
 
 ### PATCH /api/v1/goals/:id - Error: Title too short (empty string)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -122,6 +135,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Title too long (>255 characters)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -130,6 +144,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Invalid category
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -138,6 +153,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Progress out of range (negative)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -146,6 +162,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Progress out of range (>100)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -154,6 +171,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Progress not an integer
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -162,6 +180,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Position out of range (<1)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -170,6 +189,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Position out of range (>5)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -178,6 +198,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Position not an integer
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -186,6 +207,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Unknown field (strict mode)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -195,6 +217,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Attempt to change plan_id (should be rejected)
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -204,6 +227,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Invalid JSON
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -213,6 +237,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Error: Title with only whitespace
+# Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -225,6 +250,7 @@ Content-Type: application/json
 ### ============================================================================
 
 ### PATCH /api/v1/goals/:id - Error: Goal not found (non-existent UUID)
+# Expected: 404 Not Found
 PATCH {{baseUrl}}/api/v1/goals/{{nonExistentGoalId}}
 Content-Type: application/json
 
@@ -237,6 +263,7 @@ Content-Type: application/json
 ### ============================================================================
 
 ### PATCH /api/v1/goals/:id - Boundary: Progress at 0
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -245,6 +272,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Boundary: Progress at 100
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -253,6 +281,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Boundary: Position 1
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -261,6 +290,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Boundary: Position 5
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -269,6 +299,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Boundary: Title exactly 255 characters
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -277,6 +308,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Boundary: Title with 1 character
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -285,6 +317,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Test all valid categories: work
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -293,6 +326,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Test all valid categories: finance
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -301,6 +335,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Test all valid categories: hobby
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -309,6 +344,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Test all valid categories: relationships
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -317,6 +353,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Test all valid categories: health
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -325,6 +362,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Test all valid categories: development
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -333,6 +371,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Very long description (no limit)
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -345,6 +384,7 @@ Content-Type: application/json
 ### ============================================================================
 
 ### DELETE /api/v1/goals/:id - Delete existing goal
+# Expected: 200 OK
 ### WARNING: This will permanently delete the goal and all related milestones!
 ### Make sure to use a test goal ID that can be safely deleted
 DELETE {{baseUrl}}/api/v1/goals/{{goalId}}
@@ -354,6 +394,7 @@ DELETE {{baseUrl}}/api/v1/goals/{{goalId}}
 ### ============================================================================
 
 ### DELETE /api/v1/goals/:id - Error: Invalid UUID
+# Expected: 400 Bad Request
 DELETE {{baseUrl}}/api/v1/goals/{{invalidGoalId}}
 
 ### ============================================================================
@@ -361,9 +402,11 @@ DELETE {{baseUrl}}/api/v1/goals/{{invalidGoalId}}
 ### ============================================================================
 
 ### DELETE /api/v1/goals/:id - Error: Goal not found (non-existent UUID)
+# Expected: 404 Not Found
 DELETE {{baseUrl}}/api/v1/goals/{{nonExistentGoalId}}
 
 ### DELETE /api/v1/goals/:id - Error: Already deleted (idempotency test)
+# Expected: 404 Not Found
 ### Run this after successfully deleting a goal - should return 404
 DELETE {{baseUrl}}/api/v1/goals/{{goalId}}
 
@@ -384,6 +427,7 @@ DELETE {{baseUrl}}/api/v1/goals/{{goalId}}
 ### ============================================================================
 
 ### PATCH /api/v1/goals/:id - Update with trimmed title (leading/trailing spaces)
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -392,6 +436,7 @@ Content-Type: application/json
 }
 
 ### PATCH /api/v1/goals/:id - Multiple rapid updates (test updated_at trigger)
+# Expected: 200 OK
 ### Run these in quick succession and verify updated_at changes
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
@@ -401,6 +446,7 @@ Content-Type: application/json
 }
 
 ### Second rapid update
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
@@ -409,6 +455,7 @@ Content-Type: application/json
 }
 
 ### Third rapid update
+# Expected: 200 OK
 PATCH {{baseUrl}}/api/v1/goals/{{goalId}}
 Content-Type: application/json
 
