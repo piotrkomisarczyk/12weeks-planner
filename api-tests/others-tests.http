@@ -1,0 +1,210 @@
+### Variables
+@baseUrl = http://localhost:3000/api/v1
+@authToken = YOUR_AUTH_TOKEN_HERE
+
+# Task ID for testing - replace with actual task ID from your database
+@taskId = 00000000-0000-0000-0000-000000000000
+
+### ============================================================================
+### TASK HISTORY TESTS
+### ============================================================================
+
+### Test 1: Get task history - Success
+# Expected: 200 OK with array of history entries
+# Description: Fetch complete status change history for a task
+GET {{baseUrl}}/tasks/{{taskId}}/history
+Authorization: Bearer {{authToken}}
+
+### Test 2: Get task history - Invalid UUID format
+# Expected: 400 Bad Request with validation error
+# Description: Attempt to fetch history with invalid UUID format
+GET {{baseUrl}}/tasks/invalid-uuid/history
+Authorization: Bearer {{authToken}}
+
+### Test 3: Get task history - Task not found
+# Expected: 404 Not Found
+# Description: Attempt to fetch history for non-existent task
+GET {{baseUrl}}/tasks/00000000-0000-0000-0000-000000000000/history
+Authorization: Bearer {{authToken}}
+
+### Test 4: Get task history - Unauthorized
+# Expected: 401 Unauthorized
+# Description: Attempt to fetch history without authentication token
+# Note: In development with DEFAULT_USER_ID, this may not return 401
+GET {{baseUrl}}/tasks/{{taskId}}/history
+
+### Test 5: Get task history for task with no status changes
+# Expected: 200 OK with empty array or single entry
+# Description: Fetch history for newly created task
+GET {{baseUrl}}/tasks/{{taskId}}/history
+Authorization: Bearer {{authToken}}
+
+### Test 6: Get task history for task with multiple status changes
+# Expected: 200 OK with multiple entries ordered by changed_at
+# Description: Fetch history for task that has gone through multiple statuses
+# Prerequisite: Update task status several times first
+GET {{baseUrl}}/tasks/{{taskId}}/history
+Authorization: Bearer {{authToken}}
+
+### ============================================================================
+### USER METRICS TESTS
+### ============================================================================
+
+### Test 7: Get user metrics - Success
+# Expected: 200 OK with user metrics object
+# Description: Fetch success metrics for authenticated user
+GET {{baseUrl}}/users/metrics
+Authorization: Bearer {{authToken}}
+
+### Test 8: Get user metrics - Unauthorized
+# Expected: 401 Unauthorized
+# Description: Attempt to fetch metrics without authentication token
+# Note: In development with DEFAULT_USER_ID, this may not return 401
+GET {{baseUrl}}/users/metrics
+
+### Test 9: Get user metrics - New user with no activity
+# Expected: 404 Not Found
+# Description: Fetch metrics for user who hasn't created any plans yet
+# Note: Metrics are created by triggers when first plan is created
+GET {{baseUrl}}/users/metrics
+Authorization: Bearer {{authToken}}
+
+### Test 10: Get user metrics - User with completed plans
+# Expected: 200 OK with populated metrics
+# Description: Fetch metrics showing plan completion and goal achievements
+# Prerequisite: User should have created and completed at least one plan
+GET {{baseUrl}}/users/metrics
+Authorization: Bearer {{authToken}}
+
+### ============================================================================
+### EXPORT TESTS
+### ============================================================================
+
+### Test 11: Export user data - Success
+# Expected: 200 OK with complete user data in JSON format
+# Description: Export all user data for GDPR compliance
+# Response includes Content-Disposition header for file download
+GET {{baseUrl}}/export
+Authorization: Bearer {{authToken}}
+
+### Test 12: Export user data - Unauthorized
+# Expected: 401 Unauthorized
+# Description: Attempt to export data without authentication token
+# Note: In development with DEFAULT_USER_ID, this may not return 401
+GET {{baseUrl}}/export
+
+### Test 13: Export user data - New user with no data
+# Expected: 200 OK with empty arrays in all fields
+# Description: Export data for user who hasn't created any content yet
+# Should return structure with empty arrays and null metrics
+GET {{baseUrl}}/export
+Authorization: Bearer {{authToken}}
+
+### Test 14: Export user data - User with complete dataset
+# Expected: 200 OK with populated data in all fields
+# Description: Export complete dataset including plans, goals, tasks, reviews, etc.
+# Prerequisite: User should have multiple plans with goals, tasks, and reviews
+GET {{baseUrl}}/export
+Authorization: Bearer {{authToken}}
+
+### ============================================================================
+### EDGE CASES AND ERROR SCENARIOS
+### ============================================================================
+
+### Test 15: Task history - Task belonging to different user
+# Expected: 404 Not Found (RLS policy prevents access)
+# Description: Attempt to access task history for task owned by another user
+# Prerequisite: Need taskId from different user's plan
+@otherUserTaskId = 00000000-0000-0000-0000-111111111111
+GET {{baseUrl}}/tasks/{{otherUserTaskId}}/history
+Authorization: Bearer {{authToken}}
+
+### Test 16: Task history - Malformed UUID with special characters
+# Expected: 400 Bad Request with validation error
+# Description: Test UUID validation with special characters
+GET {{baseUrl}}/tasks/abc-def-ghi/history
+Authorization: Bearer {{authToken}}
+
+### Test 17: Export - Verify exported_at timestamp format
+# Expected: 200 OK with ISO 8601 timestamp in exported_at field
+# Description: Verify timestamp is properly formatted (YYYY-MM-DDTHH:mm:ss.sssZ)
+GET {{baseUrl}}/export
+Authorization: Bearer {{authToken}}
+
+### ============================================================================
+### PERFORMANCE TESTS
+### ============================================================================
+
+### Test 18: Export - Large dataset performance
+# Expected: 200 OK within reasonable time (< 5 seconds)
+# Description: Test export performance with large dataset
+# Prerequisite: User should have multiple plans with many tasks and reviews
+# Monitor response time and consider implementing pagination if too slow
+GET {{baseUrl}}/export
+Authorization: Bearer {{authToken}}
+
+### Test 19: Task history - Performance with long history
+# Expected: 200 OK with all history entries
+# Description: Test performance when task has been updated many times
+# Prerequisite: Task should have 50+ status changes
+GET {{baseUrl}}/tasks/{{taskId}}/history
+Authorization: Bearer {{authToken}}
+
+### ============================================================================
+### DATA VERIFICATION TESTS
+### ============================================================================
+
+### Test 20: Export - Verify data completeness
+# Expected: All related data is included (no orphaned records)
+# Description: Verify that export includes all user data across all tables
+# Manual check: Verify all plans have their goals, goals have milestones, etc.
+GET {{baseUrl}}/export
+Authorization: Bearer {{authToken}}
+
+### Test 21: Task history - Verify ordering
+# Expected: History entries ordered by changed_at (ascending)
+# Description: Verify history is returned in chronological order
+GET {{baseUrl}}/tasks/{{taskId}}/history
+Authorization: Bearer {{authToken}}
+
+### Test 22: User metrics - Verify counter accuracy
+# Expected: Metrics match actual database counts
+# Description: Compare total_plans_created and total_goals_completed with actual counts
+# Manual verification: Query database directly and compare with API response
+GET {{baseUrl}}/users/metrics
+Authorization: Bearer {{authToken}}
+
+### ============================================================================
+### NOTES FOR MANUAL TESTING
+### ============================================================================
+
+# IMPORTANT NOTES:
+# 
+# 1. Replace @taskId with actual task ID from your database before testing
+# 
+# 2. For development testing with DEFAULT_USER_ID:
+#    - Authentication checks are commented out
+#    - All requests will use the same user ID
+#    - 401 Unauthorized tests may not work as expected
+# 
+# 3. Test setup requirements:
+#    - Task History: Create a task and update its status multiple times
+#    - User Metrics: Create and complete at least one plan
+#    - Export: Create diverse data (plans, goals, tasks, reviews)
+# 
+# 4. Performance considerations:
+#    - Export endpoint may be slow for users with large datasets
+#    - Consider implementing rate limiting (1 request per 5 minutes)
+#    - Monitor database connection pool usage
+# 
+# 5. RLS Policy verification:
+#    - Test with different user accounts to verify data isolation
+#    - Ensure users cannot access other users' data
+#    - Verify all queries are properly filtered by user_id
+# 
+# 6. Expected response formats:
+#    - Task History: { "data": [...] }
+#    - User Metrics: { "data": {...} }
+#    - Export: { "user_id": "...", "exported_at": "...", ... }
+
+

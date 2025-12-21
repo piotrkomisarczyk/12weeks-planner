@@ -130,6 +130,14 @@ export const taskIdSchema = z.object({
   id: uuidSchema,
 });
 
+/**
+ * Task ID Parameter Schema for history endpoint
+ * For endpoints with :taskId parameter
+ */
+export const taskIdParamSchema = z.object({
+  taskId: uuidSchema,
+});
+
 // ============================================================================
 // REQUEST BODY SCHEMAS
 // ============================================================================
@@ -243,6 +251,7 @@ export const copyTaskSchema = z.object({
 export type ListTasksParams = z.infer<typeof listTasksSchema>;
 export type DailyTasksParams = z.infer<typeof dailyTasksParamsSchema>;
 export type TaskIdParam = z.infer<typeof taskIdSchema>;
+export type TaskIdParamForHistory = z.infer<typeof taskIdParamSchema>;
 export type CreateTaskData = z.infer<typeof createTaskSchema>;
 export type UpdateTaskData = z.infer<typeof updateTaskSchema>;
 export type CopyTaskData = z.infer<typeof copyTaskSchema>;

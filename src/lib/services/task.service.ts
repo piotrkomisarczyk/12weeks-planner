@@ -2,6 +2,7 @@ import type { SupabaseClient } from '../../db/supabase.client';
 import type {
   TaskDTO,
   TaskWithHistoryDTO,
+  TaskHistoryDTO,
   DailyTasksDTO,
   ListResponse,
   ItemResponse,
@@ -426,6 +427,36 @@ export class TaskService {
       return { message: 'Task deleted successfully' };
     } catch (error) {
       console.error('Unexpected error in deleteTask:', error);
+      return { error: 'Internal server error' };
+    }
+  }
+
+  /**
+   * Get status change history for a task
+   * GET /api/v1/tasks/:taskId/history
+   * 
+   * @param taskId - Task UUID
+   * @returns Array of task history entries ordered by changed_at
+   */
+  async getTaskHistory(taskId: string): Promise<ListResponse<TaskHistoryDTO> | ErrorResponse> {
+    try {
+      // Query task_history table
+      const { data, error } = await this.supabase
+        .from('task_history')
+        .select('*')
+        .eq('task_id', taskId)
+        .order('changed_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching task history:', error);
+        return { error: 'Failed to fetch task history' };
+      }
+
+      return {
+        data: data as TaskHistoryDTO[],
+      };
+    } catch (error) {
+      console.error('Unexpected error in getTaskHistory:', error);
       return { error: 'Internal server error' };
     }
   }
