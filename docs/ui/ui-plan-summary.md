@@ -28,6 +28,8 @@
 </matched_recommendations>
 
 <ui_architecture_planning_summary>
+Pełna architektura UI została zdefiniowana w pliku **`docs/ui/ui-plan.md`**.
+
 ### Główne wymagania i struktura
 Aplikacja "12 Weeks Planner" będzie oparta na **Astro 5** (SSR) z interaktywnymi "wyspami" **React 19**. Interfejs użytkownika wykorzystuje bibliotekę **Shadcn/ui** oraz **Tailwind CSS v4**. Projekt jest realizowany w podejściu **Desktop First**, z zachowaniem responsywności (RWD) dla kluczowych widoków. Język interfejsu to angielski (MVP).
 
