@@ -1,0 +1,165 @@
+import { MoreVertical, Play, Archive, Trash2 } from 'lucide-react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardAction,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import type { PlanViewModel } from '@/lib/plan-utils';
+import { formatDate } from '@/lib/plan-utils';
+import { cn } from '@/lib/utils';
+
+export interface PlanActions {
+  onActivate: (id: string) => void;
+  onArchive: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
+interface PlanCardProps {
+  plan: PlanViewModel;
+  actions: PlanActions;
+}
+
+export function PlanCard({ plan, actions }: PlanCardProps) {
+  const showActivateButton = plan.status !== 'active' && plan.status !== 'completed';
+  const showArchiveButton = plan.status !== 'archived';
+
+  // Determine card styling based on status
+  const cardVariant = {
+    active: 'border-primary bg-primary/5',
+    ready: '',
+    archived: 'bg-muted/50 opacity-75',
+    completed: 'bg-muted/30',
+  }[plan.status];
+
+  // Determine badge styling based on status
+  const badgeVariant = {
+    active: 'default' as const,
+    ready: 'secondary' as const,
+    archived: 'outline' as const,
+    completed: 'secondary' as const,
+  }[plan.status];
+
+  const handleCardClick = () => {
+    // Navigate to plan dashboard
+    window.location.href = `/plans/${plan.id}`;
+  };
+
+  const handleActionClick = (
+    e: React.MouseEvent,
+    action: () => void
+  ) => {
+    e.stopPropagation(); // Prevent card click navigation
+    action();
+  };
+
+  return (
+    <Card
+      className={cn(
+        'cursor-pointer transition-all hover:shadow-md',
+        cardVariant
+      )}
+      onClick={handleCardClick}
+      role="article"
+      aria-label={`Plan: ${plan.name}`}
+    >
+      <CardHeader>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">{plan.name}</CardTitle>
+              <Badge variant={badgeVariant}>{plan.displayStatus}</Badge>
+            </div>
+            <CardDescription>
+              {formatDate(plan.start_date)} - {formatDate(plan.endDate)}
+            </CardDescription>
+          </div>
+
+          <CardAction>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Plan actions menu"
+                >
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {showActivateButton && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={(e) =>
+                        handleActionClick(e, () => actions.onActivate(plan.id))
+                      }
+                    >
+                      <Play className="size-4" />
+                      Activate
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {showArchiveButton && (
+                  <DropdownMenuItem
+                    onClick={(e) =>
+                      handleActionClick(e, () => actions.onArchive(plan.id))
+                    }
+                  >
+                    <Archive className="size-4" />
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={(e) =>
+                    handleActionClick(e, () => actions.onDelete(plan.id))
+                  }
+                >
+                  <Trash2 className="size-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CardAction>
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="space-y-2 text-sm">
+          {plan.currentWeek !== null && plan.status === 'active' && (
+            <div className="text-muted-foreground">
+              Week {plan.currentWeek} of 12
+            </div>
+          )}
+          {plan.isOverdue && plan.status === 'active' && (
+            <div className="text-destructive font-medium">Overdue</div>
+          )}
+          {plan.status === 'completed' && (
+            <div className="text-muted-foreground">Completed</div>
+          )}
+          {plan.status === 'ready' && (
+            <div className="text-muted-foreground">Ready to start</div>
+          )}
+          {plan.status === 'archived' && (
+            <div className="text-muted-foreground">Archived</div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
