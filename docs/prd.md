@@ -4,7 +4,7 @@
 
 Aplikacja 12 Weeks Planner to webowa narzędzie do planowania i monitorowania długoterminowych celów, inspirowane książkami \"12 tygodniowy rok\" Briana P. Morina oraz \"Zjedz tę żabę\" Briana Tracy'ego. Celem jest zapewnienie użytkownikom strukturyzowanego podejścia do realizacji celów poprzez 12-tygodniowe planery, z hierarchią celów, zadań tygodniowych i dziennych, oraz mechanizmami śledzenia postępów.
 
-Aplikacja jest dostępna w języku angielskim i polskim i skierowana do indywidualnych użytkowników poszukujących zaawansowanego narzędzia do planowania. MVP obejmuje system uwierzytelniania, tworzenie planerów, zarządzanie celami i zadaniami, oraz widoki nawigacyjne. Technologia: frontend oparty na Astro z React i Tailwind CSS, backend z Supabase dla autentykacji i bazy danych. Rozwój realizowany przez jednego developera, bez integracji zewnętrznych w MVP.
+Aplikacja jest dostępna w języku angielskim (MVP) i w przyszłości w polskim i skierowana do indywidualnych użytkowników poszukujących zaawansowanego narzędzia do planowania. MVP obejmuje system uwierzytelniania, tworzenie planerów, zarządzanie celami i zadaniami, oraz widoki nawigacyjne. Technologia: frontend oparty na Astro z React i Tailwind CSS, backend z Supabase dla autentykacji i bazy danych. Rozwój realizowany przez jednego developera, bez integracji zewnętrznych w MVP.
 
 ## 2. Problem użytkownika
 
@@ -53,7 +53,7 @@ Większość aplikacji typu to-do list obsługuje jedynie proste, krótkotermino
 ### Interfejs
 - Responsywny design z Tailwind CSS.
 - Ikony SVG z ARIA labels dla stanów i priorytetów.
-- Język angielski i język polski; brak mobile w MVP.
+- Język angielski (MVP), w przyszłości język polski; brak mobile w MVP.
 
 ### Baza danych (Supabase)
 - Tabele: users, planners, goals, tasks (z foreign keys dla hierarchii), weekly_summaries.
@@ -216,12 +216,12 @@ Tytuł: Obsługa błędów i walidacji
 Opis: Jako użytkownik, chcę otrzymywać jasne komunikaty błędów, aby korygować akcje.  
 Kryteria akceptacji:  
 - Walidacje formularzy (np. puste pola).  
-- Komunikaty po angielsku lub po polsku.  
+- Komunikaty po angielsku (MVP), (w przyszłości po polsku).  
 - Edge case: awaria sieci – retry button.
 
 ### US-014
 Tytuł: Zmiana języka aplikacji na dashboardzie  
-Opis: Jako użytkownik, chcę móc zmienić język aplikacji. Do wyboru są język angielski i polski.  
+Opis: Jako użytkownik, chcę móc zmienić język aplikacji. Do wyboru są język angielski i polski (w MVP tylko język angielski dostępny).  
 Kryteria akceptacji:  
 - Na dashboardzie po prawej u góry dostępne 2 ikonki z flagami
 - Po kliknięciu w odpowiednią ikonę zmienia się język aplikacji
