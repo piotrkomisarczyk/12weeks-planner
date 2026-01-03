@@ -620,3 +620,36 @@ export type ProgressPercentage = number;
  */
 export type Position = number;
 
+// ============================================================================
+// WIZARD VIEW MODELS (Frontend-specific types)
+// ============================================================================
+
+/**
+ * Plan details data for wizard step 1
+ */
+export interface PlanDetailsData {
+  name: string;
+  startDate: Date | undefined;
+}
+
+/**
+ * Goal form data for wizard step 2
+ */
+export interface GoalFormData {
+  id: string; // temporary ID for React list management (uuid v4)
+  title: string;
+  category: GoalCategory;
+  description: string;
+}
+
+/**
+ * Complete wizard state
+ */
+export interface PlanWizardState {
+  step: 1 | 2;
+  details: PlanDetailsData;
+  goals: GoalFormData[];
+  isSubmitting: boolean;
+  errors: Record<string, string>;
+}
+

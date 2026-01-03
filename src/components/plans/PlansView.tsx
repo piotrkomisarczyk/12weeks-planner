@@ -11,10 +11,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { PlanCard } from './PlanCard';
-import { CreatePlanDialog } from './CreatePlanDialog';
 import { usePlans } from './hooks/usePlans';
 import { transformPlansToViewModels, type PlanViewModel } from '@/lib/plan-utils';
-import type { CreatePlanCommand } from '@/types';
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -25,7 +23,7 @@ interface ConfirmDialogState {
 }
 
 export function PlansView() {
-  const { plans, isLoading, error, fetchPlans, createPlan, activatePlan, archivePlan, deletePlan } = usePlans();
+  const { plans, isLoading, error, fetchPlans, activatePlan, archivePlan, deletePlan } = usePlans();
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     title: '',
@@ -47,15 +45,9 @@ export function PlansView() {
   const completedPlans = viewModels.filter((p) => p.status === 'completed');
   const archivedPlans = viewModels.filter((p) => p.status === 'archived');
 
-  // Handler for creating a plan
-  const handleCreatePlan = async (data: CreatePlanCommand) => {
-    try {
-      await createPlan(data);
-      toast.success('Plan created successfully');
-    } catch (error) {
-      toast.error('Failed to create plan');
-      throw error;
-    }
+  // Handler for navigating to create plan wizard
+  const handleCreatePlan = () => {
+    window.location.href = '/plans/new';
   };
 
   // Handler for activating a plan
@@ -199,15 +191,10 @@ export function PlansView() {
               Get started by creating your first 12-week plan to track your
               long-term goals.
             </p>
-            <CreatePlanDialog
-              onCreatePlan={handleCreatePlan}
-              trigger={
-                <Button className="mt-6" size="lg">
-                  <Plus className="size-4" />
-                  Create First Plan
-                </Button>
-              }
-            />
+            <Button className="mt-6" size="lg" onClick={handleCreatePlan}>
+              <Plus className="size-4" />
+              Create First Plan
+            </Button>
           </div>
         </div>
       </div>
@@ -225,15 +212,10 @@ export function PlansView() {
             Manage your 12-week planning cycles
           </p>
         </div>
-        <CreatePlanDialog
-          onCreatePlan={handleCreatePlan}
-          trigger={
-            <Button size="lg">
-              <Plus className="size-4" />
-              Create New Plan
-            </Button>
-          }
-        />
+        <Button size="lg" onClick={handleCreatePlan}>
+          <Plus className="size-4" />
+          Create New Plan
+        </Button>
       </div>
 
       <div className="space-y-8">
