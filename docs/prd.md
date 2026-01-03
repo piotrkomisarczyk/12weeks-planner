@@ -99,7 +99,7 @@ Kryteria akceptacji:
 Tytuł: Reset hasła  
 Opis: Jako zalogowany użytkownik, chcę zresetować hasło via email, aby odzyskać dostęp w przypadku zapomnienia.  
 Kryteria akceptacji:  
-- Link \"Zapomniałem hasła\" na stronie logowania.  
+- Link \"Forgot password\" na stronie logowania.  
 - Wysłanie email z linkiem resetu.  
 - Nowy formularz hasła po kliknięciu linku (potwierdzenie nowego hasła).  
 - Po sukcesie, przekierowanie do logowania.  
@@ -109,16 +109,16 @@ Kryteria akceptacji:
 Tytuł: Tworzenie nowego planera  
 Opis: Jako zalogowany użytkownik, chcę utworzyć 12-tygodniowy planer, aby rozpocząć planowanie celów.  
 Kryteria akceptacji:  
-- Przycisk \"Nowy planer\" na dashboardzie.
+- Przycisk \"New planner\" na dashboardzie.
 - Okno modalne do wprowadzania nazwy i daty startu <data_startu>
 - Automatyczne ustawienie daty startu na poniedziałek aktualnego tygodnia <data_startu>. Możliwość ustawiania innej daty (tylko poniedziałki) przy pomocy date pickera
 - Domyślna nazwa planera: \"Planner_<data_startu>\"
 - Możliwość zmiany nazwy na dowolną przy użyciu input box
-- Po kliknięciu przycisku \"Dalej\", przekierowanie do widoku celów.  
+- Po kliknięciu przycisku \"Next\", przekierowanie do widoku celów.  
 - Walidacja: min. 1 cel wymagany przed zapisem.  
-- Przycisk \"Stwórz\" tworzy nowy planer w bazie danych
+- Przycisk \"Create\" tworzy nowy planer w bazie danych
 - Edge case: próba utworzenia bez celów pokazuje błąd.
-- Edge case2: gdy poprzedni planer jest zarchiwizowany użytkownik musi stworzyć kolejny planner. Nie następuje to automatycznie
+- Edge case2: gdy poprzedni planer jest zarchiwizowany użytkownik musi stworzyć kolejny planner. Nie następuje to automatycznie.
 
 ### US-005
 Tytuł: Nawigacja między planerami  
@@ -142,7 +142,7 @@ Kryteria akceptacji:
 
 ### US-007
 Tytuł: Planowanie zadania tygodniowego  
-Opis: Jako użytkownik, chcę przypisać zadania do tygodnia z priorytetami, aby zorganizować pracę.  
+Opis: Jako użytkownik, chcę przypisać zadania do tygodnia z priorytetami, aby zorganizować pracę.
 Kryteria akceptacji:  
 - Widok tygodnia z sekcjami: główne zadanie powiązane z celami lub kamieniami milowymi, podzadania dla zadania głównego, dodatkowe zadania ad-hoc (niezwiązane z celami).  
 - Dropdown dla priorytetu A/B/C.  
@@ -230,42 +230,42 @@ Kryteria akceptacji:
 Tytuł: Wyświetlanie numeru tygodnia na dashboardzie oraz na widoku (plan tygodnia, dzień, podsumowanie)
 Opis: Jako użytkownik, chcę móc widzieć na dashboardzie oraz na   
 Kryteria akceptacji:  
-- Na dashboardzie na środku u góry pokazany jest napis \"tydzień <numer_tygodnia>\"
+- Na dashboardzie na środku u góry pokazany jest napis \"Week <numer_tygodnia>\"
 - <numer_tygodnia> liczony jest od pierwszego tygodnia w którym utworzono planer
 - Widoki posiadają numer tygodnia wyświetlany na górze
   
 ### US-016
 Tytuł: Nawigacja po widoku dnia
-Opis: Jako użytkownik, chcę móc przeglądać zadania przypisane do poszczególnych dni i przechodzić pomiędzy dniami przy użyciu przycisków 'poprzedni dzień', 'następny dzień'. Użytkownik ma też możliwość wybrać dzień przy użyciu date picker.
+Opis: Jako użytkownik, chcę móc przeglądać zadania przypisane do poszczególnych dni i przechodzić pomiędzy dniami przy użyciu przycisków 'Previous day', 'Next day'. Użytkownik ma też możliwość wybrać dzień przy użyciu date picker.
 Kryteria akceptacji:
 - Link z dashboardu do widoku dnia. 
-- Przycisk 'następny dzień' przenosi na widok kolejnego dnia
-- Przycisk 'poprzedni dzień' przenosi na widok poprzedniego dnia
+- Przycisk 'Next day' przenosi na widok kolejnego dnia
+- Przycisk 'Previous day' przenosi na widok poprzedniego dnia
 - DatePicker pozwala wybrać dowolny dzień z zakresu dat aktywnego planera
 - Nawigacja działa także przy oglądaniu archiwalnych planerów
-- Aby móc oglądać archiwalny planer trzeba go najpierw wybrać na widoku dashboard
+- Aby móc oglądać archiwalny planer trzeba go najpierw wybrać na widoku Planners
 
 ### US-017  
 Tytuł: Nawigacja po widoku tygodnia
-Opis: Jako użytkownik, chcę móc przeglądać zadania przypisane do poszczególnych tygodni i przechodzić pomiędzy tygodniami przy użyciu przycisków 'poprzedni tydzień', 'następny tydzień'. Użytkownik ma też możliwość wybrać tydzień przy użyciu listy rozwijalnej (zakres 1-12).   
+Opis: Jako użytkownik, chcę móc przeglądać zadania przypisane do poszczególnych tygodni i przechodzić pomiędzy tygodniami przy użyciu przycisków 'Previous week', 'Next week'. Użytkownik ma też możliwość wybrać tydzień przy użyciu listy rozwijalnej (zakres 1-12).   
 Kryteria akceptacji:
 - Link z dashboardu do widoku tygodnia. 
-- Przycisk 'następny tydzień' przenosi na widok kolejnego tygodnia
-- Przycisk 'poprzedni tydzień' przenosi na widok poprzedniego tygodnia
+- Przycisk 'Next week' przenosi na widok kolejnego tygodnia
+- Przycisk 'Previous week' przenosi na widok poprzedniego tygodnia
 - lista rozwijalna pozwala wybrać dowolny tydzień od 1 do 12 w ramach aktywnego planera
 - Nawigacja działa także przy oglądaniu archiwalnych planerów
-- Aby móc oglądać archiwalny planer trzeba go najpierw wybrać na widoku dashboard
+- Aby móc oglądać archiwalny planer trzeba go najpierw wybrać na widoku Planners
 
 ### US-018
 Tytuł: Nawigacja po widoku podsumowań
-Opis: Jako użytkownik, chcę móc przeglądać podsumowania poszczególnych tygodni i przechodzić pomiędzy podsumowaniami przy użyciu przycisków 'poprzednie podsumowanie', 'następne podsumowanie'. Użytkownik ma też możliwość wybrać podsumowanie tygodnia przy użyciu listy rozwijalnej (zakres 1-12).   
+Opis: Jako użytkownik, chcę móc przeglądać podsumowania poszczególnych tygodni i przechodzić pomiędzy podsumowaniami przy użyciu przycisków 'Previous summary', 'Next summary'. Użytkownik ma też możliwość wybrać podsumowanie tygodnia przy użyciu listy rozwijalnej (zakres 1-12).   
 Kryteria akceptacji:
 - Link z dashboardu do listy podsumowań. 
-- Przycisk 'następne podsumowanie' przenosi na widok kolejnego podsumowania tygodnia
-- Przycisk 'poprzednie podsumowanie' przenosi na widok poprzedniego podsumowania tygodnia
+- Przycisk 'Next summary' przenosi na widok kolejnego podsumowania tygodnia
+- Przycisk 'Previous summary' przenosi na widok poprzedniego podsumowania tygodnia
 - lista rozwijalna pozwala wybrać dowolne podsumowanie tygodnia od 1 do 12 w ramach aktywnego planera
 - Nawigacja działa także przy oglądaniu archiwalnych planerów
-- Aby móc oglądać archiwalny planer trzeba go najpierw wybrać na widoku dashboard
+- Aby móc oglądać archiwalny planer trzeba go najpierw wybrać na widoku Planners
 
 
 ## 6. Metryki sukcesu
