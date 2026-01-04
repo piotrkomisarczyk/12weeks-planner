@@ -1,0 +1,68 @@
+---
+/**
+ * Goals View Page
+ * Route: /plans/[id]/goals
+ * 
+ * Allows users to manage long-term goals (up to 5) and their milestones
+ * Server-side: Fetches plan data for context and validation
+ * Client-side: React island for interactive goal management
+ */
+
+import { PlanService } from '@/lib/services/plan.service';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import Layout from '@/layouts/Layout.astro';
+import GoalsManager from '@/components/plans/goals/GoalsManager';
+import { Toaster } from '@/components/ui/sonner';
+
+export const prerender = false;
+
+// Get plan ID from URL params
+const { id: planId } = Astro.params;
+
+if (!planId) {
+  return Astro.redirect('/plans');
+}
+
+// Fetch plan data on server
+const userId = DEFAULT_USER_ID;
+const planService = new PlanService(Astro.locals.supabase);
+
+let plan;
+try {
+  plan = await planService.getPlanById(planId, userId);
+} catch (error) {
+  console.error('Error fetching plan:', error);
+}
+
+// Redirect if plan not found
+if (!plan) {
+  return Astro.redirect('/plans');
+}
+
+// Calculate end date (12 weeks from start)
+const startDate = new Date(plan.start_date);
+const endDate = new Date(startDate);
+endDate.setDate(startDate.getDate() + (12 * 7) - 1); // 12 weeks minus 1 day
+
+// Check if plan is archived
+const isArchived = plan.status === 'archived';
+
+// Format dates for client
+const planContext = {
+  id: plan.id,
+  name: plan.name,
+  startDate: plan.start_date,
+  endDate: endDate.toISOString().split('T')[0], // YYYY-MM-DD format // TODO: change to use local time as in create plan wizard
+  isArchived,
+  status: plan.status,
+};
+---
+
+<Layout title={`${plan.name} - Goals`}>
+  <GoalsManager 
+    client:load
+    planContext={planContext}
+  />
+  <Toaster client:load position="bottom-right" />
+</Layout>
+

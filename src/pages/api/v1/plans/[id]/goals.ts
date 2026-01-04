@@ -1,5 +1,5 @@
 /**
- * API Endpoints: /api/v1/plans/:planId/goals
+ * API Endpoints: /api/v1/plans/:id/goals
  * GET - Retrieves all goals for a specific plan
  */
 
@@ -62,7 +62,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
       }
     );
   } catch (error) {
-    console.error('Error in GET /api/v1/plans/:planId/goals:', error);
+    console.error('Error in GET /api/v1/plans/:id/goals:', error);
     return new Response(
       JSON.stringify({
         error: 'Internal server error',

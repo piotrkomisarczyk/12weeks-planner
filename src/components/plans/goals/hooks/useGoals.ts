@@ -1,0 +1,224 @@
+/**
+ * useGoals Hook
+ * Manages goals for a specific plan
+ * Handles CRUD operations and maintains local state
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import type {
+  GoalDTO,
+  CreateGoalCommand,
+  UpdateGoalCommand,
+  ListResponse,
+  ItemResponse,
+} from '@/types';
+
+interface UseGoalsState {
+  goals: GoalDTO[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface UseGoalsReturn extends UseGoalsState {
+  fetchGoals: () => Promise<void>;
+  addGoal: (data: Omit<CreateGoalCommand, 'plan_id'>) => Promise<GoalDTO>;
+  updateGoal: (id: string, data: UpdateGoalCommand) => Promise<void>;
+  deleteGoal: (id: string) => Promise<void>;
+  canAddGoal: boolean;
+}
+
+/**
+ * Hook for managing goals for a specific plan
+ * 
+ * @param planId - ID of the plan
+ * @returns Goals state and CRUD operations
+ * 
+ * @example
+ * ```tsx
+ * const { goals, isLoading, addGoal, updateGoal, deleteGoal, canAddGoal } = useGoals(planId);
+ * 
+ * // Add a goal
+ * await addGoal({
+ *   title: 'New Goal',
+ *   category: 'work',
+ *   description: 'Description',
+ *   progress_percentage: 0,
+ *   position: 1
+ * });
+ * 
+ * // Update goal progress
+ * await updateGoal(goalId, { progress_percentage: 50 });
+ * 
+ * // Delete goal
+ * await deleteGoal(goalId);
+ * ```
+ */
+export function useGoals(planId: string): UseGoalsReturn {
+  const [state, setState] = useState<UseGoalsState>({
+    goals: [],
+    isLoading: false,
+    error: null,
+  });
+
+  // Check if user can add more goals (max 5)
+  const canAddGoal = state.goals.length < 5;
+
+  // Fetch all goals for the plan
+  const fetchGoals = useCallback(async () => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+    try {
+      const response = await fetch(`/api/v1/plans/${planId}/goals`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch goals');
+      }
+
+      const data: ListResponse<GoalDTO> = await response.json();
+      setState({ goals: data.data, isLoading: false, error: null });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to load goals';
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
+      }));
+    }
+  }, [planId]);
+
+  // Add a new goal
+  const addGoal = useCallback(
+    async (data: Omit<CreateGoalCommand, 'plan_id'>): Promise<GoalDTO> => {
+      // Check limit before API call
+      if (!canAddGoal) {
+        throw new Error('Maximum 5 goals per plan exceeded');
+      }
+
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        const response = await fetch('/api/v1/goals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...data,
+            plan_id: planId,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create goal');
+        }
+
+        const result: ItemResponse<GoalDTO> = await response.json();
+        
+        // Add new goal to local state
+        setState((prev) => ({
+          goals: [...prev.goals, result.data],
+          isLoading: false,
+          error: null,
+        }));
+
+        return result.data;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to create goal';
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+        throw error;
+      }
+    },
+    [planId, canAddGoal]
+  );
+
+  // Update an existing goal
+  const updateGoal = useCallback(
+    async (id: string, data: UpdateGoalCommand) => {
+      try {
+        const response = await fetch(`/api/v1/goals/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update goal');
+        }
+
+        const result: ItemResponse<GoalDTO> = await response.json();
+
+        // Update goal in local state
+        setState((prev) => ({
+          ...prev,
+          goals: prev.goals.map((goal) =>
+            goal.id === id ? result.data : goal
+          ),
+        }));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to update goal';
+        setState((prev) => ({ ...prev, error: errorMessage }));
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Delete a goal
+  const deleteGoal = useCallback(async (id: string) => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+    try {
+      const response = await fetch(`/api/v1/goals/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete goal');
+      }
+
+      // Remove goal from local state
+      setState((prev) => ({
+        goals: prev.goals.filter((goal) => goal.id !== id),
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to delete goal';
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, []);
+
+  // Fetch goals on mount
+  useEffect(() => {
+    fetchGoals();
+  }, [fetchGoals]);
+
+  return {
+    ...state,
+    fetchGoals,
+    addGoal,
+    updateGoal,
+    deleteGoal,
+    canAddGoal,
+  };
+}
+
