@@ -90,7 +90,7 @@ export type UpdatePlanCommand = Pick<PlanUpdate, 'name' | 'status'>;
 
 /**
  * Plan Dashboard DTO - GET /api/v1/plans/:id/dashboard
- * Aggregated view with plan, goals, milestones, and progress
+ * Aggregated view with plan, goals, milestones, weekly goals, tasks, and progress
  */
 export interface PlanDashboardDTO {
   plan: {
@@ -100,11 +100,27 @@ export interface PlanDashboardDTO {
     status: PlanStatus;
     current_week: number;
   };
-  goals: GoalWithMilestonesDTO[];
+  goals: Array<
+    GoalWithMilestonesDTO & {
+      weekly_goals_count: number;
+      tasks_count: number;
+    }
+  >;
+  weekly_goals: Array<
+    WeeklyGoalDTO & {
+      tasks_count: number;
+      completed_tasks: number;
+    }
+  >;
+  ad_hoc_tasks: Pick<TaskDTO, 'id' | 'week_number' | 'title' | 'priority' | 'status'>[];
   progress_summary: {
     total_goals: number;
     completed_goals: number;
     average_progress: number;
+    total_milestones: number;
+    completed_milestones: number;
+    total_tasks: number;
+    completed_tasks: number;
   };
 }
 
@@ -120,10 +136,15 @@ export type GoalDTO = LongTermGoalEntity;
 
 /**
  * Goal with Milestones DTO - GET /api/v1/goals/:id
- * Goal entity with nested milestones array
+ * Goal entity with nested milestones array and optional counts
  */
 export interface GoalWithMilestonesDTO extends GoalDTO {
-  milestones: MilestoneDTO[];
+  milestones: Array<
+    MilestoneDTO & {
+      weekly_goals_count?: number;
+      tasks_count?: number;
+    }
+  >;
 }
 
 /**
@@ -191,18 +212,20 @@ export interface WeeklyGoalWithSubtasksDTO extends WeeklyGoalDTO {
 /**
  * Create Weekly Goal Command - POST /api/v1/weekly-goals
  * Required fields for weekly goal creation
+ * Both long_term_goal_id and milestone_id are optional, allowing flexible hierarchies
  */
 export type CreateWeeklyGoalCommand = Pick<
   WeeklyGoalInsert,
-  'plan_id' | 'long_term_goal_id' | 'week_number' | 'title' | 'description' | 'position'
+  'plan_id' | 'long_term_goal_id' | 'milestone_id' | 'week_number' | 'title' | 'description' | 'position'
 >;
 
 /**
  * Update Weekly Goal Command - PATCH /api/v1/weekly-goals/:id
  * All fields optional for partial updates
+ * Can update associations (long_term_goal_id, milestone_id) independently
  */
 export type UpdateWeeklyGoalCommand = Partial<
-  Pick<WeeklyGoalUpdate, 'long_term_goal_id' | 'title' | 'description' | 'position'>
+  Pick<WeeklyGoalUpdate, 'long_term_goal_id' | 'milestone_id' | 'title' | 'description' | 'position'>
 >;
 
 // ============================================================================
@@ -239,11 +262,13 @@ export interface DailyTasksDTO {
 /**
  * Create Task Command - POST /api/v1/tasks
  * Required fields for task creation
+ * Supports flexible hierarchies: can link to weekly_goal, long_term_goal, milestone, or any combination
  */
 export type CreateTaskCommand = Pick<
   TaskInsert,
   | 'plan_id'
   | 'weekly_goal_id'
+  | 'long_term_goal_id'
   | 'milestone_id'
   | 'title'
   | 'description'
@@ -258,11 +283,13 @@ export type CreateTaskCommand = Pick<
 /**
  * Update Task Command - PATCH /api/v1/tasks/:id
  * All fields optional for partial updates
+ * Can update associations (weekly_goal_id, long_term_goal_id, milestone_id) to change task relationships
  */
 export type UpdateTaskCommand = Partial<
   Pick<
     TaskUpdate,
     | 'weekly_goal_id'
+    | 'long_term_goal_id'
     | 'milestone_id'
     | 'title'
     | 'description'
@@ -525,6 +552,7 @@ export interface WeeklyGoalListParams extends ListQueryParams {
   plan_id: string;
   week_number?: number;
   long_term_goal_id?: string;
+  milestone_id?: string;
 }
 
 /**
@@ -536,9 +564,19 @@ export interface TaskListParams extends ListQueryParams {
   due_day?: number;
   task_type?: TaskType;
   weekly_goal_id?: string;
+  long_term_goal_id?: string;
   milestone_id?: string;
   status?: TaskStatus;
   priority?: TaskPriority;
+}
+
+/**
+ * Tasks by goal query parameters - GET /api/v1/goals/:goalId/tasks
+ */
+export interface TasksByGoalParams extends ListQueryParams {
+  status?: TaskStatus;
+  week_number?: number;
+  include_milestone_tasks?: boolean;
 }
 
 /**
