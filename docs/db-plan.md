@@ -73,6 +73,7 @@ Tabela przechowująca cele tygodniowe (główne zadanie na tydzień).
 | id | UUID | PRIMARY KEY, DEFAULT uuid_generate_v4() | Unikalny identyfikator celu tygodniowego |
 | plan_id | UUID | NOT NULL, REFERENCES plans(id) ON DELETE CASCADE | Powiązanie z planerem |
 | long_term_goal_id | UUID | NULL, REFERENCES long_term_goals(id) ON DELETE SET NULL | Opcjonalne powiązanie z celem długoterminowym |
+| milestone_id | UUID | NULL, REFERENCES milestones(id) ON DELETE SET NULL | Opcjonalne powiązanie z kamieniem milowym |
 | week_number | INTEGER | NOT NULL, CHECK (week_number >= 1 AND week_number <= 12) | Numer tygodnia w ramach planera (1-12) |
 | title | TEXT | NOT NULL | Główne zadanie tygodnia |
 | description | TEXT | NULL | Opis celu tygodniowego |
@@ -83,6 +84,7 @@ Tabela przechowująca cele tygodniowe (główne zadanie na tydzień).
 **Indeksy:**
 - `idx_weekly_goals_plan_id` ON (plan_id)
 - `idx_weekly_goals_long_term_goal_id` ON (long_term_goal_id)
+- `idx_weekly_goals_milestone_id` ON (milestone_id)
 - `idx_weekly_goals_week_number` ON (plan_id, week_number)
 
 ---
@@ -95,6 +97,7 @@ Tabela przechowująca zadania. Zadania mogą być powiązane z celami tygodniowy
 | id | UUID | PRIMARY KEY, DEFAULT uuid_generate_v4() | Unikalny identyfikator zadania |
 | weekly_goal_id | UUID | NULL, REFERENCES weekly_goals(id) ON DELETE CASCADE | Powiązanie z celem tygodniowym (NULL dla ad-hoc) |
 | plan_id | UUID | NOT NULL, REFERENCES plans(id) ON DELETE CASCADE | Powiązanie z planerem (dla zadań ad-hoc) |
+| long_term_goal_id | UUID | NULL, REFERENCES long_term_goals(id) ON DELETE SET NULL | Opcjonalne powiązanie z celem długoterminowym |
 | milestone_id | UUID | NULL, REFERENCES milestones(id) ON DELETE SET NULL | Opcjonalne powiązanie z kamieniem milowym |
 | title | TEXT | NOT NULL | Tytuł zadania |
 | description | TEXT | NULL | Opis zadania |
@@ -110,6 +113,7 @@ Tabela przechowująca zadania. Zadania mogą być powiązane z celami tygodniowy
 **Indeksy:**
 - `idx_tasks_weekly_goal_id` ON (weekly_goal_id)
 - `idx_tasks_plan_id` ON (plan_id)
+- `idx_tasks_long_term_goal_id` ON (long_term_goal_id)
 - `idx_tasks_milestone_id` ON (milestone_id)
 - `idx_tasks_week_number` ON (plan_id, week_number)
 - `idx_tasks_due_day` ON (plan_id, week_number, due_day)
@@ -195,8 +199,10 @@ long_term_goals (1) ---> (N) milestones
 plans (1) ---> (N) weekly_goals
 weekly_goals (1) ---> (N) tasks (jako podzadania)
 plans (1) ---> (N) tasks (zadania ad-hoc)
-milestones (1) ---> (N) tasks (opcjonalne powiązanie)
 long_term_goals (1) ---> (N) weekly_goals (opcjonalne powiązanie)
+long_term_goals (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
+milestones (1) ---> (N) weekly_goals (opcjonalne powiązanie)
+milestones (1) ---> (N) tasks (opcjonalne powiązanie)
 ```
 
 ### 2.3. Historia Zadań
@@ -219,10 +225,13 @@ auth.users (1) ---> (1) user_metrics
   - `auth.users` → `plans`
   - `plans` → `long_term_goals` (1-5 celów)
   - `long_term_goals` → `milestones` (0-5 kamieni milowych)
+  - `long_term_goals` → `weekly_goals` (opcjonalne powiązanie)
+  - `long_term_goals` → `tasks` (opcjonalne powiązanie bezpośrednie)
+  - `milestones` → `weekly_goals` (opcjonalne powiązanie)
+  - `milestones` → `tasks` (opcjonalne powiązanie)
   - `plans` → `weekly_goals` (0-12 celów tygodniowych)
   - `weekly_goals` → `tasks` (0-10 podzadań)
   - `plans` → `tasks` (zadania ad-hoc)
-  - `milestones` → `tasks` (opcjonalnie)
   - `plans` → `weekly_reviews` (0-12 podsumowań)
   - `tasks` → `task_history`
 
@@ -231,8 +240,8 @@ auth.users (1) ---> (1) user_metrics
 
 **Kaskadowe Usuwanie:**
 - Usunięcie `plan` → kaskadowe usunięcie wszystkich powiązanych `long_term_goals`, `milestones`, `weekly_goals`, `tasks`, `weekly_reviews`
-- Usunięcie `long_term_goal` → kaskadowe usunięcie powiązanych `milestones`, ustawienie `long_term_goal_id = NULL` w `weekly_goals`
-- Usunięcie `milestone` → ustawienie `milestone_id = NULL` w `tasks`
+- Usunięcie `long_term_goal` → kaskadowe usunięcie powiązanych `milestones`, ustawienie `long_term_goal_id = NULL` w `weekly_goals` i `tasks`
+- Usunięcie `milestone` → ustawienie `milestone_id = NULL` w `weekly_goals` i `tasks`
 - Usunięcie `weekly_goal` → kaskadowe usunięcie powiązanych `tasks` (podzadań)
 - Usunięcie `task` → kaskadowe usunięcie powiązanych `task_history`
 - Usunięcie `auth.users` → kaskadowe usunięcie wszystkich danych użytkownika
@@ -247,7 +256,9 @@ auth.users (1) ---> (1) user_metrics
 ```sql
 CREATE INDEX idx_tasks_plan_week_day ON tasks(plan_id, week_number, due_day);
 CREATE INDEX idx_tasks_week_status ON tasks(plan_id, week_number, status);
+CREATE INDEX idx_tasks_goal_milestone ON tasks(long_term_goal_id, milestone_id) WHERE long_term_goal_id IS NOT NULL OR milestone_id IS NOT NULL;
 CREATE INDEX idx_weekly_goals_plan_week ON weekly_goals(plan_id, week_number);
+CREATE INDEX idx_weekly_goals_goal_milestone ON weekly_goals(long_term_goal_id, milestone_id) WHERE long_term_goal_id IS NOT NULL OR milestone_id IS NOT NULL;
 CREATE INDEX idx_weekly_reviews_plan_week ON weekly_reviews(plan_id, week_number);
 ```
 
@@ -1076,6 +1087,8 @@ Schemat bazy danych jest znormalizowany do **3NF (Third Normal Form)**:
 
 Jedyne odstępstwa od pełnej normalizacji (celowa denormalizacja dla wydajności):
 - `plan_id` w tabeli `tasks` (dla zadań ad-hoc) - pozwala na szybsze zapytania bez JOIN przez `weekly_goals`
+- `long_term_goal_id` w tabeli `tasks` - umożliwia bezpośrednie wiązanie zadań z celami długoterminowymi dla elastyczności w hierarchii
+- `milestone_id` w tabeli `weekly_goals` - pozwala na bezpośrednie powiązanie celów tygodniowych z kamieniami milowymi
 
 ### 7.2. UUID vs. Serial IDs
 Wszystkie klucze podstawowe używają **UUID** zamiast SERIAL/BIGSERIAL z następujących powodów:
@@ -1133,10 +1146,13 @@ Walidacja danych odbywa się na trzech poziomach:
 ### 7.6. Performance Considerations
 
 **Query Optimization:**
-- Indeksy na wszystkich kluczach obcych
+- Indeksy na wszystkich kluczach obcych (w tym nowe `long_term_goal_id` i `milestone_id`)
 - Indeksy na kolumnach używanych w WHERE (status, week_number, due_day)
-- Composite indexes dla często używanych kombinacji
+- Composite indexes dla często używanych kombinacji:
+  - `tasks(long_term_goal_id, milestone_id)` - optymalizacja dla zapytań po hierarchii celów
+  - `weekly_goals(long_term_goal_id, milestone_id)` - filtrowanie celów tygodniowych po powiązaniach
 - Partial indexes dla często filtrowanych podzbiorów danych
+- Nowe indeksy wykorzystują WHERE clauses do optymalizacji tylko dla rekordów z faktycznymi powiązaniami
 
 **Denormalization Trade-offs:**
 - Dynamiczne obliczanie postępów (views) zamiast przechowywania obliczonych wartości
@@ -1162,7 +1178,10 @@ Walidacja danych odbywa się na trzech poziomach:
 **Referential Integrity:**
 - Wszystkie relacje chronione przez foreign keys
 - Kaskadowe usuwanie zapewnia spójność (orphaned records)
-- ON DELETE SET NULL dla opcjonalnych relacji (milestone_id, long_term_goal_id)
+- ON DELETE SET NULL dla opcjonalnych relacji:
+  - `milestone_id` w tabelach `tasks` i `weekly_goals`
+  - `long_term_goal_id` w tabelach `tasks` i `weekly_goals`
+- Elastyczne wiązanie pozwala na wielopoziomową hierarchię: zadania mogą być powiązane zarówno bezpośrednio z celami długoterminowymi, jak i z kamieniami milowymi
 
 **Business Logic Integrity:**
 - Triggers walidują limity zgodnie z wymaganiami biznesowymi
