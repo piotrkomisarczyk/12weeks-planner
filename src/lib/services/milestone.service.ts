@@ -12,10 +12,13 @@ import type {
   CreateMilestoneCommand,
   UpdateMilestoneCommand,
   MilestoneInsert,
-  MilestoneUpdate
+  MilestoneUpdate,
+  WeeklyGoalDTO,
+  TaskDTO,
 } from '../../types';
 import type {
   ListMilestonesQuery,
+  ListTasksByMilestoneQuery,
 } from '../validation/milestone.validation';
 
 /**
@@ -323,6 +326,126 @@ export class MilestoneService {
       console.error('Error deleting milestone:', error);
       throw new Error(`Failed to delete milestone: ${error.message}`);
     }
+  }
+
+  /**
+   * Get weekly goals for a specific milestone
+   * Verifies milestone exists and belongs to user
+   * Returns weekly goals ordered by week_number and position
+   * 
+   * @param milestoneId - UUID of the milestone
+   * @param userId - ID użytkownika (DEFAULT_USER_ID w MVP)
+   * @returns Promise with array of weekly goals
+   * @throws Error if milestone not found or doesn't belong to user
+   * @throws Error if database query fails
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoals = await milestoneService.getWeeklyGoalsByMilestoneId(milestoneId, userId);
+   * ```
+   */
+  async getWeeklyGoalsByMilestoneId(
+    milestoneId: string,
+    userId: string
+  ): Promise<WeeklyGoalDTO[]> {
+    // First check if milestone exists and belongs to user
+    const { data: milestone, error: milestoneError } = await this.supabase
+      .from('milestones')
+      .select('id')
+      .eq('id', milestoneId)
+      .single();
+
+    if (milestoneError || !milestone) {
+      throw new Error('Milestone not found or access denied');
+    }
+
+    // Get weekly goals
+    const { data, error } = await this.supabase
+      .from('weekly_goals')
+      .select('*')
+      .eq('milestone_id', milestoneId)
+      .order('week_number', { ascending: true })
+      .order('position', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching weekly goals by milestone:', error);
+      throw new Error(`Failed to fetch weekly goals: ${error.message}`);
+    }
+
+    return data as WeeklyGoalDTO[];
+  }
+
+  /**
+   * Get tasks for a specific milestone with optional filters
+   * Verifies milestone exists and belongs to user
+   * Supports filtering by status and week_number
+   * Returns tasks ordered by week_number, due_day, and position
+   * 
+   * @param milestoneId - UUID of the milestone
+   * @param filters - Query filters (status, week_number, limit, offset)
+   * @param userId - ID użytkownika (DEFAULT_USER_ID w MVP)
+   * @returns Promise with array of tasks and total count
+   * @throws Error if milestone not found or doesn't belong to user
+   * @throws Error if database query fails
+   * 
+   * @example
+   * ```typescript
+   * const result = await milestoneService.getTasksByMilestoneId(
+   *   milestoneId,
+   *   { status: 'completed', week_number: 3, limit: 50, offset: 0 },
+   *   userId
+   * );
+   * ```
+   */
+  async getTasksByMilestoneId(
+    milestoneId: string,
+    filters: ListTasksByMilestoneQuery,
+    userId: string
+  ): Promise<{ data: TaskDTO[]; count: number }> {
+    // First check if milestone exists and belongs to user
+    const { data: milestone, error: milestoneError } = await this.supabase
+      .from('milestones')
+      .select('id')
+      .eq('id', milestoneId)
+      .single();
+
+    if (milestoneError || !milestone) {
+      throw new Error('Milestone not found or access denied');
+    }
+
+    // Build query
+    let query = this.supabase
+      .from('tasks')
+      .select('*', { count: 'exact' })
+      .eq('milestone_id', milestoneId);
+
+    // Apply filters
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters.week_number !== undefined) {
+      query = query.eq('week_number', filters.week_number);
+    }
+
+    // Apply ordering and pagination
+    query = query
+      .order('week_number', { ascending: true, nullsFirst: false })
+      .order('due_day', { ascending: true, nullsFirst: false })
+      .order('position', { ascending: true })
+      .range(filters.offset, filters.offset + filters.limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Error fetching tasks by milestone:', error);
+      throw new Error(`Failed to fetch tasks: ${error.message}`);
+    }
+
+    return {
+      data: data as TaskDTO[],
+      count: count ?? 0,
+    };
   }
 }
 

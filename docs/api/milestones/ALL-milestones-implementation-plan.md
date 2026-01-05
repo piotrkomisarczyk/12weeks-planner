@@ -11,6 +11,8 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 4. `POST /api/v1/milestones` - tworzenie nowego milestone
 5. `PATCH /api/v1/milestones/:id` - aktualizacja milestone
 6. `DELETE /api/v1/milestones/:id` - usuwanie milestone
+7. `GET /api/v1/milestones/:milestoneId/weekly-goals` - weekly goals dla milestone
+8. `GET /api/v1/milestones/:milestoneId/tasks` - tasks dla milestone z filtrami
 
 **Ograniczenia biznesowe:**
 - Maksymalnie 5 milestones na goal (enforced przez database trigger)
@@ -150,6 +152,44 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 - `id` (wymagany): UUID - ID milestone
 
 **Query Parameters:** Brak
+
+**Request Body:** Brak
+
+**Headers:** Brak (MVP - bez autentykacji)
+
+---
+
+### 2.7. GET /api/v1/milestones/:milestoneId/weekly-goals
+
+**Metoda HTTP:** GET
+
+**Struktura URL:** `/api/v1/milestones/:milestoneId/weekly-goals`
+
+**URL Parameters:**
+- `milestoneId` (wymagany): UUID - ID milestone
+
+**Query Parameters:** Brak
+
+**Request Body:** Brak
+
+**Headers:** Brak (MVP - bez autentykacji)
+
+---
+
+### 2.8. GET /api/v1/milestones/:milestoneId/tasks
+
+**Metoda HTTP:** GET
+
+**Struktura URL:** `/api/v1/milestones/:milestoneId/tasks`
+
+**URL Parameters:**
+- `milestoneId` (wymagany): UUID - ID milestone
+
+**Query Parameters:**
+- `status` (opcjonalny): string - filtrowanie po statusie zadania (todo, in_progress, completed, cancelled, postponed)
+- `week_number` (opcjonalny): number - filtrowanie po numerze tygodnia (1-12)
+- `limit` (opcjonalny): number - liczba wyników (default: 50, max: 100)
+- `offset` (opcjonalny): number - offset dla paginacji (default: 0)
 
 **Request Body:** Brak
 
@@ -451,6 +491,103 @@ interface ErrorResponse {
 
 ---
 
+### 4.7. GET /api/v1/milestones/:milestoneId/weekly-goals
+
+**Sukces - 200 OK:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
+      "week_number": 3,
+      "title": "Complete authentication system",
+      "description": "Implement auth with Supabase",
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T10:00:00Z"
+    }
+  ]
+}
+```
+
+**Błąd - 400 Bad Request:**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "milestoneId",
+      "message": "Invalid UUID format"
+    }
+  ]
+}
+```
+
+**Błąd - 404 Not Found:**
+```json
+{
+  "error": "Not Found",
+  "message": "Milestone not found or access denied"
+}
+```
+
+---
+
+### 4.8. GET /api/v1/milestones/:milestoneId/tasks
+
+**Sukces - 200 OK:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "weekly_goal_id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
+      "title": "Setup Supabase client",
+      "description": "Configure Supabase with environment variables",
+      "priority": "A",
+      "status": "completed",
+      "task_type": "weekly_sub",
+      "week_number": 3,
+      "due_day": 1,
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T16:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+**Błąd - 400 Bad Request:**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "status",
+      "message": "Invalid status value",
+      "received": "invalid"
+    }
+  ]
+}
+```
+
+**Błąd - 404 Not Found:**
+```json
+{
+  "error": "Not Found",
+  "message": "Milestone not found or access denied"
+}
+```
+
+---
+
 ## 5. Przepływ danych
 
 ### 5.1. Architektura warstw
@@ -562,6 +699,43 @@ Client Response
    ```
 5. **Cascade**: Automatycznie ustawia `milestone_id = NULL` w powiązanych tasks (ON DELETE SET NULL)
 6. **Response**: Zwraca `SuccessResponse` z message lub 404 jeśli nie znaleziono
+
+### 5.8. GET /api/v1/milestones/:milestoneId/weekly-goals - Przepływ
+
+1. **Endpoint**: Odbiera request z milestoneId w URL
+2. **Walidacja**: Sprawdza poprawność UUID dla milestoneId
+3. **Service**: `milestoneService.getWeeklyGoalsByMilestoneId(milestoneId, DEFAULT_USER_ID)`
+4. **Weryfikacja Milestone**: Sprawdza czy milestone istnieje
+5. **Database Query**:
+   ```sql
+   SELECT * FROM weekly_goals
+   WHERE milestone_id = $1
+   ORDER BY week_number ASC, position ASC
+   ```
+6. **Response**: Zwraca `ListResponse<WeeklyGoalDTO>` lub 404 jeśli milestone nie istnieje
+
+**⚠️ MVP:** Bez sprawdzania user_id - wszystkie weekly goals dla milestone są dostępne
+
+### 5.9. GET /api/v1/milestones/:milestoneId/tasks - Przepływ
+
+1. **Endpoint**: Odbiera request z milestoneId w URL i query params
+2. **Walidacja**: 
+   - Sprawdza poprawność UUID dla milestoneId
+   - Waliduje query params (status, week_number, limit, offset)
+3. **Service**: `milestoneService.getTasksByMilestoneId(milestoneId, filters, DEFAULT_USER_ID)`
+4. **Weryfikacja Milestone**: Sprawdza czy milestone istnieje
+5. **Database Query**:
+   ```sql
+   SELECT * FROM tasks
+   WHERE milestone_id = $1
+     AND (status = $2 OR $2 IS NULL)
+     AND (week_number = $3 OR $3 IS NULL)
+   ORDER BY week_number ASC, due_day ASC, position ASC
+   LIMIT $4 OFFSET $5
+   ```
+6. **Response**: Zwraca `ListResponse<TaskDTO>` z count lub 404 jeśli milestone nie istnieje
+
+**⚠️ MVP:** Bez sprawdzania user_id - wszystkie tasks dla milestone są dostępne
 
 ---
 
@@ -886,6 +1060,94 @@ const uuidSchema = z.string().uuid();
 }
 ```
 
+#### 7.2.7. GET /api/v1/milestones/:milestoneId/weekly-goals
+
+**400 Bad Request:**
+```typescript
+// Invalid milestoneId UUID
+{
+  error: "Validation failed",
+  details: [
+    {
+      field: "milestoneId",
+      message: "Invalid UUID format",
+      received: "not-a-uuid"
+    }
+  ]
+}
+```
+
+**404 Not Found:**
+```typescript
+// Milestone doesn't exist or belongs to another user
+{
+  error: "Not Found",
+  message: "Milestone not found or access denied"
+}
+```
+
+#### 7.2.8. GET /api/v1/milestones/:milestoneId/tasks
+
+**400 Bad Request:**
+```typescript
+// Invalid milestoneId UUID
+{
+  error: "Validation failed",
+  details: [
+    {
+      field: "milestoneId",
+      message: "Invalid UUID format",
+      received: "abc-123"
+    }
+  ]
+}
+
+// Invalid status value
+{
+  error: "Validation failed",
+  details: [
+    {
+      field: "status",
+      message: "Invalid status value",
+      received: "invalid_status"
+    }
+  ]
+}
+
+// Invalid week_number
+{
+  error: "Validation failed",
+  details: [
+    {
+      field: "week_number",
+      message: "Must be between 1 and 12",
+      received: 15
+    }
+  ]
+}
+
+// Invalid limit
+{
+  error: "Validation failed",
+  details: [
+    {
+      field: "limit",
+      message: "Must be between 1 and 100",
+      received: 200
+    }
+  ]
+}
+```
+
+**404 Not Found:**
+```typescript
+// Milestone doesn't exist or belongs to another user
+{
+  error: "Not Found",
+  message: "Milestone not found or access denied"
+}
+```
+
 ### 7.3. Error Handling Pattern w kodzie
 
 ```typescript
@@ -1107,14 +1369,17 @@ src/
     └── api/
         └── v1/
             ├── milestones/
-            │   └── [id].ts                # GET/PATCH/DELETE /milestones/:id
-            ├── milestones.ts              # GET/POST /milestones (nie istnieje jeszcze)
+            │   ├── [id].ts                      # GET/PATCH/DELETE /milestones/:id
+            │   └── [milestoneId]/
+            │       ├── weekly-goals.ts          # GET /milestones/:milestoneId/weekly-goals
+            │       └── tasks.ts                 # GET /milestones/:milestoneId/tasks
+            ├── milestones.ts                    # GET/POST /milestones
             └── goals/
                 └── [goalId]/
-                    └── milestones.ts      # GET /goals/:goalId/milestones
+                    └── milestones.ts            # GET /goals/:goalId/milestones
 ```
 
-**Uwaga:** Sprawdzić czy struktura goals/ już istnieje, jeśli nie - utworzyć.
+**Uwaga:** Sprawdzić czy struktura goals/ i milestones/[milestoneId]/ już istnieją, jeśli nie - utworzyć.
 
 ---
 
@@ -1182,10 +1447,25 @@ export const updateMilestoneSchema = z.object({
   { message: 'At least one field must be provided for update' }
 );
 
+// Query params dla GET /api/v1/milestones/:milestoneId/tasks
+export const listTasksByMilestoneQuerySchema = z.object({
+  status: z.enum(['todo', 'in_progress', 'completed', 'cancelled', 'postponed'], {
+    errorMap: () => ({ message: "Invalid status value" })
+  }).optional(),
+  week_number: z.coerce.number()
+    .int({ message: 'Week number must be an integer' })
+    .min(1, { message: 'Week number must be at least 1' })
+    .max(12, { message: 'Week number must be at most 12' })
+    .optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
 // Type exports dla TypeScript
 export type ListMilestonesQuery = z.infer<typeof listMilestonesQuerySchema>;
 export type CreateMilestoneData = z.infer<typeof createMilestoneSchema>;
 export type UpdateMilestoneData = z.infer<typeof updateMilestoneSchema>;
+export type ListTasksByMilestoneQuery = z.infer<typeof listTasksByMilestoneQuerySchema>;
 ```
 
 **Sprawdzić:**
@@ -1193,6 +1473,8 @@ export type UpdateMilestoneData = z.infer<typeof updateMilestoneSchema>;
 - ✅ Wszystkie validation messages są czytelne
 - ✅ Regex dla daty poprawny
 - ✅ Ranges dla position (1-5) i limit (1-100)
+- ✅ Enum dla task status (todo, in_progress, completed, cancelled, postponed)
+- ✅ Week number validation (1-12)
 - ✅ Type exports na końcu pliku
 
 ---
@@ -1207,9 +1489,12 @@ import type {
   MilestoneDTO,
   CreateMilestoneCommand,
   UpdateMilestoneCommand,
+  WeeklyGoalDTO,
+  TaskDTO,
 } from '../../types';
 import type {
   ListMilestonesQuery,
+  ListTasksByMilestoneQuery,
 } from '../validation/milestone.validation';
 
 /**
@@ -1400,6 +1685,94 @@ export class MilestoneService {
       console.error('Error deleting milestone:', error);
       throw new Error(`Failed to delete milestone: ${error.message}`);
     }
+  }
+
+  /**
+   * Get weekly goals for a specific milestone
+   */
+  async getWeeklyGoalsByMilestoneId(
+    milestoneId: string,
+    userId: string
+  ): Promise<WeeklyGoalDTO[]> {
+    // First check if milestone exists and belongs to user
+    const { data: milestone, error: milestoneError } = await this.supabase
+      .from('milestones')
+      .select('id')
+      .eq('id', milestoneId)
+      .single();
+
+    if (milestoneError || !milestone) {
+      throw new Error('Milestone not found or access denied');
+    }
+
+    // Get weekly goals
+    const { data, error } = await this.supabase
+      .from('weekly_goals')
+      .select('*')
+      .eq('milestone_id', milestoneId)
+      .order('week_number', { ascending: true })
+      .order('position', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching weekly goals by milestone:', error);
+      throw new Error(`Failed to fetch weekly goals: ${error.message}`);
+    }
+
+    return data as WeeklyGoalDTO[];
+  }
+
+  /**
+   * Get tasks for a specific milestone with optional filters
+   */
+  async getTasksByMilestoneId(
+    milestoneId: string,
+    filters: ListTasksByMilestoneQuery,
+    userId: string
+  ): Promise<{ data: TaskDTO[]; count: number }> {
+    // First check if milestone exists and belongs to user
+    const { data: milestone, error: milestoneError } = await this.supabase
+      .from('milestones')
+      .select('id')
+      .eq('id', milestoneId)
+      .single();
+
+    if (milestoneError || !milestone) {
+      throw new Error('Milestone not found or access denied');
+    }
+
+    // Build query
+    let query = this.supabase
+      .from('tasks')
+      .select('*', { count: 'exact' })
+      .eq('milestone_id', milestoneId);
+
+    // Apply filters
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters.week_number !== undefined) {
+      query = query.eq('week_number', filters.week_number);
+    }
+
+    // Apply ordering and pagination
+    query = query
+      .order('week_number', { ascending: true, nullsFirst: false })
+      .order('due_day', { ascending: true, nullsFirst: false })
+      .order('position', { ascending: true })
+      .range(filters.offset, filters.offset + filters.limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Error fetching tasks by milestone:', error);
+      throw new Error(`Failed to fetch tasks: ${error.message}`);
+    }
+
+    return {
+      data: data as TaskDTO[],
+      count: count ?? 0,
+    };
   }
 }
 ```
@@ -1919,7 +2292,208 @@ export const GET: APIRoute = async ({ params }) => {
 
 ---
 
-### Krok 7: Testowanie ręczne (Manual Testing)
+### Krok 7: Implementacja GET /api/v1/milestones/:milestoneId/weekly-goals
+
+**Plik: `src/pages/api/v1/milestones/[milestoneId]/weekly-goals.ts`** (NOWY PLIK)
+
+```typescript
+import type { APIRoute } from 'astro';
+import { supabase, DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { MilestoneService } from '../../../../../lib/services/milestone.service';
+import { uuidSchema } from '../../../../../lib/validation/milestone.validation';
+import { z } from 'zod';
+
+export const prerender = false;
+
+// GET /api/v1/milestones/:milestoneId/weekly-goals
+export const GET: APIRoute = async ({ params }) => {
+  try {
+    // Validate milestone ID
+    const milestoneId = uuidSchema.parse(params.milestoneId);
+
+    // Get weekly goals from service
+    const milestoneService = new MilestoneService(supabase);
+    const weeklyGoals = await milestoneService.getWeeklyGoalsByMilestoneId(
+      milestoneId,
+      DEFAULT_USER_ID
+    );
+
+    return new Response(
+      JSON.stringify({
+        data: weeklyGoals,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  } catch (error) {
+    // Zod validation error
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({
+          error: 'Validation failed',
+          details: error.errors.map((e) => ({
+            field: 'milestoneId',
+            message: e.message,
+            received: e.input,
+          })),
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Not found error
+    if (error instanceof Error && error.message.includes('not found')) {
+      return new Response(
+        JSON.stringify({
+          error: 'Not Found',
+          message: error.message,
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Other errors
+    console.error('Error in GET /api/v1/milestones/:milestoneId/weekly-goals:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Internal Server Error',
+        message: 'An unexpected error occurred',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+};
+```
+
+**Sprawdzić:**
+- ✅ Proper path depth (6x ../ dla imports)
+- ✅ params.milestoneId (nie params.id)
+- ✅ Same error handling pattern jako inne endpoints
+- ✅ Zwraca ListResponse z data array
+
+---
+
+### Krok 8: Implementacja GET /api/v1/milestones/:milestoneId/tasks
+
+**Plik: `src/pages/api/v1/milestones/[milestoneId]/tasks.ts`** (NOWY PLIK)
+
+```typescript
+import type { APIRoute } from 'astro';
+import { supabase, DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { MilestoneService } from '../../../../../lib/services/milestone.service';
+import {
+  uuidSchema,
+  listTasksByMilestoneQuerySchema,
+} from '../../../../../lib/validation/milestone.validation';
+import { z } from 'zod';
+
+export const prerender = false;
+
+// GET /api/v1/milestones/:milestoneId/tasks
+export const GET: APIRoute = async ({ params, request }) => {
+  try {
+    // Validate milestone ID
+    const milestoneId = uuidSchema.parse(params.milestoneId);
+
+    // Parse and validate query parameters
+    const url = new URL(request.url);
+    const queryParams = {
+      status: url.searchParams.get('status') ?? undefined,
+      week_number: url.searchParams.get('week_number') ?? undefined,
+      limit: url.searchParams.get('limit') ?? undefined,
+      offset: url.searchParams.get('offset') ?? undefined,
+    };
+
+    const validatedParams = listTasksByMilestoneQuerySchema.parse(queryParams);
+
+    // Get tasks from service
+    const milestoneService = new MilestoneService(supabase);
+    const result = await milestoneService.getTasksByMilestoneId(
+      milestoneId,
+      validatedParams,
+      DEFAULT_USER_ID
+    );
+
+    return new Response(
+      JSON.stringify({
+        data: result.data,
+        count: result.count,
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  } catch (error) {
+    // Zod validation error
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({
+          error: 'Validation failed',
+          details: error.errors.map((e) => ({
+            field: e.path.join('.') || 'milestoneId',
+            message: e.message,
+            received: e.input,
+          })),
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Not found error
+    if (error instanceof Error && error.message.includes('not found')) {
+      return new Response(
+        JSON.stringify({
+          error: 'Not Found',
+          message: error.message,
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Other errors
+    console.error('Error in GET /api/v1/milestones/:milestoneId/tasks:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Internal Server Error',
+        message: 'An unexpected error occurred',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+};
+```
+
+**Sprawdzić:**
+- ✅ Proper path depth (6x ../ dla imports)
+- ✅ params.milestoneId (nie params.id)
+- ✅ Query params validation
+- ✅ Same error handling pattern jako inne endpoints
+- ✅ Zwraca ListResponse z data array i count
+
+---
+
+### Krok 9: Testowanie ręczne (Manual Testing)
 
 **Przygotować test file: `api-tests/milestones-tests.http`**
 
@@ -1980,9 +2554,24 @@ Content-Type: application/json
 ### 10. DELETE /api/v1/milestones/:id - Delete milestone
 DELETE {{baseUrl}}/milestones/{{milestoneId}}
 
+### 11. GET /api/v1/milestones/:milestoneId/weekly-goals - Get weekly goals for milestone
+GET {{baseUrl}}/milestones/{{milestoneId}}/weekly-goals
+
+### 12. GET /api/v1/milestones/:milestoneId/tasks - Get tasks for milestone
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks
+
+### 13. GET /api/v1/milestones/:milestoneId/tasks - Filter by status
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?status=completed
+
+### 14. GET /api/v1/milestones/:milestoneId/tasks - Filter by week
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?week_number=3
+
+### 15. GET /api/v1/milestones/:milestoneId/tasks - Multiple filters with pagination
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?status=todo&week_number=5&limit=10&offset=0
+
 ### ERROR TESTS
 
-### 11. POST with invalid UUID - Should return 400
+### 16. POST with invalid UUID - Should return 400
 POST {{baseUrl}}/milestones
 Content-Type: application/json
 
@@ -1991,7 +2580,7 @@ Content-Type: application/json
   "title": "Test"
 }
 
-### 12. POST with title too long - Should return 400
+### 17. POST with title too long - Should return 400
 POST {{baseUrl}}/milestones
 Content-Type: application/json
 
@@ -2000,7 +2589,7 @@ Content-Type: application/json
   "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit."
 }
 
-### 13. POST with invalid date format - Should return 400
+### 18. POST with invalid date format - Should return 400
 POST {{baseUrl}}/milestones
 Content-Type: application/json
 
@@ -2010,7 +2599,7 @@ Content-Type: application/json
   "due_date": "31/12/2025"
 }
 
-### 14. POST with position out of range - Should return 400
+### 19. POST with position out of range - Should return 400
 POST {{baseUrl}}/milestones
 Content-Type: application/json
 
@@ -2020,16 +2609,16 @@ Content-Type: application/json
   "position": 10
 }
 
-### 15. GET non-existent milestone - Should return 404
+### 20. GET non-existent milestone - Should return 404
 GET {{baseUrl}}/milestones/00000000-0000-0000-0000-000000000000
 
-### 16. PATCH without any fields - Should return 400
+### 21. PATCH without any fields - Should return 400
 PATCH {{baseUrl}}/milestones/{{milestoneId}}
 Content-Type: application/json
 
 {}
 
-### 17. POST 6th milestone to goal - Should return 400 (max 5)
+### 22. POST 6th milestone to goal - Should return 400 (max 5)
 # First create 5 milestones, then try to create 6th
 POST {{baseUrl}}/milestones
 Content-Type: application/json
@@ -2038,21 +2627,34 @@ Content-Type: application/json
   "long_term_goal_id": "{{goalId}}",
   "title": "Milestone 6"
 }
+
+### 23. GET weekly goals for non-existent milestone - Should return 404
+GET {{baseUrl}}/milestones/00000000-0000-0000-0000-000000000000/weekly-goals
+
+### 24. GET tasks with invalid status - Should return 400
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?status=invalid_status
+
+### 25. GET tasks with invalid week_number - Should return 400
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?week_number=15
+
+### 26. GET tasks with limit too high - Should return 400
+GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?limit=200
 ```
 
 **Test checklist:**
 - [ ] Upewnić się że `DEFAULT_USER_ID` jest zdefiniowany w `supabase.client.ts`
 - [ ] Uruchomić Supabase lokalnie (bez RLS)
 - [ ] Uruchomić dev server: `npm run dev`
-- [ ] Utworzyć test goal ID (należący do DEFAULT_USER_ID)
-- [ ] Wykonać wszystkie success tests (1-10)
-- [ ] Wykonać wszystkie error tests (11-17)
+- [ ] Utworzyć test goal ID i milestone ID (należące do DEFAULT_USER_ID)
+- [ ] Utworzyć test weekly goals i tasks powiązane z milestone
+- [ ] Wykonać wszystkie success tests (1-15)
+- [ ] Wykonać wszystkie error tests (16-26)
 - [ ] Sprawdzić response bodies i status codes
 - [ ] Sprawdzić logi w konsoli
 
 ---
 
-### Krok 8: ~~Weryfikacja RLS Policies~~ (Pominięte w MVP)
+### Krok 10: ~~Weryfikacja RLS Policies~~ (Pominięte w MVP)
 
 **⚠️ MVP Mode: RLS wyłączone**
 
@@ -2088,7 +2690,7 @@ WHERE schemaname = 'public' AND tablename = 'milestones';
 
 ---
 
-### Krok 9: Optymalizacja i cleanup
+### Krok 11: Optymalizacja i cleanup
 
 **9.1. Sprawdzić query performance:**
 
@@ -2141,26 +2743,27 @@ npx tsc --noEmit
 
 ---
 
-### Krok 10: Dokumentacja i finalizacja
+### Krok 12: Dokumentacja i finalizacja
 
-**10.1. Aktualizować główny plik API documentation:**
+**12.1. Aktualizować główny plik API documentation:**
 
 W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktualna i zgodna z implementacją.
 
-**10.2. Utworzyć CHANGELOG entry (opcjonalne):**
+**12.2. Utworzyć CHANGELOG entry (opcjonalne):**
 
 ```markdown
 ## [Unreleased]
 
 ### Added
 - Milestone API endpoints (GET, POST, PATCH, DELETE)
+- Milestone related resources endpoints (weekly-goals, tasks)
 - MilestoneService for business logic
 - Zod validation schemas for milestones
 - RLS policies enforcement for milestone operations
 - Manual tests in api-tests/milestones-tests.http
 ```
 
-**10.3. Code review checklist:**
+**12.3. Code review checklist:**
 
 - [ ] Wszystkie endpoints zwracają proper status codes
 - [ ] Error messages są informacyjne i bezpieczne (nie leakują sensitive data)
@@ -2171,7 +2774,7 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 - [ ] Consistent code style (formatowanie, naming)
 - [ ] Type safety (brak `any`, proper DTOs)
 
-**10.4. Final testing:**
+**12.4. Final testing:**
 
 - [ ] Smoke test wszystkich endpoints
 - [ ] Test z różnymi users (isolation test)
@@ -2189,7 +2792,9 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 3. **src/pages/api/v1/milestones.ts** - GET/POST endpoints
 4. **src/pages/api/v1/milestones/[id].ts** - GET/PATCH/DELETE by ID
 5. **src/pages/api/v1/goals/[goalId]/milestones.ts** - GET by goal ID
-6. **api-tests/milestones-tests.http** - Manual test suite
+6. **src/pages/api/v1/milestones/[milestoneId]/weekly-goals.ts** - GET weekly goals by milestone
+7. **src/pages/api/v1/milestones/[milestoneId]/tasks.ts** - GET tasks by milestone with filters
+8. **api-tests/milestones-tests.http** - Manual test suite
 
 ### Wykorzystywane typy z types.ts:
 
@@ -2255,12 +2860,18 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 **Koniec planu implementacji**
 
 Data utworzenia: 2025-01-11  
-Data aktualizacji: 2025-01-11  
-Wersja: 1.1 (MVP Mode - bez autentykacji i RLS)  
+Data aktualizacji: 2025-01-05  
+Wersja: 1.2 (MVP Mode - bez autentykacji i RLS)  
 Status: Ready for implementation
 
 **⚠️ Uwaga MVP:**
 Ten plan implementuje uproszczoną wersję API bez autentykacji JWT i RLS policies. 
 Używany jest `DEFAULT_USER_ID` dla wszystkich operacji. Po implementacji wszystkich 
 endpointów należy włączyć RLS i dodać prawdziwą autentykację.
+
+**Changelog:**
+- v1.2 (2025-01-05): Dodano endpointy do pobierania powiązanych zasobów:
+  - GET /api/v1/milestones/:milestoneId/weekly-goals
+  - GET /api/v1/milestones/:milestoneId/tasks (z filtrami)
+- v1.1 (2025-01-11): Wersja bazowa z 6 podstawowymi endpointami
 

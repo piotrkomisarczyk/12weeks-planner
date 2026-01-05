@@ -578,3 +578,107 @@ GET {{baseUrl}}/api/v1/milestones?offset=100
 # Expected: 200 OK
 GET {{baseUrl}}/api/v1/milestones?long_term_goal_id={{goalId}}&is_completed=false&limit=5&offset=0
 
+### ============================================================================
+### NEW ENDPOINTS - Weekly Goals and Tasks by Milestone (API v1.2)
+### ============================================================================
+
+### GET /api/v1/milestones/:milestoneId/weekly-goals - Get weekly goals for milestone
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/weekly-goals
+
+### GET /api/v1/milestones/:milestoneId/tasks - Get all tasks for milestone
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks
+
+### GET /api/v1/milestones/:milestoneId/tasks - Filter by status
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?status=todo
+
+### GET /api/v1/milestones/:milestoneId/tasks - Filter by status (in_progress)
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?status=in_progress
+
+### GET /api/v1/milestones/:milestoneId/tasks - Filter by status (completed)
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?status=completed
+
+### GET /api/v1/milestones/:milestoneId/tasks - Filter by week number
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?week_number=3
+
+### GET /api/v1/milestones/:milestoneId/tasks - Filter by week number (boundary: 1)
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?week_number=1
+
+### GET /api/v1/milestones/:milestoneId/tasks - Filter by week number (boundary: 12)
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?week_number=12
+
+### GET /api/v1/milestones/:milestoneId/tasks - Combined filters (status + week)
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?status=todo&week_number=5
+
+### GET /api/v1/milestones/:milestoneId/tasks - With pagination
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?limit=10&offset=0
+
+### GET /api/v1/milestones/:milestoneId/tasks - Combined filters with pagination
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?status=completed&week_number=3&limit=20&offset=0
+
+### GET /api/v1/milestones/:milestoneId/tasks - Boundary: Limit 1
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?limit=1
+
+### GET /api/v1/milestones/:milestoneId/tasks - Boundary: Limit 100
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?limit=100
+
+### ============================================================================
+### ERROR TESTS - New Endpoints
+### ============================================================================
+
+### GET /api/v1/milestones/:milestoneId/weekly-goals - Error: Invalid milestone UUID
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/invalid-uuid/weekly-goals
+
+### GET /api/v1/milestones/:milestoneId/weekly-goals - Error: Milestone not found
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000/weekly-goals
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Invalid milestone UUID
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/invalid-uuid/tasks
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Milestone not found
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/milestones/00000000-0000-0000-0000-000000000000/tasks
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Invalid status
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?status=invalid_status
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Week number out of range (<1)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?week_number=0
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Week number out of range (>12)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?week_number=13
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Invalid week number (not integer)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?week_number=abc
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Limit out of range (>100)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?limit=200
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Limit out of range (<1)
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?limit=0
+
+### GET /api/v1/milestones/:milestoneId/tasks - Error: Negative offset
+# Expected: 400 Bad Request
+GET {{baseUrl}}/api/v1/milestones/{{milestoneId}}/tasks?offset=-1
+

@@ -112,3 +112,31 @@ export const updateMilestoneSchema = z.object({
  */
 export type UpdateMilestoneData = z.infer<typeof updateMilestoneSchema>;
 
+/**
+ * Query parameters schema for GET /api/v1/milestones/:milestoneId/tasks
+ * Validates filtering and pagination for tasks by milestone
+ * 
+ * Validates:
+ * - status: optional task status enum (todo, in_progress, completed, cancelled, postponed)
+ * - week_number: optional integer 1-12
+ * - limit: integer 1-100, defaults to 50
+ * - offset: integer >= 0, defaults to 0
+ */
+export const listTasksByMilestoneQuerySchema = z.object({
+  status: z.enum(['todo', 'in_progress', 'completed', 'cancelled', 'postponed'], {
+    errorMap: () => ({ message: "Invalid status value" })
+  }).optional(),
+  week_number: z.coerce.number()
+    .int({ message: 'Week number must be an integer' })
+    .min(1, { message: 'Week number must be at least 1' })
+    .max(12, { message: 'Week number must be at most 12' })
+    .optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+/**
+ * Inferred TypeScript type from listTasksByMilestoneQuerySchema
+ */
+export type ListTasksByMilestoneQuery = z.infer<typeof listTasksByMilestoneQuerySchema>;
+
