@@ -381,5 +381,52 @@ export class WeeklyGoalService {
 
     return true;
   }
+
+  /**
+   * Pobiera wszystkie cele tygodniowe powiązane z konkretnym celem długoterminowym
+   * Weryfikuje, że cel długoterminowy należy do użytkownika przez INNER JOIN
+   * GET /api/v1/goals/:goalId/weekly-goals
+   * 
+   * @param goalId - UUID celu długoterminowego
+   * @param userId - ID użytkownika
+   * @returns Promise z tablicą celów tygodniowych posortowanych po week_number i position
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const weeklyGoals = await weeklyGoalService.getWeeklyGoalsByGoalId(goalId, userId);
+   * // Returns weekly goals sorted by week_number ASC, position ASC
+   * ```
+   */
+  async getWeeklyGoalsByGoalId(
+    goalId: string,
+    userId: string
+  ): Promise<WeeklyGoalDTO[]> {
+    try {
+      // Query with security check via join with long_term_goals table
+      // This ensures user_id verification at database level
+      const { data, error } = await this.supabase
+        .from('weekly_goals')
+        .select(`
+          *,
+          long_term_goals!inner(user_id)
+        `)
+        .eq('long_term_goal_id', goalId)
+        .eq('long_term_goals.user_id', userId)
+        .order('week_number', { ascending: true })
+        .order('position', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching weekly goals by goal ID:', error);
+        throw new Error('Failed to fetch weekly goals');
+      }
+
+      // Remove the joined data from response
+      return (data || []).map(({ long_term_goals, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
+    } catch (error) {
+      console.error('Error in getWeeklyGoalsByGoalId:', error);
+      throw error;
+    }
+  }
 }
 

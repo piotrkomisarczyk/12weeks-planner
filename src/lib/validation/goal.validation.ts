@@ -143,3 +143,65 @@ export const validateUpdateGoalCommand = (data: unknown): UpdateGoalBody => {
   
   return parsed;
 };
+
+/**
+ * Query parameter schema for GET /api/v1/goals/:goalId/tasks
+ * Validates task filtering and pagination parameters
+ * 
+ * Validates:
+ * - status: optional TaskStatus enum
+ * - week_number: optional number 1-12
+ * - include_milestone_tasks: optional boolean, defaults to true
+ * - limit: optional number 1-100, defaults to 50
+ * - offset: optional number >= 0, defaults to 0
+ */
+export const TasksByGoalQuerySchema = z.object({
+  status: z.enum(['todo', 'in_progress', 'completed', 'cancelled', 'postponed'], {
+    errorMap: () => ({ 
+      message: 'Status must be one of: todo, in_progress, completed, cancelled, postponed' 
+    })
+  }).optional(),
+  
+  week_number: z.string()
+    .optional()
+    .transform((val) => val ? parseInt(val, 10) : undefined)
+    .pipe(
+      z.number()
+        .int({ message: 'Week number must be an integer' })
+        .min(1, { message: 'Week number must be at least 1' })
+        .max(12, { message: 'Week number must not exceed 12' })
+        .optional()
+    ),
+  
+  include_milestone_tasks: z.string()
+    .optional()
+    .transform((val) => {
+      if (val === undefined || val === null) return true;
+      return val === 'true' || val === '1';
+    })
+    .pipe(z.boolean()),
+  
+  limit: z.string()
+    .optional()
+    .transform((val) => val ? val : '50')
+    .pipe(
+      z.coerce.number()
+        .int({ message: 'Limit must be an integer' })
+        .min(1, { message: 'Limit must be at least 1' })
+        .max(100, { message: 'Limit must not exceed 100' })
+    ),
+  
+  offset: z.string()
+    .optional()
+    .transform((val) => val ? val : '0')
+    .pipe(
+      z.coerce.number()
+        .int({ message: 'Offset must be an integer' })
+        .min(0, { message: 'Offset must be at least 0' })
+    )
+});
+
+/**
+ * Inferred TypeScript type from TasksByGoalQuerySchema
+ */
+export type TasksByGoalQuery = z.infer<typeof TasksByGoalQuerySchema>;

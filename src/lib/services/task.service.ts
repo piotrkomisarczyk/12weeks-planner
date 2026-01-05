@@ -8,6 +8,7 @@ import type {
   ItemResponse,
   SuccessResponse,
   ErrorResponse,
+  TasksByGoalParams,
 } from '../../types';
 import type {
   ListTasksParams,
@@ -483,6 +484,169 @@ export class TaskService {
     } catch (error) {
       console.error('Error fetching plan start date:', error);
       return null;
+    }
+  }
+
+  /**
+   * Helper: Get milestone IDs for a specific goal
+   * Private method used by getTasksByGoalId
+   * 
+   * @param goalId - Long-term goal UUID
+   * @returns Array of milestone IDs
+   */
+  private async getMilestoneIdsByGoalId(goalId: string): Promise<string[]> {
+    const { data, error } = await this.supabase
+      .from('milestones')
+      .select('id')
+      .eq('long_term_goal_id', goalId);
+
+    if (error) {
+      console.error('Error fetching milestone IDs:', error);
+      throw new Error('Failed to fetch milestone IDs');
+    }
+
+    return (data || []).map(m => m.id);
+  }
+
+  /**
+   * Get all tasks associated with a specific long-term goal
+   * Includes both direct tasks (long_term_goal_id) and indirect tasks (via milestones)
+   * GET /api/v1/goals/:goalId/tasks
+   * 
+   * @param goalId - Long-term goal UUID
+   * @param userId - User ID for security verification
+   * @param params - Query parameters (status, week_number, include_milestone_tasks, limit, offset)
+   * @returns Tasks with count
+   * 
+   * @example
+   * ```typescript
+   * const result = await taskService.getTasksByGoalId(goalId, userId, {
+   *   status: 'completed',
+   *   week_number: 3,
+   *   include_milestone_tasks: true,
+   *   limit: 50,
+   *   offset: 0
+   * });
+   * // Returns { data: [...tasks], count: 25 }
+   * ```
+   */
+  async getTasksByGoalId(
+    goalId: string,
+    userId: string,
+    params: TasksByGoalParams
+  ): Promise<{ data: TaskDTO[]; count: number }> {
+    try {
+      // Build base query for direct tasks (long_term_goal_id = goalId)
+      // Use INNER JOIN with long_term_goals to verify user ownership at database level
+      let directQuery = this.supabase
+        .from('tasks')
+        .select(`
+          *,
+          long_term_goals!inner(user_id)
+        `)
+        .eq('long_term_goal_id', goalId)
+        .eq('long_term_goals.user_id', userId);
+
+      // Apply optional filters to direct query
+      if (params.status) {
+        directQuery = directQuery.eq('status', params.status);
+      }
+      if (params.week_number !== undefined) {
+        directQuery = directQuery.eq('week_number', params.week_number);
+      }
+
+      const { data: directTasks, error: directError } = await directQuery;
+
+      if (directError) {
+        console.error('Error fetching direct tasks:', directError);
+        throw new Error('Failed to fetch direct tasks');
+      }
+
+      let allTasks: any[] = directTasks || [];
+
+      // Fetch milestone tasks if requested
+      if (params.include_milestone_tasks) {
+        const milestoneIds = await this.getMilestoneIdsByGoalId(goalId);
+
+        if (milestoneIds.length > 0) {
+          // Build query for indirect tasks (via milestones)
+          // Use INNER JOIN to verify user ownership through milestone -> goal -> user chain
+          let milestoneQuery = this.supabase
+            .from('tasks')
+            .select(`
+              *,
+              milestones!inner(
+                long_term_goal_id,
+                long_term_goals!inner(user_id)
+              )
+            `)
+            .in('milestone_id', milestoneIds)
+            .eq('milestones.long_term_goals.user_id', userId);
+
+          // Apply same filters to milestone query
+          if (params.status) {
+            milestoneQuery = milestoneQuery.eq('status', params.status);
+          }
+          if (params.week_number !== undefined) {
+            milestoneQuery = milestoneQuery.eq('week_number', params.week_number);
+          }
+
+          const { data: milestoneTasks, error: milestoneError } = await milestoneQuery;
+
+          if (milestoneError) {
+            console.error('Error fetching milestone tasks:', milestoneError);
+            throw new Error('Failed to fetch milestone tasks');
+          }
+
+          // Merge and deduplicate tasks (a task could have both long_term_goal_id AND milestone_id)
+          const taskMap = new Map<string, TaskDTO>();
+          
+          // Process all tasks and remove joined data
+          [...allTasks, ...(milestoneTasks || [])].forEach(task => {
+            // Remove the joined data from response
+            const { milestones, long_term_goals, ...cleanTask } = task as any;
+            taskMap.set(cleanTask.id, cleanTask as TaskDTO);
+          });
+
+          allTasks = Array.from(taskMap.values());
+        } else {
+          // No milestones for this goal, just clean direct tasks
+          allTasks = allTasks.map((task) => {
+            const { long_term_goals, ...cleanTask } = task as any;
+            return cleanTask as TaskDTO;
+          });
+        }
+      } else {
+        // Remove joined data from direct tasks only
+        allTasks = allTasks.map((task) => {
+          const { long_term_goals, ...cleanTask } = task as any;
+          return cleanTask as TaskDTO;
+        });
+      }
+
+      // Sort by week_number and position
+      // Tasks with null week_number should appear at the end
+      allTasks.sort((a, b) => {
+        const weekA = a.week_number ?? 999;
+        const weekB = b.week_number ?? 999;
+        if (weekA !== weekB) return weekA - weekB;
+        return a.position - b.position;
+      });
+
+      // Get total count before pagination
+      const totalCount = allTasks.length;
+
+      // Apply pagination
+      const { limit = 50, offset = 0 } = params;
+      const paginatedTasks = allTasks.slice(offset, offset + limit);
+
+      return {
+        data: paginatedTasks,
+        count: totalCount
+      };
+    } catch (error) {
+      console.error('Error in getTasksByGoalId:', error);
+      throw error;
     }
   }
 }

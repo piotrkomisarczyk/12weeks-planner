@@ -1,0 +1,144 @@
+###
+# API Tests: GET /api/v1/goals/:goalId/weekly-goals and /api/v1/goals/:goalId/tasks
+# Additional GET endpoints for accessing data related to long-term goals
+###
+
+# Configuration
+@baseUrl = http://localhost:4321
+@goalId = PUT_VALID_GOAL_ID_HERE
+
+###############################################################################
+# GET /api/v1/goals/:goalId/weekly-goals
+###############################################################################
+
+### GET Weekly Goals by Goal - Valid goal with weekly goals
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/weekly-goals
+
+### GET Weekly Goals by Goal - Invalid UUID format
+GET {{baseUrl}}/api/v1/goals/not-a-uuid/weekly-goals
+
+### GET Weekly Goals by Goal - Non-existent goal (valid UUID format)
+GET {{baseUrl}}/api/v1/goals/123e4567-e89b-12d3-a456-426614174999/weekly-goals
+
+### GET Weekly Goals by Goal - Empty result (goal exists but has no weekly goals)
+# Replace with goalId that has no weekly goals
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/weekly-goals
+
+###############################################################################
+# GET /api/v1/goals/:goalId/tasks
+###############################################################################
+
+### GET Tasks by Goal - All tasks (default parameters)
+# Defaults: include_milestone_tasks=true, limit=50, offset=0
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks
+
+### GET Tasks by Goal - Only completed tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=completed
+
+### GET Tasks by Goal - Only in_progress tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=in_progress
+
+### GET Tasks by Goal - Only todo tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=todo
+
+### GET Tasks by Goal - Week 3 tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=3
+
+### GET Tasks by Goal - Week 1 tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=1
+
+### GET Tasks by Goal - Week 12 tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=12
+
+### GET Tasks by Goal - Exclude milestone tasks (only direct tasks)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?include_milestone_tasks=false
+
+### GET Tasks by Goal - Include milestone tasks (explicitly set to true)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?include_milestone_tasks=true
+
+### GET Tasks by Goal - With pagination (first page)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?limit=10&offset=0
+
+### GET Tasks by Goal - With pagination (second page)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?limit=10&offset=10
+
+### GET Tasks by Goal - Combined filters (status + week_number)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=completed&week_number=3
+
+### GET Tasks by Goal - Combined filters (status + week_number + limit)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=completed&week_number=3&limit=20
+
+### GET Tasks by Goal - All filters combined
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=completed&week_number=3&include_milestone_tasks=true&limit=20&offset=0
+
+###############################################################################
+# Error Cases - Invalid Parameters
+###############################################################################
+
+### GET Tasks by Goal - Invalid status value
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=invalid_status
+
+### GET Tasks by Goal - Invalid week number (0)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=0
+
+### GET Tasks by Goal - Invalid week number (13)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=13
+
+### GET Tasks by Goal - Invalid week number (negative)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=-1
+
+### GET Tasks by Goal - Invalid limit (exceeds maximum)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?limit=150
+
+### GET Tasks by Goal - Invalid limit (0)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?limit=0
+
+### GET Tasks by Goal - Invalid limit (negative)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?limit=-5
+
+### GET Tasks by Goal - Invalid offset (negative)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?offset=-10
+
+### GET Tasks by Goal - Invalid UUID format
+GET {{baseUrl}}/api/v1/goals/not-a-valid-uuid/tasks
+
+### GET Tasks by Goal - Non-existent goal (valid UUID format)
+GET {{baseUrl}}/api/v1/goals/123e4567-e89b-12d3-a456-426614174999/tasks
+
+###############################################################################
+# Edge Cases
+###############################################################################
+
+### GET Tasks by Goal - Maximum limit (100)
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?limit=100
+
+### GET Tasks by Goal - Week 1, Status todo, No milestone tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?week_number=1&status=todo&include_milestone_tasks=false
+
+### GET Tasks by Goal - All cancelled tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=cancelled
+
+### GET Tasks by Goal - All postponed tasks
+GET {{baseUrl}}/api/v1/goals/{{goalId}}/tasks?status=postponed
+
+###############################################################################
+# Notes
+###############################################################################
+# 
+# Before running these tests:
+# 1. Start the development server: npm run dev
+# 2. Replace {{goalId}} with a valid goal UUID from your database
+# 3. Use the REST Client extension in VS Code to execute requests
+# 4. Check response status codes and body for expected results
+#
+# Expected Response Status Codes:
+# - 200 OK: Successful request
+# - 400 Bad Request: Invalid parameters (UUID format, enum values, ranges)
+# - 404 Not Found: Goal not found or doesn't belong to user
+# - 500 Internal Server Error: Unexpected server error
+#
+# Expected Response Structure:
+# Weekly Goals: { data: WeeklyGoalDTO[] }
+# Tasks: { data: TaskDTO[], count: number }
+#
+
