@@ -225,6 +225,7 @@ export type Database = {
           description: string | null
           due_day: number | null
           id: string
+          long_term_goal_id: string | null
           milestone_id: string | null
           plan_id: string
           position: number
@@ -241,6 +242,7 @@ export type Database = {
           description?: string | null
           due_day?: number | null
           id?: string
+          long_term_goal_id?: string | null
           milestone_id?: string | null
           plan_id: string
           position?: number
@@ -257,6 +259,7 @@ export type Database = {
           description?: string | null
           due_day?: number | null
           id?: string
+          long_term_goal_id?: string | null
           milestone_id?: string | null
           plan_id?: string
           position?: number
@@ -269,6 +272,20 @@ export type Database = {
           weekly_goal_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_long_term_goal_id_fkey"
+            columns: ["long_term_goal_id"]
+            isOneToOne: false
+            referencedRelation: "long_term_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_long_term_goal_id_fkey"
+            columns: ["long_term_goal_id"]
+            isOneToOne: false
+            referencedRelation: "milestone_progress"
+            referencedColumns: ["goal_id"]
+          },
           {
             foreignKeyName: "tasks_milestone_id_fkey"
             columns: ["milestone_id"]
@@ -359,6 +376,7 @@ export type Database = {
           description: string | null
           id: string
           long_term_goal_id: string | null
+          milestone_id: string | null
           plan_id: string
           position: number
           title: string
@@ -370,6 +388,7 @@ export type Database = {
           description?: string | null
           id?: string
           long_term_goal_id?: string | null
+          milestone_id?: string | null
           plan_id: string
           position?: number
           title: string
@@ -381,6 +400,7 @@ export type Database = {
           description?: string | null
           id?: string
           long_term_goal_id?: string | null
+          milestone_id?: string | null
           plan_id?: string
           position?: number
           title?: string
@@ -401,6 +421,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "milestone_progress"
             referencedColumns: ["goal_id"]
+          },
+          {
+            foreignKeyName: "weekly_goals_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "weekly_goals_plan_id_fkey"
