@@ -286,7 +286,11 @@ Archive a plan (soft delete). This sets the plan status to 'archived' without pe
 
 **GET** `/api/v1/plans/:id/dashboard`
 
-Get aggregated dashboard data for a plan including goals, milestones, tasks, and progress.
+Get aggregated dashboard data for a plan including goals, milestones, weekly goals, tasks, and progress with full hierarchical relationships.
+
+**Query Parameters:**
+- `include_tasks` (optional): Include task summaries (default: false)
+- `current_week_only` (optional): Only include current week data (default: false)
 
 **Response** `200 OK`:
 ```json
@@ -314,19 +318,54 @@ Get aggregated dashboard data for a plan including goals, milestones, tasks, and
             "description": "",
             "due_date": "2025-01-20",
             "is_completed": true,
-            "position": 1
+            "position": 1,
+            "weekly_goals_count": 2,
+            "tasks_count": 5
           }
-        ]
+        ],
+        "weekly_goals_count": 3,
+        "tasks_count": 12
+      }
+    ],
+    "weekly_goals": [
+      {
+        "id": "uuid",
+        "week_number": 3,
+        "title": "Complete authentication system",
+        "long_term_goal_id": "uuid",
+        "milestone_id": "uuid",
+        "tasks_count": 4,
+        "completed_tasks": 2
+      }
+    ],
+    "ad_hoc_tasks": [
+      {
+        "id": "uuid",
+        "week_number": 3,
+        "title": "Review code",
+        "priority": "C",
+        "status": "todo"
       }
     ],
     "progress_summary": {
       "total_goals": 3,
       "completed_goals": 0,
-      "average_progress": 28.33
+      "average_progress": 28.33,
+      "total_milestones": 8,
+      "completed_milestones": 3,
+      "total_tasks": 47,
+      "completed_tasks": 23
     }
   }
 }
 ```
+
+**Notes:**
+- Provides a comprehensive view of plan hierarchy with relationship counts
+- Shows how weekly goals and tasks connect to goals and milestones
+- Ad-hoc tasks (those without goal/milestone associations) are listed separately
+- Use `include_tasks` parameter to get detailed task lists (increases response size)
+- Use `current_week_only` for focused dashboard on current week's work
 
 **Error Responses:**
 - `404 Not Found`: Plan not found
@@ -547,6 +586,93 @@ Delete a goal (cascades to milestones).
 }
 ```
 
+**Notes:**
+- Deleting a goal cascades to all associated milestones (hard delete)
+- Sets `long_term_goal_id = NULL` in associated weekly_goals and tasks (handled by database)
+- Associated weekly goals and tasks remain but lose their goal reference
+
+**Error Responses:**
+- `404 Not Found`: Goal not found
+- `401 Unauthorized`: Missing or invalid auth token
+
+---
+
+#### 3.3.7 Get Weekly Goals by Goal
+
+**GET** `/api/v1/goals/:goalId/weekly-goals`
+
+Get all weekly goals associated with a specific long-term goal.
+
+**Response** `200 OK`:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
+      "week_number": 3,
+      "title": "Complete authentication system",
+      "description": "Implement auth with Supabase",
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T10:00:00Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+- `404 Not Found`: Goal not found
+- `401 Unauthorized`: Missing or invalid auth token
+
+---
+
+#### 3.3.8 Get Tasks by Goal
+
+**GET** `/api/v1/goals/:goalId/tasks`
+
+Get all tasks associated with a specific long-term goal (both direct and indirect associations).
+
+**Query Parameters:**
+- `status` (optional): Filter by task status
+- `week_number` (optional): Filter by week (1-12)
+- `include_milestone_tasks` (optional): Include tasks linked via milestones (default: true)
+- `limit` (optional): Number of results (default: 50)
+- `offset` (optional): Pagination offset (default: 0)
+
+**Response** `200 OK`:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "weekly_goal_id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": null,
+      "title": "Setup Supabase client",
+      "description": "Configure Supabase with environment variables",
+      "priority": "A",
+      "status": "completed",
+      "task_type": "weekly_sub",
+      "week_number": 3,
+      "due_day": 1,
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T16:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+**Notes:**
+- Returns tasks with `long_term_goal_id` matching the goal
+- If `include_milestone_tasks` is true (default), also returns tasks linked to milestones of this goal
+- Useful for getting a complete view of all work related to a specific goal
+
 **Error Responses:**
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
@@ -755,6 +881,86 @@ Delete a milestone.
 }
 ```
 
+**Notes:**
+- Deleting a milestone sets `milestone_id = NULL` in associated weekly_goals and tasks (handled by database)
+- This is a soft disconnect - associated entities remain but lose their milestone reference
+
+**Error Responses:**
+- `404 Not Found`: Milestone not found
+- `401 Unauthorized`: Missing or invalid auth token
+
+---
+
+#### 3.4.7 Get Weekly Goals by Milestone
+
+**GET** `/api/v1/milestones/:milestoneId/weekly-goals`
+
+Get all weekly goals associated with a specific milestone.
+
+**Response** `200 OK`:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
+      "week_number": 3,
+      "title": "Complete authentication system",
+      "description": "Implement auth with Supabase",
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T10:00:00Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+- `404 Not Found`: Milestone not found
+- `401 Unauthorized`: Missing or invalid auth token
+
+---
+
+#### 3.4.8 Get Tasks by Milestone
+
+**GET** `/api/v1/milestones/:milestoneId/tasks`
+
+Get all tasks associated with a specific milestone.
+
+**Query Parameters:**
+- `status` (optional): Filter by task status
+- `week_number` (optional): Filter by week (1-12)
+- `limit` (optional): Number of results (default: 50)
+- `offset` (optional): Pagination offset (default: 0)
+
+**Response** `200 OK`:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "weekly_goal_id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
+      "title": "Setup Supabase client",
+      "description": "Configure Supabase with environment variables",
+      "priority": "A",
+      "status": "completed",
+      "task_type": "weekly_sub",
+      "week_number": 3,
+      "due_day": 1,
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T16:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
 **Error Responses:**
 - `404 Not Found`: Milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
@@ -772,7 +978,8 @@ Get weekly goals with optional filters.
 **Query Parameters:**
 - `plan_id` (required): Plan ID
 - `week_number` (optional): Filter by week (1-12)
-- `long_term_goal_id` (optional): Filter by associated goal
+- `long_term_goal_id` (optional): Filter by associated long-term goal
+- `milestone_id` (optional): Filter by associated milestone
 - `limit` (optional): Number of results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
@@ -784,6 +991,7 @@ Get weekly goals with optional filters.
       "id": "uuid",
       "plan_id": "uuid",
       "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
       "week_number": 3,
       "title": "Complete authentication system",
       "description": "Implement auth with Supabase",
@@ -815,6 +1023,7 @@ Get a specific weekly goal with its subtasks.
     "id": "uuid",
     "plan_id": "uuid",
     "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "week_number": 3,
     "title": "Complete authentication system",
     "description": "Implement auth with Supabase",
@@ -850,6 +1059,7 @@ Create a new weekly goal.
 {
   "plan_id": "uuid",
   "long_term_goal_id": "uuid",
+  "milestone_id": "uuid",
   "week_number": 3,
   "title": "Complete authentication system",
   "description": "Implement auth with Supabase",
@@ -860,6 +1070,7 @@ Create a new weekly goal.
 **Validation:**
 - `plan_id`: Required, must be valid UUID
 - `long_term_goal_id`: Optional (can be null for unlinked weekly goals)
+- `milestone_id`: Optional (can be null, represents link to a specific milestone)
 - `week_number`: Required, range 1-12
 - `title`: Required, max 255 characters
 - `description`: Optional
@@ -872,6 +1083,7 @@ Create a new weekly goal.
     "id": "uuid",
     "plan_id": "uuid",
     "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "week_number": 3,
     "title": "Complete authentication system",
     "description": "Implement auth with Supabase",
@@ -882,9 +1094,13 @@ Create a new weekly goal.
 }
 ```
 
+**Notes:**
+- A weekly goal can be linked to a long-term goal, a milestone, both, or neither
+- If milestone_id is provided, it should ideally belong to a goal in the same plan (recommended validation at application level)
+
 **Error Responses:**
 - `400 Bad Request`: Invalid data, week_number out of range
-- `404 Not Found`: Plan or goal not found
+- `404 Not Found`: Plan, goal, or milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -898,7 +1114,9 @@ Update weekly goal details.
 **Request Body**:
 ```json
 {
-  "title": "Complete authentication and authorization"
+  "title": "Complete authentication and authorization",
+  "long_term_goal_id": "uuid",
+  "milestone_id": "uuid"
 }
 ```
 
@@ -912,6 +1130,7 @@ Update weekly goal details.
     "id": "uuid",
     "plan_id": "uuid",
     "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "week_number": 3,
     "title": "Complete authentication and authorization",
     "description": "Implement auth with Supabase",
@@ -921,6 +1140,10 @@ Update weekly goal details.
   }
 }
 ```
+
+**Notes:**
+- Can update long_term_goal_id and milestone_id independently to change or remove associations
+- Set to null to remove the association
 
 **Error Responses:**
 - `404 Not Found`: Weekly goal not found
@@ -962,6 +1185,7 @@ Get tasks with rich filtering options.
 - `due_day` (optional): Filter by day (1-7, Monday=1)
 - `task_type` (optional): Filter by type (`weekly_main`, `weekly_sub`, `ad_hoc`)
 - `weekly_goal_id` (optional): Filter by weekly goal
+- `long_term_goal_id` (optional): Filter by long-term goal
 - `milestone_id` (optional): Filter by milestone
 - `status` (optional): Filter by status (`todo`, `in_progress`, `completed`, `cancelled`, `postponed`)
 - `priority` (optional): Filter by priority (`A`, `B`, `C`)
@@ -976,7 +1200,8 @@ Get tasks with rich filtering options.
       "id": "uuid",
       "weekly_goal_id": "uuid",
       "plan_id": "uuid",
-      "milestone_id": null,
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
       "title": "Setup Supabase client",
       "description": "Configure Supabase with environment variables",
       "priority": "A",
@@ -992,6 +1217,11 @@ Get tasks with rich filtering options.
   "count": 1
 }
 ```
+
+**Notes:**
+- Tasks can be linked to weekly goals, long-term goals, milestones, or any combination
+- Filtering by long_term_goal_id returns all tasks directly or indirectly associated with that goal
+- Filtering by milestone_id returns all tasks associated with that specific milestone
 
 **Error Responses:**
 - `400 Bad Request`: Missing required plan_id
@@ -1022,7 +1252,9 @@ Get tasks for a specific day with categorization (most important (A), secondary 
       "title": "Complete API design",
       "priority": "A",
       "status": "in_progress",
-      "task_type": "weekly_main"
+      "task_type": "weekly_main",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid"
     },
     "secondary": [
       {
@@ -1030,7 +1262,10 @@ Get tasks for a specific day with categorization (most important (A), secondary 
         "title": "Setup Supabase client",
         "priority": "B",
         "status": "completed",
-        "task_type": "weekly_sub"
+        "task_type": "weekly_sub",
+        "weekly_goal_id": "uuid",
+        "long_term_goal_id": "uuid",
+        "milestone_id": null
       }
     ],
     "additional": [
@@ -1039,12 +1274,21 @@ Get tasks for a specific day with categorization (most important (A), secondary 
         "title": "Review documentation",
         "priority": "C",
         "status": "todo",
-        "task_type": "ad_hoc"
+        "task_type": "ad_hoc",
+        "weekly_goal_id": null,
+        "long_term_goal_id": null,
+        "milestone_id": null
       }
     ]
   }
 }
 ```
+
+**Notes:**
+- Returns tasks grouped by priority category for better daily planning
+- Includes relationship fields (long_term_goal_id, milestone_id) for context
+- Most important and secondary tasks typically have goal/milestone associations
+- Additional tasks may include ad-hoc items without associations
 
 **Error Responses:**
 - `400 Bad Request`: Missing required parameters
@@ -1065,7 +1309,8 @@ Get a specific task with its history.
     "id": "uuid",
     "weekly_goal_id": "uuid",
     "plan_id": "uuid",
-    "milestone_id": null,
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "title": "Setup Supabase client",
     "description": "Configure Supabase with environment variables",
     "priority": "A",
@@ -1117,7 +1362,8 @@ Create a new task.
 {
   "plan_id": "uuid",
   "weekly_goal_id": "uuid",
-  "milestone_id": null,
+  "long_term_goal_id": "uuid",
+  "milestone_id": "uuid",
   "title": "Setup Supabase client",
   "description": "Configure Supabase with environment variables",
   "priority": "A",
@@ -1132,7 +1378,8 @@ Create a new task.
 **Validation:**
 - `plan_id`: Required, must be valid UUID
 - `weekly_goal_id`: Optional (null for ad-hoc tasks)
-- `milestone_id`: Optional
+- `long_term_goal_id`: Optional (null for tasks not directly linked to a goal)
+- `milestone_id`: Optional (null for tasks not linked to a milestone)
 - `title`: Required, max 255 characters
 - `description`: Optional
 - `priority`: Default 'C', one of: `A`, `B`, `C`
@@ -1151,7 +1398,8 @@ Create a new task.
     "id": "uuid",
     "weekly_goal_id": "uuid",
     "plan_id": "uuid",
-    "milestone_id": null,
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "title": "Setup Supabase client",
     "description": "Configure Supabase with environment variables",
     "priority": "A",
@@ -1166,9 +1414,14 @@ Create a new task.
 }
 ```
 
+**Notes:**
+- Tasks support flexible hierarchies: can be linked to weekly goals, long-term goals, milestones, or any combination
+- For hierarchical organization: goal → milestone → task OR goal → task
+- Ad-hoc tasks typically have no associations (all foreign keys null)
+
 **Error Responses:**
 - `400 Bad Request`: Invalid data, enum values, ranges, or maximum tasks exceeded
-- `404 Not Found`: Plan, weekly goal, or milestone not found
+- `404 Not Found`: Plan, weekly goal, long-term goal, or milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -1182,7 +1435,9 @@ Update task details. Status changes are automatically logged to task_history by 
 **Request Body**:
 ```json
 {
-  "status": "completed"
+  "status": "completed",
+  "long_term_goal_id": "uuid",
+  "milestone_id": "uuid"
 }
 ```
 
@@ -1196,7 +1451,8 @@ Update task details. Status changes are automatically logged to task_history by 
     "id": "uuid",
     "weekly_goal_id": "uuid",
     "plan_id": "uuid",
-    "milestone_id": null,
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "title": "Setup Supabase client",
     "description": "Configure Supabase with environment variables",
     "priority": "A",
@@ -1210,6 +1466,10 @@ Update task details. Status changes are automatically logged to task_history by 
   }
 }
 ```
+
+**Notes:**
+- Can update long_term_goal_id and milestone_id to change task associations
+- Set to null to remove associations
 
 **Error Responses:**
 - `404 Not Found`: Task not found
@@ -1243,7 +1503,8 @@ Copy a task to another day/week with history preservation.
     "id": "uuid",
     "weekly_goal_id": "uuid",
     "plan_id": "uuid",
-    "milestone_id": null,
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
     "title": "Setup Supabase client",
     "description": "Configure Supabase with environment variables",
     "priority": "A",
@@ -1258,6 +1519,11 @@ Copy a task to another day/week with history preservation.
   "message": "Task copied successfully"
 }
 ```
+
+**Notes:**
+- Copied task retains all associations (weekly_goal_id, long_term_goal_id, milestone_id)
+- Status is reset to 'todo' for the new copy
+- Original task remains unchanged
 
 **Error Responses:**
 - `404 Not Found`: Task not found
@@ -1785,10 +2051,16 @@ All API endpoints validate incoming data before processing:
 - **Validation**:
   - `week_number` range: 1-12
   - Must belong to a valid plan
+  - `long_term_goal_id`: Optional, must reference valid long-term goal if provided
+  - `milestone_id`: Optional, must reference valid milestone if provided
 
 - **Business Logic**:
-  - Can be optionally linked to a long-term goal
+  - Can be optionally linked to a long-term goal, a milestone, both, or neither
+  - Provides flexible hierarchy: goal → weekly goal OR milestone → weekly goal
+  - If milestone_id is provided, it's recommended (but not enforced) that it belongs to a goal in the same plan
   - Deleting a weekly goal cascades to all subtasks
+  - Deleting a long-term goal sets `long_term_goal_id = NULL` in associated weekly goals (via trigger)
+  - Deleting a milestone sets `milestone_id = NULL` in associated weekly goals (via trigger)
 
 #### Tasks
 - **Validation**:
@@ -1797,14 +2069,30 @@ All API endpoints validate incoming data before processing:
   - `task_type` must be one of: `weekly_main`, `weekly_sub`, `ad_hoc`
   - `week_number` range: 1-12 (if specified)
   - `due_day` range: 1-7 (if specified, where 1=Monday)
+  - `weekly_goal_id`: Optional, must reference valid weekly goal if provided
+  - `long_term_goal_id`: Optional, must reference valid long-term goal if provided
+  - `milestone_id`: Optional, must reference valid milestone if provided
   - Maximum 10 weekly subtasks per weekly_goal (enforced by database trigger)
   - Maximum 10 ad-hoc tasks per week (enforced by database trigger)
 
 - **Business Logic**:
+  - Tasks support flexible multi-level hierarchies:
+    - Can be linked to weekly goals (typical for weekly_sub tasks)
+    - Can be directly linked to long-term goals (bypassing weekly goals)
+    - Can be directly linked to milestones (specific goal milestones)
+    - Can have any combination of these associations
+    - Ad-hoc tasks typically have no associations (all foreign keys null)
+  - Hierarchy patterns supported:
+    - `goal → milestone → task` (task linked to milestone)
+    - `goal → task` (task linked directly to goal)
+    - `weekly_goal → task` (task as subtask of weekly goal)
+    - `milestone → task` (task linked to milestone without goal link)
   - Changing task status automatically creates task_history entry (via trigger)
   - Multi-day tasks: If status is not `completed` or `cancelled`, task can be copied to next day
   - Task history tracks all status changes with timestamps
   - Deleting a weekly goal cascades to all its subtasks
+  - Deleting a long-term goal sets `long_term_goal_id = NULL` in associated tasks (via trigger)
+  - Deleting a milestone sets `milestone_id = NULL` in associated tasks (via trigger)
   - Task priority determines daily task categorization:
     - Most important: 1 task (typically priority A, weekly_main)
     - Secondary: 2 tasks (typically priority A or B)
@@ -1950,16 +2238,35 @@ GET /api/v1/tasks?plan_id=abc-123&status=todo,in_progress&sort=-priority,positio
 #### Cascade Deletes
 - Deleting a **plan** (DELETE endpoint - hard delete) cascades to: goals, milestones, weekly_goals, tasks, task_history, weekly_reviews
 - Archiving a **plan** (soft delete) preserves all data, only changes status to `archived`
-- Deleting a **goal** cascades to: milestones, sets `long_term_goal_id = NULL` in weekly_goals
-- Deleting a **milestone** sets `milestone_id = NULL` in tasks
-- Deleting a **weekly_goal** cascades to: tasks (subtasks only)
+- Deleting a **goal** cascades to: 
+  - All associated milestones (hard delete)
+  - Sets `long_term_goal_id = NULL` in weekly_goals (disconnects, keeps weekly goals)
+  - Sets `long_term_goal_id = NULL` in tasks (disconnects, keeps tasks)
+- Deleting a **milestone** sets `milestone_id = NULL` in:
+  - Associated weekly_goals (disconnects, keeps weekly goals)
+  - Associated tasks (disconnects, keeps tasks)
+- Deleting a **weekly_goal** cascades to: tasks with `weekly_goal_id` set (subtasks only)
+  - Note: Tasks with only `long_term_goal_id` or `milestone_id` are NOT deleted
 - Deleting a **task** cascades to: task_history
 - Deleting a **user** (from auth.users) cascades to all user data
 
 #### Orphan Prevention
 - All foreign keys have `ON DELETE CASCADE` or `ON DELETE SET NULL`
+- The flexible hierarchy prevents orphaned data:
+  - Tasks can survive deletion of weekly goals if they have long_term_goal_id or milestone_id
+  - Weekly goals can survive deletion of long-term goals if they have milestone_id
+  - Only true orphans (no associations) are ad-hoc tasks/goals by design
 - RLS policies ensure users can only access their own data
 - Database constraints prevent invalid references
+
+#### Relationship Flexibility
+- The database supports multiple valid hierarchy patterns:
+  - **Classic hierarchy**: plan → goal → milestone → weekly_goal → task
+  - **Direct goal link**: plan → goal → task (bypassing milestones and weekly goals)
+  - **Milestone link**: plan → goal → milestone → task (bypassing weekly goals)
+  - **Ad-hoc**: plan → task (no intermediate associations)
+- This flexibility allows users to organize work in ways that make sense for their specific goals
+- API clients should handle null values gracefully for optional foreign keys
 
 ---
 
@@ -2125,6 +2432,87 @@ export function validationErrorResponse(details: Array<{ field: string; message:
 }
 ```
 
+### 6.6 Handling Flexible Hierarchies
+
+The database schema supports flexible relationships between goals, milestones, weekly goals, and tasks. When implementing API endpoints, consider:
+
+**1. Optional Foreign Keys:**
+```typescript
+// All relationship fields are optional
+interface Task {
+  id: string
+  plan_id: string
+  weekly_goal_id: string | null      // Link to weekly goal
+  long_term_goal_id: string | null   // Direct link to goal
+  milestone_id: string | null         // Direct link to milestone
+  // ... other fields
+}
+```
+
+**2. Filtering by Multiple Relationships:**
+```typescript
+// Support filtering by any combination of relationships
+const { data } = await supabase
+  .from('tasks')
+  .select('*')
+  .eq('plan_id', planId)
+  .or(`long_term_goal_id.eq.${goalId},milestone_id.eq.${milestoneId}`)
+```
+
+**3. Validation Recommendations:**
+```typescript
+// Application-level validation for better UX
+// (Not enforced by database, but recommended)
+async function validateTaskRelationships(task: TaskInput) {
+  // If milestone_id is provided, verify it belongs to a goal in the same plan
+  if (task.milestone_id) {
+    const { data: milestone } = await supabase
+      .from('milestones')
+      .select('long_term_goal_id, long_term_goals!inner(plan_id)')
+      .eq('id', task.milestone_id)
+      .single()
+    
+    if (milestone.long_term_goals.plan_id !== task.plan_id) {
+      throw new Error('Milestone must belong to a goal in the same plan')
+    }
+  }
+}
+```
+
+**4. Handling Cascading Nulls:**
+```typescript
+// When a goal or milestone is deleted, associated entities have their 
+// foreign keys set to NULL automatically by the database.
+// API responses should handle null values gracefully:
+
+interface WeeklyGoal {
+  id: string
+  plan_id: string
+  long_term_goal_id: string | null   // May be null if goal was deleted
+  milestone_id: string | null         // May be null if milestone was deleted
+  // ... other fields
+}
+
+// In client code, always check for null:
+if (weeklyGoal.long_term_goal_id) {
+  // Fetch goal details
+}
+```
+
+**5. Querying Hierarchical Data:**
+```typescript
+// Get tasks with their full hierarchy
+const { data: tasks } = await supabase
+  .from('tasks')
+  .select(`
+    *,
+    weekly_goal:weekly_goals(*),
+    long_term_goal:long_term_goals(*),
+    milestone:milestones(*, long_term_goal:long_term_goals(*))
+  `)
+  .eq('plan_id', planId)
+```
+
 ---
 
 ## 7. Future Enhancements
@@ -2250,5 +2638,6 @@ Content-Type: application/json
 |---------|------|---------|
 | 1.0 | 2025-01-27 | Initial API plan |
 | 1.1 | 2025-10-29 | Added DELETE /api/v1/plans/:id endpoint for hard delete of plans |
+| 1.2 | 2025-01-05 | Added flexible goal-milestone-task relationships:<br>- Added `milestone_id` to weekly_goals (CREATE, UPDATE, GET endpoints)<br>- Added `long_term_goal_id` to tasks (already in examples, now fully documented)<br>- Added filtering by `milestone_id` for weekly_goals<br>- Added filtering by `long_term_goal_id` for tasks<br>- Added GET /api/v1/milestones/:id/weekly-goals endpoint<br>- Added GET /api/v1/milestones/:id/tasks endpoint<br>- Updated business logic to reflect flexible hierarchies<br>- Updated cascade delete behavior documentation<br>- Clarified validation rules for new optional foreign keys |
 
 
