@@ -124,26 +124,52 @@ export type WeeklyGoalIdParams = z.infer<typeof WeeklyGoalIdParamsSchema>;
 export const WeeklyGoalListQuerySchema = z.object({
   plan_id: z.string().uuid({ message: 'Invalid plan ID format' }),
   
-  week_number: z.coerce.number()
-    .int({ message: 'Week number must be an integer' })
-    .min(1, { message: 'Week number must be at least 1' })
-    .max(12, { message: 'Week number must not exceed 12' })
-    .optional(),
+  week_number: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int({ message: 'Week number must be an integer' })
+        .min(1, { message: 'Week number must be at least 1' })
+        .max(12, { message: 'Week number must not exceed 12' })
+        .optional()
+    ),
   
   long_term_goal_id: z.string()
-    .uuid({ message: 'Invalid long-term goal ID format' })
-    .optional(),
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.string()
+        .uuid({ message: 'Invalid long-term goal ID format' })
+        .optional()
+    ),
   
-  limit: z.coerce.number()
-    .int({ message: 'Limit must be an integer' })
-    .min(1, { message: 'Limit must be at least 1' })
-    .max(100, { message: 'Limit must not exceed 100' })
-    .default(50),
+  limit: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int({ message: 'Limit must be an integer' })
+        .min(1, { message: 'Limit must be at least 1' })
+        .max(100, { message: 'Limit must not exceed 100' })
+        .optional()
+    )
+    .default("50"),
   
-  offset: z.coerce.number()
-    .int({ message: 'Offset must be an integer' })
-    .min(0, { message: 'Offset must be at least 0' })
-    .default(0)
+  offset: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int({ message: 'Offset must be an integer' })
+        .min(0, { message: 'Offset must be at least 0' })
+        .optional()
+    )
+    .default("0")
 });
 
 /**

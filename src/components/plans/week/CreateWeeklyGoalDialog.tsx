@@ -1,0 +1,121 @@
+/**
+ * CreateWeeklyGoalDialog Component
+ * 
+ * Dialog for creating a new weekly goal with optional link to long-term goal.
+ */
+
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { SimpleGoal } from '@/types';
+
+interface CreateWeeklyGoalDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (title: string, longTermGoalId?: string) => void;
+  availableLongTermGoals: SimpleGoal[];
+}
+
+export function CreateWeeklyGoalDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  availableLongTermGoals,
+}: CreateWeeklyGoalDialogProps) {
+  const [title, setTitle] = useState('');
+  const [selectedGoalId, setSelectedGoalId] = useState<string>('__none__');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!title.trim()) return;
+
+    // Convert __none__ sentinel value to undefined
+    const goalId = selectedGoalId === '__none__' ? undefined : selectedGoalId;
+    onSubmit(title.trim(), goalId);
+    
+    // Reset form
+    setTitle('');
+    setSelectedGoalId('__none__');
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset form when closing
+      setTitle('');
+      setSelectedGoalId('__none__');
+    }
+    onOpenChange(newOpen);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Create Weekly Goal</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Title Input */}
+            <div className="space-y-2">
+              <Label htmlFor="title">
+                Goal Title <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Complete authentication module"
+                required
+                autoFocus
+              />
+            </div>
+
+            {/* Long-term Goal Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="long-term-goal">
+                Link to Long-term Goal <span className="text-muted-foreground text-sm">(optional)</span>
+              </Label>
+              {availableLongTermGoals.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No long-term goals available. Create goals in the Goals view first.
+                </p>
+              ) : (
+                <Select value={selectedGoalId} onValueChange={setSelectedGoalId}>
+                  <SelectTrigger id="long-term-goal">
+                    <SelectValue placeholder="Select a long-term goal (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">None</SelectItem>
+                    {availableLongTermGoals.map((goal) => (
+                      <SelectItem key={goal.id} value={goal.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground uppercase">{goal.category}</span>
+                          <span>{goal.title}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!title.trim()}>
+              Create Goal
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

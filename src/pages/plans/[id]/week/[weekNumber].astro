@@ -1,0 +1,86 @@
+---
+/**
+ * Week Planning View Page
+ * Route: /plans/[id]/week/[weekNumber]
+ * 
+ * Allows users to plan their week with weekly goals and tasks
+ * Server-side: Fetches plan data for context and validation
+ * Client-side: React island for interactive week planning
+ */
+
+import { PlanService } from '@/lib/services/plan.service';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import Layout from '@/layouts/Layout.astro';
+import { WeekPlannerContainer } from '@/components/plans/week';
+import { Toaster } from '@/components/ui/sonner';
+
+export const prerender = false;
+
+// Get params from URL
+const { id: planId, weekNumber: weekNumberParam } = Astro.params;
+
+// Validate params
+if (!planId) {
+  return Astro.redirect('/plans');
+}
+
+const weekNumber = parseInt(weekNumberParam || '1', 10);
+
+// Validate week number (1-12)
+if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
+  return Astro.redirect(`/plans/${planId}/week/1`);
+}
+
+// Fetch plan data on server
+const userId = DEFAULT_USER_ID;
+const planService = new PlanService(Astro.locals.supabase);
+
+let plan;
+try {
+  plan = await planService.getPlanById(planId, userId);
+} catch (error) {
+  console.error('Error fetching plan:', error);
+}
+
+// Redirect if plan not found
+if (!plan) {
+  return Astro.redirect('/plans');
+}
+
+// Check if plan is archived - don't allow editing archived plans
+if (plan.status === 'archived') {
+  return Astro.redirect(`/plans/${planId}/goals`);
+}
+
+// Parse start date
+const startDate = new Date(plan.start_date);
+
+// Calculate end date (12 weeks from start)
+const endDate = new Date(startDate);
+endDate.setDate(startDate.getDate() + (12 * 7) - 1);
+
+// Check if the requested week is valid based on plan dates
+const currentDate = new Date();
+const weekStartDate = new Date(startDate);
+weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
+
+// If week hasn't started yet and plan is not active, redirect to current week
+if (plan.status !== 'active' && weekStartDate > currentDate) {
+  const currentWeek = plan.current_week || 1;
+  if (weekNumber !== currentWeek) {
+    return Astro.redirect(`/plans/${planId}/week/${currentWeek}`);
+  }
+}
+---
+
+<Layout title={`${plan.name} - Week ${weekNumber}`}>
+  <WeekPlannerContainer
+    client:load
+    planId={planId}
+    weekNumber={weekNumber}
+    planName={plan.name}
+    planStartDate={startDate}
+  />
+  <Toaster client:load position="bottom-right" />
+</Layout>
+

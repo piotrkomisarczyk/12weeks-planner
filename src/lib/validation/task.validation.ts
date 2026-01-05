@@ -73,29 +73,76 @@ const dueDaySchema = z
  */
 export const listTasksSchema = z.object({
   plan_id: uuidSchema,
-  week_number: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(12)
+  week_number: z.string()
     .nullable()
     .optional()
-    .transform(val => val === null ? undefined : val),
-  due_day: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(7)
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int()
+        .min(1)
+        .max(12)
+        .optional()
+    ),
+  due_day: z.string()
     .nullable()
     .optional()
-    .transform(val => val === null ? undefined : val),
-  task_type: taskTypeSchema.optional(),
-  weekly_goal_id: uuidSchema.optional(),
-  milestone_id: uuidSchema.optional(),
-  status: taskStatusSchema.optional(),
-  priority: taskPrioritySchema.optional(),
-  limit: z.coerce.number().int().positive().max(100).default(50).optional(),
-  offset: z.coerce.number().int().min(0).default(0).optional(),
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int()
+        .min(1)
+        .max(7)
+        .optional()
+    ),
+  task_type: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(taskTypeSchema.optional()),
+  weekly_goal_id: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(uuidSchema.optional()),
+  milestone_id: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(uuidSchema.optional()),
+  status: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(taskStatusSchema.optional()),
+  priority: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(taskPrioritySchema.optional()),
+  limit: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int()
+        .positive()
+        .max(100)
+        .optional()
+    )
+    .default("50"),
+  offset: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.coerce.number()
+        .int()
+        .min(0)
+        .optional()
+    )
+    .default("0"),
 });
 
 /**

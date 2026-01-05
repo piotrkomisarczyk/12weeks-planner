@@ -653,3 +653,57 @@ export interface PlanWizardState {
   errors: Record<string, string>;
 }
 
+// ============================================================================
+// WEEK VIEW MODELS (Frontend-specific types for Week Planning)
+// ============================================================================
+
+/**
+ * Task ViewModel - extends TaskDTO with UI-specific fields
+ */
+export interface TaskViewModel extends TaskDTO {
+  isEditing?: boolean;
+  isSaving?: boolean;
+}
+
+/**
+ * Weekly Goal ViewModel - extends WeeklyGoalDTO with nested tasks
+ */
+export interface WeeklyGoalViewModel extends WeeklyGoalDTO {
+  tasks: TaskViewModel[];
+}
+
+/**
+ * Week View Data - complete data structure for week planning view
+ */
+export interface WeekViewData {
+  weeklyGoals: WeeklyGoalViewModel[]; // Sorted by position
+  adHocTasks: TaskViewModel[]; // Tasks without weekly_goal_id, sorted by position
+}
+
+/**
+ * Simple Goal - minimal data for dropdown selection
+ */
+export interface SimpleGoal {
+  id: string;
+  title: string;
+  category: GoalCategory;
+}
+
+/**
+ * Simple Milestone - minimal data for dropdown selection
+ */
+export interface SimpleMilestone {
+  id: string;
+  title: string;
+  long_term_goal_id: string;
+  due_date: string | null;
+}
+
+/**
+ * Week View Metadata - supporting data for dropdowns and references
+ */
+export interface WeekViewMeta {
+  longTermGoals: SimpleGoal[];
+  milestones: SimpleMilestone[];
+}
+
