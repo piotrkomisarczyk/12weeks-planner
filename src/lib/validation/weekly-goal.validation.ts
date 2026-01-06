@@ -12,6 +12,7 @@ import { z } from 'zod';
  * Validates:
  * - plan_id: required UUID string
  * - long_term_goal_id: optional UUID, nullable
+ * - milestone_id: optional UUID, nullable
  * - week_number: required integer 1-12
  * - title: required string, 1-255 characters, trimmed
  * - description: optional string, nullable
@@ -22,6 +23,11 @@ export const CreateWeeklyGoalBodySchema = z.object({
   
   long_term_goal_id: z.string()
     .uuid({ message: 'Invalid long-term goal ID format' })
+    .nullable()
+    .optional(),
+  
+  milestone_id: z.string()
+    .uuid({ message: 'Invalid milestone ID format' })
     .nullable()
     .optional(),
   
@@ -47,6 +53,7 @@ export const CreateWeeklyGoalBodySchema = z.object({
 }).transform((data) => ({
   ...data,
   long_term_goal_id: data.long_term_goal_id ?? null,
+  milestone_id: data.milestone_id ?? null,
   description: data.description ?? null
 }));
 
@@ -64,6 +71,7 @@ export type CreateWeeklyGoalBody = z.infer<typeof CreateWeeklyGoalBodySchema>;
  * 
  * Validates:
  * - long_term_goal_id: optional UUID, nullable
+ * - milestone_id: optional UUID, nullable
  * - title: optional string, 1-255 characters, trimmed
  * - description: optional string, nullable
  * - position: optional integer >= 1
@@ -73,6 +81,11 @@ export type CreateWeeklyGoalBody = z.infer<typeof CreateWeeklyGoalBodySchema>;
 export const UpdateWeeklyGoalBodySchema = z.object({
   long_term_goal_id: z.string()
     .uuid({ message: 'Invalid long-term goal ID format' })
+    .nullable()
+    .optional(),
+  
+  milestone_id: z.string()
+    .uuid({ message: 'Invalid milestone ID format' })
     .nullable()
     .optional(),
   
@@ -118,6 +131,7 @@ export type WeeklyGoalIdParams = z.infer<typeof WeeklyGoalIdParamsSchema>;
  * - plan_id: required UUID
  * - week_number: optional integer 1-12
  * - long_term_goal_id: optional UUID for filtering by goal
+ * - milestone_id: optional UUID for filtering by milestone
  * - limit: integer 1-100, defaults to 50
  * - offset: integer >= 0, defaults to 0
  */
@@ -143,6 +157,16 @@ export const WeeklyGoalListQuerySchema = z.object({
     .pipe(
       z.string()
         .uuid({ message: 'Invalid long-term goal ID format' })
+        .optional()
+    ),
+  
+  milestone_id: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(
+      z.string()
+        .uuid({ message: 'Invalid milestone ID format' })
         .optional()
     ),
   

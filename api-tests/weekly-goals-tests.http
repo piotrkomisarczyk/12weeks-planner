@@ -636,5 +636,363 @@ Content-Type: application/json
 ### List all goals for week 5
 GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=5
 
+### ============================================================================
+### MILESTONE_ID SUPPORT TESTS (NEW)
+### ============================================================================
+
+### Variables for milestone tests
+@milestoneId = REPLACE_WITH_VALID_MILESTONE_ID
+@anotherMilestoneId = REPLACE_WITH_ANOTHER_VALID_MILESTONE_ID
+@milestoneFromOtherPlan = REPLACE_WITH_MILESTONE_FROM_OTHER_PLAN
+
+### ============================================================================
+### POSITIVE TESTS - Milestone Association
+### ============================================================================
+
+### POST /api/v1/weekly-goals - Create with milestone_id only (no long_term_goal_id)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 6,
+  "title": "Weekly goal linked to milestone only"
+}
+
+### POST /api/v1/weekly-goals - Create with full hierarchy (plan → goal → milestone)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 7,
+  "title": "Weekly goal with full hierarchy",
+  "description": "Connected to plan, goal, and milestone",
+  "position": 1
+}
+
+### POST /api/v1/weekly-goals - Create with milestone from different goal (but same plan)
+### NOTE: This is ALLOWED - milestone can be from goalB while long_term_goal_id is goalA
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "milestone_id": "{{anotherMilestoneId}}",
+  "week_number": 8,
+  "title": "Cross-goal milestone reference",
+  "description": "Milestone from different goal, but same plan"
+}
+
+### POST /api/v1/weekly-goals - Create with explicit null milestone_id
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "milestone_id": null,
+  "week_number": 9,
+  "title": "Weekly goal with null milestone"
+}
+
+### GET /api/v1/weekly-goals - Filter by milestone_id
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&milestone_id={{milestoneId}}
+
+### GET /api/v1/weekly-goals - Combined filters: week_number + milestone_id
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=7&milestone_id={{milestoneId}}
+
+### GET /api/v1/weekly-goals - Combined filters: goal + milestone + week
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&long_term_goal_id={{goalId}}&milestone_id={{milestoneId}}&week_number=7
+
+### GET /api/v1/weekly-goals - Filter by milestone with pagination
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&milestone_id={{milestoneId}}&limit=10&offset=0
+
+### PATCH /api/v1/weekly-goals/:id - Add milestone_id to existing weekly goal
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneId}}"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Change milestone_id to different milestone
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{anotherMilestoneId}}"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Remove milestone_id (set to null)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": null
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update milestone_id and title together
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneId}}",
+  "title": "Updated title with new milestone"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Update long_term_goal_id and milestone_id
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{goalId}}",
+  "milestone_id": "{{milestoneId}}"
+}
+
+### ============================================================================
+### VALIDATION ERROR TESTS - Milestone
+### ============================================================================
+
+### POST /api/v1/weekly-goals - Error: Invalid milestone_id UUID format
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "not-a-valid-uuid",
+  "week_number": 3,
+  "title": "Test with invalid milestone UUID"
+}
+
+### GET /api/v1/weekly-goals - Error: Invalid milestone_id UUID in query
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&milestone_id=invalid-uuid
+
+### PATCH /api/v1/weekly-goals/:id - Error: Invalid milestone_id UUID
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "not-a-uuid"
+}
+
+### ============================================================================
+### BUSINESS LOGIC ERROR TESTS - Milestone
+### ============================================================================
+
+### POST /api/v1/weekly-goals - Error: Milestone not found (non-existent UUID)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "00000000-0000-0000-0000-000000000000",
+  "week_number": 3,
+  "title": "Test with non-existent milestone"
+}
+
+### POST /api/v1/weekly-goals - Error: Milestone from different plan (SECURITY TEST)
+### This should return 400 - Milestone does not belong to a goal in the specified plan
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneFromOtherPlan}}",
+  "week_number": 3,
+  "title": "Cross-plan milestone attack attempt"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Update with non-existent milestone
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "00000000-0000-0000-0000-000000000000"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Error: Update with milestone from different plan (SECURITY TEST)
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneFromOtherPlan}}"
+}
+
+### ============================================================================
+### EDGE CASES - Milestone Relationships
+### ============================================================================
+
+### POST /api/v1/weekly-goals - Edge: Milestone without long_term_goal_id
+### Weekly goal has milestone but no explicit goal reference
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 10,
+  "title": "Milestone without explicit goal",
+  "description": "System should still validate milestone belongs to plan"
+}
+
+### POST /api/v1/weekly-goals - Edge: Goal A with milestone from Goal B (same plan)
+### This tests the independence of milestone_id and long_term_goal_id
+### Both must belong to the same plan, but can be from different goals
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "milestone_id": "{{anotherMilestoneId}}",
+  "week_number": 11,
+  "title": "Cross-goal milestone association",
+  "description": "Goal A + Milestone from Goal B (valid if both in same plan)"
+}
+
+### GET /api/v1/weekly-goals - Edge: Filter by milestone only (no goal filter)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&milestone_id={{milestoneId}}
+
+### GET /api/v1/weekly-goals - Edge: Filter by goal and different milestone
+### Should return weekly goals that match BOTH filters
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&long_term_goal_id={{goalId}}&milestone_id={{anotherMilestoneId}}
+
+### PATCH /api/v1/weekly-goals/:id - Edge: Change from one milestone to another
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{anotherMilestoneId}}",
+  "description": "Moved to different milestone"
+}
+
+### PATCH /api/v1/weekly-goals/:id - Edge: Set milestone without changing goal
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneId}}"
+}
+
+### ============================================================================
+### CASCADE AND RELATIONSHIP TESTS - Milestone
+### ============================================================================
+
+### NOTE: When a milestone is deleted (ON DELETE SET NULL), 
+### weekly goals should remain but milestone_id should be set to NULL
+
+### Test sequence:
+### 1. Create weekly goal with milestone_id
+### 2. Delete the milestone (via milestones endpoint)
+### 3. GET the weekly goal - should exist with milestone_id = null
+### 4. Weekly goal should NOT be deleted (different from goal deletion)
+
+### Step 1: Create weekly goal for milestone SET NULL test
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 12,
+  "title": "Weekly goal for milestone SET NULL test",
+  "description": "When milestone is deleted, this goal should remain with milestone_id = null"
+}
+
+### Step 2: Delete milestone (execute via milestones endpoint)
+### DELETE {{baseUrl}}/api/v1/milestones/{{milestoneId}}
+
+### Step 3: Verify weekly goal still exists with milestone_id = null
+### GET {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+### Expected: weekly goal exists, milestone_id is null
+
+### ============================================================================
+### SECURITY TESTS - Milestone Hierarchy Validation
+### ============================================================================
+
+### CRITICAL SECURITY TEST: Prevent cross-user milestone access
+### This tests the validateMilestoneInPlan() security method
+
+### Test 1: Attempt to use milestone from another user's plan
+### Expected: 404 Milestone not found (milestone doesn't exist in user's context)
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneFromOtherPlan}}",
+  "week_number": 3,
+  "title": "Security test - other user's milestone"
+}
+
+### Test 2: Attempt to use milestone from different plan (same user)
+### Expected: 400 Validation failed - Milestone does not belong to a goal in the specified plan
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneFromOtherPlan}}",
+  "week_number": 3,
+  "title": "Security test - cross-plan milestone"
+}
+
+### Test 3: Update to use milestone from wrong plan
+### Expected: 400 Validation failed
+PATCH {{baseUrl}}/api/v1/weekly-goals/{{weeklyGoalId}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneFromOtherPlan}}"
+}
+
+### ============================================================================
+### PERFORMANCE TESTS - Milestone Queries
+### ============================================================================
+
+### Test milestone validation query performance (should use JOIN with indexes)
+### The validateMilestoneInPlan() method should complete in < 10ms
+
+### Create multiple weekly goals with milestones rapidly
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 1,
+  "title": "Performance test goal 1"
+}
+
+### Second rapid creation
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 2,
+  "title": "Performance test goal 2"
+}
+
+### Third rapid creation
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "week_number": 3,
+  "title": "Performance test goal 3"
+}
+
+### List with milestone filter (should use index on milestone_id)
+GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&milestone_id={{milestoneId}}
+
 
 

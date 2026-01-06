@@ -1,19 +1,21 @@
 /**
  * API Endpoints: /api/v1/weekly-goals
  * 
- * GET - Lists weekly goals with filters (plan_id, week_number, long_term_goal_id)
+ * GET - Lists weekly goals with filters (plan_id, week_number, long_term_goal_id, milestone_id)
  * POST - Creates a new weekly goal
  * 
  * GET Query Parameters:
  * - plan_id: UUID (required)
  * - week_number: integer (optional, 1-12)
  * - long_term_goal_id: UUID (optional)
+ * - milestone_id: UUID (optional)
  * - limit: integer (optional, 1-100, default: 50)
  * - offset: integer (optional, >= 0, default: 0)
  * 
  * POST Request Body:
  * - plan_id: UUID (required)
  * - long_term_goal_id: UUID (optional, nullable)
+ * - milestone_id: UUID (optional, nullable)
  * - week_number: integer (required, 1-12)
  * - title: string (required, 1-255 characters)
  * - description: string (optional, nullable)
@@ -22,8 +24,8 @@
  * Responses:
  * - 200: OK (GET)
  * - 201: Created (POST)
- * - 400: Validation error
- * - 404: Plan not found or Long-term goal not found
+ * - 400: Validation error, Milestone-Plan mismatch
+ * - 404: Plan not found, Long-term goal not found, or Milestone not found
  * - 500: Internal server error
  */
 
@@ -60,6 +62,7 @@ export const GET: APIRoute = async ({ locals, request }) => {
       plan_id: url.searchParams.get('plan_id'),
       week_number: url.searchParams.get('week_number'),
       long_term_goal_id: url.searchParams.get('long_term_goal_id'),
+      milestone_id: url.searchParams.get('milestone_id'),
       limit: url.searchParams.get('limit'),
       offset: url.searchParams.get('offset')
     };
@@ -258,6 +261,34 @@ export const POST: APIRoute = async ({ locals, request }) => {
           JSON.stringify({
             error: 'Validation failed',
             message: 'Long-term goal does not belong to the specified plan'
+          } as ErrorResponse),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
+      // Milestone not found
+      if (errorMessage.includes('Milestone not found')) {
+        return new Response(
+          JSON.stringify({
+            error: 'Milestone not found',
+            message: 'Milestone does not exist or does not belong to user\'s plan'
+          } as ErrorResponse),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
+      // Milestone doesn't belong to a goal in the plan
+      if (errorMessage.includes('does not belong to a goal')) {
+        return new Response(
+          JSON.stringify({
+            error: 'Validation failed',
+            message: 'Milestone does not belong to a goal in the specified plan'
           } as ErrorResponse),
           {
             status: 400,

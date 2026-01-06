@@ -16,18 +16,71 @@ import type {
 } from '../../types';
 import { PlanService } from './plan.service';
 import { GoalService } from './goal.service';
+import { MilestoneService } from './milestone.service';
 
 export class WeeklyGoalService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
+   * Waliduje, że milestone należy do goala w podanym planie
+   * Jest to krytyczny check bezpieczeństwa zapobiegający cross-plan milestone associations
+   * 
+   * @param milestoneId - UUID milestone do walidacji
+   * @param planId - UUID planu, który powinien zawierać goal milestone'a
+   * @throws Error jeśli milestone nie istnieje
+   * @throws Error jeśli goal milestone'a nie należy do podanego planu
+   * 
+   * @example
+   * ```typescript
+   * await validateMilestoneInPlan(milestoneId, planId);
+   * // Jeśli nie rzuci błędu, milestone jest poprawny dla tego planu
+   * ```
+   */
+  private async validateMilestoneInPlan(
+    milestoneId: string,
+    planId: string
+  ): Promise<void> {
+    // Query milestone with its goal's plan_id using JOIN
+    const { data, error } = await this.supabase
+      .from('milestones')
+      .select(`
+        id,
+        long_term_goal_id,
+        long_term_goals!inner(id, plan_id)
+      `)
+      .eq('id', milestoneId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Database error while validating milestone: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Milestone not found');
+    }
+
+    // Type assertion for nested structure
+    const milestone = data as unknown as {
+      id: string;
+      long_term_goal_id: string;
+      long_term_goals: { id: string; plan_id: string };
+    };
+
+    // Check if milestone's goal belongs to the specified plan
+    if (milestone.long_term_goals.plan_id !== planId) {
+      throw new Error('Milestone does not belong to a goal in the specified plan');
+    }
+  }
+
+  /**
    * Tworzy nowy cel tygodniowy
    * 
    * @param userId - ID użytkownika (z tokenu JWT)
-   * @param data - Dane celu tygodniowego (plan_id, week_number, title, etc.)
+   * @param data - Dane celu tygodniowego (plan_id, week_number, title, milestone_id, etc.)
    * @returns Promise z utworzonym celem tygodniowym
    * @throws Error jeśli plan nie istnieje lub nie należy do użytkownika
    * @throws Error jeśli long_term_goal_id nie istnieje lub nie należy do tego samego planu
+   * @throws Error jeśli milestone_id nie istnieje lub nie należy do goala w tym samym planie
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    * 
    * @example
@@ -35,6 +88,7 @@ export class WeeklyGoalService {
    * const weeklyGoal = await weeklyGoalService.createWeeklyGoal(userId, {
    *   plan_id: 'uuid',
    *   long_term_goal_id: 'uuid',
+   *   milestone_id: 'uuid',
    *   week_number: 3,
    *   title: 'Complete authentication system',
    *   description: 'Implement auth with Supabase',
@@ -69,24 +123,30 @@ export class WeeklyGoalService {
       }
     }
 
-    // Step 3: Prepare insert data
+    // Step 3: If milestone_id provided, verify it exists and belongs to goal in same plan
+    if (data.milestone_id) {
+      await this.validateMilestoneInPlan(data.milestone_id, data.plan_id);
+    }
+
+    // Step 4: Prepare insert data
     const insertData: WeeklyGoalInsert = {
       plan_id: data.plan_id,
       long_term_goal_id: data.long_term_goal_id ?? null,
+      milestone_id: data.milestone_id ?? null,
       week_number: data.week_number,
       title: data.title,
       description: data.description ?? null,
       position: data.position ?? 1
     };
 
-    // Step 4: Execute insert
+    // Step 5: Execute insert
     const { data: weeklyGoal, error } = await this.supabase
       .from('weekly_goals')
       .insert(insertData)
       .select()
       .single();
 
-    // Step 5: Handle database errors
+    // Step 6: Handle database errors
     if (error) {
       throw new Error(`Failed to create weekly goal: ${error.message}`);
     }
@@ -188,7 +248,7 @@ export class WeeklyGoalService {
    * Pobiera listę celów tygodniowych z filtrami
    * Weryfikuje, że plan należy do użytkownika
    * 
-   * @param params - Parametry zapytania (plan_id, week_number, long_term_goal_id, limit, offset)
+   * @param params - Parametry zapytania (plan_id, week_number, long_term_goal_id, milestone_id, limit, offset)
    * @param userId - ID użytkownika
    * @returns Promise z tablicą celów tygodniowych
    * @throws Error jeśli plan nie istnieje lub nie należy do użytkownika
@@ -199,6 +259,7 @@ export class WeeklyGoalService {
    * const weeklyGoals = await weeklyGoalService.listWeeklyGoals({
    *   plan_id: 'uuid',
    *   week_number: 3,
+   *   milestone_id: 'uuid',
    *   limit: 50,
    *   offset: 0
    * }, userId);
@@ -232,6 +293,10 @@ export class WeeklyGoalService {
       query = query.eq('long_term_goal_id', params.long_term_goal_id);
     }
 
+    if (params.milestone_id !== undefined) {
+      query = query.eq('milestone_id', params.milestone_id);
+    }
+
     // Apply pagination
     const limit = params.limit ?? 50;
     const offset = params.offset ?? 0;
@@ -256,15 +321,17 @@ export class WeeklyGoalService {
    * 
    * @param id - UUID celu tygodniowego
    * @param userId - ID użytkownika (z DEFAULT_USER_ID)
-   * @param data - Dane do aktualizacji (wszystkie pola opcjonalne)
+   * @param data - Dane do aktualizacji (wszystkie pola opcjonalne, włącznie z milestone_id)
    * @returns Promise z zaktualizowanym celem lub null jeśli nie istnieje
    * @throws Error jeśli long_term_goal_id nie istnieje lub nie należy do tego samego planu
+   * @throws Error jeśli milestone_id nie istnieje lub nie należy do goala w tym samym planie
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    * 
    * @example
    * ```typescript
    * const weeklyGoal = await weeklyGoalService.updateWeeklyGoal(id, userId, {
    *   title: 'Updated Title',
+   *   milestone_id: 'uuid',
    *   position: 2
    * });
    * if (!weeklyGoal) {
@@ -299,11 +366,20 @@ export class WeeklyGoalService {
       }
     }
 
-    // Step 3: Prepare partial update data
+    // Step 3: If milestone_id changed and not null, verify it
+    if (data.milestone_id !== undefined && data.milestone_id !== null) {
+      await this.validateMilestoneInPlan(data.milestone_id, existingWeeklyGoal.plan_id);
+    }
+
+    // Step 4: Prepare partial update data
     const updateData: WeeklyGoalUpdate = {};
     
     if (data.long_term_goal_id !== undefined) {
       updateData.long_term_goal_id = data.long_term_goal_id;
+    }
+    
+    if (data.milestone_id !== undefined) {
+      updateData.milestone_id = data.milestone_id;
     }
     
     if (data.title !== undefined) {
@@ -320,7 +396,7 @@ export class WeeklyGoalService {
     
     // updated_at is automatically set by database trigger
 
-    // Step 4: Execute update
+    // Step 5: Execute update
     const { data: weeklyGoal, error } = await this.supabase
       .from('weekly_goals')
       .update(updateData)
@@ -328,7 +404,7 @@ export class WeeklyGoalService {
       .select()
       .single();
 
-    // Step 5: Handle database errors
+    // Step 6: Handle database errors
     if (error) {
       throw new Error(`Failed to update weekly goal: ${error.message}`);
     }

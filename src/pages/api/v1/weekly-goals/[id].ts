@@ -10,6 +10,7 @@
  * 
  * PATCH Request Body (all optional, at least one required):
  * - long_term_goal_id: UUID (nullable) - associated long-term goal
+ * - milestone_id: UUID (nullable) - associated milestone
  * - title: string (1-255 characters)
  * - description: string (nullable)
  * - position: integer (>= 1)
@@ -18,8 +19,8 @@
  * 
  * Responses:
  * - 200: Success
- * - 400: Validation error
- * - 404: Weekly goal not found, Plan not found, or Long-term goal not found
+ * - 400: Validation error, Milestone-Plan mismatch
+ * - 404: Weekly goal not found, Plan not found, Long-term goal not found, or Milestone not found
  * - 500: Internal server error
  */
 
@@ -289,6 +290,34 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
           JSON.stringify({
             error: 'Validation failed',
             message: 'Long-term goal does not belong to the same plan'
+          } as ErrorResponse),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
+      // Milestone not found
+      if (errorMessage.includes('Milestone not found')) {
+        return new Response(
+          JSON.stringify({
+            error: 'Milestone not found',
+            message: 'Milestone does not exist or does not belong to user\'s plan'
+          } as ErrorResponse),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
+      // Milestone doesn't belong to a goal in the plan
+      if (errorMessage.includes('does not belong to a goal')) {
+        return new Response(
+          JSON.stringify({
+            error: 'Validation failed',
+            message: 'Milestone does not belong to a goal in the specified plan'
           } as ErrorResponse),
           {
             status: 400,
