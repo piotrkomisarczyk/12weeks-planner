@@ -15,7 +15,16 @@ Ten dokument opisuje implementację 7 endpointów REST API dla zarządzania zada
 Zadania mogą być:
 - Związane z weekly goals (task_type: weekly_main, weekly_sub)
 - Zadaniami ad-hoc niezwiązanymi z weekly goals
-- Opcjonalnie powiązane z milestones
+- Opcjonalnie powiązane bezpośrednio z long-term goals
+- Opcjonalnie powiązane bezpośrednio z milestones
+
+**Elastyczna hierarchia relacji:**
+```
+plans (1) ---> (N) tasks (zadania ad-hoc)
+weekly_goals (1) ---> (N) tasks (zadania tygodniowe)
+long_term_goals (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
+milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
+```
 
 ---
 
@@ -34,6 +43,7 @@ Zadania mogą być:
   - `due_day` (number, 1-7) - filtr dnia tygodnia
   - `task_type` (enum) - filtr typu: weekly_main, weekly_sub, ad_hoc
   - `weekly_goal_id` (UUID) - filtr celu tygodniowego
+  - `long_term_goal_id` (UUID) - filtr celu długoterminowego
   - `milestone_id` (UUID) - filtr kamienia milowego
   - `status` (enum) - filtr statusu: todo, in_progress, completed, cancelled, postponed
   - `priority` (enum) - filtr priorytetu: A, B, C
@@ -43,10 +53,35 @@ Zadania mogą być:
 **Response 200 OK**:
 ```json
 {
-  "data": [TaskDTO],
-  "count": number
+  "data": [
+    {
+      "id": "uuid",
+      "weekly_goal_id": "uuid",
+      "plan_id": "uuid",
+      "long_term_goal_id": "uuid",
+      "milestone_id": "uuid",
+      "title": "Setup Supabase client",
+      "description": "Configure Supabase with environment variables",
+      "priority": "A",
+      "status": "completed",
+      "task_type": "weekly_sub",
+      "week_number": 3,
+      "due_day": 1,
+      "position": 1,
+      "created_at": "2025-01-20T10:00:00Z",
+      "updated_at": "2025-01-20T16:30:00Z"
+    }
+  ],
+  "count": 1
 }
 ```
+
+**Uwagi**:
+- Zadania mogą być powiązane z weekly goals, long-term goals, milestones lub dowolną ich kombinacją
+- Filtrowanie po long_term_goal_id zwraca wszystkie zadania bezpośrednio powiązane z tym celem długoterminowym
+- Filtrowanie po milestone_id zwraca wszystkie zadania bezpośrednio powiązane z tym kamieniem milowym
+- Filtrowanie po weekly_goal_id zwraca wszystkie zadania bezpośrednio powiązane z tym celem tygodniowym
+
 
 ---
 
@@ -68,12 +103,40 @@ Zadania mogą być:
     "date": "2025-01-20",
     "week_number": 3,
     "due_day": 1,
-    "most_important": TaskDTO | null,
-    "secondary": TaskDTO[],
-    "additional": TaskDTO[]
+    "most_important": {
+      "id": "uuid",
+      "title": "Complete API design",
+      "priority": "A",
+      "status": "in_progress",
+      "task_type": "weekly_main"
+    },
+    "secondary": [
+      {
+        "id": "uuid",
+        "title": "Setup Supabase client",
+        "priority": "B",
+        "status": "completed",
+        "task_type": "weekly_sub"
+      }
+    ],
+    "additional": [
+      {
+        "id": "uuid",
+        "title": "Review documentation",
+        "priority": "C",
+        "status": "todo",
+        "task_type": "ad_hoc"
+      }
+    ]
   }
 }
 ```
+
+**Uwagi**:
+- Zwraca zadania pogrupowane według priorytetu dla lepszego planowania dziennego
+- `most_important` to pierwsze zadanie z priorytetem A (lub null jeśli brak)
+- `secondary` to wszystkie zadania z priorytetem B
+- `additional` to wszystkie zadania z priorytetem C
 
 ---
 
@@ -89,8 +152,44 @@ Zadania mogą być:
 ```json
 {
   "data": {
-    ...TaskDTO,
-    "history": TaskHistoryDTO[]
+    "id": "uuid",
+    "weekly_goal_id": "uuid",
+    "plan_id": "uuid",
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
+    "title": "Setup Supabase client",
+    "description": "Configure Supabase with environment variables",
+    "priority": "A",
+    "status": "completed",
+    "task_type": "weekly_sub",
+    "week_number": 3,
+    "due_day": 1,
+    "position": 1,
+    "created_at": "2025-01-20T10:00:00Z",
+    "updated_at": "2025-01-20T16:30:00Z",
+    "history": [
+      {
+        "id": "uuid",
+        "task_id": "uuid",
+        "status": "todo",
+        "changed_at": "2025-01-20T10:00:00Z",
+        "due_day": 1
+      },
+      {
+        "id": "uuid",
+        "task_id": "uuid",
+        "status": "in_progress",
+        "changed_at": "2025-01-20T14:00:00Z",
+        "due_day": 1
+      },
+      {
+        "id": "uuid",
+        "task_id": "uuid",
+        "status": "completed",
+        "changed_at": "2025-01-20T16:30:00Z",
+        "due_day": 1
+      }
+    ]
   }
 }
 ```
@@ -107,24 +206,62 @@ Zadania mogą być:
 {
   "plan_id": "uuid",
   "weekly_goal_id": "uuid" | null,
+  "long_term_goal_id": "uuid" | null,
   "milestone_id": "uuid" | null,
-  "title": "string",
-  "description": "string" | null,
+  "title": "Setup Supabase client",
+  "description": "Configure Supabase with environment variables" | null,
   "priority": "A" | "B" | "C",
   "status": "todo" | "in_progress" | "completed" | "cancelled" | "postponed",
   "task_type": "weekly_main" | "weekly_sub" | "ad_hoc",
   "week_number": 1-12 | null,
   "due_day": 1-7 | null,
-  "position": number
+  "position": 1
 }
 ```
+
+**Walidacja**:
+- `plan_id`: Wymagane, musi być valid UUID
+- `weekly_goal_id`: Opcjonalne (null dla ad-hoc tasks)
+- `long_term_goal_id`: Opcjonalne (null dla zadań nie powiązanych bezpośrednio z celem)
+- `milestone_id`: Opcjonalne (null dla zadań nie powiązanych z kamieniem milowym)
+- `title`: Wymagane, max 255 znaków
+- `description`: Opcjonalne
+- `priority`: Domyślnie 'A', jeden z: A, B, C
+- `status`: Domyślnie 'todo', jeden z: todo, in_progress, completed, cancelled, postponed
+- `task_type`: Domyślnie 'weekly_sub', jeden z: weekly_main, weekly_sub, ad_hoc
+- `week_number`: Opcjonalne (null dla zadań nie przypisanych do tygodnia), zakres 1-12
+- `due_day`: Opcjonalne (null dla zadań nie przypisanych do dnia), zakres 1-7
+- `position`: Domyślnie 1
+- Maksymalnie 10 weekly subtasks per weekly_goal (egzekwowane przez trigger bazy danych)
+- Maksymalnie 10 ad-hoc tasks per week (egzekwowane przez trigger bazy danych)
 
 **Response 201 Created**:
 ```json
 {
-  "data": TaskDTO
+  "data": {
+    "id": "uuid",
+    "weekly_goal_id": "uuid",
+    "plan_id": "uuid",
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
+    "title": "Setup Supabase client",
+    "description": "Configure Supabase with environment variables",
+    "priority": "A",
+    "status": "todo",
+    "task_type": "weekly_sub",
+    "week_number": 3,
+    "due_day": 1,
+    "position": 1,
+    "created_at": "2025-01-20T10:00:00Z",
+    "updated_at": "2025-01-20T10:00:00Z"
+  }
 }
 ```
+
+**Uwagi**:
+- Zadania wspierają elastyczne hierarchie: mogą być powiązane z weekly goals, long-term goals, milestones lub dowolną kombinacją
+- Dla organizacji hierarchicznej: goal → milestone → task LUB goal → task LUB goal → milestone → weekly_goal → task LUB goal → weekly_goal → task
+- Zadania ad-hoc NIE mają powiązania z weekly_goal (weekly_goal_id = null). Mogą mieć powiązania bezpośrednio z goal lub też z milestone lub z oboma goal i milestone (wtedy milestone musi być powiązany z goal). Zadania ad-hoc mogą także w ogóle nie mieć powiązań (wszystkie foreign keys null).
 
 ---
 
@@ -137,13 +274,43 @@ Zadania mogą być:
 - `id` (UUID) - ID zadania
 
 **Request Body**: Partial update - wszystkie pola opcjonalne
+```json
+{
+  "status": "completed",
+  "long_term_goal_id": "uuid",
+  "milestone_id": "uuid"
+}
+```
+
+**Walidacja**: Taka sama jak przy tworzeniu, wszystkie pola opcjonalne
 
 **Response 200 OK**:
 ```json
 {
-  "data": TaskDTO
+  "data": {
+    "id": "uuid",
+    "weekly_goal_id": "uuid",
+    "plan_id": "uuid",
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
+    "title": "Setup Supabase client",
+    "description": "Configure Supabase with environment variables",
+    "priority": "A",
+    "status": "completed",
+    "task_type": "weekly_sub",
+    "week_number": 3,
+    "due_day": 1,
+    "position": 1,
+    "created_at": "2025-01-20T10:00:00Z",
+    "updated_at": "2025-01-20T16:30:00Z"
+  }
 }
 ```
+
+**Uwagi**:
+- Można aktualizować long_term_goal_id i milestone_id aby zmienić powiązania zadania
+- Ustawienie na null usuwa powiązania
+- Zmiany statusu są automatycznie logowane do task_history przez trigger bazy danych
 
 ---
 
@@ -158,18 +325,43 @@ Zadania mogą być:
 **Request Body**:
 ```json
 {
-  "week_number": 1-12 | null,
-  "due_day": 1-7 | null
+  "week_number": 4,
+  "due_day": 2
 }
 ```
+
+**Walidacja**:
+- `week_number`: Opcjonalne, zakres 1-12 (jeśli null, kopiuje do nieprzypisanych)
+- `due_day`: Opcjonalne, zakres 1-7 (jeśli null, kopiuje bez konkretnego dnia)
 
 **Response 201 Created**:
 ```json
 {
-  "data": TaskDTO,
+  "data": {
+    "id": "uuid",
+    "weekly_goal_id": "uuid",
+    "plan_id": "uuid",
+    "long_term_goal_id": "uuid",
+    "milestone_id": "uuid",
+    "title": "Setup Supabase client",
+    "description": "Configure Supabase with environment variables",
+    "priority": "A",
+    "status": "todo",
+    "task_type": "weekly_sub",
+    "week_number": 4,
+    "due_day": 2,
+    "position": 1,
+    "created_at": "2025-01-27T10:00:00Z",
+    "updated_at": "2025-01-27T10:00:00Z"
+  },
   "message": "Task copied successfully"
 }
 ```
+
+**Uwagi**:
+- Skopiowane zadanie zachowuje wszystkie powiązania (weekly_goal_id, long_term_goal_id, milestone_id)
+- Status jest resetowany do 'todo' dla nowej kopii
+- Oryginalne zadanie pozostaje niezmienione
 
 ---
 
@@ -187,6 +379,9 @@ Zadania mogą być:
   "message": "Task deleted successfully"
 }
 ```
+
+**Uwagi**:
+- Usunięcie kaskadowe do task_history
 
 ---
 
@@ -229,6 +424,7 @@ export type CreateTaskCommand = Pick<
   TaskInsert,
   | 'plan_id'
   | 'weekly_goal_id'
+  | 'long_term_goal_id'
   | 'milestone_id'
   | 'title'
   | 'description'
@@ -245,6 +441,7 @@ export type UpdateTaskCommand = Partial<
   Pick<
     TaskUpdate,
     | 'weekly_goal_id'
+    | 'long_term_goal_id'
     | 'milestone_id'
     | 'title'
     | 'description'
@@ -285,6 +482,22 @@ export interface SuccessResponse {
   };
   message: string;
 }
+
+export interface ErrorResponse {
+  error: string;
+  message?: string;
+}
+
+export interface ValidationErrorDetail {
+  field: string;
+  message: string;
+  received?: unknown;
+}
+
+export interface ValidationErrorResponse {
+  error: 'Validation failed';
+  details: ValidationErrorDetail[];
+}
 ```
 
 ---
@@ -299,7 +512,7 @@ Client Request
 Astro Endpoint: /src/pages/api/v1/tasks/index.ts
   ↓ (walidacja query params)
 Zod Schema: listTasksSchema
-  ↓ (extract supabase from context)
+  ↓ (extract supabase from context.locals)
 Service: task.service.ts → listTasks()
   ↓ (query z filtrami)
 Supabase Client → Table: tasks
@@ -322,6 +535,8 @@ Astro Endpoint: /src/pages/api/v1/tasks/daily.ts
   ↓ (walidacja query params)
 Zod Schema: dailyTasksParamsSchema
   ↓
+Service: task.service.ts → getPlanStartDate()
+  ↓ (verify plan exists)
 Service: task.service.ts → getDailyTasks()
   ↓ (query tasks dla dnia)
 Supabase Client → Table: tasks WHERE due_day & week_number
@@ -368,10 +583,20 @@ Request Body → JSON.parse()
 Zod Schema: createTaskSchema
   ↓ (verify plan exists)
 Service: task.service.ts → createTask()
+  ↓ (verify weekly_goal_id if provided)
+Service → Verify weekly goal exists
+  ↓ (verify long_term_goal_id if provided)
+Service → Verify long-term goal exists
+  ↓ (verify milestone_id if provided)
+Service → Verify milestone exists
   ↓ (insert to database)
 Supabase Client → INSERT INTO tasks
   ↓ (trigger: log_task_status_change fires)
 Database Trigger → INSERT INTO task_history (initial status)
+  ↓ (trigger: validate_weekly_subtask_count checks)
+Database Trigger → Check max 10 subtasks per weekly_goal
+  ↓ (trigger: validate_ad_hoc_task_count checks)
+Database Trigger → Check max 10 ad-hoc tasks per week
   ↓
 Service → Return TaskDTO
   ↓
@@ -398,6 +623,12 @@ Zod Schema: taskIdSchema + updateTaskSchema
 Service: task.service.ts → updateTask()
   ↓ (check if exists)
 Supabase Client → SELECT task by id
+  ↓ (verify weekly_goal_id if provided)
+Service → Verify weekly goal exists (if updating)
+  ↓ (verify long_term_goal_id if provided)
+Service → Verify long-term goal exists (if updating)
+  ↓ (verify milestone_id if provided)
+Service → Verify milestone exists (if updating)
   ↓ (update fields)
 Supabase Client → UPDATE tasks SET ...
   ↓ (if status changed, trigger fires)
@@ -508,7 +739,55 @@ Polityki obejmują: SELECT, INSERT, UPDATE, DELETE.
 - Enums walidowane jako `z.enum(['option1', 'option2'])`
 - Liczby z zakresem: `z.number().int().min(1).max(12)`
 
-### 5.4. Rate Limiting
+### 5.4. Walidacja relacji Foreign Key
+
+**Foreign Key Checks**:
+- `plan_id` must exist in plans table
+- `weekly_goal_id` (if provided) must exist in weekly_goals table
+- `long_term_goal_id` (if provided) must exist in long_term_goals table
+- `milestone_id` (if provided) must exist in milestones table
+
+**Service powinien sprawdzić**:
+```typescript
+// Verify plan exists and belongs to user
+const { data: plan } = await supabase
+  .from('plans')
+  .select('id')
+  .eq('id', plan_id)
+  .single();
+
+if (!plan) {
+  return { error: 'Plan not found' };
+}
+
+// Verify long-term goal if provided
+if (long_term_goal_id) {
+  const { data: goal } = await supabase
+    .from('long_term_goals')
+    .select('id')
+    .eq('id', long_term_goal_id)
+    .single();
+
+  if (!goal) {
+    return { error: 'Long-term goal not found' };
+  }
+}
+
+// Verify milestone if provided
+if (milestone_id) {
+  const { data: milestone } = await supabase
+    .from('milestones')
+    .select('id')
+    .eq('id', milestone_id)
+    .single();
+
+  if (!milestone) {
+    return { error: 'Milestone not found' };
+  }
+}
+```
+
+### 5.5. Rate Limiting
 
 **Rekomendacja**: Implementacja rate limiting na poziomie middleware lub reverse proxy (np. Nginx) w produkcji.
 
@@ -516,7 +795,7 @@ Polityki obejmują: SELECT, INSERT, UPDATE, DELETE.
 - GET endpoints: 100 requests/minute
 - POST/PATCH/DELETE: 50 requests/minute
 
-### 5.5. CORS
+### 5.6. CORS
 
 **Konfiguracja**: Astro middleware powinien konfigurować odpowiednie CORS headers dla API endpoints.
 
@@ -537,6 +816,8 @@ Polityki obejmują: SELECT, INSERT, UPDATE, DELETE.
 | 404 | Zadanie nie znalezione | `{"error": "Task not found"}` |
 | 404 | Plan nie znaleziony | `{"error": "Plan not found"}` |
 | 404 | Weekly goal nie znaleziony | `{"error": "Weekly goal not found"}` |
+| 404 | Long-term goal nie znaleziony | `{"error": "Long-term goal not found"}` |
+| 404 | Milestone nie znaleziony | `{"error": "Milestone not found"}` |
 | 500 | Błąd bazy danych | `{"error": "Internal server error"}` |
 
 ### 6.2. Walidacja biznesowa
@@ -555,37 +836,17 @@ try {
   const result = await supabase.from('tasks').insert(data);
   if (result.error) {
     if (result.error.message.includes('Cannot add more than')) {
-      return { error: 'Constraint violation', message: result.error.message };
+      return { error: result.error.message };
     }
     throw result.error;
   }
 } catch (error) {
-  // Log and return 500
+
+  return { error: 'Internal server error' };
 }
 ```
 
-### 6.3. Walidacja relacji
-
-**Foreign Key Checks**:
-- `plan_id` must exist in plans table
-- `weekly_goal_id` (if provided) must exist in weekly_goals table
-- `milestone_id` (if provided) must exist in milestones table
-
-**Service powinien sprawdzić**:
-```typescript
-// Verify plan exists and belongs to user
-const { data: plan } = await supabase
-  .from('plans')
-  .select('id')
-  .eq('id', plan_id)
-  .single();
-
-if (!plan) {
-  return { error: 'Plan not found', status: 404 };
-}
-```
-
-### 6.4. Error Response Format
+### 6.3. Error Response Format
 
 **Validation Error**:
 ```json
@@ -611,9 +872,7 @@ if (!plan) {
 **Constraint Error**:
 ```json
 {
-  "error": "Constraint violation",
-  "message": "Cannot add more than 10 subtasks to a weekly goal",
-  "constraint": "check_weekly_subtask_count"
+  "error": "Cannot add more than 10 subtasks to a weekly goal"
 }
 ```
 
@@ -627,6 +886,7 @@ if (!plan) {
 ```sql
 CREATE INDEX idx_tasks_weekly_goal_id ON tasks(weekly_goal_id);
 CREATE INDEX idx_tasks_plan_id ON tasks(plan_id);
+CREATE INDEX idx_tasks_long_term_goal_id ON tasks(long_term_goal_id);
 CREATE INDEX idx_tasks_milestone_id ON tasks(milestone_id);
 CREATE INDEX idx_tasks_week_number ON tasks(plan_id, week_number);
 CREATE INDEX idx_tasks_due_day ON tasks(plan_id, week_number, due_day);
@@ -651,6 +911,7 @@ CREATE INDEX idx_tasks_week_status ON tasks(plan_id, week_number, status);
 **GET /api/v1/tasks/daily**:
 - Query ograniczony do konkretnego dnia (plan_id + week_number + due_day)
 - Indeks `idx_tasks_plan_week_day` znacznie przyspiesza
+- Select tylko niezbędne pola dla UI (id, title, priority, status, task_type)
 
 **GET /api/v1/tasks/:id**:
 - Pojedynczy query dla task (index na PK)
@@ -665,6 +926,7 @@ CREATE INDEX idx_tasks_week_status ON tasks(plan_id, week_number, status);
 ```typescript
 for (const task of tasks) {
   const weeklyGoal = await getWeeklyGoal(task.weekly_goal_id); // N queries
+  const longTermGoal = await getLongTermGoal(task.long_term_goal_id); // N queries
 }
 ```
 
@@ -672,7 +934,7 @@ for (const task of tasks) {
 ```typescript
 const { data: tasks } = await supabase
   .from('tasks')
-  .select('*, weekly_goals(*), milestones(*)')
+  .select('*, weekly_goals(*), long_term_goals(*), milestones(*)')
   .eq('plan_id', planId);
 ```
 
@@ -746,6 +1008,7 @@ export const listTasksSchema = z.object({
   due_day: dueDaySchema,
   task_type: taskTypeSchema.optional(),
   weekly_goal_id: uuidSchema.optional(),
+  long_term_goal_id: uuidSchema.optional(),
   milestone_id: uuidSchema.optional(),
   status: taskStatusSchema.optional(),
   priority: taskPrioritySchema.optional(),
@@ -777,6 +1040,7 @@ export const taskIdSchema = z.object({
 export const createTaskSchema = z.object({
   plan_id: uuidSchema,
   weekly_goal_id: uuidSchema.nullable().optional(),
+  long_term_goal_id: uuidSchema.nullable().optional(),
   milestone_id: uuidSchema.nullable().optional(),
   title: z
     .string()
@@ -795,6 +1059,7 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = z
   .object({
     weekly_goal_id: uuidSchema.nullable().optional(),
+    long_term_goal_id: uuidSchema.nullable().optional(),
     milestone_id: uuidSchema.nullable().optional(),
     title: z
       .string()
@@ -842,8 +1107,7 @@ export type CopyTaskData = z.infer<typeof copyTaskSchema>;
 **Plik**: `/src/lib/services/task.service.ts`
 
 ```typescript
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
+import type { SupabaseClient } from '../../db/supabase.client';
 import type {
   TaskDTO,
   TaskWithHistoryDTO,
@@ -864,14 +1128,12 @@ import type {
   CopyTaskData,
 } from '../validation/task.validation';
 
-type SupabaseClientType = SupabaseClient<Database>;
-
 /**
  * Task Service
  * Handles all business logic for task management
  */
 export class TaskService {
-  constructor(private supabase: SupabaseClientType) {}
+  constructor(private supabase: SupabaseClient) {}
 
   /**
    * List tasks with filtering
@@ -896,6 +1158,9 @@ export class TaskService {
       }
       if (params.weekly_goal_id) {
         query = query.eq('weekly_goal_id', params.weekly_goal_id);
+      }
+      if (params.long_term_goal_id) {
+        query = query.eq('long_term_goal_id', params.long_term_goal_id);
       }
       if (params.milestone_id) {
         query = query.eq('milestone_id', params.milestone_id);
@@ -1054,6 +1319,19 @@ export class TaskService {
         }
       }
 
+      // If long_term_goal_id provided, verify it exists
+      if (taskData.long_term_goal_id) {
+        const { data: longTermGoal, error: goalError } = await this.supabase
+          .from('long_term_goals')
+          .select('id')
+          .eq('id', taskData.long_term_goal_id)
+          .single();
+
+        if (goalError || !longTermGoal) {
+          return { error: 'Long-term goal not found' };
+        }
+      }
+
       // If milestone_id provided, verify it exists
       if (taskData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
@@ -1123,6 +1401,19 @@ export class TaskService {
         }
       }
 
+      // If long_term_goal_id provided, verify it exists
+      if (updateData.long_term_goal_id) {
+        const { data: longTermGoal, error: goalError } = await this.supabase
+          .from('long_term_goals')
+          .select('id')
+          .eq('id', updateData.long_term_goal_id)
+          .single();
+
+        if (goalError || !longTermGoal) {
+          return { error: 'Long-term goal not found' };
+        }
+      }
+
       // If milestone_id provided, verify it exists
       if (updateData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
@@ -1182,6 +1473,7 @@ export class TaskService {
       const newTaskData = {
         plan_id: originalTask.plan_id,
         weekly_goal_id: originalTask.weekly_goal_id,
+        long_term_goal_id: originalTask.long_term_goal_id,
         milestone_id: originalTask.milestone_id,
         title: originalTask.title,
         description: originalTask.description,
@@ -1302,6 +1594,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       due_day: url.searchParams.get('due_day'),
       task_type: url.searchParams.get('task_type'),
       weekly_goal_id: url.searchParams.get('weekly_goal_id'),
+      long_term_goal_id: url.searchParams.get('long_term_goal_id'),
       milestone_id: url.searchParams.get('milestone_id'),
       status: url.searchParams.get('status'),
       priority: url.searchParams.get('priority'),
@@ -1382,6 +1675,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       const status =
         result.error === 'Plan not found' ||
         result.error === 'Weekly goal not found' ||
+        result.error === 'Long-term goal not found' ||
         result.error === 'Milestone not found'
           ? 404
           : result.error.includes('Cannot add more than')
@@ -1588,6 +1882,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       const status =
         result.error === 'Task not found' ||
         result.error === 'Weekly goal not found' ||
+        result.error === 'Long-term goal not found' ||
         result.error === 'Milestone not found'
           ? 404
           : 500;
@@ -1816,9 +2111,11 @@ import { TaskService } from './task.service';
 
 ```http
 ### Variables
-@baseUrl = http://localhost:4321/api/v1
+@baseUrl = http://localhost:3000/api/v1
 @planId = <your-test-plan-id>
 @taskId = <your-test-task-id>
+@goalId = <your-test-goal-id>
+@milestoneId = <your-test-milestone-id>
 
 ### 1. List Tasks - Basic
 GET {{baseUrl}}/tasks?plan_id={{planId}}
@@ -1826,19 +2123,26 @@ GET {{baseUrl}}/tasks?plan_id={{planId}}
 ### 2. List Tasks - With Filters
 GET {{baseUrl}}/tasks?plan_id={{planId}}&week_number=3&priority=A
 
-### 3. Get Daily Tasks
+### 3. List Tasks - Filter by Long-term Goal
+GET {{baseUrl}}/tasks?plan_id={{planId}}&long_term_goal_id={{goalId}}
+
+### 4. List Tasks - Filter by Milestone
+GET {{baseUrl}}/tasks?plan_id={{planId}}&milestone_id={{milestoneId}}
+
+### 5. Get Daily Tasks
 GET {{baseUrl}}/tasks/daily?plan_id={{planId}}&week_number=1&due_day=1
 
-### 4. Get Task by ID
+### 6. Get Task by ID
 GET {{baseUrl}}/tasks/{{taskId}}
 
-### 5. Create Task - Weekly Sub
+### 7. Create Task - Weekly Sub with Long-term Goal
 POST {{baseUrl}}/tasks
 Content-Type: application/json
 
 {
   "plan_id": "{{planId}}",
-  "title": "Test task",
+  "long_term_goal_id": "{{goalId}}",
+  "title": "Test task linked to goal",
   "description": "Test description",
   "priority": "A",
   "status": "todo",
@@ -1848,15 +2152,34 @@ Content-Type: application/json
   "position": 1
 }
 
-### 6. Update Task - Change Status
+### 8. Create Task - with Milestone
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{goalId}}",
+  "milestone_id": "{{milestoneId}}",
+  "title": "Task linked to milestone",
+  "description": "Test description",
+  "priority": "B",
+  "status": "todo",
+  "task_type": "weekly_sub",
+  "week_number": 1,
+  "due_day": 2,
+  "position": 1
+}
+
+### 9. Update Task - Change Status and Milestone
 PATCH {{baseUrl}}/tasks/{{taskId}}
 Content-Type: application/json
 
 {
-  "status": "completed"
+  "status": "completed",
+  "milestone_id": "{{milestoneId}}"
 }
 
-### 7. Copy Task
+### 10. Copy Task
 POST {{baseUrl}}/tasks/{{taskId}}/copy
 Content-Type: application/json
 
@@ -1865,21 +2188,21 @@ Content-Type: application/json
   "due_day": 3
 }
 
-### 8. Delete Task
+### 11. Delete Task
 DELETE {{baseUrl}}/tasks/{{taskId}}
 
 ### Error Cases
 
-### 9. Invalid UUID
+### 12. Invalid UUID
 GET {{baseUrl}}/tasks?plan_id=invalid-uuid
 
-### 10. Missing Required Param
+### 13. Missing Required Param
 GET {{baseUrl}}/tasks
 
-### 11. Week Number Out of Range
+### 14. Week Number Out of Range
 GET {{baseUrl}}/tasks?plan_id={{planId}}&week_number=15
 
-### 12. Task Not Found
+### 15. Task Not Found
 GET {{baseUrl}}/tasks/00000000-0000-0000-0000-000000000000
 ```
 
@@ -1902,6 +2225,7 @@ GET {{baseUrl}}/tasks/00000000-0000-0000-0000-000000000000
 - [ ] Error handling pokryty dla wszystkich scenariuszy
 - [ ] Database triggers działają poprawnie (max counts)
 - [ ] RLS policies weryfikują dostęp użytkownika
+- [ ] Foreign key validation dla long_term_goal_id i milestone_id działa poprawnie
 - [ ] Linter errors resolved
 - [ ] TypeScript typechecking passes
 - [ ] Performance testing (duże listy zadań)
@@ -1921,13 +2245,20 @@ Ten plan implementacji dostarcza:
 6. ✅ **Performance** przez database indexes i query optimization
 7. ✅ **Testing strategy** dla unit, integration, API tests
 8. ✅ **Type safety** przez TypeScript i generated database types
+9. ✅ **Flexible hierarchies** - zadania mogą być powiązane z weekly goals, long-term goals, milestones lub dowolną kombinacją
+
+**Kluczowe zmiany w stosunku do poprzedniej wersji**:
+- Dodano pełną obsługę `long_term_goal_id` w zadaniach
+- Dodano pełną obsługę `milestone_id` w zadaniach
+- Zaktualizowano walidację dla nowych pól relacyjnych
+- Zaktualizowano service layer dla weryfikacji foreign keys
+- Zaktualizowano dokumentację API responses
 
 **Kolejność implementacji**:
 1. task.validation.ts (walidacje)
 2. task.service.ts (logika biznesowa)
-3. API endpoints (7 plików)
+3. API endpoints (4 pliki: index.ts, daily.ts, [id].ts, [id]/copy.ts)
 4. Testy (validation → service → API)
 5. Dokumentacja i deployment
 
 **Szacowany czas implementacji**: 2-3 dni dla doświadczonego developera.
-
