@@ -141,17 +141,39 @@ Kryteria akceptacji:
 - Edge case: edycja po 12 tygodniach blokowana dla archiwalnych.
 
 ### US-007
-Tytuł: Planowanie zadania tygodniowego  
+Tytuł: Planowanie zadań tygodniowych  
 Opis: Jako użytkownik, chcę przypisać zadania do tygodnia z priorytetami, aby zorganizować pracę.
 Kryteria akceptacji:  
-- Widok tygodnia z sekcjami: główne zadanie powiązane z celami lub kamieniami milowymi, podzadania dla zadania głównego, dodatkowe zadania ad-hoc (niezwiązane z celami).  
-- Dropdown dla priorytetu A/B/C.  
-- Wybór stanu (ikony).  
-- Drag-and-drop do przenoszenia.
-- Menu podręczne przy każdym zadaniu (... menu obok każdego zadania) pozwalające przypisać zadanie do konkretnego dnia w tygodniu  
-- Alternatywa: ad-hoc bez powiązania z celem.  
+- Widok tygodnia z sekcjami:
+  - cele tygodniowe
+  - zadania ad-hoc ("Other tasks")
+  - szczegóły i założenia:
+  1)  cele tygodniowe można powiązać z celami długoterminowymi i kamieniami milowymi. Jeśli istnieje takie powiązanie to w ramach dodawania zadania dla celu tygodniowego automatycznie wiąż zadanie tak jak jest powiązany cel tygodniowy (do tego samego celu długoterminowego i kamienia milowego). 
+  2)  Dla powiązania użyj menu kontekstowego dla 2-stopniowego wiązania. Użyj etykiety "Link to goal" w menu kontekstowym.
+      a)   Najpierw najedź kursorem myszy na cel dostępny w ramach aktualnego planu,
+      b)   potem wyświetl w podmenu dostępne kamienie milowe dla tego celu długoterminowego (o ile istnieją)
+      c)   wybierz / kliknij kamień milowy.
+      d)   Powiązanie z kamieniem milowym oznacza także powiązenie z celem długoterminowym do którego należy ten kamień milowy.
+      e)   Pozwól na powiązanie tylko z celem. Wtedy użytkownik wybiera/klika na celu głównym i nie wybiera kamienia milowego.  
+  3) zadania ad-hoc mają możliwość powiązania z celami głównymi i kamieniami milowymi. (użyj tego samego 2-stopniowego menu wyboru celu długoterminowego oraz kamienia milowego)
+  4) dodaj możliwość przeniesienia zadań powiązanych z zadaniem tygodniowym do listy z zadaniami ad-hoc  Dodaj odpowiednią opcję w menu kontekstowym ("Unassign from weekly goal").
+  5) dodaj możliwość przeniesienia zadań z listy ad-hoc do konkretengo zadania tygodniowego. Dodaj odpowiednią opcję w menu kontekstowym ("Assign to weekly goal") i pokaż listę z nazwami celów tygodniowych z bieżącego tygodnia.
+  6) Dodaj ograniczenie liczby dostępnych celów tygodniowych do 3. 
+- Dropdown dla priorytetu A/B/C - Defaultowo wybieraj priorytet A przy tworzeniu zadań. Możliwość klikania i zmiany cyklicznej priorytetu.
+- Gdy tworzysz zadanie w ramach celu tygodniowego - automatycznie dodaj powiązanie z celem długoterminowym oraz kamieniem milowym takie samo jakie jest ustawione w celu tygodniowym.
+- Gdy tworzysz zadanie ad-hoc nie ustawiaj żadnych powiązań z celem długoterminowym ani z kamieniem milowym
+- Wybór stanu zadania (ikony). Nie używaj checkboxa. Zastąp go komponentem który ma pięć stanów: 
+ do zrobienia (pusty kwadrat), w trakcie (50% zaciemniony - czarny od górnego lewego narożnika do przekątnej), zakończone (pełny kwadrat ciemny z jasnym checkmark), anulowane (dwie przekątne), przesunięte (strzałka w prawo wychodząca ze środka kwadratu). Klikanie przesuwa się cyklicznie po stanach "to do", "in progress" oraz "complete". Chevron wyświetla wszystkie 5 stanów i pozwala na wybór.
+- Drag-and-drop do przenoszenia zadań w ramach listy wewnątrz celu tygodniowego (dodaj na końcu ikonkę "=" i po kliknięciu na nią pozwól na drag-and-drop).
+- Drag-and-drop do przenoszenia zadań w ramach listy wewnątrz zadan ad-hoc (dodaj na końcu ikonkę "=" i po kliknięciu na nią pozwól na drag-and-drop).
+- Menu podręczne przy każdym zadaniu (... menu obok każdego zadania) pozwalające
+  - przypisać zadanie do konkretnego dnia w tygodniu  
+  - przypisać zadanie do zadania długoterminowego
+  - zmienić priorytet (A, B, C)
+  - przypisać zadanie do kamienia milowego powiązanego z celem długotemrinowym (użyj menu 2 stopniowego opisanego wyżej)
+- ad-hoc to zadania bez powiązania z celem tygodniowym. Pozwalaj na wiązanie zadań ad-hoc z celem długoterminowym oraz z jego kamieniem milowym. (menu 2 stopniowe).  
 - Edge case: przekroczenie limitu – ostrzeżenie.
-- Limity: 0-10 podzadań zadania głównego, 0-10 zadań ad-hoc.
+- Limity: 0-10 podzadań celu tygodniowego, 0-10 zadań ad-hoc. 0-3 celów tygodniowych w danym tygodniu.
 
 ### US-008
 Tytuł: Zarządzanie zadaniami dziennymi  
