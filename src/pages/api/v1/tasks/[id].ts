@@ -79,6 +79,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
  * 
  * Request Body (all optional):
  * - weekly_goal_id: UUID | null
+ * - long_term_goal_id: UUID | null
  * - milestone_id: UUID | null
  * - title: string (max 255 chars)
  * - description: string | null
@@ -92,7 +93,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
  * Returns:
  * - 200: { data: TaskDTO }
  * - 400: Validation error or no fields provided
- * - 404: Task/weekly goal/milestone not found
+ * - 404: Task/weekly goal/long-term goal/milestone not found
  * - 500: Internal server error
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
@@ -139,6 +140,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       const status =
         result.error === 'Task not found' ||
         result.error === 'Weekly goal not found' ||
+        result.error === 'Long-term goal not found' ||
         result.error === 'Milestone not found'
           ? 404
           : 500;

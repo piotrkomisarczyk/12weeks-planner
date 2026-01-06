@@ -16,6 +16,7 @@ export const prerender = false;
  * - due_day (optional): Filter by day of week (1-7)
  * - task_type (optional): Filter by task type
  * - weekly_goal_id (optional): Filter by weekly goal
+ * - long_term_goal_id (optional): Filter by long-term goal
  * - milestone_id (optional): Filter by milestone
  * - status (optional): Filter by status
  * - priority (optional): Filter by priority (A/B/C)
@@ -39,6 +40,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       due_day: url.searchParams.get('due_day'),
       task_type: url.searchParams.get('task_type'),
       weekly_goal_id: url.searchParams.get('weekly_goal_id'),
+      long_term_goal_id: url.searchParams.get('long_term_goal_id'),
       milestone_id: url.searchParams.get('milestone_id'),
       status: url.searchParams.get('status'),
       priority: url.searchParams.get('priority'),
@@ -94,6 +96,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
  * Request Body:
  * - plan_id (required): UUID of the plan
  * - weekly_goal_id (optional): UUID of weekly goal
+ * - long_term_goal_id (optional): UUID of long-term goal
  * - milestone_id (optional): UUID of milestone
  * - title (required): Task title (max 255 chars)
  * - description (optional): Task description
@@ -142,6 +145,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       const status =
         result.error === 'Plan not found' ||
         result.error === 'Weekly goal not found' ||
+        result.error === 'Long-term goal not found' ||
         result.error === 'Milestone not found'
           ? 404
           : result.error.includes('Cannot add more than')

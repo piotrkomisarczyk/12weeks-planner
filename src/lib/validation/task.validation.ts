@@ -105,6 +105,11 @@ export const listTasksSchema = z.object({
     .optional()
     .transform(val => val ?? undefined)
     .pipe(uuidSchema.optional()),
+  long_term_goal_id: z.string()
+    .nullable()
+    .optional()
+    .transform(val => val ?? undefined)
+    .pipe(uuidSchema.optional()),
   milestone_id: z.string()
     .nullable()
     .optional()
@@ -198,6 +203,7 @@ export const taskIdParamSchema = z.object({
 export const createTaskSchema = z.object({
   plan_id: uuidSchema,
   weekly_goal_id: uuidSchema.nullable().optional(),
+  long_term_goal_id: uuidSchema.nullable().optional(),
   milestone_id: uuidSchema.nullable().optional(),
   title: z
     .string()
@@ -234,6 +240,7 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = z
   .object({
     weekly_goal_id: uuidSchema.nullable().optional(),
+    long_term_goal_id: uuidSchema.nullable().optional(),
     milestone_id: uuidSchema.nullable().optional(),
     title: z
       .string()

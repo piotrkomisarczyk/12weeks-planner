@@ -44,7 +44,32 @@ Content-Type: application/json
 
 @weeklyGoalId = REPLACE_WITH_ACTUAL_WEEKLY_GOAL_ID
 
-### Setup 3: Get existing plan ID for testing
+### Setup 3: Create a long-term goal for testing (optional)
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Test Long-term Goal",
+  "category": "work",
+  "position": 1
+}
+
+@longTermGoalId = REPLACE_WITH_ACTUAL_LONG_TERM_GOAL_ID
+
+### Setup 4: Create a milestone for testing (optional)
+POST {{baseUrl}}/api/v1/milestones
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{longTermGoalId}}",
+  "title": "Test Milestone",
+  "position": 1
+}
+
+@milestoneId = REPLACE_WITH_ACTUAL_MILESTONE_ID
+
+### Setup 5: Get existing plan ID for testing
 GET {{baseUrl}}/api/v1/plans?status=ready&limit=1
 
 ### ============================================================================
@@ -106,7 +131,80 @@ Content-Type: application/json
 
 @taskId3 = REPLACE_WITH_ACTUAL_TASK_ID
 
-### Test 1.4: Create task with default values (minimal required fields)
+### Test 1.4: Create task with long_term_goal_id (direct association)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{longTermGoalId}}",
+  "title": "Task directly linked to long-term goal",
+  "description": "This task is directly associated with a long-term goal",
+  "priority": "A",
+  "task_type": "weekly_sub",
+  "week_number": 1,
+  "due_day": 4,
+  "position": 1
+}
+
+@taskIdWithGoal = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.5: Create task with milestone_id (direct association)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "{{milestoneId}}",
+  "title": "Task directly linked to milestone",
+  "priority": "B",
+  "week_number": 1,
+  "due_day": 5,
+  "position": 1
+}
+
+@taskIdWithMilestone = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.6: Create task with both long_term_goal_id and milestone_id
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "{{longTermGoalId}}",
+  "milestone_id": "{{milestoneId}}",
+  "title": "Task with both goal and milestone",
+  "priority": "A",
+  "week_number": 1,
+  "due_day": 6,
+  "position": 1
+}
+
+@taskIdWithBoth = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.7: Create task with all associations (weekly_goal, long_term_goal, milestone)
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "weekly_goal_id": "{{weeklyGoalId}}",
+  "long_term_goal_id": "{{longTermGoalId}}",
+  "milestone_id": "{{milestoneId}}",
+  "title": "Task with complete hierarchy",
+  "priority": "A",
+  "week_number": 1,
+  "due_day": 7,
+  "position": 1
+}
+
+@taskIdWithAll = REPLACE_WITH_ACTUAL_TASK_ID
+
+### Test 1.8: Create task with default values (minimal required fields)
 # Expected: 201 Created with defaults (priority: C, status: todo, task_type: weekly_sub)
 POST {{baseUrl}}/api/v1/tasks
 Content-Type: application/json
@@ -118,7 +216,7 @@ Content-Type: application/json
 
 @taskId4 = REPLACE_WITH_ACTUAL_TASK_ID
 
-### Test 1.5: Create task for different week
+### Test 1.9: Create task for different week
 # Expected: 201 Created
 POST {{baseUrl}}/api/v1/tasks
 Content-Type: application/json
@@ -134,7 +232,7 @@ Content-Type: application/json
 
 @taskIdWeek2 = REPLACE_WITH_ACTUAL_TASK_ID
 
-### Test 1.6: Create task for different day
+### Test 1.10: Create task for different day
 # Expected: 201 Created
 POST {{baseUrl}}/api/v1/tasks
 Content-Type: application/json
@@ -300,7 +398,29 @@ Content-Type: application/json
   "title": "Task with non-existent goal"
 }
 
-### Test 2.15: Invalid JSON format
+### Test 2.15: Non-existent long_term_goal_id
+# Expected: 404 Not Found
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "long_term_goal_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Task with non-existent long-term goal"
+}
+
+### Test 2.16: Non-existent milestone_id
+# Expected: 404 Not Found
+POST {{baseUrl}}/api/v1/tasks
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "milestone_id": "00000000-0000-0000-0000-000000000000",
+  "title": "Task with non-existent milestone"
+}
+
+### Test 2.17: Invalid JSON format
 # Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/tasks
 Content-Type: application/json
@@ -310,7 +430,7 @@ Content-Type: application/json
   "title": "Invalid JSON"
 }
 
-### Test 2.16: Empty request body
+### Test 2.19: Empty request body
 # Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/tasks
 Content-Type: application/json
@@ -361,11 +481,23 @@ GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&task_type=ad_hoc
 # Expected: 200 OK with tasks for specific weekly goal
 GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&weekly_goal_id={{weeklyGoalId}}
 
-### Test 3.11: Multiple filters combined
+### Test 3.11: Filter by long_term_goal_id
+# Expected: 200 OK with tasks for specific long-term goal
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&long_term_goal_id={{longTermGoalId}}
+
+### Test 3.12: Filter by milestone_id
+# Expected: 200 OK with tasks for specific milestone
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&milestone_id={{milestoneId}}
+
+### Test 3.13: Multiple filters combined
 # Expected: 200 OK with filtered results
 GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&week_number=1&priority=A&status=todo
 
-### Test 3.12: List with custom limit (max 100)
+### Test 3.14: Multiple filters with long_term_goal_id
+# Expected: 200 OK
+GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&long_term_goal_id={{longTermGoalId}}&status=todo
+
+### Test 3.15: List with custom limit (max 100)
 # Expected: 200 OK
 GET {{baseUrl}}/api/v1/tasks?plan_id={{planId}}&limit=10
 
@@ -700,7 +832,61 @@ Content-Type: application/json
   "weekly_goal_id": "00000000-0000-0000-0000-000000000000"
 }
 
-### Test 10.12: Update with invalid JSON
+### Test 10.12: Update long_term_goal_id - Success
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskIdWithGoal}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "{{longTermGoalId}}"
+}
+
+### Test 10.13: Update milestone_id - Success
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskIdWithMilestone}}
+Content-Type: application/json
+
+{
+  "milestone_id": "{{milestoneId}}"
+}
+
+### Test 10.14: Set long_term_goal_id to null (remove association)
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskIdWithGoal}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": null
+}
+
+### Test 10.15: Set milestone_id to null (remove association)
+# Expected: 200 OK
+PATCH {{baseUrl}}/api/v1/tasks/{{taskIdWithMilestone}}
+Content-Type: application/json
+
+{
+  "milestone_id": null
+}
+
+### Test 10.16: Update with non-existent long_term_goal_id
+# Expected: 404 Not Found
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "long_term_goal_id": "00000000-0000-0000-0000-000000000000"
+}
+
+### Test 10.17: Update with non-existent milestone_id
+# Expected: 404 Not Found
+PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
+Content-Type: application/json
+
+{
+  "milestone_id": "00000000-0000-0000-0000-000000000000"
+}
+
+### Test 10.18: Update with invalid JSON
 # Expected: 400 Bad Request
 PATCH {{baseUrl}}/api/v1/tasks/{{taskId1}}
 Content-Type: application/json
@@ -1141,10 +1327,16 @@ Content-Type: application/json
 # □ Create task with all fields
 # □ Create task with minimal fields (defaults applied)
 # □ Create task with weekly_goal_id
+# □ Create task with long_term_goal_id
+# □ Create task with milestone_id
+# □ Create task with both long_term_goal_id and milestone_id
+# □ Create task with all associations (weekly_goal, long_term_goal, milestone)
 # □ Create task without weekly_goal_id (ad-hoc)
-# □ Create task with milestone_id (if milestones implemented)
 # □ List all tasks for a plan
 # □ List tasks with each filter type (week, day, priority, status, type)
+# □ List tasks filtered by weekly_goal_id
+# □ List tasks filtered by long_term_goal_id
+# □ List tasks filtered by milestone_id
 # □ List tasks with combined filters
 # □ List tasks with pagination (limit, offset)
 # □ Get daily tasks (verify A/B/C categorization)
@@ -1153,6 +1345,8 @@ Content-Type: application/json
 # □ Update task (single field)
 # □ Update task (multiple fields)
 # □ Update task status (verify history logging)
+# □ Update task associations (long_term_goal_id, milestone_id)
+# □ Remove task associations (set to null)
 # □ Copy task to different week
 # □ Copy task to different day
 # □ Copy task with empty body
@@ -1176,8 +1370,10 @@ Content-Type: application/json
 # Replace these placeholders with actual IDs from your tests:
 # - {{planId}}
 # - {{weeklyGoalId}}
+# - {{longTermGoalId}}
 # - {{milestoneId}}
 # - {{taskId1}}, {{taskId2}}, {{taskId3}}, {{taskId4}}
+# - {{taskIdWithGoal}}, {{taskIdWithMilestone}}, {{taskIdWithBoth}}, {{taskIdWithAll}}
 # - {{copiedTaskId1}}, {{copiedTaskId2}}, etc.
 # - {{workflowTaskId}}
 # - {{historyTaskId}}

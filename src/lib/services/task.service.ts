@@ -59,6 +59,9 @@ export class TaskService {
       if (params.weekly_goal_id) {
         query = query.eq('weekly_goal_id', params.weekly_goal_id);
       }
+      if (params.long_term_goal_id) {
+        query = query.eq('long_term_goal_id', params.long_term_goal_id);
+      }
       if (params.milestone_id) {
         query = query.eq('milestone_id', params.milestone_id);
       }
@@ -226,6 +229,19 @@ export class TaskService {
         }
       }
 
+      // If long_term_goal_id provided, verify it exists
+      if (taskData.long_term_goal_id) {
+        const { data: longTermGoal, error: goalError } = await this.supabase
+          .from('long_term_goals')
+          .select('id')
+          .eq('id', taskData.long_term_goal_id)
+          .single();
+
+        if (goalError || !longTermGoal) {
+          return { error: 'Long-term goal not found' };
+        }
+      }
+
       // If milestone_id provided, verify it exists
       if (taskData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
@@ -299,6 +315,19 @@ export class TaskService {
         }
       }
 
+      // If long_term_goal_id provided, verify it exists
+      if (updateData.long_term_goal_id) {
+        const { data: longTermGoal, error: goalError } = await this.supabase
+          .from('long_term_goals')
+          .select('id')
+          .eq('id', updateData.long_term_goal_id)
+          .single();
+
+        if (goalError || !longTermGoal) {
+          return { error: 'Long-term goal not found' };
+        }
+      }
+
       // If milestone_id provided, verify it exists
       if (updateData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
@@ -362,6 +391,7 @@ export class TaskService {
       const newTaskData = {
         plan_id: originalTask.plan_id,
         weekly_goal_id: originalTask.weekly_goal_id,
+        long_term_goal_id: originalTask.long_term_goal_id,
         milestone_id: originalTask.milestone_id,
         title: originalTask.title,
         description: originalTask.description,

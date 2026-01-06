@@ -13,7 +13,7 @@ export const prerender = false;
  * 
  * Copy an existing task to a new week and/or day.
  * The copied task will have:
- * - Same: plan_id, weekly_goal_id, milestone_id, title, description, priority, task_type, position
+ * - Same: plan_id, weekly_goal_id, long_term_goal_id, milestone_id, title, description, priority, task_type, position
  * - Reset: status (set to 'todo')
  * - Modified: week_number and/or due_day (based on request body)
  * 
