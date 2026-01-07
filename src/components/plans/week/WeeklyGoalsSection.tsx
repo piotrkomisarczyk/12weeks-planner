@@ -23,9 +23,11 @@ interface WeeklyGoalsSectionProps {
   onUpdateTask: (taskId: string, updates: Partial<TaskViewModel>) => void;
   onDeleteTask: (taskId: string) => void;
   onAssignDay: (taskId: string, day: number | null) => void;
-  onLinkMilestone: (taskId: string, milestoneId: string | null) => void;
-  onLinkGoal: (goalId: string, longTermGoalId: string | null) => void;
+  onLinkGoal: (goalId: string, longTermGoalId: string | null, milestoneId: string | null) => void;
+  onUnassignFromWeeklyGoal: (taskId: string) => void;
 }
+
+const MAX_WEEKLY_GOALS = 3;
 
 export function WeeklyGoalsSection({
   goals,
@@ -38,10 +40,11 @@ export function WeeklyGoalsSection({
   onUpdateTask,
   onDeleteTask,
   onAssignDay,
-  onLinkMilestone,
   onLinkGoal,
+  onUnassignFromWeeklyGoal,
 }: WeeklyGoalsSectionProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const isAtGoalLimit = goals.length >= MAX_WEEKLY_GOALS;
 
   const handleCreateGoal = (title: string, longTermGoalId?: string) => {
     onAddGoal(title, longTermGoalId);
@@ -55,14 +58,28 @@ export function WeeklyGoalsSection({
         <div>
           <h2 className="text-xl font-semibold">Weekly Goals</h2>
           <p className="text-sm text-muted-foreground">
-            Plan your goals for this week
+            Plan your goals for this week {isAtGoalLimit && `(${goals.length}/${MAX_WEEKLY_GOALS})`}
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button 
+          onClick={() => setIsCreateDialogOpen(true)}
+          disabled={isAtGoalLimit}
+          title={isAtGoalLimit ? `Maximum ${MAX_WEEKLY_GOALS} weekly goals reached` : undefined}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Weekly Goal
         </Button>
       </div>
+
+      {/* Goal Limit Warning */}
+      {isAtGoalLimit && (
+        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            <strong>Maximum weekly goals reached.</strong> You can have up to {MAX_WEEKLY_GOALS} weekly goals. 
+            Delete an existing goal to add a new one.
+          </p>
+        </div>
+      )}
 
       {/* Goals List */}
       {goals.length === 0 ? (
@@ -70,7 +87,11 @@ export function WeeklyGoalsSection({
           <p className="text-muted-foreground mb-4">
             No weekly goals yet. Create your first goal to get started.
           </p>
-          <Button onClick={() => setIsCreateDialogOpen(true)} variant="outline">
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)} 
+            variant="outline"
+            disabled={isAtGoalLimit}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create Weekly Goal
           </Button>
@@ -90,8 +111,8 @@ export function WeeklyGoalsSection({
                 onUpdateTask={onUpdateTask}
                 onDeleteTask={onDeleteTask}
                 onAssignDay={onAssignDay}
-                onLinkMilestone={onLinkMilestone}
                 onLinkGoal={onLinkGoal}
+                onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
               />
             ))}
           </div>

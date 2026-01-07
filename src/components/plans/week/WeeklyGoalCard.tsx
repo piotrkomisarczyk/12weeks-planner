@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,8 +14,9 @@ import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
+import { GoalMilestonePicker } from './GoalMilestonePicker';
 import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } from '@/types';
-import { Link2, MoreVertical, Trash2, Plus } from 'lucide-react';
+import { Link2, MoreVertical, Trash2, Plus, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WeeklyGoalCardProps {
@@ -27,11 +29,20 @@ interface WeeklyGoalCardProps {
   onUpdateTask: (taskId: string, updates: Partial<TaskViewModel>) => void;
   onDeleteTask: (taskId: string) => void;
   onAssignDay: (taskId: string, day: number | null) => void;
-  onLinkMilestone: (taskId: string, milestoneId: string | null) => void;
-  onLinkGoal: (goalId: string, longTermGoalId: string | null) => void;
+  onLinkGoal: (goalId: string, longTermGoalId: string | null, milestoneId: string | null) => void;
+  onUnassignFromWeeklyGoal: (taskId: string) => void;
 }
 
 const MAX_TASKS_PER_GOAL = 10;
+
+const CATEGORY_COLORS: Record<string, string> = {
+  work: 'bg-blue-500 text-white',
+  finance: 'bg-green-500 text-white',
+  hobby: 'bg-purple-500 text-white',
+  relationships: 'bg-pink-500 text-white',
+  health: 'bg-red-500 text-white',
+  development: 'bg-orange-500 text-white',
+};
 
 export function WeeklyGoalCard({
   goal,
@@ -43,12 +54,13 @@ export function WeeklyGoalCard({
   onUpdateTask,
   onDeleteTask,
   onAssignDay,
-  onLinkMilestone,
   onLinkGoal,
+  onUnassignFromWeeklyGoal,
 }: WeeklyGoalCardProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editValue, setEditValue] = useState(goal.title);
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const completedTasks = goal.tasks.filter(t => t.status === 'completed').length;
   const totalTasks = goal.tasks.length;
@@ -58,6 +70,21 @@ export function WeeklyGoalCard({
   const getLongTermGoalTitle = (goalId: string | null) => {
     if (!goalId) return null;
     return availableLongTermGoals.find(g => g.id === goalId)?.title;
+  };
+
+  const getLongTermGoalCategory = (goalId: string | null) => {
+    if (!goalId) return null;
+    return availableLongTermGoals.find(g => g.id === goalId)?.category;
+  };
+
+  const getMilestoneTitle = (milestoneId: string | null) => {
+    if (!milestoneId) return null;
+    return availableMilestones.find(m => m.id === milestoneId)?.title;
+  };
+
+  const handleGoalMilestoneSelect = (goalId: string | null, milestoneId: string | null) => {
+    onLinkGoal(goal.id, goalId, milestoneId);
+    setIsPickerOpen(false);
   };
 
   const handleTitleSave = () => {
@@ -118,15 +145,35 @@ export function WeeklyGoalCard({
               </button>
             )}
 
-            {/* Long-term Goal Link */}
-            {goal.long_term_goal_id && (
-              <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                <Link2 className="h-3 w-3" />
-                <span className="truncate">
-                  {getLongTermGoalTitle(goal.long_term_goal_id)}
-                </span>
-              </div>
-            )}
+            {/* Category, Long-term Goal & Milestone Links */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
+                <Badge 
+                  className={cn(
+                    'text-xs uppercase font-semibold',
+                    CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'
+                  )}
+                >
+                  {getLongTermGoalCategory(goal.long_term_goal_id)}
+                </Badge>
+              )}
+              {goal.long_term_goal_id && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <Link2 className="h-3 w-3" />
+                  <span className="truncate max-w-[150px]">
+                    {getLongTermGoalTitle(goal.long_term_goal_id)}
+                  </span>
+                </Badge>
+              )}
+              {goal.milestone_id && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <Flag className="h-3 w-3" />
+                  <span className="truncate max-w-[150px]">
+                    {getMilestoneTitle(goal.milestone_id)}
+                  </span>
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Actions Menu */}
@@ -141,19 +188,10 @@ export function WeeklyGoalCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              {/* Link to Long-term Goal */}
-              <DropdownMenuItem
-                onClick={() => {
-                  // This will be handled by a dialog in the future
-                  // For now, just show available goals
-                  const goalId = prompt(
-                    `Available goals:\n${availableLongTermGoals.map(g => `${g.title} (${g.id})`).join('\n')}\n\nEnter goal ID or leave empty to unlink:`
-                  );
-                  onLinkGoal(goal.id, goalId || null);
-                }}
-              >
+              {/* Link to Goal & Milestone */}
+              <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
                 <Link2 className="mr-2 h-4 w-4" />
-                Link to Long-term Goal
+                Link Goal & Milestone
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
@@ -192,25 +230,28 @@ export function WeeklyGoalCard({
 
       <CardContent className="pt-0">
         {/* Task List */}
-        <div className="space-y-2">
-          {goal.tasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              availableMilestones={availableMilestones}
-              onUpdate={onUpdateTask}
-              onDelete={onDeleteTask}
-              onAssignDay={onAssignDay}
-              onLinkMilestone={onLinkMilestone}
-            />
-          ))}
+        <SortableContext items={goal.tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2">
+            {goal.tasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                isAdHoc={false}
+                availableMilestones={availableMilestones}
+                availableLongTermGoals={availableLongTermGoals}
+                onUpdate={onUpdateTask}
+                onDelete={onDeleteTask}
+                onAssignDay={onAssignDay}
+                onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
+              />
+            ))}
 
-          {/* Empty State */}
-          {goal.tasks.length === 0 && !isAddingTask && (
-            <div className="text-center py-6 text-sm text-muted-foreground">
-              No tasks yet. Add your first task below.
-            </div>
-          )}
+            {/* Empty State */}
+            {goal.tasks.length === 0 && !isAddingTask && (
+              <div className="text-center py-6 text-sm text-muted-foreground">
+                No tasks yet. Add your first task below.
+              </div>
+            )}
 
           {/* Add Task */}
           {isAddingTask ? (
@@ -239,8 +280,22 @@ export function WeeklyGoalCard({
               Maximum task limit reached ({MAX_TASKS_PER_GOAL} tasks per goal)
             </p>
           )}
-        </div>
+          </div>
+        </SortableContext>
       </CardContent>
+
+      {/* Goal & Milestone Picker Dialog */}
+      <GoalMilestonePicker
+        open={isPickerOpen}
+        onOpenChange={setIsPickerOpen}
+        availableGoals={availableLongTermGoals}
+        availableMilestones={availableMilestones}
+        currentGoalId={goal.long_term_goal_id}
+        currentMilestoneId={goal.milestone_id}
+        onSelect={handleGoalMilestoneSelect}
+        title="Link Weekly Goal"
+        description="Link this weekly goal to a long-term goal and optionally a milestone."
+      />
     </Card>
   );
 }

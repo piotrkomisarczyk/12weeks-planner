@@ -47,6 +47,7 @@ export function WeekPlannerContainer({
     updateTask,
     deleteTask,
     moveTask,
+    refetch,
   } = useWeekPlan(planId, weekNumber);
 
   // Drag and Drop sensors
@@ -66,6 +67,12 @@ export function WeekPlannerContainer({
 
   // Weekly Goal handlers
   const handleAddGoal = useCallback(async (title: string, longTermGoalId?: string) => {
+    // Check weekly goal limit
+    if (data.weeklyGoals.length >= 3) {
+      toast.error('Maximum 3 weekly goals allowed per week');
+      return;
+    }
+
     try {
       await addWeeklyGoal(title, longTermGoalId);
       toast.success('Weekly goal created');
@@ -73,7 +80,7 @@ export function WeekPlannerContainer({
       toast.error('Failed to create weekly goal');
       console.error(err);
     }
-  }, [addWeeklyGoal]);
+  }, [addWeeklyGoal, data.weeklyGoals.length]);
 
   const handleUpdateGoal = useCallback(async (id: string, updates: Partial<WeeklyGoalViewModel>) => {
     try {
@@ -94,15 +101,40 @@ export function WeekPlannerContainer({
     }
   }, [deleteWeeklyGoal]);
 
-  const handleLinkGoal = useCallback(async (goalId: string, longTermGoalId: string | null) => {
+  const handleLinkGoal = useCallback(async (
+    goalId: string, 
+    longTermGoalId: string | null, 
+    milestoneId: string | null
+  ) => {
     try {
-      await updateWeeklyGoal(goalId, { long_term_goal_id: longTermGoalId });
-      toast.success(longTermGoalId ? 'Goal linked' : 'Goal unlinked');
+      // Update the weekly goal
+      await updateWeeklyGoal(goalId, { 
+        long_term_goal_id: longTermGoalId,
+        milestone_id: milestoneId,
+      });
+
+      // Find all tasks belonging to this weekly goal
+      const weeklyGoal = data.weeklyGoals.find(g => g.id === goalId);
+      if (weeklyGoal && weeklyGoal.tasks.length > 0) {
+        // Update all subtasks to inherit the new goal/milestone associations
+        await Promise.all(
+          weeklyGoal.tasks.map(task => 
+            updateTask(task.id, {
+              long_term_goal_id: longTermGoalId,
+              milestone_id: milestoneId,
+            })
+          )
+        );
+      }
+
+      // Refetch to update UI with new associations
+      await refetch();
+      toast.success('Goal & milestone linked, tasks updated');
     } catch (err) {
-      toast.error('Failed to link goal');
+      toast.error('Failed to link goal & milestone');
       console.error(err);
     }
-  }, [updateWeeklyGoal]);
+  }, [updateWeeklyGoal, updateTask, data.weeklyGoals, refetch]);
 
   // Task handlers
   const handleAddTask = useCallback(async (weeklyGoalId: string | null, title: string) => {
@@ -145,15 +177,55 @@ export function WeekPlannerContainer({
     }
   }, [updateTask]);
 
-  const handleLinkMilestone = useCallback(async (taskId: string, milestoneId: string | null) => {
+
+  const handleAssignToWeeklyGoal = useCallback(async (taskId: string, goalId: string) => {
     try {
-      await updateTask(taskId, { milestone_id: milestoneId });
-      toast.success(milestoneId ? 'Milestone linked' : 'Milestone unlinked');
+      const targetGoal = data.weeklyGoals.find(g => g.id === goalId);
+      if (!targetGoal) {
+        toast.error('Weekly goal not found');
+        return;
+      }
+
+      // Check if goal has reached task limit
+      if (targetGoal.tasks.length >= 10) {
+        toast.error('Weekly goal has reached maximum task limit (10)');
+        return;
+      }
+
+      // Update task: set weekly_goal_id, change task_type, inherit goal/milestone associations
+      await updateTask(taskId, {
+        weekly_goal_id: goalId,
+        task_type: 'weekly_sub',
+        long_term_goal_id: targetGoal.long_term_goal_id,
+        milestone_id: targetGoal.milestone_id,
+      });
+      
+      // Refetch to move task from ad-hoc to weekly goal list
+      await refetch();
+      toast.success('Task assigned to weekly goal');
     } catch (err) {
-      toast.error('Failed to link milestone');
+      toast.error('Failed to assign task');
       console.error(err);
     }
-  }, [updateTask]);
+  }, [data.weeklyGoals, updateTask, refetch]);
+
+  const handleUnassignFromWeeklyGoal = useCallback(async (taskId: string) => {
+    try {
+      // Update task: clear weekly_goal_id, change to ad_hoc, keep goal/milestone associations
+      await updateTask(taskId, {
+        weekly_goal_id: null,
+        task_type: 'ad_hoc',
+        // Keep long_term_goal_id and milestone_id as per requirements
+      });
+      
+      // Refetch to move task from weekly goal to ad-hoc list
+      await refetch();
+      toast.success('Task unassigned from weekly goal');
+    } catch (err) {
+      toast.error('Failed to unassign task');
+      console.error(err);
+    }
+  }, [updateTask, refetch]);
 
   // Drag and Drop handlers
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
@@ -182,10 +254,9 @@ export function WeekPlannerContainer({
         }
       }
     } else {
-      // Moving/reordering tasks
-      // Find source and destination containers
+      // Reordering tasks - ONLY within the same container
+      // Find source container
       let sourceContainerId: string | null = null;
-      let destContainerId: string | null = null;
 
       // Check if task is in a weekly goal
       for (const goal of data.weeklyGoals) {
@@ -197,39 +268,43 @@ export function WeekPlannerContainer({
 
       // Check if task is in ad-hoc
       if (!sourceContainerId && data.adHocTasks.some(t => t.id === active.id)) {
-        sourceContainerId = null; // ad-hoc
+        sourceContainerId = null; // ad-hoc (represented as null)
       }
 
-      // Determine destination
+      // Determine destination container
+      let destContainerId: string | null = null;
+
       if (typeof over.id === 'string') {
-        // Check if dropping on a goal
-        const targetGoal = data.weeklyGoals.find(g => g.id === over.id);
-        if (targetGoal) {
-          destContainerId = targetGoal.id;
-        } else {
-          // Check if dropping on a task
-          for (const goal of data.weeklyGoals) {
-            if (goal.tasks.some(t => t.id === over.id)) {
-              destContainerId = goal.id;
-              break;
-            }
+        // Check if dropping on a task - find which container it belongs to
+        for (const goal of data.weeklyGoals) {
+          if (goal.tasks.some(t => t.id === over.id)) {
+            destContainerId = goal.id;
+            break;
           }
-          
-          if (!destContainerId && data.adHocTasks.some(t => t.id === over.id)) {
-            destContainerId = null; // ad-hoc
-          }
+        }
+        
+        if (!destContainerId && data.adHocTasks.some(t => t.id === over.id)) {
+          destContainerId = null; // ad-hoc
         }
       }
 
-      // Calculate new index
+      // BLOCK cross-container moves - only allow reordering within same container
+      if (sourceContainerId !== destContainerId) {
+        toast.error('Cannot move tasks between sections. Use context menu to assign/unassign.');
+        return;
+      }
+
+      // Calculate new index within the same container
       let newIndex = 0;
       if (destContainerId) {
+        // Moving within a weekly goal
         const destGoal = data.weeklyGoals.find(g => g.id === destContainerId);
         if (destGoal) {
           newIndex = destGoal.tasks.findIndex(t => t.id === over.id);
           if (newIndex === -1) newIndex = destGoal.tasks.length;
         }
       } else {
+        // Moving within ad-hoc
         newIndex = data.adHocTasks.findIndex(t => t.id === over.id);
         if (newIndex === -1) newIndex = data.adHocTasks.length;
       }
@@ -237,7 +312,7 @@ export function WeekPlannerContainer({
       try {
         await moveTask(active.id as string, sourceContainerId, destContainerId, newIndex);
       } catch (err) {
-        toast.error('Failed to move task');
+        toast.error('Failed to reorder task');
         console.error(err);
       }
     }
@@ -320,19 +395,21 @@ export function WeekPlannerContainer({
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onAssignDay={handleAssignDay}
-            onLinkMilestone={handleLinkMilestone}
             onLinkGoal={handleLinkGoal}
+            onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
           />
 
           {/* Ad-hoc Tasks Section */}
           <AdHocSection
             tasks={data.adHocTasks}
+            availableWeeklyGoals={data.weeklyGoals}
             availableMilestones={meta.milestones}
+            availableLongTermGoals={meta.longTermGoals}
             onAddTask={(title) => handleAddTask(null, title)}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onAssignDay={handleAssignDay}
-            onLinkMilestone={handleLinkMilestone}
+            onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
           />
         </div>
       </DndContext>

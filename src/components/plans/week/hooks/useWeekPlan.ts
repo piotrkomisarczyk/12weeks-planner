@@ -26,7 +26,7 @@ interface UseWeekPlanReturn {
   error: string | null;
   
   // Weekly Goal Actions
-  addWeeklyGoal: (title: string, longTermGoalId?: string) => Promise<void>;
+  addWeeklyGoal: (title: string, longTermGoalId?: string, milestoneId?: string) => Promise<void>;
   updateWeeklyGoal: (id: string, updates: Partial<UpdateWeeklyGoalCommand>) => Promise<void>;
   deleteWeeklyGoal: (id: string) => Promise<void>;
   reorderWeeklyGoals: (newOrder: WeeklyGoalViewModel[]) => Promise<void>;
@@ -167,7 +167,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
   /**
    * Add a new weekly goal
    */
-  const addWeeklyGoal = useCallback(async (title: string, longTermGoalId?: string) => {
+  const addWeeklyGoal = useCallback(async (title: string, longTermGoalId?: string, milestoneId?: string) => {
     // Calculate next position
     const nextPosition = data.weeklyGoals.length + 1;
 
@@ -177,6 +177,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       id: tempId,
       plan_id: planId,
       long_term_goal_id: longTermGoalId || null,
+      milestone_id: milestoneId || null,
       week_number: weekNumber,
       title,
       description: null,
@@ -195,6 +196,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       const payload: CreateWeeklyGoalCommand = {
         plan_id: planId,
         long_term_goal_id: longTermGoalId || null,
+        milestone_id: milestoneId || null,
         week_number: weekNumber,
         title,
         description: null,
@@ -343,13 +345,20 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
 
   /**
    * Add a new task
+   * If adding to a weekly goal, inherits long_term_goal_id and milestone_id from parent
    */
   const addTask = useCallback(async (weeklyGoalId: string | null, title: string) => {
     // Determine position based on container
     let nextPosition = 1;
+    let inheritedGoalId: string | null = null;
+    let inheritedMilestoneId: string | null = null;
+    
     if (weeklyGoalId) {
       const goal = data.weeklyGoals.find(g => g.id === weeklyGoalId);
       nextPosition = (goal?.tasks.length || 0) + 1;
+      // Inherit goal and milestone associations from weekly goal
+      inheritedGoalId = goal?.long_term_goal_id || null;
+      inheritedMilestoneId = goal?.milestone_id || null;
     } else {
       nextPosition = data.adHocTasks.length + 1;
     }
@@ -360,7 +369,8 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       id: tempId,
       plan_id: planId,
       weekly_goal_id: weeklyGoalId,
-      milestone_id: null,
+      long_term_goal_id: inheritedGoalId,
+      milestone_id: inheritedMilestoneId,
       title,
       description: null,
       priority: 'C',
@@ -393,7 +403,8 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       const payload: CreateTaskCommand = {
         plan_id: planId,
         weekly_goal_id: weeklyGoalId,
-        milestone_id: null,
+        long_term_goal_id: inheritedGoalId,
+        milestone_id: inheritedMilestoneId,
         title,
         description: null,
         priority: 'C',

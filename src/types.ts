@@ -698,7 +698,10 @@ export interface PlanWizardState {
 /**
  * Task ViewModel - extends TaskDTO with UI-specific fields
  */
-export interface TaskViewModel extends TaskDTO {
+export interface TaskViewModel extends Omit<TaskDTO, 'status' | 'priority' | 'task_type'> {
+  status: TaskStatus;
+  priority: TaskPriority;
+  task_type: TaskType;
   isEditing?: boolean;
   isSaving?: boolean;
 }
