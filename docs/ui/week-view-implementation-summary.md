@@ -37,6 +37,9 @@ Added new TypeScript interfaces:
 - Checkbox for status toggling (todo ↔ completed)
 - Inline title editing with keyboard shortcuts
 - Priority badge (A/B/C) with click-to-cycle
+  - **Debounced updates** (1000ms) to prevent excessive API calls
+  - Optimistic local state for instant visual feedback
+  - Only sends API request after user stops clicking
 - Visual indicators for milestone and day assignment
 - Context menu with:
   - Assign to Day (Monday-Sunday submenu)
@@ -340,6 +343,7 @@ src/
 
 ✅ Parallel API requests with Promise.all()
 ✅ Optimistic updates for instant UI feedback
+✅ Debounced priority changes (1000ms) to reduce API calls
 ✅ Minimal re-renders with useCallback
 ✅ Efficient drag and drop with @dnd-kit
 ✅ Lazy loading with client:load directive
