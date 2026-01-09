@@ -179,13 +179,14 @@ Kryteria akceptacji:
 Tytuł: Zarządzanie zadaniami dziennymi  
 Opis: Jako użytkownik, chcę przypisać zadania do dnia z limitami i stanami, aby skupić się na priorytetach.  
 Kryteria akceptacji:  
-- Widok dnia z slotami: 1 najważniejsze, 2 drugorzędne, 7 dodatkowych.
-- Zadania związane z celami/kamieniami milowymi powinny być w 2 pierwszych kategoriach
+- Widok dnia ze slotami: 1 najważniejsze (label: Most important), 2 drugorzędne (label: Secondary), 7 dodatkowych (label: Others).
+- Pokaż zadania z widoku tygodniowego które są przypisane do wybranego dnia
+- Segreguj zadania przypisane do dnia po priorytetach (A > B > C) i po pozycjach. Uzyskaną listę umieść odpowiednio na trzech listach zgodnie z ich limitami
 - Zadania ad-hoc w liście 7 dodatkowych
-- Jeśli zabraknie miejsca w 2 pierwszych kategoriach, to zadania związane z celami umieść w liście dodatkowych 
-- Możliwość kopiowania zadania z tygodniowego planu z historią stanów dla wielodniowych zadań. (W danych zadania powinna być przechowana informacja z datami i stanami w jakich zadanie się znajdowało).  
-- Zmiana stanu ikoną (kliknięcie - cykliczne przechodzenie przez wszystkie stany).
-- Ad-hoc umieszczane na liście dodatkowej.  
+- Możliwość kopiowania i przenoszenia zadania na inny dzień i/lub tydzień wraz z historią stanów dla wielodniowych zadań. (W danych zadania powinna być przechowana informacja z datami i stanami w jakich zadanie się znajdowało).  
+- Zmiana stanu ikoną (tak jak na widoku tygodnia).
+- Ad-hoc umieszczane na liście dodatkowej.
+- Możliwość dodawania zadań w widoku dnia
 - Edge case: zadanie wielodniowe – auto-duplikacja do następnych dni o ile stan jest różny od zakończone i różny od anulowane.
 
 ### US-009

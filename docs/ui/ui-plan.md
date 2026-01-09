@@ -161,9 +161,29 @@ tydzień.
 #### 2.3.5. Widok Dnia
 *   **Ścieżka:** `/plans/[id]/week/[nr]/day/[date]`
 *   **Cel:** Egzekucja - lista "To-Do" na dziś oraz możliwość dodawania, przesuwania i kopiowania zadań na inne dni.
-*   **Kluczowe informacje:** Data, dzień tygodnia. Sekcje: Most Important (1), Secondary (2), Additional (7).
+*   **Kluczowe informacje:** Data, dzień tygodnia. Sekcje: Most Important (1), Secondary (2), Others (7).
 *   **Komponenty:** `DayNavigator` (Week Strip), `DailyTaskSlot`, `TaskItem` (pełna interakcja), `Confetti` (przy ukończeniu wszystkich), `AddTaskButton`.
-*   **UX:** Wyraźne wizualne rozróżnienie sekcji priorytetów. Zadanie "Most Important" wyróżnione (np. złota ramka/tło). Drag-and-drop do ustalania kolejności zadań w widoku dnia. Możliwość przesuwania zadań pomiędzy sekcjami priorytetów o ile dostępne są limity.
+*   **UX:** Wyraźne wizualne rozróżnienie sekcji priorytetów. . Drag-and-drop do ustalania kolejności zadań w widoku dnia. Możliwość przesuwania zadań pomiędzy sekcjami priorytetów o ile dostępne są limity (odbywa się poprzez zmianę priorytetu zadania A/B/C).
+*   **Szczegóły zachowania:**
+    * Segreguj zadania po priorytetach (A > B > C) i po pozycjach. Uzyskaną listę umieść odpowiednio na listach
+    * Jeśli w zadaniach na dany dzień jest więcej niż jedno zadanie (A), to wybierz pierwsze z najwyższą pozycją i pokaż je na liście najważniejszych. Kolejne zadania (A) wyświetl na liście drugorzędne, a kolejne na liście dodatkowe.
+    * Jeśli w zadaniach na dany dzień jest więcej niż dwa zadania (B), to wybierz pierwsze dwa z najwyższą pozycją i pokaż je na liście drugorzędnych (o ile jest tam miejsce - nie są przekroczone limity). Jeśli brakuje miejsca kolejne zadania (B) wyświetl na liście dodatkowe.
+    * Zadania (C) pokazuj na liście dodatkowe (chyba że są miejsca na pierwszych dwóch listach - wtedy decyduje kolejność wg position)
+    * Pozwalaj na zmianę priorytetu zadania w widoku dnia i odświeżaj aktualną listę zadań na wszystkich 3 listach. Użyj debounce 1000ms do odświeżania.
+    * Pozwalaj na zmianę kolejności zadań na liście przez drag-and-drop. Upewnij się czy jest to możliwe przy aktualnej implementacji api oraz bazy danych (tasks posiadają jedno pole position w bazie danych). Zaproponuj rozwiązanie by użyć pola position tak by przechowywało pozycje dla widoku tygodnia i dnia.
+    * Możliwość kopiowania zadania na kolejne dni. (W danych historii zadania powinna być przechowana informacja z datami i stanami w jakich zadanie się znajdowało przed przekopiowaniem).
+    * Zmiana stanu zadania prze kliknięcie na ikonie stanu oraz przez chevron (zastosuj implementację zadania z widoku tygodnia)
+    * Dla widoku dnia nie wyświetlaj na zadaniach badga z dniem. Zamiast tego dodaj informacje o przypisanym celu tygodniowym (o ile został przypisany).
+    * W widoku dnia na każdym zadaniu wyświetlaj badge: 
+    kategoria celu > cel > milestone > cel tygodniowy (o ile są dostępne)
+    * Pozwól dodawać zadania w widoku dnia. Automatycznie ustaw due day na dzień używany w aktualnym widoku (to nie musi być bieżący dzień według aktualnej daty - tylko dzień wyświetlany w widoku dnia)
+    * Przycisk dodawania zadań umieść pod listą analogicznie jak w widoku tygodnia
+    * Pozwól na przypisywanie zadań do celów i milestone'ów zgodnie z aktualną implementacją (tak jak w widoku tygodnia)
+    * Edge case: zadanie wielodniowe. Pozwól użytkownikowi wybrać jeden z dwóch sposobów obsługi takich zadań:
+      * przenieść zadanie na kolejny lub wybrany tydzień/dzień (oraz zaktualizować historię zadania)
+      * skopiować zadanie na kolejny lub wybrany dzień (skopiować istniejącą historie zadania i zaktualizować ją - o ile to możliwe).
+      * obie opcje mają być dostępne z menu kontekstowego zadania (...) tylko w widoku dnia
+ 
 
 #### 2.3.6. Podsumowanie Tygodnia (Review)
 *   **Ścieżka:** `/plans/[id]/review/[nr]`
