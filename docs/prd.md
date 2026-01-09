@@ -187,7 +187,7 @@ Kryteria akceptacji:
 - Zmiana stanu ikoną (tak jak na widoku tygodnia).
 - Ad-hoc umieszczane na liście dodatkowej.
 - Możliwość dodawania zadań w widoku dnia
-- Edge case: zadanie wielodniowe – auto-duplikacja do następnych dni o ile stan jest różny od zakończone i różny od anulowane.
+- Edge case: zadanie wielodniowe – pozwalaj na kopiowanie / przenoszenie do następnych dni o ile stan jest różny od zakończone i różny od anulowane.
 
 ### US-009
 Tytuł: Podsumowanie tygodnia  
