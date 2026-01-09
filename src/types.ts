@@ -748,3 +748,67 @@ export interface WeekViewMeta {
   milestones: SimpleMilestone[];
 }
 
+// ============================================================================
+// DAY VIEW MODELS (Frontend-specific types for Day Planning)
+// ============================================================================
+
+/**
+ * Day Slot - represents priority-based slots in day view
+ * - most_important: 1 task with priority A
+ * - secondary: up to 2 tasks with priority A/B
+ * - additional: up to 7 tasks with priority A/B/C
+ */
+export type DaySlot = 'most_important' | 'secondary' | 'additional';
+
+/**
+ * Slot Limits - max number of tasks per slot
+ */
+export type SlotLimits = {
+  most_important: 1;
+  secondary: 2;
+  additional: 7;
+};
+
+/**
+ * Day Task ViewModel - extends TaskViewModel with slot information
+ */
+export interface DayTaskViewModel extends TaskViewModel {
+  slot: DaySlot;
+}
+
+/**
+ * Day View Data - complete data structure for day planning view
+ */
+export interface DayViewData {
+  weekNumber: number;
+  dayNumber: number;
+  date: string; // Computed date (YYYY-MM-DD) based on plan start date
+  slots: {
+    mostImportant: DayTaskViewModel | null;
+    secondary: DayTaskViewModel[];
+    additional: DayTaskViewModel[];
+  };
+}
+
+/**
+ * Day View Metadata - supporting data for day view operations
+ */
+export interface DayViewMeta {
+  longTermGoals: SimpleGoal[];
+  milestones: SimpleMilestone[];
+  weeklyGoals: Array<{
+    id: string;
+    title: string;
+    long_term_goal_id: string | null;
+    milestone_id: string | null;
+  }>;
+}
+
+/**
+ * Day Copy/Move Payload - for copying/moving tasks to different day/week
+ */
+export interface DayCopyMovePayload {
+  targetWeek?: number | null;
+  targetDayNumber?: number | null;
+}
+
