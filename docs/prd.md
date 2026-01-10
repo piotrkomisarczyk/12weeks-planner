@@ -21,10 +21,10 @@ Większość aplikacji typu to-do list obsługuje jedynie proste, krótkotermino
 ### Zarządzanie planerami
 - Tworzenie 12-tygodniowych planerów zaczynających się od poniedziałku aktualnego tygodnia.
 - Nawigacja między planerami: poprzedni/następny, przeglądanie archiwalnych.
-- Minimalnie 1 cel, maksymalnie 5 celów na planer (walidacja formularza).
+- Minimalnie 1 cel, maksymalnie 6 celów na planer (walidacja formularza).
 
 ### Cele
-- Tworzenie/edycja 3-5 celów z uzasadnieniem (dlaczego ważny).
+- Tworzenie/edycja 1-6 celów z uzasadnieniem (dlaczego ważny).
 - Do każdego celu do 5 zadań (kamieni milowych) z terminami wykonania.
 - Manualny pasek postępu (0-100%) niezależny od stanów zadań.
 - Wizualizacja w dashboardzie z listą celów i postępami.
@@ -35,10 +35,12 @@ Większość aplikacji typu to-do list obsługuje jedynie proste, krótkotermino
 - Stany: do zrobienia (pusty kwadrat), w trakcie (50% zaciemniony), zakończone (pełny kwadrat), anulowane (dwie przekątne), przesunięte (strzałka).
 - Kopiowanie zadań wielodniowych między dniami z zachowaniem historii stanów.
 - Możliwość przypisania zadań do konkretnych dni podczas planowania tygodnia lub dnia
+- Limity: 0-15 podzadań celu tygodniowego, 0-100 zadań ad-hoc na tydzień. 0-3 celów tygodniowych w danym tygodniu.
 
 ### Widok dnia
-- 1 najważniejsze zadanie, 2 drugorzędne, 7 dodatkowych (z tygodniowych lub ad-hoc).
+- 1 najważniejsze zadanie (Priority A), 2 drugorzędne (Priority A/B), 7 dodatkowych (dowolny priorytet).
 - Stany zadań jak wyżej; ad-hoc zadania grupowane osobno.
+- Łącznie maksymalnie 10 zadań na dzień.
 - Kopiowanie zadań między tygodniami/dniami via menu kontekstowe. Możliwość wybrania na który dzień przesunąć zadanie. Zadania pozostają widoczne w każdym tygodniu i dniu do których były przypisane mimo kopiowania na kolejne dni.
 
 
@@ -136,7 +138,7 @@ Opis: Jako użytkownik, chcę dodać/edytować cel z uzasadnieniem, kategorią (
 Kryteria akceptacji:  
 - Formularz z tytułem, uzasadnieniem (textarea), paskiem postępu (slider 0-100%).  
 - Dodawanie do 5 zadań (kamieni milowych) z terminami (data picker).  
-- Limity: 1-5 celów na planer.  
+- Limity: 1-6 celów na planer.  
 - Zapisywanie aktualizuje dashboard.  
 - Edge case: edycja po 12 tygodniach blokowana dla archiwalnych.
 
@@ -173,7 +175,8 @@ Kryteria akceptacji:
   - przypisać zadanie do kamienia milowego powiązanego z celem długotemrinowym (użyj menu 2 stopniowego opisanego wyżej)
 - ad-hoc to zadania bez powiązania z celem tygodniowym. Pozwalaj na wiązanie zadań ad-hoc z celem długoterminowym oraz z jego kamieniem milowym. (menu 2 stopniowe).  
 - Edge case: przekroczenie limitu – ostrzeżenie.
-- Limity: 0-10 podzadań celu tygodniowego, 0-10 zadań ad-hoc. 0-3 celów tygodniowych w danym tygodniu.
+- Limity: 0-15 podzadań celu tygodniowego, 0-100 zadań ad-hoc na tydzień. 0-3 celów tygodniowych w danym tygodniu.
+- Maksymalnie 10 zadań przypisanych do konkretnego dnia (łącznie z wszystkich sekcji).
 
 ### US-008
 Tytuł: Zarządzanie zadaniami dziennymi  

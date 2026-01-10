@@ -28,7 +28,7 @@ Authorization: Bearer <jwt_token>
 | Resource | Database Table | Description |
 |----------|---------------|-------------|
 | Plans | `plans` | 12-week planners |
-| Goals | `long_term_goals` | Long-term goals (3-5 per plan) |
+| Goals | `long_term_goals` | Long-term goals (1-6 per plan) |
 | Milestones | `milestones` | Goal milestones (up to 5 per goal) |
 | Weekly Goals | `weekly_goals` | Main weekly tasks |
 | Tasks | `tasks` | Weekly subtasks and ad-hoc tasks |
@@ -505,8 +505,8 @@ Create a new long-term goal.
 - `description`: Optional
 - `category`: Optional, one of: `work`, `finance`, `hobby`, `relationships`, `health`, `development`
 - `progress_percentage`: Default 0, range 0-100
-- `position`: Default 1, range 1-5
-- Maximum 5 goals per plan (enforced by database trigger)
+- `position`: Default 1, range 1-6
+- Maximum 6 goals per plan (enforced by database trigger)
 
 **Response** `201 Created`:
 ```json
@@ -801,7 +801,7 @@ Create a new milestone for a goal.
 - `description`: Optional
 - `due_date`: Optional, ISO 8601 date format
 - `is_completed`: Default false
-- `position`: Default 1, range 1-5
+- `position`: Default 1, range 1-6
 - Maximum 5 milestones per goal (enforced by database trigger)
 
 **Response** `201 Created`:
@@ -1388,8 +1388,9 @@ Create a new task.
 - `week_number`: Optional (null for tasks not assigned to specific week), range 1-12
 - `due_day`: Optional (null for tasks not assigned to specific day), range 1-7
 - `position`: Default 1
-- Maximum 10 weekly subtasks per weekly_goal (enforced by database trigger)
-- Maximum 10 ad-hoc tasks per week (enforced by database trigger)
+- Maximum 15 weekly subtasks per weekly_goal (enforced by database trigger)
+- Maximum 100 ad-hoc tasks per week (enforced by database trigger)
+- Maximum 10 tasks per day (same week number and due day) (enforced by database trigger)
 
 **Response** `201 Created`:
 ```json
@@ -2027,9 +2028,9 @@ All API endpoints validate incoming data before processing:
 
 #### Long-term Goals
 - **Validation**:
-  - Minimum 1, maximum 5 goals per plan (enforced by database trigger)
-  - `progress_percentage` range: 0-100
-  - `position` range: 1-5
+- Minimum 1, maximum 6 goals per plan (enforced by database trigger)
+- `progress_percentage` range: 0-100
+- `position` range: 1-6
   - `category` must be one of: `work`, `finance`, `hobby`, `relationships`, `health`, `development`
 
 - **Business Logic**:
@@ -2072,8 +2073,9 @@ All API endpoints validate incoming data before processing:
   - `weekly_goal_id`: Optional, must reference valid weekly goal if provided
   - `long_term_goal_id`: Optional, must reference valid long-term goal if provided
   - `milestone_id`: Optional, must reference valid milestone if provided
-  - Maximum 10 weekly subtasks per weekly_goal (enforced by database trigger)
-  - Maximum 10 ad-hoc tasks per week (enforced by database trigger)
+- Maximum 15 weekly subtasks per weekly_goal (enforced by database trigger)
+- Maximum 100 ad-hoc tasks per week (enforced by database trigger)
+- Maximum 10 tasks per day (enforced by database trigger)
 
 - **Business Logic**:
   - Tasks support flexible multi-level hierarchies:
@@ -2168,7 +2170,7 @@ All error responses follow a consistent format:
 ```json
 {
   "error": "Constraint violation",
-  "message": "Cannot add more than 5 goals to a plan",
+  "message": "Cannot add more than 6 goals to a plan",
   "constraint": "check_goal_count"
 }
 ```

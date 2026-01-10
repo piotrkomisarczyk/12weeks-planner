@@ -17,6 +17,7 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
 *   **Feedback natychmiastowy:** Optymistyczne UI dla statusów zadań, pasków postępu i zmian powiązań.
 *   **Bezpieczeństwo danych:** Auto-save dla formularzy tekstowych (refleksje) i edycji zadań z debouncingiem.
 *   **Intuicyjne linkowanie:** Menu 2-stopniowe (cel → milestone) dla łatwego zarządzania powiązaniami między celami a zadaniami.
+*   **Limity:** 1-6 celów na planer, do 5 kamieni milowych na cel, 0-3 celów tygodniowych na tydzień, do 15 podzadań na cel tygodniowy, do 100 zadań ad-hoc na tydzień, do 10 zadań dziennie.
 
 ## 2. Lista widoków
 
@@ -46,7 +47,7 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
 #### 2.2.2. Kreator Planera (Wizard)
 *   **Ścieżka:** `/plans/new`
 *   **Cel:** Utworzenie nowego 12-tygodniowego planera.
-*   **Kluczowe informacje:** Krok 1: Nazwa i Data Startu (wymuszony poniedziałek). Krok 2: Definicja Celów (1-5).
+*   **Kluczowe informacje:** Krok 1: Nazwa i Data Startu (wymuszony poniedziałek). Krok 2: Definicja Celów (1-6).
 *   **Komponenty:** `PlanWizardStepper`, `DatePicker` (z blokadą dni innych niż poniedziałek), `GoalInputList`.
 *   **UX:** Walidacja na żywo (min. 1 cel). Blokada przejścia dalej bez poprawnych danych.
 
@@ -108,7 +109,7 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
 *   **Cel:** Zarządzanie celami długoterminowymi i ich kamieniami milowymi.
 *   **Kluczowe informacje:** Szczegółowa lista celów, edycja treści, dodawanie kamieni milowych.
 *   **Komponenty:** `GoalEditor` (formularz), `MilestoneList` (z datami), `ProgressSlider`, `Confetti` (przy ustawieniu progresu celu na 100 %).
-*   **UX:** Limit 5 celów. Walidacja dat kamieni milowych (muszą mieścić się w 12 tygodniach).
+*   **UX:** Limit 6 celów. Walidacja dat kamieni milowych (muszą mieścić się w 12 tygodniach).
 
 #### 2.3.4. Widok Tygodnia
 *   **Ścieżka:** `/plans/[id]/week/[nr]`
@@ -118,8 +119,8 @@ tydzień.
 *   **Kluczowe informacje:** 
     *   Numer tygodnia (wyświetlany jako "Week X"), zakres dat (data startu - data końca).
     *   Dwie główne sekcje zadań:
-        *   **Weekly Goals** (0-3 celów tygodniowych, każdy z listą podzadań 0-10)
-        *   **Other Tasks** (zadania ad-hoc, 0-10 zadań niezwiązanych z celami tygodniowymi)
+    *   **Weekly Goals** (0-3 celów tygodniowych, każdy z listą podzadań 0-15)
+    *   **Other Tasks** (zadania ad-hoc, 0-100 zadań niezwiązanych z celami tygodniowymi)
 *   **Komponenty:** 
     *   `WeekNavigator` (przycisk poprzedni/następny + dropdown wyboru tygodnia 1-12)
     *   `WeeklyGoalCard` (karta z tytułem celu tygodniowego, badge z powiązaniem do celu długoterminowego/milestone, lista podzadań)
@@ -147,8 +148,9 @@ tydzień.
     *   **Linkowanie celu tygodniowego do goal/milestone:** Kliknięcie na badge powiązania (lub placeholder "Not linked") w `WeeklyGoalCard` otwiera `GoalMilestonePicker`. Zmiana powiązania aktualizuje wszystkie podzadania.
     *   **Limity i walidacja:**
         *   Maksymalnie 3 cele tygodniowe (przycisk "+ Add Weekly Goal" wyłączony po osiągnięciu).
-        *   Maksymalnie 10 podzadań na cel tygodniowy (przycisk "+ Add Task" w karcie wyłączony).
-        *   Maksymalnie 10 zadań ad-hoc (przycisk "+ Add Task" w sekcji Other Tasks wyłączony).
+        *   Maksymalnie 15 podzadań na cel tygodniowy (przycisk "+ Add Task" w karcie wyłączony).
+        *   Maksymalnie 100 zadań ad-hoc na tydzień (przycisk "+ Add Task" w sekcji Other Tasks wyłączony).
+        *   Maksymalnie 10 zadań dziennie (suma wszystkich priorytetów).
         *   Toast z informacją o limicie przy próbie przekroczenia.
 *   **Dostępność:**
     *   Drag-handle dostępny z klawiatury (Enter aktywuje, strzałki przesuwają, Enter zatwierdza).
@@ -367,8 +369,8 @@ Komponent nawigacyjny w widoku Dnia.
 Komponent używany w widoku Tygodnia do prezentacji celu tygodniowego i jego podzadań.
 *   **Wygląd:**
     *   Nagłówek karty: Tytuł celu tygodniowego (inline editable), badge powiązania (klikalne, pokazuje cel długoterminowy i/lub milestone), ikona menu ("...").
-    *   Lista podzadań (0-10 zadań typu `weekly_sub`) z komponentami `TaskItem`.
-    *   Przycisk "+ Add Task" na dole karty (disabled po osiągnięciu limitu 10 zadań).
+    *   Lista podzadań (0-15 zadań typu `weekly_sub`) z komponentami `TaskItem`.
+    *   Przycisk "+ Add Task" na dole karty (disabled po osiągnięciu limitu 15 zadań).
 *   **Badge Powiązania:**
     *   Jeśli cel tygodniowy ma `long_term_goal_id` i `milestone_id`: wyświetla "🎯 [Nazwa Celu] > 🚩 [Nazwa Milestone]".
     *   Jeśli tylko `long_term_goal_id`: wyświetla "🎯 [Nazwa Celu]".
@@ -383,7 +385,7 @@ Komponent używany w widoku Tygodnia do prezentacji celu tygodniowego i jego pod
     *   Kliknięcie "+ Add Task" tworzy nowe zadanie dziedziczące `long_term_goal_id` i `milestone_id` z celu tygodniowego. Priorytet domyślnie A.
     *   Drag-and-drop podzadań w ramach karty (sortowanie pozycji).
 *   **Walidacja:**
-    *   Limit 10 podzadań - przycisk "+ Add Task" disabled, tooltip "Maximum 10 tasks per weekly goal".
+    *   Limit 15 podzadań - przycisk "+ Add Task" disabled, tooltip "Maximum 15 tasks per weekly goal".
 *   **UX:**
     *   Karta zwijana/rozwijana (collapse/expand) - ikona chevron w nagłówku.
     *   Minimalistyczny design - wyraźne oddzielenie od sekcji Other Tasks.
@@ -509,11 +511,12 @@ Komponent do wyboru celu długoterminowego i opcjonalnie kamienia milowego. Uży
 
 #### Walidacja po stronie klienta (przed wysłaniem do API)
 *   Limity biznesowe:
-    *   Maksymalnie 5 celów na planer (wyłączenie przycisku "+ Add Goal").
+    *   Maksymalnie 6 celów na planer (wyłączenie przycisku "+ Add Goal").
     *   Maksymalnie 5 milestones na cel (wyłączenie przycisku "+ Add Milestone").
     *   Maksymalnie 3 cele tygodniowe na tydzień (wyłączenie przycisku "+ Add Weekly Goal").
-    *   Maksymalnie 10 podzadań na cel tygodniowy (wyłączenie "+ Add Task" w karcie).
-    *   Maksymalnie 10 zadań ad-hoc na tydzień (wyłączenie "+ Add Task" w sekcji Other Tasks).
+    *   Maksymalnie 15 podzadań na cel tygodniowy (wyłączenie "+ Add Task" w karcie).
+    *   Maksymalnie 100 zadań ad-hoc na tydzień (wyłączenie "+ Add Task" w sekcji Other Tasks).
+    *   Maksymalnie 10 zadań na dzień (suma wszystkich priorytetów).
 *   Wymagane pola:
     *   Tytuł zadania/celu (min. 1 znak).
     *   Plan ID, week_number dla weekly goals i tasks.

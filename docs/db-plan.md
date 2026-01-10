@@ -23,7 +23,7 @@ Centralna tabela przechowująca 12-tygodniowe planery użytkowników.
 ---
 
 ### 1.2. long_term_goals
-Tabela przechowująca cele długoterminowe (3-5 celów na planer).
+Tabela przechowująca cele długoterminowe (1-6 celów na planer).
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -33,7 +33,7 @@ Tabela przechowująca cele długoterminowe (3-5 celów na planer).
 | description | TEXT | NULL | Uzasadnienie - dlaczego cel jest ważny |
 | category | TEXT | NULL, CHECK (category IN ('work', 'finance', 'hobby', 'relationships', 'health', 'development')) | Kategoria celu (praca, finanse, hobby, relacje, zdrowie, rozwój) |
 | progress_percentage | INTEGER | NOT NULL, DEFAULT 0, CHECK (progress_percentage >= 0 AND progress_percentage <= 100) | Manualny postęp celu (0-100%) |
-| position | INTEGER | NOT NULL, DEFAULT 1 | Kolejność wyświetlania celów (1-5) |
+| position | INTEGER | NOT NULL, DEFAULT 1 | Kolejność wyświetlania celów (1-6) |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Data utworzenia |
 | updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT NOW() | Data ostatniej modyfikacji |
 
@@ -223,15 +223,15 @@ auth.users (1) ---> (1) user_metrics
 **Kardynalność:**
 - **1:N (jeden-do-wielu):** 
   - `auth.users` → `plans`
-  - `plans` → `long_term_goals` (1-5 celów)
+  - `plans` → `long_term_goals` (1-6 celów)
   - `long_term_goals` → `milestones` (0-5 kamieni milowych)
   - `long_term_goals` → `weekly_goals` (opcjonalne powiązanie)
   - `long_term_goals` → `tasks` (opcjonalne powiązanie bezpośrednie)
   - `milestones` → `weekly_goals` (opcjonalne powiązanie)
   - `milestones` → `tasks` (opcjonalne powiązanie)
-  - `plans` → `weekly_goals` (0-12 celów tygodniowych)
-  - `weekly_goals` → `tasks` (0-10 podzadań)
-  - `plans` → `tasks` (zadania ad-hoc)
+  - `plans` → `weekly_goals` (0-12 celów tygodniowych, max 3 na tydzień)
+  - `weekly_goals` → `tasks` (0-15 podzadań)
+  - `plans` → `tasks` (max 100 zadań ad-hoc na tydzień, max 10 zadań na dzień)
   - `plans` → `weekly_reviews` (0-12 podsumowań)
   - `tasks` → `task_history`
 
@@ -949,7 +949,7 @@ FOR EACH ROW EXECUTE FUNCTION validate_plan_start_date();
 ```
 
 ### 6.7. Trigger: validate_goal_count_per_plan
-Walidacja liczby celów na planer (min 1, max 5).
+Walidacja liczby celów na planer (min 1, max 6).
 
 ```sql
 -- Funkcja pomocnicza
@@ -963,9 +963,9 @@ BEGIN
   FROM long_term_goals
   WHERE plan_id = NEW.plan_id;
   
-  -- Sprawdź maksymalną liczbę celów (5)
-  IF (TG_OP = 'INSERT') AND goal_count >= 5 THEN
-    RAISE EXCEPTION 'Cannot add more than 5 goals to a plan';
+  -- Sprawdź maksymalną liczbę celów (6)
+  IF (TG_OP = 'INSERT') AND goal_count >= 6 THEN
+    RAISE EXCEPTION 'Cannot add more than 6 goals to a plan';
   END IF;
   
   RETURN NEW;
@@ -1009,7 +1009,7 @@ FOR EACH ROW EXECUTE FUNCTION validate_milestone_count_per_goal();
 ```
 
 ### 6.9. Trigger: validate_weekly_subtask_count
-Walidacja liczby podzadań tygodniowych (max 10).
+Walidacja liczby podzadań tygodniowych (max 15).
 
 ```sql
 -- Funkcja pomocnicza
@@ -1025,9 +1025,9 @@ BEGIN
     WHERE weekly_goal_id = NEW.weekly_goal_id
     AND task_type = 'weekly_sub';
     
-    -- Sprawdź maksymalną liczbę podzadań (10)
-    IF (TG_OP = 'INSERT') AND subtask_count >= 10 THEN
-      RAISE EXCEPTION 'Cannot add more than 10 subtasks to a weekly goal';
+    -- Sprawdź maksymalną liczbę podzadań (15)
+    IF (TG_OP = 'INSERT') AND subtask_count >= 15 THEN
+      RAISE EXCEPTION 'Cannot add more than 15 subtasks to a weekly goal';
     END IF;
   END IF;
   
@@ -1042,7 +1042,7 @@ FOR EACH ROW EXECUTE FUNCTION validate_weekly_subtask_count();
 ```
 
 ### 6.10. Trigger: validate_ad_hoc_task_count
-Walidacja liczby zadań ad-hoc na tydzień (max 10).
+Walidacja liczby zadań ad-hoc na tydzień (max 100).
 
 ```sql
 -- Funkcja pomocnicza
@@ -1059,9 +1059,9 @@ BEGIN
     AND week_number = NEW.week_number
     AND task_type = 'ad_hoc';
     
-    -- Sprawdź maksymalną liczbę zadań ad-hoc (10)
-    IF (TG_OP = 'INSERT') AND ad_hoc_count >= 10 THEN
-      RAISE EXCEPTION 'Cannot add more than 10 ad-hoc tasks per week';
+    -- Sprawdź maksymalną liczbę zadań ad-hoc (100)
+    IF (TG_OP = 'INSERT') AND ad_hoc_count >= 100 THEN
+      RAISE EXCEPTION 'Cannot add more than 100 ad-hoc tasks per week';
     END IF;
   END IF;
   
@@ -1073,6 +1073,71 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER check_ad_hoc_task_count
 BEFORE INSERT ON tasks
 FOR EACH ROW EXECUTE FUNCTION validate_ad_hoc_task_count();
+```
+
+### 6.11. Trigger: validate_daily_task_count
+Walidacja liczby zadań na dzień (max 10).
+
+```sql
+-- Funkcja pomocnicza
+CREATE OR REPLACE FUNCTION validate_daily_task_count()
+RETURNS TRIGGER AS $$
+DECLARE
+  daily_count INTEGER;
+BEGIN
+  -- Policz zadania na konkretny dzień
+  IF NEW.week_number IS NOT NULL AND NEW.due_day IS NOT NULL THEN
+    SELECT COUNT(*) INTO daily_count
+    FROM tasks
+    WHERE plan_id = NEW.plan_id
+    AND week_number = NEW.week_number
+    AND due_day = NEW.due_day;
+    
+    -- Sprawdź maksymalną liczbę zadań na dzień (10)
+    IF (TG_OP = 'INSERT') AND daily_count >= 10 THEN
+      RAISE EXCEPTION 'Cannot add more than 10 tasks per day';
+    END IF;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+CREATE TRIGGER check_daily_task_count
+BEFORE INSERT ON tasks
+FOR EACH ROW EXECUTE FUNCTION validate_daily_task_count();
+```
+
+### 6.12. Trigger: validate_weekly_goal_count
+Walidacja liczby celów tygodniowych na tydzień (max 3).
+
+```sql
+-- Funkcja pomocnicza
+CREATE OR REPLACE FUNCTION validate_weekly_goal_count()
+RETURNS TRIGGER AS $$
+DECLARE
+  wg_count INTEGER;
+BEGIN
+  -- Policz cele tygodniowe na konkretny tydzień
+  SELECT COUNT(*) INTO wg_count
+  FROM weekly_goals
+  WHERE plan_id = NEW.plan_id
+  AND week_number = NEW.week_number;
+  
+  -- Sprawdź maksymalną liczbę celów tygodniowych (3)
+  IF (TG_OP = 'INSERT') AND wg_count >= 3 THEN
+    RAISE EXCEPTION 'Cannot add more than 3 weekly goals per week';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+CREATE TRIGGER check_weekly_goal_count
+BEFORE INSERT ON weekly_goals
+FOR EACH ROW EXECUTE FUNCTION validate_weekly_goal_count();
 ```
 
 ---
@@ -1131,10 +1196,11 @@ Walidacja danych odbywa się na trzech poziomach:
 
 **Poziom 2: Database Triggers**
 - Zapewnienie pojedynczego aktywnego planu (tylko jeden plan może być 'active')
-- Walidacja liczby celów (1-5 na planer)
+- Walidacja liczby celów (1-6 na planer)
 - Walidacja liczby kamieni milowych (0-5 na cel)
-- Walidacja liczby podzadań (0-10 na cel tygodniowy)
-- Walidacja liczby zadań ad-hoc (0-10 na tydzień)
+- Walidacja liczby podzadań (0-15 na cel tygodniowy)
+- Walidacja liczby zadań ad-hoc (0-100 na tydzień)
+- Walidacja liczby zadań dziennie (0-10 na dzień)
 - Walidacja daty rozpoczęcia planera (musi być poniedziałek)
 
 **Poziom 3: Application Layer**
