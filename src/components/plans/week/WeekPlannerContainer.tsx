@@ -168,6 +168,34 @@ export function WeekPlannerContainer({
   }, [deleteTask]);
 
   const handleAssignDay = useCallback(async (taskId: string, day: number | null) => {
+    // Check if assigning to a day (not clearing)
+    if (day !== null) {
+      // Count tasks already assigned to this day
+      let tasksAssignedToDay = 0;
+
+      // Count in weekly goal tasks
+      data.weeklyGoals.forEach(goal => {
+        goal.tasks.forEach(task => {
+          if (task.due_day === day) {
+            tasksAssignedToDay++;
+          }
+        });
+      });
+
+      // Count in ad-hoc tasks
+      data.adHocTasks.forEach(task => {
+        if (task.due_day === day) {
+          tasksAssignedToDay++;
+        }
+      });
+
+      // Check limit (10 tasks per day)
+      if (tasksAssignedToDay >= 10) {
+        toast.error(`Cannot assign more than 10 tasks to a day. Day ${day} already has ${tasksAssignedToDay} tasks.`);
+        return;
+      }
+    }
+
     try {
       await updateTask(taskId, { due_day: day });
       toast.success(day ? `Assigned to day ${day}` : 'Day cleared');
@@ -175,7 +203,7 @@ export function WeekPlannerContainer({
       toast.error('Failed to assign day');
       console.error(err);
     }
-  }, [updateTask]);
+  }, [updateTask, data.weeklyGoals, data.adHocTasks]);
 
 
   const handleAssignToWeeklyGoal = useCallback(async (taskId: string, goalId: string) => {
