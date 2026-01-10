@@ -7,11 +7,11 @@
 **Cel:** Utworzenie nowego długoterminowego celu (long-term goal) powiązanego z istniejącym 12-tygodniowym planerem.
 
 **Funkcjonalność:**
-- Użytkownik może utworzyć do 5 celów długoterminowych dla każdego planera
+- Użytkownik może utworzyć do 6 celów długoterminowych dla każdego planera
 - Cele służą do definiowania głównych priorytetów na 12 tygodni
 - Każdy cel może mieć przypisaną kategorię (praca, finanse, hobby, relacje, zdrowie, rozwój)
 - Postęp celu jest śledzony manualnie (0-100%)
-- Cele mają określoną kolejność wyświetlania (position 1-5)
+- Cele mają określoną kolejność wyświetlania (position 1-6)
 
 **Powiązania z innymi zasobami:**
 - Cel należy do konkretnego planera (`plan_id`)
@@ -69,12 +69,12 @@
   - Domyślnie: 0
 
 - **position** (integer)
-  - Kolejność wyświetlania celów (1-5)
-  - Walidacja: integer, zakres 1-5
+  - Kolejność wyświetlania celów (1-6)
+  - Walidacja: integer, zakres 1-6
   - Domyślnie: 1
 
 ### 2.3. Ograniczenia biznesowe
-- **Maksymalnie 5 celów na plan** - egzekwowane przez trigger bazodanowy `validate_max_goals_per_plan`
+- **Maksymalnie 6 celów na plan** - egzekwowane przez trigger bazodanowy `validate_max_goals_per_plan`
 - Plan musi istnieć i należeć do użytkownika
 
 ---
@@ -192,11 +192,11 @@ X-Content-Type-Options: nosniff
 }
 ```
 
-**Przykład 4: Przekroczony limit 5 celów**
+**Przykład 4: Przekroczony limit 6 celów**
 ```json
 {
   "error": "Constraint violation",
-  "message": "Maximum 5 goals per plan exceeded"
+  "message": "Maximum 6 goals per plan exceeded"
 }
 ```
 
@@ -253,7 +253,7 @@ W przyszłości (po implementacji autentykacji):
    
 4. Supabase (PostgreSQL)
    ↓ Execute INSERT INTO long_term_goals
-   ↓ Trigger: validate_max_goals_per_plan (max 5)
+   ↓ Trigger: validate_max_goals_per_plan (max 6)
    ↓ Trigger: update_updated_at_column
    ↓ Return inserted row
    
@@ -288,7 +288,7 @@ RETURNING *;
 ```
 
 #### Triggery aktywowane automatycznie:
-1. **validate_max_goals_per_plan** - sprawdza limit 5 celów na plan
+1. **validate_max_goals_per_plan** - sprawdza limit 6 celów na plan
 2. **update_updated_at_column** - ustawia `updated_at` na NOW()
 
 ### 5.3. Zewnętrzne zależności
@@ -356,7 +356,7 @@ if (!plan) {
 **Poziom 2: Walidacja biznesowa (Service + Database)**
 - Istnienie planera
 - Własność planera
-- Limit 5 celów (database trigger)
+- Limit 6 celów (database trigger)
 
 ### 6.4. Bezpieczeństwo SQL
 
@@ -413,7 +413,7 @@ if (!plan) {
 | 400 | Validation failed | Progress poza zakresem | `progress_percentage: 150` |
 | 400 | Validation failed | Position poza zakresem | `position: 10` |
 | 400 | Validation failed | Title za długi | `title: "a".repeat(300)` |
-| 400 | Constraint violation | Maksymalnie 5 celów | Próba dodania 6. celu |
+| 400 | Constraint violation | Maksymalnie 6 celów | Próba dodania 7. celu |
 | 404 | Plan not found | Plan nie istnieje | Nieistniejący UUID |
 | 404 | Plan not found | Plan należy do innego użytkownika | Cudzy plan |
 | 500 | Internal server error | Nieoczekiwany błąd bazy danych | Timeout, connection lost |
@@ -447,9 +447,9 @@ try {
     .single();
 
   if (error) {
-    // Constraint violation: max 5 goals per plan
+    // Constraint violation: max 6 goals per plan
     if (error.code === '23514' || error.message.includes('max_goals')) {
-      throw new Error('Maximum 5 goals per plan exceeded');
+      throw new Error('Maximum 6 goals per plan exceeded');
     }
     
     // Other database errors
@@ -482,7 +482,7 @@ try {
 
 **1. Index na plan_id w long_term_goals**
 - Już istnieje: `idx_long_term_goals_plan_id`
-- Przyspiesza weryfikację limitu 5 celów w triggerze
+- Przyspiesza weryfikację limitu 6 celów w triggerze
 
 **2. Single database transaction**
 - Weryfikacja planu + insert celu powinny być w jednej transakcji
@@ -507,7 +507,7 @@ try {
 ### 8.4. Skalowanie
 
 **Limit celów:**
-- Maksymalnie 5 celów na plan (constraint)
+- Maksymalnie 6 celów na plan (constraint)
 - Przy 1000 użytkownikach i średnio 2 planach: ~10,000 celów
 - Tabela `long_term_goals` może obsłużyć miliony rekordów bez problemu
 
@@ -557,7 +557,7 @@ export const CreateGoalBodySchema = z.object({
   position: z.number()
     .int({ message: 'Position must be an integer' })
     .min(1, { message: 'Position must be at least 1' })
-    .max(5, { message: 'Position must not exceed 5' })
+    .max(6, { message: 'Position must not exceed 6' })
     .default(1)
 }).transform((data) => ({
   ...data,
@@ -603,7 +603,7 @@ export class GoalService {
    * @param data - Dane celu (plan_id, title, description, category, progress_percentage, position)
    * @returns Promise z utworzonym celem
    * @throws Error jeśli plan nie istnieje lub nie należy do użytkownika
-   * @throws Error jeśli przekroczono limit 5 celów (constraint violation)
+   * @throws Error jeśli przekroczono limit 6 celów (constraint violation)
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    */
   async createGoal(
@@ -637,9 +637,9 @@ export class GoalService {
 
     // Step 4: Handle database errors
     if (error) {
-      // Check for constraint violations (max 5 goals per plan)
+      // Check for constraint violations (max 6 goals per plan)
       if (error.code === '23514' || error.message.includes('max_goals')) {
-        throw new Error('Maximum 5 goals per plan exceeded');
+        throw new Error('Maximum 6 goals per plan exceeded');
       }
       
       // Other database errors
@@ -708,7 +708,7 @@ export class GoalService {
  * - description: string (optional)
  * - category: enum (optional) - work, finance, hobby, relationships, health, development
  * - progress_percentage: integer (0-100, default: 0)
- * - position: integer (1-5, default: 1)
+ * - position: integer (1-6, default: 1)
  * 
  * Responses:
  * - 201: Created
@@ -816,8 +816,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
         );
       }
       
-      // Maximum 5 goals exceeded
-      if (errorMessage.includes('Maximum 5 goals')) {
+      // Maximum 6 goals exceeded
+      if (errorMessage.includes('Maximum 6 goals')) {
         return new Response(
           JSON.stringify({
             error: 'Constraint violation',
@@ -1005,7 +1005,7 @@ Content-Type: application/json
   invalid json
 }
 
-### Create 5 goals to test constraint (repeat until error)
+### Create 6 goals to test constraint (repeat until error)
 ### Goal 1
 POST http://localhost:4321/api/v1/goals
 Content-Type: application/json
@@ -1056,13 +1056,23 @@ Content-Type: application/json
   "position": 5
 }
 
-### Goal 6 - Should fail with max 5 goals constraint
+### Goal 6
 POST http://localhost:4321/api/v1/goals
 Content-Type: application/json
 
 {
   "plan_id": "{{planId}}",
-  "title": "Goal 6 - This should fail",
+  "title": "Goal 6",
+  "position": 6
+}
+
+### Goal 7 - Should fail with max 6 goals constraint
+POST http://localhost:4321/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 7 - This should fail",
   "position": 1
 }
 ```
@@ -1111,7 +1121,7 @@ Zapisz `id` z odpowiedzi jako `{{planId}}` do testów.
 
 3. Testy logiki biznesowej:
    - Plan nie istnieje ✓
-   - Maksymalnie 5 celów ✓
+   - Maksymalnie 6 celów ✓
 
 4. Testy błędów:
    - Nieprawidłowy JSON ✓
@@ -1128,12 +1138,12 @@ WHERE plan_id = '{{planId}}'
 ORDER BY position;
 ```
 
-**Sprawdzenie triggera (max 5 celów):**
+**Sprawdzenie triggera (max 6 celów):**
 ```sql
 SELECT COUNT(*) as goal_count 
 FROM long_term_goals 
 WHERE plan_id = '{{planId}}';
--- Should be <= 5
+-- Should be <= 6
 ```
 
 **Sprawdzenie timestamps:**
@@ -1181,7 +1191,7 @@ WHERE plan_id = '{{planId}}';
 - [ ] Metoda `createGoal(userId, data)`
 - [ ] Metoda `getGoalById(goalId, userId)` (helper)
 - [ ] Weryfikacja własności planu
-- [ ] Obsługa constraint violation (max 5 goals)
+- [ ] Obsługa constraint violation (max 6 goals)
 - [ ] Error handling
 
 ### API Route
@@ -1198,7 +1208,7 @@ WHERE plan_id = '{{planId}}';
 - [ ] Utworzenie `api-tests/goals-tests.http`
 - [ ] Testy pozytywne (różne kombinacje pól)
 - [ ] Testy walidacji (wszystkie scenariusze błędów)
-- [ ] Test max 5 goals constraint
+- [ ] Test max 6 goals constraint
 - [ ] Test plan not found
 - [ ] Weryfikacja w bazie danych
 
@@ -1299,7 +1309,7 @@ Ten endpoint implementuje kluczową funkcjonalność tworzenia długoterminowych
 **Kluczowe aspekty:**
 - ✅ Walidacja danych wejściowych na 3 poziomach (format, typ, biznesowa)
 - ✅ Bezpieczna weryfikacja własności zasobów
-- ✅ Obsługa constraint bazodanowych (max 5 celów)
+- ✅ Obsługa constraint bazodanowych (max 6 celów)
 - ✅ Szczegółowe komunikaty błędów dla klienta
 - ✅ Struktura zgodna z istniejącym kodem (plan.service pattern)
 - ✅ Kompletne pokrycie testami

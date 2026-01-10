@@ -232,8 +232,11 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 - `week_number`: Opcjonalne (null dla zadań nie przypisanych do tygodnia), zakres 1-12
 - `due_day`: Opcjonalne (null dla zadań nie przypisanych do dnia), zakres 1-7
 - `position`: Domyślnie 1
-- Maksymalnie 10 weekly subtasks per weekly_goal (egzekwowane przez trigger bazy danych)
-- Maksymalnie 10 ad-hoc tasks per week (egzekwowane przez trigger bazy danych)
+- Maksymalnie 15 weekly subtasks per weekly_goal (egzekwowane przez trigger bazy danych)
+- Maksymalnie 100 ad-hoc tasks per week (egzekwowane przez trigger bazy danych)
+- Maksymalnie 10 tasks per day (egzekwowane przez trigger bazy danych)
+- Maksymalnie 3 weekly goals per week (egzekwowane przez trigger bazy danych)
+- Maksymalnie 6 long-term goals per plan (egzekwowane przez trigger bazy danych)
 
 **Response 201 Created**:
 ```json
@@ -594,9 +597,11 @@ Supabase Client → INSERT INTO tasks
   ↓ (trigger: log_task_status_change fires)
 Database Trigger → INSERT INTO task_history (initial status)
   ↓ (trigger: validate_weekly_subtask_count checks)
-Database Trigger → Check max 10 subtasks per weekly_goal
+Database Trigger → Check max 15 subtasks per weekly_goal
   ↓ (trigger: validate_ad_hoc_task_count checks)
-Database Trigger → Check max 10 ad-hoc tasks per week
+Database Trigger → Check max 100 ad-hoc tasks per week
+  ↓ (trigger: validate_daily_task_count checks)
+Database Trigger → Check max 10 tasks per day
   ↓
 Service → Return TaskDTO
   ↓
@@ -607,8 +612,9 @@ Client Response (201 Created)
 
 **Database Triggers:**
 - `log_task_status_change` - automatycznie loguje początkowy status do task_history
-- `validate_weekly_subtask_count` - sprawdza max 10 subtasków per weekly_goal
-- `validate_ad_hoc_task_count` - sprawdza max 10 ad-hoc tasks per week
+- `validate_weekly_subtask_count` - sprawdza max 15 subtasków per weekly_goal
+- `validate_ad_hoc_task_count` - sprawdza max 100 ad-hoc tasks per week
+- `validate_daily_task_count` - sprawdza max 10 tasks per day
 - `update_updated_at_timestamp` - aktualizuje updated_at
 
 ### 4.5. PATCH /api/v1/tasks/:id - Update Task
@@ -824,11 +830,14 @@ if (milestone_id) {
 
 **Database Triggers** automatycznie sprawdzają:
 
-1. **validate_weekly_subtask_count**: Max 10 subtasków per weekly_goal
-   - Error: `"Cannot add more than 10 subtasks to a weekly goal"`
+1. **validate_weekly_subtask_count**: Max 15 subtasków per weekly_goal
+   - Error: `"Cannot add more than 15 subtasks to a weekly goal"`
 
-2. **validate_ad_hoc_task_count**: Max 10 ad-hoc tasks per week
-   - Error: `"Cannot add more than 10 ad-hoc tasks per week"`
+2. **validate_ad_hoc_task_count**: Max 100 ad-hoc tasks per week
+   - Error: `"Cannot add more than 100 ad-hoc tasks per week"`
+
+3. **validate_daily_task_count**: Max 10 tasks per day
+   - Error: `"Cannot add more than 10 tasks per day"`
 
 **Obsługa w service**:
 ```typescript
@@ -872,7 +881,7 @@ try {
 **Constraint Error**:
 ```json
 {
-  "error": "Cannot add more than 10 subtasks to a weekly goal"
+  "error": "Cannot add more than 15 subtasks to a weekly goal"
 }
 ```
 
@@ -1436,6 +1445,10 @@ export class TaskService {
         .single();
 
       if (updateError) {
+        // Check for constraint violations (triggers)
+        if (updateError.message.includes('Cannot add more than')) {
+          return { error: updateError.message };
+        }
         console.error('Error updating task:', updateError);
         return { error: 'Failed to update task' };
       }
@@ -2253,6 +2266,11 @@ Ten plan implementacji dostarcza:
 - Zaktualizowano walidację dla nowych pól relacyjnych
 - Zaktualizowano service layer dla weryfikacji foreign keys
 - Zaktualizowano dokumentację API responses
+- **Zaktualizowano limity systemowe zgodnie z api-plan.md i db-plan.md**:
+  - Max 15 weekly subtasks (było 10)
+  - Max 100 ad-hoc tasks per week (było 10)
+  - Nowy limit: Max 10 tasks per day
+  - Zaktualizowano limity dla planów (6 goals) i celów tygodniowych (3 weekly goals) w walidacji wejściowej
 
 **Kolejność implementacji**:
 1. task.validation.ts (walidacje)

@@ -15,8 +15,8 @@ Ten dokument opisuje implementację pięciu endpointów REST API dla zarządzani
 - Cele tygodniowe należą do `plans` (wymagana relacja)
 - Opcjonalnie powiązane z `long_term_goals` (nullable)
 - Opcjonalnie powiązane z `milestones` (nullable)
-- Posiadają podzadania w `tasks` (weekly_sub type) - usuwane kaskadowo
-- Ograniczenia: week_number musi być w zakresie 1-12
+- Posiadają podzadania w `tasks` (weekly_sub type) - usuwane kaskadowo (max 15 na cel)
+- Ograniczenia: week_number musi być w zakresie 1-12, maksymalnie 3 cele na tydzień
 
 ### Hierarchia powiązań:
 Weekly goal może być powiązany z:
@@ -476,6 +476,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 
 3. WeeklyGoalService
    ├─> Verify plan exists and belongs to user (via PlanService)
+   ├─> Verify weekly goal count for specified week (max 3)
    ├─> If long_term_goal_id provided:
    │   └─> Verify goal exists and belongs to same plan
    ├─> If milestone_id provided:
@@ -648,6 +649,7 @@ if (milestone_id) {
 | **400** | Walidacja body | `{ error: "Validation failed", details: [...] }` | Zod validation error w body |
 | **400** | Brak pól w PATCH | `{ error: "Validation failed", message: "At least one field..." }` | Puste PATCH body |
 | **400** | Milestone-Plan mismatch | `{ error: "Validation failed", message: "Milestone does not belong to plan" }` | Milestone należy do goala z innego planu |
+| **400** | Limit celów tygodniowych | `{ error: "Validation failed", message: "Cannot add more than 3 weekly goals per week" }` | Przekroczenie limitu 3 celów na tydzień |
 | **404** | Plan nie istnieje | `{ error: "Plan not found" }` | Service nie znalazł planu |
 | **404** | Goal nie istnieje | `{ error: "Long-term goal not found" }` | Service nie znalazł goal |
 | **404** | Milestone nie istnieje | `{ error: "Milestone not found" }` | Service nie znalazł milestone |
@@ -748,8 +750,8 @@ export const GET: APIRoute = async ({ locals, request }) => {
 - Consider cursor-based pagination dla większych datasets w przyszłości
 
 **Expected dataset sizes:**
-- Max ~12 weekly goals per plan (1 per week)
-- Pagination bardziej przydatna dla subtasks (max 10 per goal)
+- Max 36 weekly goals per plan (3 per week)
+- Pagination bardziej przydatna dla subtasks (max 15 na cel tygodniowy)
 
 ### 8.3. N+1 Query Problem
 
@@ -916,6 +918,7 @@ export function validateUpdateWeeklyGoalCommand(data: UpdateWeeklyGoalCommand): 
 
 1. **createWeeklyGoal(userId: string, data: CreateWeeklyGoalCommand): Promise<WeeklyGoalDTO>**
    - Weryfikacja istnienia planu (via PlanService.getPlanById)
+   - **Weryfikacja limitu celów tygodniowych (max 3 na tydzień)**
    - Weryfikacja long_term_goal_id jeśli podany (via GoalService.getGoalById)
    - Sprawdzenie czy goal należy do tego samego planu
    - **Weryfikacja milestone_id jeśli podany:**
@@ -1504,10 +1507,19 @@ if (data.milestone_id) {
 **Problem:** Czy fetching subtasks dla GET :id może być wolny?
 
 **Rozwiązanie:** 
-- Max 10 subtasks per weekly goal (constraint)
+- Max 15 subtasks per weekly goal (constraint)
 - Index na weekly_goal_id już istnieje
 - SELECT tylko 4 kolumny
 - Performance powinien być OK dla MVP
+
+### Problem 9: Limit celów tygodniowych
+
+**Problem:** Czy użytkownik może dodać więcej niż jeden cel na tydzień?
+
+**Rozwiązanie:** TAK, ale z ograniczeniem:
+- System pozwala na maksymalnie 3 cele tygodniowe na ten sam tydzień w ramach jednego planu.
+- Limit jest wymuszany przez trigger bazodanowy `check_weekly_goal_count`.
+- Warto dodać walidację w service layer, aby zwrócić czytelny błąd 400 zamiast generycznego błędu bazy danych.
 
 ### Problem 6: Pagination count
 
@@ -1600,6 +1612,7 @@ return { data, count };
 - [ ] **Error handling dla milestone validation (400 dla wrong plan, 404 dla not found)**
 - [ ] Weryfikacja własności działa poprawnie (plan → user)
 - [ ] **Weryfikacja hierarchii działa poprawnie (milestone → goal → plan → user)**
+- [ ] **Weryfikacja limitu 3 celów na tydzień działa poprawnie**
 - [ ] Cascade delete testowany (weekly goal → subtasks)
 - [ ] **SET NULL testowany (goal/milestone delete → weekly_goal remains)**
 - [ ] Foreign key validation testowana (plan_id, long_term_goal_id, milestone_id)

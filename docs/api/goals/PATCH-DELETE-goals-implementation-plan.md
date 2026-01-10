@@ -83,8 +83,8 @@ Wszystkie pola są **opcjonalne**:
   - Walidacja: integer, zakres 0-100
 
 - **position** (integer)
-  - Kolejność wyświetlania celów (1-5)
-  - Walidacja: integer, zakres 1-5
+  - Kolejność wyświetlania celów (1-6)
+  - Walidacja: integer, zakres 1-6
 
 #### 2.1.4. Ograniczenia biznesowe
 - Cel musi istnieć i należeć do użytkownika
@@ -508,7 +508,7 @@ try {
 **Przykłady:**
 - Title zbyt krótki/długi
 - Progress percentage poza zakresem 0-100
-- Position poza zakresem 1-5
+- Position poza zakresem 1-6
 - Category nie jest jednym z dozwolonych wartości
 - UUID w nieprawidłowym formacie
 
@@ -824,7 +824,7 @@ export const updateGoalSchema = z.object({
   position: z.number()
     .int('Position must be an integer')
     .min(1, 'Position must be at least 1')
-    .max(5, 'Position must not exceed 5')
+    .max(6, 'Position must not exceed 6')
     .optional()
 }).strict(); // Reject unknown fields
 

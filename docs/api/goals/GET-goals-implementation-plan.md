@@ -8,7 +8,7 @@ This implementation plan covers three GET endpoints for managing long-term goals
 2. **GET /api/v1/plans/:planId/goals** - Get all goals for a specific plan
 3. **GET /api/v1/goals/:id** - Get a specific goal with its milestones
 
-These endpoints provide read-only access to long-term goals, which are the foundation of the 12-week planning system. Each goal can have 3-5 milestones and is associated with a specific plan. Goals include progress tracking (0-100%), categorization, and positioning.
+These endpoints provide read-only access to long-term goals, which are the foundation of the 12-week planning system. Each goal can have up to 5 milestones and is associated with a specific plan. Goals include progress tracking (0-100%), categorization, and positioning.
 
 ---
 
@@ -123,7 +123,7 @@ From database schema (`long_term_goals` table):
   description: string | null;  // Why this goal is important
   category: 'work' | 'finance' | 'hobby' | 'relationships' | 'health' | 'development' | null;
   progress_percentage: number;  // 0-100
-  position: number;        // 1-5 (ordering)
+  position: number;        // 1-6 (ordering)
   created_at: string;      // ISO timestamp
   updated_at: string;      // ISO timestamp
 }
