@@ -1361,8 +1361,9 @@ Content-Type: application/json
 # 2. Status changes automatically logged to task_history (trigger)
 # 3. Copy operation resets status to 'todo'
 # 4. Delete cascades to task_history
-# 5. Weekly subtask count limit (max 10 per weekly_goal) - trigger
-# 6. Ad-hoc task count limit (max 10 per week) - trigger
+# 5. Weekly subtask count limit (max 15 per weekly_goal) - trigger
+# 6. Ad-hoc task count limit (max 100 per week) - trigger
+# 7. Daily task count limit (max 10 per day) - trigger
 # 7. updated_at timestamp automatically updated
 # 8. Daily tasks properly categorized by priority (A/B/C)
 # 9. Date calculation correct for daily tasks endpoint
