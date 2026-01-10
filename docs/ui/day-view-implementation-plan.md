@@ -122,7 +122,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Range: `week_number` 1–12, `due_day` 1–7 (wymuszać w pickerach i ścieżce `dayNumber`).
 - Stany kopiowania/przenoszenia: blokuj dla `completed`/`cancelled` (edge multi-day).
 - Weekly goal limits: przy assign to weekly goal sprawdź `tasks.length < 10`.
-- Ad-hoc limit: max 10 na tydzień (przy dodaniu w Others).
+- Ad-hoc limit: max 10 zadań na dzień (przy dodaniu w każdym slocie).
 - Walidacja formularzy: tytuł wymagany, trim, max 255 (spójnie z API).
 - Pozycjonowanie: po każdej zmianie reindeksuj pozycje w danej kolumnie (1..n) i wyślij PATCH.
 - Single-field `position` strategia: użyj zakresów „blokowych” dla tygodnia i slotu:

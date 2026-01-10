@@ -1,7 +1,7 @@
 # Plan implementacji widoku edycji celów (Goal Editing View)
 
 ## 1. Przegląd
-Widok ten umożliwia użytkownikom zarządzanie celami długoterminowymi (Long-Term Goals) w ramach wybranego 12-tygodniowego planu. Użytkownik może dodawać, edytować i usuwać cele (do 5 na plan), określać ich postęp za pomocą suwaka oraz zarządzać powiązanymi kamieniami milowymi (Milestones).
+Widok ten umożliwia użytkownikom zarządzanie celami długoterminowymi (Long-Term Goals) w ramach wybranego 12-tygodniowego planu. Użytkownik może dodawać, edytować i usuwać cele (do 6 na plan), określać ich postęp za pomocą suwaka oraz zarządzać powiązanymi kamieniami milowymi (Milestones).
 
 ## 2. Routing widoku
 Ścieżka: `/src/pages/plans/[id]/goals.astro`
@@ -31,7 +31,7 @@ Hierarchia komponentów:
 
 ### `GoalsManager.tsx`
 - **Opis**: Główny komponent stanowy. Zarządza pobieraniem listy celów.
-- **Interakcje**: Dodawanie nowego celu (jeśli limit < 5).
+- **Interakcje**: Dodawanie nowego celu (jeśli limit < 6).
 - **Typy**: `PlanDTO` (partial).
 - **Props**: `planId: string`, `planStartDate: Date`, `planEndDate: Date`.
 - **Zarządzanie stanem**: Używa custom hooka `useGoals` do pobrania i zarządzania listą celów.
@@ -114,7 +114,7 @@ Rekomendowane użycie React Hooks.
     - `addGoal(data)`: POST /goals.
     - `updateGoal(id, data)`: PATCH /goals/{id}.
     - `deleteGoal(id)`: DELETE /goals/{id}.
-    - **Obsługa limitu**: Sprawdza czy `goals.length < 5` przed dodaniem.
+    - **Obsługa limitu**: Sprawdza czy `goals.length < 6` przed dodaniem.
 
 2. **`useMilestones(goalId)`**:
     - `milestones`: lista kamieni.
@@ -138,7 +138,7 @@ Wszystkie żądania powinny używać klienta Supabase lub fetch wrapper z autory
 1. **Wejście na stronę**: Ładowanie danych planu i listy celów.
 2. **Dodawanie celu**:
     - Kliknięcie "Add Goal".
-    - Jeśli limit 5 osiągnięty -> Przycisk zablokowany (disabled).
+    - Jeśli limit 6 osiągnięty -> Przycisk zablokowany (disabled).
     - Wyświetlenie formularza (modal podobny jak strona tworzenia celów w wizardzie do tworzenia planerów).
     - Zapisanie -> Odświeżenie listy.
 3. **Edycja postępu**:
@@ -159,7 +159,7 @@ Walidacja realizowana przy użyciu `zod` na frontendzie (dla formularzy) oraz sp
 
 | Warunek | Weryfikacja | Akcja UI |
 |---------|-------------|----------|
-| Max 5 celów | `goals.length >= 5` | Ukrycie/Zablokowanie przycisku "Add Goal" |
+| Max 6 celów | `goals.length >= 6` | Ukrycie/Zablokowanie przycisku "Add Goal" |
 | Max 5 kamieni | `milestones.length >= 5` | Ukrycie formularza dodawania kamieni |
 | Data kamienia | `date < planStart || date > planEnd` | Wyświetlenie błędu "Date must be within plan duration" |
 | Długość tytułu | `title.length > 255` | HTML maxlength + Zod error |
@@ -180,6 +180,6 @@ Walidacja realizowana przy użyciu `zod` na frontendzie (dla formularzy) oraz sp
 5. **Logic Hooks**: Implementacja `useGoals` i `useMilestones`.
 6. **Milestone Implementation**: Implementacja `MilestoneManager` z walidacją dat.
 7. **Integration**: Połączenie komponentów w `GoalsManager`, podpięcie hooków.
-8. **Validation & Limits**: Dodanie blokad dla limitów 5 elementów i walidacji dat.
+8. **Validation & Limits**: Dodanie blokad dla limitów 6 celów i 5 kamieni oraz walidacji dat.
 9. **UI Polish**: Dodanie styli, Slidera, Confetti, stanów Loading/Empty.
 

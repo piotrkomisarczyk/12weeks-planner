@@ -51,7 +51,7 @@ src/pages/plans/[id]/week/[weekNumber].astro (Page Wrapper)
 ### `WeeklyGoalCard`
 - **Opis:** Karta reprezentująca cel tygodniowy.
 - **Obsługiwane walidacja:**
-    - Limit 10 zadań (zablokowanie `InlineAddTask`).
+    - Limit 15 zadań przy dodawaniu zadań do celu (zablokowanie `InlineAddTask`).
 - **Obsługiwane interakcje:**
     - Edycja tytułu celu.
     - Linkowanie do Long-Term Goal/Milestone (otwiera `GoalMilestonePicker`).
@@ -188,7 +188,8 @@ Wykorzystanie custom hooka `useWeekPlan(planId, weekNumber)`:
 ## 9. Warunki i walidacja
 
 *   **Limit Celów Tygodniowych:** Max 3. Przycisk "Add Weekly Goal" wyłączony (disabled) lub ukryty, gdy `weeklyGoals.length >= 3`.
-*   **Limit Zadań:** Max 10 per lista. Input "Add task" wyłączony, gdy lista osiągnie 10 elementów.
+*   **Limit Zadań:** Max 15 per lista. Input "Add task" wyłączony, gdy lista osiągnie 15 elementów dla celu.
+*   **Limit Zadań:** Max 100 per lista Ad-hoc. Input "Add task" wyłączony, gdy lista osiągnie 100 elementów ad-hoc.
 *   **Spójność:**
     *   Subtask musi mieć te same `long_term_goal_id`/`milestone_id` co jego Weekly Goal (domyślnie dziedziczy, użytkownik NIE MOŻE ręcznie nadpisać dla zadań podlinkowanych do celu głównego / kamienia milowego).
     *   Ad-hoc domyślnie nie ma powiązań.

@@ -76,7 +76,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 - [x] **3.3.4** Create Goal - **POST** `/api/v1/goals`
   - Request body: `plan_id`, `title`, `description`, `category`, `progress_percentage`, `position`
-  - Max 5 goals per plan (enforced by database trigger)
+  - Max 6 goals per plan (enforced by database trigger)
   - Plik: `src/pages/api/v1/goals/index.ts`
   - Service: `GoalService.createGoal()`
   - Validation: `CreateGoalBodySchema`
@@ -215,7 +215,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 - [x] **3.6.4** Create Task - **POST** `/api/v1/tasks`
   - Request body: `plan_id`, `weekly_goal_id`, `milestone_id`, `title`, `description`, `priority`, `status`, `task_type`, `week_number`, `due_day`, `position`
-  - Max 10 weekly subtasks per weekly_goal, max 10 ad-hoc tasks per week (enforced by database trigger)
+  - Max 15 weekly subtasks per weekly_goal, max 100 ad-hoc tasks per week (enforced by database trigger)
   - Plik: `src/pages/api/v1/tasks/index.ts`
   - Service: `TaskService.createTask()`
   - Validation: `createTaskSchema`
@@ -500,7 +500,7 @@ Zawiera 4 główne schematy Zod:
 #### 3. API Endpoints
 **Plik:** `src/pages/api/v1/goals/index.ts` (153 linie)
 - POST /api/v1/goals
-- Obsługa: Invalid JSON, Validation errors, Plan not found, Max 5 goals constraint
+- Obsługa: Invalid JSON, Validation errors, Plan not found, Max 6 goals constraint
 - Response: 201 Created lub błędy 400/404/500
 
 **Plik:** `src/pages/api/v1/goals/[id].ts` (256 linii)
