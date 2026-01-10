@@ -33,7 +33,7 @@ interface WeeklyGoalCardProps {
   onUnassignFromWeeklyGoal: (taskId: string) => void;
 }
 
-const MAX_TASKS_PER_GOAL = 10;
+const MAX_TASKS_PER_GOAL = 15;
 
 const CATEGORY_COLORS: Record<string, string> = {
   work: 'bg-blue-500 text-white',

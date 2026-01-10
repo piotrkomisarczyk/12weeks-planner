@@ -25,7 +25,7 @@ interface AdHocSectionProps {
   onAssignToWeeklyGoal: (taskId: string, goalId: string) => void;
 }
 
-const MAX_AD_HOC_TASKS = 10;
+const MAX_AD_HOC_TASKS = 100;
 
 export function AdHocSection({
   tasks,
