@@ -6,10 +6,14 @@
 import type { SupabaseClient } from '../../db/supabase.client';
 import type { 
   GoalDTO, 
+  GoalWithMilestonesDTO,
+  MilestoneDTO,
   CreateGoalCommand,
   UpdateGoalCommand,
   LongTermGoalInsert,
-  LongTermGoalUpdate
+  LongTermGoalUpdate,
+  PaginatedResponse,
+  GoalListParams
 } from '../../types';
 import { PlanService } from './plan.service';
 
@@ -23,7 +27,7 @@ export class GoalService {
    * @param data - Dane celu (plan_id, title, description, category, progress_percentage, position)
    * @returns Promise z utworzonym celem
    * @throws Error jeśli plan nie istnieje lub nie należy do użytkownika
-   * @throws Error jeśli przekroczono limit 5 celów (constraint violation)
+   * @throws Error jeśli przekroczono limit 6 celów (constraint violation)
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    * 
    * @example
@@ -69,9 +73,9 @@ export class GoalService {
 
     // Step 4: Handle database errors
     if (error) {
-      // Check for constraint violations (max 5 goals per plan)
-      if (error.code === '23514' || error.message.includes('max_goals')) {
-        throw new Error('Maximum 5 goals per plan exceeded');
+      // Check for constraint violations (max 6 goals per plan)
+      if (error.code === '23514' || error.message.includes('max_goals') || error.message.includes('cannot add more than 6 goals')) {
+        throw new Error('Maximum 6 goals per plan exceeded');
       }
       
       // Other database errors
@@ -79,6 +83,70 @@ export class GoalService {
     }
 
     return goal;
+  }
+
+  /**
+   * Pobiera listę celów dla użytkownika z opcjonalnym filtrowaniem i paginacją
+   * 
+   * @param userId - ID użytkownika
+   * @param params - Parametry zapytania (plan_id, limit, offset)
+   * @returns Promise z paginowaną listą celów
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const result = await goalService.getGoals(userId, {
+   *   plan_id: 'uuid',
+   *   limit: 50,
+   *   offset: 0
+   * });
+   * ```
+   */
+  async getGoals(
+    userId: string,
+    params: GoalListParams
+  ): Promise<PaginatedResponse<GoalDTO>> {
+    const { plan_id, limit = 50, offset = 0 } = params;
+
+    // Build base query with JOIN to filter by user_id
+    let query = this.supabase
+      .from('long_term_goals')
+      .select(`
+        *,
+        plans!inner(user_id)
+      `, { count: 'exact' })
+      .eq('plans.user_id', userId)
+      .order('position', { ascending: true });
+
+    // Apply optional plan_id filter
+    if (plan_id) {
+      query = query.eq('plan_id', plan_id);
+    }
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    // Execute query
+    const { data, error, count } = await query;
+
+    // Handle database errors
+    if (error) {
+      throw new Error(`Failed to fetch goals: ${error.message}`);
+    }
+
+    // Remove nested plans data from results
+    const goals = (data || []).map((item: any) => {
+      const { plans, ...goal } = item;
+      return goal as GoalDTO;
+    });
+
+    // Return paginated response
+    return {
+      data: goals,
+      count: count || 0,
+      limit,
+      offset
+    };
   }
 
   /**
@@ -121,6 +189,53 @@ export class GoalService {
     }
 
     return null;
+  }
+
+  /**
+   * Pobiera cel po ID wraz z powiązanymi kamieniami milowymi
+   * Weryfikuje, że cel należy do użytkownika (przez plan_id)
+   * 
+   * @param goalId - UUID celu
+   * @param userId - ID użytkownika
+   * @returns Promise z celem i milestones lub null jeśli nie istnieje/nie należy do użytkownika
+   * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
+   * 
+   * @example
+   * ```typescript
+   * const goalWithMilestones = await goalService.getGoalWithMilestones(goalId, userId);
+   * if (!goalWithMilestones) {
+   *   // Goal not found or doesn't belong to user
+   * }
+   * ```
+   */
+  async getGoalWithMilestones(
+    goalId: string,
+    userId: string
+  ): Promise<GoalWithMilestonesDTO | null> {
+    // First get the goal
+    const goal = await this.getGoalById(goalId, userId);
+    
+    if (!goal) {
+      return null;
+    }
+
+    // Query milestones for this goal
+    const { data: milestones, error } = await this.supabase
+      .from('milestones')
+      .select('*')
+      .eq('long_term_goal_id', goalId)
+      .order('position', { ascending: true });
+
+    // Handle database errors
+    if (error) {
+      throw new Error(`Failed to fetch milestones: ${error.message}`);
+    }
+
+    // Combine goal with milestones
+    return {
+      ...goal,
+      milestones: (milestones || []) as MilestoneDTO[]
+    };
   }
 
   /**

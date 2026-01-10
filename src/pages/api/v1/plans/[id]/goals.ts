@@ -1,23 +1,41 @@
 /**
- * API Endpoints: /api/v1/plans/:id/goals
+ * API Endpoints: /api/v1/plans/:planId/goals
  * GET - Retrieves all goals for a specific plan
+ * 
+ * URL Parameters:
+ * - planId: UUID (required)
+ * 
+ * Responses:
+ * - 200: OK with goals array
+ * - 400: Invalid plan ID format
+ * - 404: Plan not found or doesn't belong to user
+ * - 500: Internal server error
  */
 
 import type { APIRoute } from 'astro';
 import { GoalService } from '../../../../../lib/services/goal.service';
 import { PlanService } from '../../../../../lib/services/plan.service';
-import { PlanIdParamsSchema } from '../../../../../lib/validation/plan.validation';
+import { PlanIdParamsSchema } from '../../../../../lib/validation/goal.validation';
 import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import type { ErrorResponse, ValidationErrorResponse, ListResponse, GoalDTO } from '../../../../../types';
+import type { 
+  ErrorResponse, 
+  ValidationErrorResponse, 
+  ListResponse, 
+  GoalDTO 
+} from '../../../../../types';
 
 export const prerender = false;
 
+/**
+ * GET /api/v1/plans/:planId/goals
+ * Retrieves all goals for a specific plan
+ */
 export const GET: APIRoute = async ({ locals, params }) => {
   try {
-    // Authentication (MVP: using default user)
+    // Step 1: Authentication - Using default user for MVP
     const userId = DEFAULT_USER_ID;
 
-    // Validate URL params
+    // Step 2: Validate URL params
     const validationResult = PlanIdParamsSchema.safeParse(params);
 
     if (!validationResult.success) {
@@ -33,9 +51,9 @@ export const GET: APIRoute = async ({ locals, params }) => {
       );
     }
 
-    const  planId  = validationResult.data.id;
+    const { planId } = validationResult.data;
 
-    // Verify plan exists and belongs to user
+    // Step 3: Verify plan exists and belongs to user
     const planService = new PlanService(locals.supabase);
     const plan = await planService.getPlanById(planId, userId);
 
@@ -46,11 +64,11 @@ export const GET: APIRoute = async ({ locals, params }) => {
       );
     }
 
-    // Get goals for plan
+    // Step 4: Get goals for plan
     const goalService = new GoalService(locals.supabase);
     const goals = await goalService.getGoalsByPlanId(planId, userId);
 
-    // Return success
+    // Step 5: Return success
     return new Response(
       JSON.stringify({ data: goals } as ListResponse<GoalDTO>),
       {
@@ -62,7 +80,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
       }
     );
   } catch (error) {
-    console.error('Error in GET /api/v1/plans/:id/goals:', error);
+    console.error('Error in GET /api/v1/plans/:planId/goals:', error);
     return new Response(
       JSON.stringify({
         error: 'Internal server error',
@@ -72,4 +90,3 @@ export const GET: APIRoute = async ({ locals, params }) => {
     );
   }
 };
-

@@ -15,7 +15,7 @@ import { z } from 'zod';
  * - description: optional string, nullable
  * - category: optional enum, nullable - work, finance, hobby, relationships, health, development
  * - progress_percentage: integer 0-100, defaults to 0
- * - position: integer 1-5, defaults to 1
+ * - position: integer 1-6, defaults to 1
  */
 export const CreateGoalBodySchema = z.object({
   plan_id: z.string().uuid({ message: 'Invalid plan ID format' }),
@@ -45,7 +45,7 @@ export const CreateGoalBodySchema = z.object({
   position: z.number()
     .int({ message: 'Position must be an integer' })
     .min(1, { message: 'Position must be at least 1' })
-    .max(5, { message: 'Position must not exceed 5' })
+    .max(6, { message: 'Position must not exceed 6' })
     .default(1)
 }).transform((data) => ({
   ...data,
@@ -83,7 +83,7 @@ export type GoalIdParams = z.infer<typeof GoalIdParamsSchema>;
  * - description: optional string, nullable
  * - category: optional enum, nullable - work, finance, hobby, relationships, health, development
  * - progress_percentage: optional integer 0-100
- * - position: optional integer 1-5
+ * - position: optional integer 1-6
  */
 export const UpdateGoalBodySchema = z.object({
   title: z.string()
@@ -116,7 +116,7 @@ export const UpdateGoalBodySchema = z.object({
   position: z.number()
     .int({ message: 'Position must be an integer' })
     .min(1, { message: 'Position must be at least 1' })
-    .max(5, { message: 'Position must not exceed 5' })
+    .max(6, { message: 'Position must not exceed 6' })
     .optional()
 }).strict(); // Reject unknown fields
 
@@ -143,6 +143,46 @@ export const validateUpdateGoalCommand = (data: unknown): UpdateGoalBody => {
   
   return parsed;
 };
+
+/**
+ * Query parameter schema for GET /api/v1/goals
+ * Validates goal list filtering and pagination parameters
+ * 
+ * Validates:
+ * - plan_id: optional UUID for filtering by plan
+ * - limit: optional number 1-100, defaults to 50
+ * - offset: optional number >= 0, defaults to 0
+ */
+export const GetGoalsQuerySchema = z.object({
+  plan_id: z.string().uuid().nullish(),
+  limit: z.string().nullish()
+    .transform((val) => val === null || val === undefined ? '50' : val)
+    .pipe(z.coerce.number().int().positive().max(100)),
+  offset: z.string().nullish()
+    .transform((val) => val === null || val === undefined ? '0' : val)
+    .pipe(z.coerce.number().int().min(0))
+}).transform((data) => ({
+  ...data,
+  plan_id: data.plan_id ?? undefined
+}));
+
+/**
+ * Inferred TypeScript type from GetGoalsQuerySchema
+ */
+export type GetGoalsQuery = z.infer<typeof GetGoalsQuerySchema>;
+
+/**
+ * URL parameter schema for GET /api/v1/plans/:planId/goals
+ * Validates UUID format for plan ID
+ */
+export const PlanIdParamsSchema = z.object({
+  planId: z.string().uuid({ message: 'Invalid plan ID format' })
+});
+
+/**
+ * Inferred TypeScript type from PlanIdParamsSchema
+ */
+export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 
 /**
  * Query parameter schema for GET /api/v1/goals/:goalId/tasks

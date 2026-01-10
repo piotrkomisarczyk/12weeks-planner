@@ -1,6 +1,7 @@
 /**
  * API Endpoints for individual goal operations
  * 
+ * GET /api/v1/goals/:id - Retrieve a specific goal with its milestones
  * PATCH /api/v1/goals/:id - Update an existing long-term goal
  * DELETE /api/v1/goals/:id - Delete a long-term goal
  */
@@ -13,7 +14,8 @@ import {
   validateUpdateGoalCommand 
 } from '../../../../lib/validation/goal.validation';
 import type { 
-  GoalDTO, 
+  GoalDTO,
+  GoalWithMilestonesDTO,
   ItemResponse, 
   ValidationErrorResponse, 
   ErrorResponse
@@ -21,6 +23,96 @@ import type {
 import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
 
 export const prerender = false;
+
+/**
+ * GET /api/v1/goals/:id
+ * Retrieves a specific goal with its milestones
+ * 
+ * Response: 200 OK with goal and milestones
+ * Errors:
+ * - 400 Bad Request: Invalid UUID
+ * - 404 Not Found: Goal doesn't exist or doesn't belong to user
+ * - 500 Internal Server Error: Unexpected errors
+ */
+export const GET: APIRoute = async ({ params, locals }) => {
+  try {
+    // 1. Use DEFAULT_USER_ID for now (authentication will be added later)
+    const userId = DEFAULT_USER_ID;
+
+    // 2. Validate goal ID from URL parameter
+    let goalId: string;
+    try {
+      const validatedParams = GoalIdParamsSchema.parse(params);
+      goalId = validatedParams.id;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const validationError: ValidationErrorResponse = {
+          error: 'Validation failed',
+          details: error.errors.map(err => ({
+            field: 'id',
+            message: err.message
+          }))
+        };
+        return new Response(JSON.stringify(validationError), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      throw error;
+    }
+
+    // 3. Get Supabase client from context
+    const supabase = locals.supabase;
+    
+    if (!supabase) {
+      throw new Error('Supabase client not available in context');
+    }
+
+    // 4. Get goal with milestones via service
+    const goalService = new GoalService(supabase);
+    const goal = await goalService.getGoalWithMilestones(goalId, userId);
+
+    // 5. Handle not found
+    if (!goal) {
+      const errorResponse: ErrorResponse = {
+        error: 'Not found',
+        message: 'Goal not found'
+      };
+      return new Response(JSON.stringify(errorResponse), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 6. Return success response
+    const response: ItemResponse<GoalWithMilestonesDTO> = {
+      data: goal
+    };
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Content-Type-Options': 'nosniff'
+      }
+    });
+
+  } catch (error) {
+    // Log error for debugging
+    console.error('Error in GET /api/v1/goals/:id:', error);
+
+    // Return generic error response
+    const errorResponse: ErrorResponse = {
+      error: 'Internal server error',
+      message: 'An unexpected error occurred'
+    };
+
+    return new Response(JSON.stringify(errorResponse), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+};
 
 /**
  * PATCH /api/v1/goals/:id

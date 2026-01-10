@@ -170,7 +170,7 @@ Content-Type: application/json
   "position": 0
 }
 
-### POST /api/v1/goals - Error: Position out of range (>5)
+### POST /api/v1/goals - Error: Position out of range (>6)
 # Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/goals
 Content-Type: application/json
@@ -227,10 +227,10 @@ Content-Type: application/json
 }
 
 ### ============================================================================
-### CONSTRAINT TESTS - Maximum 5 goals per plan
+### CONSTRAINT TESTS - Maximum 6 goals per plan
 ### ============================================================================
 
-### Create 5 goals to test constraint (use a fresh plan)
+### Create 6 goals to test constraint (use a fresh plan)
 ### NOTE: Replace {{planId}} with a plan that has 0 goals
 
 ### Goal 1
@@ -288,14 +288,25 @@ Content-Type: application/json
   "position": 5
 }
 
-### Goal 6 - Should fail with max 5 goals constraint
+### Goal 6
+# Expected: 201 Created
+POST {{baseUrl}}/api/v1/goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "title": "Goal 6",
+  "position": 6
+}
+
+### Goal 7 - Should fail with max 6 goals constraint
 # Expected: 400 Bad Request
 POST {{baseUrl}}/api/v1/goals
 Content-Type: application/json
 
 {
   "plan_id": "{{planId}}",
-  "title": "Goal 6 - This should fail",
+  "title": "Goal 7 - This should fail",
   "position": 1
 }
 
@@ -336,15 +347,15 @@ Content-Type: application/json
   "position": 1
 }
 
-### POST /api/v1/goals - Boundary: Position 5
+### POST /api/v1/goals - Boundary: Position 6
 # Expected: 201 Created
 POST {{baseUrl}}/api/v1/goals
 Content-Type: application/json
 
 {
   "plan_id": "{{planId}}",
-  "title": "Goal at position 5",
-  "position": 5
+  "title": "Goal at position 6",
+  "position": 6
 }
 
 ### POST /api/v1/goals - Boundary: Title exactly 255 characters
