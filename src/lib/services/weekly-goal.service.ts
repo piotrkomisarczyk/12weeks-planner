@@ -148,6 +148,11 @@ export class WeeklyGoalService {
 
     // Step 6: Handle database errors
     if (error) {
+      // Check for constraint violations (max 3 weekly goals per week)
+      if (error.message.includes('cannot add more than 3 weekly goals')) {
+        throw new Error('Cannot add more than 3 weekly goals per week');
+      }
+      
       throw new Error(`Failed to create weekly goal: ${error.message}`);
     }
 

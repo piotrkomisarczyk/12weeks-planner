@@ -594,13 +594,13 @@ Content-Type: application/json
 ### Should return empty array
 
 ### ============================================================================
-### MULTIPLE WEEKLY GOALS PER WEEK TEST
+### MULTIPLE WEEKLY GOALS PER WEEK TEST (MAX 3 LIMIT)
 ### ============================================================================
 
-### NOTE: Unlike milestones (max 5 per goal), there is no hard limit on weekly goals
-### Multiple weekly goals can exist for the same week in the same plan
+### NOTE: Maximum 3 weekly goals per week per plan (enforced by database trigger)
+### This limit encourages focus on key priorities each week
 
-### Create multiple goals for week 5
+### Create first goal for week 5
 POST {{baseUrl}}/api/v1/weekly-goals
 Content-Type: application/json
 
@@ -611,7 +611,7 @@ Content-Type: application/json
   "position": 1
 }
 
-### Second goal for week 5
+### Create second goal for week 5
 POST {{baseUrl}}/api/v1/weekly-goals
 Content-Type: application/json
 
@@ -622,7 +622,7 @@ Content-Type: application/json
   "position": 2
 }
 
-### Third goal for week 5
+### Create third goal for week 5 (should succeed - at limit)
 POST {{baseUrl}}/api/v1/weekly-goals
 Content-Type: application/json
 
@@ -633,7 +633,19 @@ Content-Type: application/json
   "position": 3
 }
 
-### List all goals for week 5
+### Create fourth goal for week 5 (should FAIL - exceeds limit)
+### Expected: 400 Bad Request - Cannot add more than 3 weekly goals per week
+POST {{baseUrl}}/api/v1/weekly-goals
+Content-Type: application/json
+
+{
+  "plan_id": "{{planId}}",
+  "week_number": 5,
+  "title": "Fourth goal for week 5 - should fail",
+  "position": 4
+}
+
+### List all goals for week 5 (should show exactly 3 goals)
 GET {{baseUrl}}/api/v1/weekly-goals?plan_id={{planId}}&week_number=5
 
 ### ============================================================================

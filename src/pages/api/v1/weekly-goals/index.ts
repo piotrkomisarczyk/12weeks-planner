@@ -297,6 +297,20 @@ export const POST: APIRoute = async ({ locals, request }) => {
         );
       }
       
+      // Maximum weekly goals per week exceeded
+      if (errorMessage.includes('Cannot add more than 3 weekly goals')) {
+        return new Response(
+          JSON.stringify({
+            error: 'Validation failed',
+            message: 'Cannot add more than 3 weekly goals per week'
+          } as ErrorResponse),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+      
       // Re-throw for general error handler
       throw serviceError;
     }
