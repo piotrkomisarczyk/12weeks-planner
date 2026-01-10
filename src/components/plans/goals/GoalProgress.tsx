@@ -87,10 +87,10 @@ export function GoalProgress({ progress, onChange, disabled = false }: GoalProgr
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Debounced update to parent (1000ms)
+    // Debounced update to parent (500ms)
     debounceTimerRef.current = setTimeout(() => {
       onChange(newProgress);
-    }, 1000);
+    }, 500);
   }, [onChange, hasShownConfetti, triggerConfetti]);
 
   return (

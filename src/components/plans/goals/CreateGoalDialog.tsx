@@ -63,7 +63,7 @@ export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: 
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const canAddGoal = currentGoalsCount < 5;
+  const canAddGoal = currentGoalsCount < 6;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +123,7 @@ export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: 
         <DialogHeader>
           <DialogTitle>Add New Goal</DialogTitle>
           <DialogDescription>
-            Create a new long-term goal for your 12-week plan. You can add up to 5 goals.
+            Create a new long-term goal for your 12-week plan. You can add up to 6 goals.
           </DialogDescription>
         </DialogHeader>
 

@@ -60,8 +60,8 @@ export function useGoals(planId: string): UseGoalsReturn {
     error: null,
   });
 
-  // Check if user can add more goals (max 5)
-  const canAddGoal = state.goals.length < 5;
+  // Check if user can add more goals (max 6)
+  const canAddGoal = state.goals.length < 6;
 
   // Fetch all goals for the plan
   const fetchGoals = useCallback(async () => {
@@ -93,7 +93,7 @@ export function useGoals(planId: string): UseGoalsReturn {
     async (data: Omit<CreateGoalCommand, 'plan_id'>): Promise<GoalDTO> => {
       // Check limit before API call
       if (!canAddGoal) {
-        throw new Error('Maximum 5 goals per plan exceeded');
+        throw new Error('Maximum 6 goals per plan exceeded');
       }
 
       setState((prev) => ({ ...prev, isLoading: true, error: null }));

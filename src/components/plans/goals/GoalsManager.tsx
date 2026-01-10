@@ -134,7 +134,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
           <div>
             <h2 className="text-xl font-semibold">Long-Term Goals</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {goals.length} of 5 goals created
+              {goals.length} of 6 goals created
             </p>
           </div>
           
@@ -171,7 +171,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
         {/* Max Goals Message */}
         {!canAddGoal && goals.length > 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">
-            Maximum of 5 goals reached. Delete a goal to add another.
+            Maximum of 6 goals reached. Delete a goal to add another.
           </p>
         )}
       </div>
