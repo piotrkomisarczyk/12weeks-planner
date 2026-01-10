@@ -15,7 +15,7 @@
 import type { APIRoute } from 'astro';
 import { GoalService } from '../../../../../lib/services/goal.service';
 import { PlanService } from '../../../../../lib/services/plan.service';
-import { PlanIdParamsSchema } from '../../../../../lib/validation/goal.validation';
+import { PlanIdParamsSchema } from '../../../../../lib/validation/plan.validation';
 import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
 import type { 
   ErrorResponse, 
@@ -51,7 +51,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
       );
     }
 
-    const { planId } = validationResult.data;
+    const { id: planId } = validationResult.data;
 
     // Step 3: Verify plan exists and belongs to user
     const planService = new PlanService(locals.supabase);
