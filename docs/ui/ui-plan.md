@@ -71,16 +71,26 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
 *   **Cel:** Wizualizacja pełnej struktury celów, kamieni milowych i zadań z elastyczną hierarchią.
 *   **Kluczowe informacje:** 
     *   Drzewo hierarchiczne z możliwością expand/collapse dla każdego poziomu:
-        *   **Long-term Goals** (cel główny)
+    *   **Root** nazwa planera
+        *   **Long-term Goals** (cele główne)
             *   **Milestones** (kamienie milowe celu)
                 *   **Weekly Goals** (cele tygodniowe powiązane z celem głównym oraz z kamieniem milowym)
-                    *   **Subtasks** (podzadania celu tygodniowego powiązanego z kamieniem milowym)
-                *   **Tasks** (zadania powiązane z milestone oraz z celem głównym)
-            *   **Tasks** (zadania powiązane bezpośrednio z celem, bez milestone)
-            *   **Weekly Goals** (cele tygodniowe powiązane z celem głównym)
-                *   **Subtasks** (podzadania celu tygodniowego)
-        *   **Ad-hoc Tasks** (sekcja osobna dla zadań bez powiązań z celami ani kamieniami milowymi)
-    *   Checkbox "Show completed" (domyślnie ukryte zadania i milestones ze statusem completed/cancelled).
+                    *   **Weekly tasks** (podzadania celu tygodniowego powiązanego z kamieniem milowym)
+                *   **Milestone Tasks** (zadania powiązane z milestone oraz z celem głównym, ale niepowiązane z celem tygodniowym)
+            *   **Weekly Goals** (cele tygodniowe powiązane z celem głównym i niepowiązane z kamieniem milowym)
+                *   **Weekly tasks** (podzadania celu tygodniowego, powiązane z celem głównym i niepowiązane z kamieniem milowym)
+            *   **Tasks** (zadania powiązane bezpośrednio z celem głównym, bez milestone i bez celu tygodniowego)
+        *   **Weekly Goals** (cele tygodniowe niepowiązane z celem głównym i niepowiązane z kamieniem milowym)
+            *   **Weekly tasks** (podzadania celu tygodniowego niepowiązane z celem głównym i niepowiązane z kamieniem milowym)
+        *   **Other Tasks** (sekcja osobna dla zadań bez powiązań z celami długoterminowymi ani kamieniami milowymi ani celami tygodniowymi)
+    *   Zadania w sekcjach **Tasks**,  **Weekly tasks**, oraz **Other Tasks** pokazuj w następujący sposób (Przykład dla **Tasks**):
+        *   **Tasks**
+            *   **Week <number>**
+                *   **Monday**
+                    *  **status icon** **Task 1 title**
+    *   2-stanowy przełącznik nad hierarchią "Show all / uncompleted" (domyślnie ukryte zadania i milestones ze statusem completed/cancelled - przycisk w stanie "Show uncompleted").
+    *   2-stanowy przełącznik nad hierarchią "Show current week / all weeks" (domyślnie ustawiony na Show current week - pokazuje hierarchię zadań powiązanych z bieżącym tygodniem)
+    *   
 *   **Komponenty:** 
     *   `HierarchyTree` (komponent drzewa z expand/collapse, lazy loading dla dużych struktur).
     *   `HierarchyNode` (węzeł drzewa: goal, milestone, weekly goal, task).
