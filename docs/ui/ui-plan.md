@@ -88,8 +88,6 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
             *   **Week <number>**
                 *   **Monday**
                     *  **status icon** **Task 1 title**
-    *   2-stanowy przełącznik nad hierarchią "Show all / uncompleted" (domyślnie ukryte zadania i milestones ze statusem completed/cancelled - przycisk w stanie "Show uncompleted").
-    *   2-stanowy przełącznik nad hierarchią "Show current week / all weeks" (domyślnie ustawiony na Show current week - pokazuje hierarchię zadań powiązanych z bieżącym tygodniem)
     *   
 *   **Komponenty:** 
     *   `HierarchyTree` (komponent drzewa z expand/collapse, lazy loading dla dużych struktur).
@@ -98,15 +96,17 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
     *   `ProgressBadge` (badge z procentem postępu dla celów).
     *   `MilestoneCompletionIcon` (checkbox/checkmark dla milestones).
 *   **UX:** 
-    *   Domyślnie zwinięte elementy zakończone (controlled przez checkbox "Show completed").
+    *   2-stanowy przełącznik nad hierarchią "Show all / uncompleted" (domyślnie ukryte zadania i milestones ze statusem completed/cancelled - przycisk w stanie "Show uncompleted").
+    *   2-stanowy przełącznik nad hierarchią "Show current week / all weeks" (domyślnie ustawiony na Show current week - pokazuje hierarchię zadań powiązanych z bieżącym tygodniem)
     *   Kliknięcie na nazwę węzła:
         *   Goal -> otwiera widok Goals.
         *   Milestone -> otwiera widok Goals z focus na tym milestone.
         *   Weekly Goal -> przenosi do widoku Tygodnia (week_number z weekly goal).
-        *   Task -> przenosi do widoku Dnia (due_day i week_number z task), otwiera TaskSheet dla tego zadania.
+        *   Task -> przenosi do widoku Dnia (due_day i week_number z task)
     *   Ikona expand/collapse (chevron) obok każdego węzła z children.
-    *   Sekcja "Ad-hoc Tasks" zawsze na dole drzewa, osobno od hierarchii celów.
-    *   Wyróżnienie kolorystyczne dla węzłów z różnymi statusami (completed: zielony, cancelled: granatowy/przekreślony, in progress - niebieski, to do - czarny).
+    *   Sekcja "Other Tasks" zawsze na dole drzewa, osobno od hierarchii celów.
+    *   Pokazuj obok każdego zadania ikonę stanu
+    *   Wyróżnienie kolorystyczne dla węzłów z różnymi statusami (completed: ciemnozielony, cancelled: szary/przekreślony, in progress - niebieski, to do - czarny, postponed - brązowy).
 *   **Dostępność:**
     *   ARIA tree role dla struktury drzewa.
     *   Keyboard navigation: strzałki do nawigacji, Spacja do expand/collapse, Enter do otwarcia widoku.
