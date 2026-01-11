@@ -209,13 +209,12 @@ Kryteria akceptacji:
 - Edge case: podsumowanie dla przeszłego tygodnia edytowalne.
 
 ### US-010
-Tytuł: Wizualizacja hierarchii na dashboardzie  
-Opis: Jako użytkownik, chcę widzieć drzewo hierarchii, aby łatwo nawigować po zadaniach. Jest to widok domyślny na dashboardzie.
+Tytuł: Wizualizacja hierarchii  
+Opis: Jako użytkownik, chcę widzieć drzewo hierarchii zadań tylko do odczytu, aby łatwo nawigować po zadaniach. Jest to widok dodatkowy dostępny z menu górnego.
 Kryteria akceptacji:  
 - Drzewo jak katalogi z expand/collapse.
 - Kliknięcie na celu prowadzi do widoku celów
-- Kliknięcie na zadania prowadzi do ostatniego dnia w którym to zadanie było realizowane.
-- Pokazuje postępy celów.
+- Kliknięcie na zadania prowadzi do dnia w którym to zadanie było realizowane.
 - Responsywne na desktopie.
 - Edge case: pusty planer – placeholder.
 
