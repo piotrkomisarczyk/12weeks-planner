@@ -812,3 +812,23 @@ export interface DayCopyMovePayload {
   targetDayNumber?: number | null;
 }
 
+// ============================================================================
+// WEEKLY REVIEW VIEW MODELS (Frontend-specific types for Weekly Review)
+// ============================================================================
+
+/**
+ * Weekly Review ViewModel - extends WeeklyReviewDTO with UI-specific fields
+ * Supports lazy creation (id can be null if review doesn't exist yet)
+ */
+export interface WeeklyReviewViewModel extends Omit<WeeklyReviewDTO, 'id'> {
+  id: string | null; // Null if review doesn't exist in database yet
+  isSaving: boolean;
+  lastSavedAt: Date | null;
+}
+
+/**
+ * Goal Review ViewModel - extends GoalDTO with UI-specific fields for progress updates
+ */
+export interface GoalReviewViewModel extends GoalDTO {
+  isUpdating: boolean; // Whether progress update is in progress
+}

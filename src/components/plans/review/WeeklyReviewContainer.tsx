@@ -1,0 +1,107 @@
+/**
+ * Weekly Review Container
+ * Main container component managing state and business logic for weekly review functionality
+ */
+
+import type {
+  WeeklyReviewViewModel,
+  GoalReviewViewModel
+} from '../../../types';
+import { useWeeklyReview } from './hooks/useWeeklyReview';
+import ReviewHeader from './ReviewHeader';
+import GoalProgressList from './GoalProgressList';
+import ReflectionForm from './ReflectionForm';
+import ReviewCompletionStatus from './ReviewCompletionStatus';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../../ui/accordion';
+
+interface WeeklyReviewContainerProps {
+  planId: string;
+  weekNumber: number;
+  initialReview: WeeklyReviewViewModel;
+  initialGoals: GoalReviewViewModel[];
+}
+
+export default function WeeklyReviewContainer({
+  planId,
+  weekNumber,
+  initialReview,
+  initialGoals
+}: WeeklyReviewContainerProps) {
+  // Use custom hook for state management and business logic
+  const {
+    review,
+    goals,
+    error,
+    updateReflection,
+    updateGoalProgress,
+    toggleCompletion
+  } = useWeeklyReview({
+    planId,
+    weekNumber,
+    initialReview,
+    initialGoals
+  });
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  return (
+    <div className="space-y-6">
+      {/* Header with navigation */}
+      <ReviewHeader
+        planId={planId}
+        weekNumber={weekNumber}
+      />
+
+      {/* Goal Progress Section */}
+      <Accordion type="single" collapsible defaultValue="goal-progress" className="bg-white rounded-lg border">
+        <AccordionItem value="goal-progress">
+          <AccordionTrigger className="px-6 py-4 hover:no-underline">
+            <h2 className="text-xl font-semibold">Goal Progress</h2>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 pb-4">
+            <GoalProgressList
+              goals={goals}
+              onProgressUpdate={updateGoalProgress}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {/* Reflection Form */}
+      <Accordion type="single" collapsible defaultValue="weekly-reflection" className="bg-white rounded-lg border">
+        <AccordionItem value="weekly-reflection">
+          <AccordionTrigger className="px-6 py-4 hover:no-underline">
+            <h2 className="text-xl font-semibold">Weekly Reflection</h2>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 pb-4">
+            <ReflectionForm
+              values={review}
+              onChange={updateReflection}
+              isSaving={review.isSaving}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {/* Completion Status */}
+      <ReviewCompletionStatus
+        isCompleted={review.is_completed}
+        onToggleComplete={toggleCompletion}
+      />
+
+      {/* Error display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+    </div>
+  );
+}
