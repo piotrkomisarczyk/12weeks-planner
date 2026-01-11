@@ -286,11 +286,12 @@ Archive a plan (soft delete). This sets the plan status to 'archived' without pe
 
 **GET** `/api/v1/plans/:id/dashboard`
 
-Get aggregated dashboard data for a plan including goals, milestones, weekly goals, tasks, and progress with full hierarchical relationships.
+Get comprehensive data for a plan to populate the Dashboard and Hierarchy views. This endpoint returns a normalized structure (flat arrays) of all plan entities, optimized for client-side tree construction and filtering.
 
 **Query Parameters:**
-- `include_tasks` (optional): Include task summaries (default: false)
-- `current_week_only` (optional): Only include current week data (default: false)
+- `week_view` (optional): Filter scope for time-based entities. Values: `current` (default), `all`.
+- `status_view` (optional): Filter scope for completion status. Values: `active` (excludes completed/cancelled items), `all` (default).
+- `week_number` (optional): Specific week number to focus on if `week_view=current` (defaults to plan's calculated current week).
 
 **Response** `200 OK`:
 ```json
@@ -310,21 +311,17 @@ Get aggregated dashboard data for a plan including goals, milestones, weekly goa
         "description": "Important for career growth",
         "category": "work",
         "progress_percentage": 45,
+        "position": 1
+      }
+    ],
+    "milestones": [
+      {
+        "id": "uuid",
+        "long_term_goal_id": "uuid",
+        "title": "Complete API design",
+        "is_completed": true,
         "position": 1,
-        "milestones": [
-          {
-            "id": "uuid",
-            "title": "Complete API design",
-            "description": "",
-            "due_date": "2025-01-20",
-            "is_completed": true,
-            "position": 1,
-            "weekly_goals_count": 2,
-            "tasks_count": 5
-          }
-        ],
-        "weekly_goals_count": 3,
-        "tasks_count": 12
+        "due_date": "2025-01-20"
       }
     ],
     "weekly_goals": [
@@ -334,38 +331,49 @@ Get aggregated dashboard data for a plan including goals, milestones, weekly goa
         "title": "Complete authentication system",
         "long_term_goal_id": "uuid",
         "milestone_id": "uuid",
-        "tasks_count": 4,
-        "completed_tasks": 2
+        "position": 1
       }
     ],
-    "ad_hoc_tasks": [
+    "tasks": [
       {
         "id": "uuid",
+        "weekly_goal_id": "uuid",
+        "long_term_goal_id": "uuid",
+        "milestone_id": "uuid",
+        "title": "Setup Supabase client",
+        "priority": "A",
+        "status": "completed",
+        "task_type": "weekly_sub",
         "week_number": 3,
-        "title": "Review code",
-        "priority": "C",
-        "status": "todo"
+        "due_day": 1,
+        "position": 1
       }
     ],
-    "progress_summary": {
+    "metrics": {
       "total_goals": 3,
       "completed_goals": 0,
-      "average_progress": 28.33,
-      "total_milestones": 8,
-      "completed_milestones": 3,
-      "total_tasks": 47,
-      "completed_tasks": 23
+      "total_tasks": 45,
+      "completed_tasks": 20
     }
   }
 }
 ```
 
+**Business Logic & Filtering:**
+1.  **Normalized Response**: Returns flat arrays for all entities. This allows the frontend to reconstruct the complex hierarchy (Goal -> Milestone -> WeeklyGoal -> Task, etc.) defined in the UI requirements without the API imposing a fixed nesting structure.
+2.  **`week_view=current` Logic**:
+    -   **Tasks**: Returns only tasks where `week_number` matches the target week.
+    -   **Weekly Goals**: Returns only weekly goals where `week_number` matches the target week.
+    -   **Goals/Milestones**: Always returned (structural parents) .
+3.  **`status_view=active` Logic**:
+    -   **Goals**: Excludes goals with `progress_percentage = 100`.
+    -   **Milestones**: Excludes milestones with `is_completed = true`.
+    -   **Tasks**: Excludes tasks with status `completed` or `cancelled`.
+    -   **Weekly Goals**: Returned regardless of completion (as they don't have a status field).
+
 **Notes:**
-- Provides a comprehensive view of plan hierarchy with relationship counts
-- Shows how weekly goals and tasks connect to goals and milestones
-- Ad-hoc tasks (those without goal/milestone associations) are listed separately
-- Use `include_tasks` parameter to get detailed task lists (increases response size)
-- Use `current_week_only` for focused dashboard on current week's work
+- This endpoint is designed to reduce the number of HTTP requests ("waterfall") when loading the main plan view.
+- Provides all necessary Foreign Keys (`long_term_goal_id`, `milestone_id`, `weekly_goal_id`) in the `tasks` and `weekly_goals` arrays to allow precise mapping in the Hierarchy Tree.
 
 **Error Responses:**
 - `404 Not Found`: Plan not found
