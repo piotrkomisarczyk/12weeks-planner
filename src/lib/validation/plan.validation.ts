@@ -127,3 +127,28 @@ export const PlanIdParamsSchema = z.object({
  */
 export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 
+/**
+ * Query parameters schema for GET /api/v1/plans/:id/dashboard
+ *
+ * Validates:
+ * - week_view: must be 'current' or 'all' (optional, defaults to 'current')
+ * - status_view: must be 'active' or 'all' (optional, defaults to 'all')
+ * - week_number: integer 1-12 (optional, only used when week_view='current')
+ */
+export const GetDashboardQuerySchema = z.object({
+  week_view: z.enum(['current', 'all']).nullish()
+    .transform((val) => val === null || val === undefined ? 'current' : val),
+  status_view: z.enum(['active', 'all']).nullish()
+    .transform((val) => val === null || val === undefined ? 'all' : val),
+  week_number: z.string().nullish()
+    .transform((val) => val === null || val === undefined ? undefined : val)
+    .pipe(z.coerce.number().int().min(1).max(12).optional())
+}).transform((data) => ({
+  ...data,
+  week_number: data.week_number ?? undefined
+}));
+
+/**
+ * Inferred TypeScript type from GetDashboardQuerySchema
+ */
+export type GetDashboardQuery = z.infer<typeof GetDashboardQuerySchema>;

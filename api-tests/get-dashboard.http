@@ -1,0 +1,112 @@
+###
+# API Tests for Dashboard Endpoint
+# Test suite for GET /api/v1/plans/:id/dashboard
+###
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+@validPlanId = f5bce676-807c-449e-9c42-a28c160a2424
+
+################################################################################
+### GET /api/v1/plans/:id/dashboard - Get plan dashboard data
+################################################################################
+
+###
+# Test 1: Get full dashboard (default filters: week_view=current, status_view=all)
+# Expected: 200 OK with plan, goals, milestones, weekly_goals, tasks, metrics
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard
+Content-Type: {{contentType}}
+
+✅ Passed - returns complete dashboard data with 3 goals, 5 milestones, 3 weekly goals, 1 task
+
+###
+# Test 2: Get dashboard with current week only
+# Expected: 200 OK with only data for current week
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_view=current
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 3: Get dashboard with specific week number
+# Expected: 200 OK with only data for week 5
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_view=current&week_number=5
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 4: Get dashboard with active status filter only
+# Expected: 200 OK with only active goals/milestones/tasks
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?status_view=active
+Content-Type: {{contentType}}
+
+✅ Passed - shows only 2 incomplete milestones (filtered from 5 total)
+
+###
+# Test 5: Get dashboard with all weeks and all statuses
+# Expected: 200 OK with all data (no filtering)
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_view=all&status_view=all
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 6: Get dashboard with current week and active status
+# Expected: 200 OK with current week data and only active items
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_view=current&status_view=active
+Content-Type: {{contentType}}
+
+✅ Passed
+
+################################################################################
+### Error Cases
+################################################################################
+
+###
+# Test 7: Invalid plan ID format
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/invalid-uuid/dashboard
+Content-Type: {{contentType}}
+
+✅ Passed - returns "Validation failed" error
+
+###
+# Test 8: Plan not found
+# Expected: 404 Not Found
+GET {{baseUrl}}/api/v1/plans/99999999-9999-9999-9999-999999999999/dashboard
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 9: Invalid week_number parameter (too high)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_number=13
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 10: Invalid week_number parameter (too low)
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_number=0
+Content-Type: {{contentType}}
+
+✅ Passed - returns "Validation failed" error
+
+###
+# Test 11: Invalid week_view parameter
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?week_view=invalid
+Content-Type: {{contentType}}
+
+✅ Passed
+
+###
+# Test 12: Invalid status_view parameter
+# Expected: 400 Bad Request with validation error
+GET {{baseUrl}}/api/v1/plans/{{validPlanId}}/dashboard?status_view=invalid
+Content-Type: {{contentType}}
+
+✅ Passed

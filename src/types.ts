@@ -124,6 +124,38 @@ export interface PlanDashboardDTO {
   };
 }
 
+/**
+ * Dashboard Metrics - aggregated counts for dashboard overview
+ */
+export interface DashboardMetrics {
+  total_goals: number;
+  completed_goals: number;
+  total_tasks: number;
+  completed_tasks: number;
+}
+
+/**
+ * Plan Dashboard Response - GET /api/v1/plans/:id/dashboard
+ * Flat structure with plan, goals, milestones, weekly goals, tasks, and metrics
+ */
+export interface PlanDashboardResponse {
+  plan: PlanDTO;
+  goals: GoalDTO[];
+  milestones: MilestoneDTO[];
+  weekly_goals: WeeklyGoalDTO[];
+  tasks: TaskDTO[];
+  metrics: DashboardMetrics;
+}
+
+/**
+ * Dashboard Options - configuration for dashboard data filtering
+ */
+export interface DashboardOptions {
+  weekView?: 'current' | 'all';
+  statusView?: 'active' | 'all';
+  weekNumber?: number;
+}
+
 // ============================================================================
 // GOAL (LONG-TERM GOAL) DTOs
 // ============================================================================
