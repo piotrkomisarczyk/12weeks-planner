@@ -60,15 +60,13 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
 ### 2.3. Kontekst Planera
 *Dostępne dla ścieżek `/plans/[id]/*` oraz aliasu `/active/*`.*
 
-#### 2.3.1. Dashboard Planera
+#### 2.3.1. Dashboard Planera razem z Hierarchią (Tree View)
 *   **Ścieżka:** `/plans/[id]/dashboard` (lub `/active`)
-*   **Cel:** "Perspektywa z lotu ptaka" - szybki dostęp do bieżących akcji i podgląd postępów.
-*   **Kluczowe informacje:** Quick Links (Current Week, Today), Goals Overview (lista celów z postępem), info o bieżącym tygodniu.
-*   **Komponenty:** `QuickActionsPanel`, `GoalsOverviewList` (tytuł + progress bar), `WeeklyReviewReminder` (jeśli niedziela).
+*   **Cel:** "Perspektywa z lotu ptaka" - szybki dostęp do bieżących akcji i podgląd postępów. Wizualizacja pełnej struktury celów, kamieni milowych i zadań z elastyczną hierarchią.
+*   **Kluczowe informacje:** Quick Links (Current Week, Today), Goals Overview (lista celów z postępem readonly, dostępna w accordion), info o bieżącym tygodniu. Hierarchia opisana poniżej, dostępna w accordion.
+*   **Komponenty:** `QuickActionsPanel`, `GoalsOverviewList` (tytuł + progress bar), `WeeklyReviewReminder` (jeśli niedziela), .
 
-#### 2.3.2. Hierarchia (Tree View)
-*   **Ścieżka:** `/plans/[id]/hierarchy`
-*   **Cel:** Wizualizacja pełnej struktury celów, kamieni milowych i zadań z elastyczną hierarchią.
+##### 2.3.1.1 Hierarchia dostępna z widoku Dashboard pod goals overview
 *   **Kluczowe informacje:** 
     *   Drzewo hierarchiczne z możliwością expand/collapse dla każdego poziomu:
     *   **Root** nazwa planera
