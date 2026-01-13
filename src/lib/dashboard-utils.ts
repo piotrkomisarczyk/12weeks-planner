@@ -73,16 +73,35 @@ export function buildHierarchyTree(
   });
 
   // Helper function to determine if an item should be included based on filters
-  const shouldInclude = (status?: string, weekNumber?: number | null): boolean => {
+  const shouldInclude = (
+    status?: string | boolean,
+    weekNumber?: number | null,
+    itemType?: 'goal' | 'milestone' | 'task' | 'weekly_goal'
+  ): boolean => {
     // Filter by completion status
     if (!showCompleted) {
-      if (status === 'completed' || status === 'cancelled') {
-        return false;
+      // For goals: only hide if progress is 100% (checked by caller)
+      // For milestones: only hide if is_completed is true (boolean)
+      // For tasks: only hide if status is 'completed' or 'cancelled'
+      // For weekly_goals: never hide based on completion (they don't have completion status)
+      
+      if (itemType === 'milestone') {
+        // For milestones, status is a boolean (is_completed)
+        if (typeof status === 'boolean' && status === true) {
+          return false;
+        }
+      } else if (itemType === 'task') {
+        // For tasks, check task status
+        if (status === 'completed' || status === 'cancelled') {
+          return false;
+        }
+      } else if (itemType === 'goal') {
+        // For goals, status will be 'completed' only if progress is 100%
+        if (status === 'completed') {
+          return false;
+        }
       }
-      if (typeof status === 'boolean' && status === true) {
-        // For milestones, boolean status indicates completion
-        return false;
-      }
+      // weekly_goal items are never filtered by completion
     }
 
     // Filter by week
@@ -152,7 +171,7 @@ export function buildHierarchyTree(
 
   // 2. Process goals and their children
   for (const goal of data.goals) {
-    if (!shouldInclude(goal.progress_percentage === 100 ? 'completed' : 'todo')) {
+    if (!shouldInclude(goal.progress_percentage === 100 ? 'completed' : 'in_progress', undefined, 'goal')) {
       continue;
     }
 
@@ -173,7 +192,7 @@ export function buildHierarchyTree(
     // Find milestones for this goal
     const goalMilestones = data.milestones.filter((m: any) => m.long_term_goal_id === goal.id);
     for (const milestone of goalMilestones) {
-      if (!shouldInclude(milestone.is_completed ? 'completed' : 'todo')) {
+      if (!shouldInclude(milestone.is_completed, undefined, 'milestone')) {
         continue;
       }
 
@@ -196,7 +215,7 @@ export function buildHierarchyTree(
         (wg: any) => wg.milestone_id === milestone.id
       );
       for (const weeklyGoal of milestoneWeeklyGoals) {
-        if (!shouldInclude('todo', weeklyGoal.week_number)) {
+        if (!shouldInclude(undefined, weeklyGoal.week_number, 'weekly_goal')) {
           continue;
         }
 
@@ -219,7 +238,7 @@ export function buildHierarchyTree(
           (t: any) => t.weekly_goal_id === weeklyGoal.id
         );
         for (const task of weeklyGoalTasks) {
-          if (!shouldInclude(getTaskStatus(task), task.week_number)) {
+          if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
             continue;
           }
 
@@ -240,9 +259,8 @@ export function buildHierarchyTree(
           weeklyGoalNode.children.push(taskNode);
         }
 
-        if (weeklyGoalNode.children.length > 0 || showCompleted) {
-          milestoneNode.children.push(weeklyGoalNode);
-        }
+        // Always add weekly goals if they pass the week filter, regardless of children
+        milestoneNode.children.push(weeklyGoalNode);
       }
 
       // Add tasks directly under milestone (without weekly goal)
@@ -250,7 +268,7 @@ export function buildHierarchyTree(
         (t: any) => t.milestone_id === milestone.id && !t.weekly_goal_id
       );
       for (const task of milestoneTasks) {
-        if (!shouldInclude(getTaskStatus(task), task.week_number)) {
+        if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
           continue;
         }
 
@@ -271,9 +289,8 @@ export function buildHierarchyTree(
         milestoneNode.children.push(taskNode);
       }
 
-      if (milestoneNode.children.length > 0 || showCompleted) {
-        goalNode.children.push(milestoneNode);
-      }
+      // Always add milestones if they pass the filter, regardless of children
+      goalNode.children.push(milestoneNode);
     }
 
     // Add weekly goals directly under goal (without milestone)
@@ -281,7 +298,7 @@ export function buildHierarchyTree(
       (wg: any) => wg.long_term_goal_id === goal.id && !wg.milestone_id
     );
     for (const weeklyGoal of goalWeeklyGoals) {
-      if (!shouldInclude('todo', weeklyGoal.week_number)) {
+      if (!shouldInclude(undefined, weeklyGoal.week_number, 'weekly_goal')) {
         continue;
       }
 
@@ -304,7 +321,7 @@ export function buildHierarchyTree(
         (t: any) => t.weekly_goal_id === weeklyGoal.id
       );
       for (const task of weeklyGoalTasks) {
-        if (!shouldInclude(getTaskStatus(task), task.week_number)) {
+        if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
           continue;
         }
 
@@ -325,9 +342,8 @@ export function buildHierarchyTree(
         weeklyGoalNode.children.push(taskNode);
       }
 
-      if (weeklyGoalNode.children.length > 0 || showCompleted) {
-        goalNode.children.push(weeklyGoalNode);
-      }
+      // Always add weekly goals if they pass the week filter, regardless of children
+      goalNode.children.push(weeklyGoalNode);
     }
 
     // Add tasks directly under goal (without milestone or weekly goal)
@@ -335,7 +351,7 @@ export function buildHierarchyTree(
       (t: any) => t.long_term_goal_id === goal.id && !t.milestone_id && !t.weekly_goal_id
     );
     for (const task of goalTasks) {
-      if (!shouldInclude(getTaskStatus(task), task.week_number)) {
+      if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
         continue;
       }
 
@@ -356,9 +372,8 @@ export function buildHierarchyTree(
       goalNode.children.push(taskNode);
     }
 
-    if (goalNode.children.length > 0 || showCompleted) {
-      planNode.children.push(goalNode);
-    }
+    // Always add goals if they pass the filter, regardless of children
+    planNode.children.push(goalNode);
   }
 
   // 2a. Add weekly goals directly under plan (without long-term goal)
@@ -367,7 +382,7 @@ export function buildHierarchyTree(
   );
   
   for (const weeklyGoal of planWeeklyGoals) {
-    if (!shouldInclude('todo', weeklyGoal.week_number)) {
+    if (!shouldInclude(undefined, weeklyGoal.week_number, 'weekly_goal')) {
       continue;
     }
 
@@ -391,7 +406,7 @@ export function buildHierarchyTree(
     );
     
     for (const task of weeklyGoalTasks) {
-      if (!shouldInclude(getTaskStatus(task), task.week_number)) {
+      if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
         continue;
       }
 
@@ -412,9 +427,8 @@ export function buildHierarchyTree(
       weeklyGoalNode.children.push(taskNode);
     }
 
-    if (weeklyGoalNode.children.length > 0 || showCompleted) {
-      planNode.children.push(weeklyGoalNode);
-    }
+    // Always add weekly goals if they pass the week filter, regardless of children
+    planNode.children.push(weeklyGoalNode);
   }
 
   // 3. Add ad-hoc tasks (tasks not linked to any goal/milestone/weekly goal)
@@ -438,7 +452,7 @@ export function buildHierarchyTree(
     );
 
     for (const task of adHocTasks) {
-      if (!shouldInclude(getTaskStatus(task), task.week_number)) {
+      if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
         continue;
       }
 
