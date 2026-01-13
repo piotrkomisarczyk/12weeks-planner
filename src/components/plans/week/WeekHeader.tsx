@@ -7,6 +7,7 @@
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface WeekHeaderProps {
   weekNumber: number;
@@ -35,12 +36,12 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
   const canGoNext = weekNumber < 12;
 
   return (
-    <div className="border-b bg-card">
-      <div className="container mx-auto px-4 py-4">
+    <Card className="rounded-lg">
+      <CardContent className="p-4">
         {/* Plan Name */}
-        <div className="text-sm text-muted-foreground mb-2">
-          {planName}
-        </div>
+        {/* <div className="text-2xl font-bold text-gray-900 mb-2"> */}
+          {/* {planName} */}
+        {/* </div> */}
 
         {/* Week Navigation */}
         <div className="flex items-center justify-between">
@@ -100,8 +101,8 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

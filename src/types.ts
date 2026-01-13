@@ -157,6 +157,45 @@ export interface DashboardOptions {
 }
 
 // ============================================================================
+// DASHBOARD UI TYPES (Frontend-specific types)
+// ============================================================================
+
+/**
+ * Node Type - represents different types of nodes in the hierarchy tree
+ */
+export type NodeType = 'plan' | 'goal' | 'milestone' | 'weekly_goal' | 'task' | 'ad_hoc_group';
+
+/**
+ * Hierarchy Tree Node - unified structure for UI tree nodes
+ * Represents a single item in the hierarchical dashboard view
+ */
+export interface HierarchyTreeNode {
+  id: string;
+  type: NodeType;
+  title: string;
+  status?: string; // PlanStatus | TaskStatus | boolean (for milestone)
+  isCompleted: boolean;
+  progress?: number; // For goals
+  weekNumber?: number; // For tasks/weekly goals
+  indent: number; // Indentation level for visual display
+  children: HierarchyTreeNode[];
+  metadata: {
+    originalId: string;
+    linkUrl: string; // URL to navigate to
+    priority?: string; // For tasks
+    date?: string; // For tasks with date
+  };
+}
+
+/**
+ * Dashboard Filter State - current state of dashboard filters
+ */
+export interface DashboardFilterState {
+  showCompleted: boolean;
+  showAllWeeks: boolean; // false = current week only
+}
+
+// ============================================================================
 // GOAL (LONG-TERM GOAL) DTOs
 // ============================================================================
 

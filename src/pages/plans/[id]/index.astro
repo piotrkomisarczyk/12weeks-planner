@@ -1,0 +1,30 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { DashboardContainer } from '@/components/plans/dashboard';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+
+// Extract planId from URL params
+const { id: planId } = Astro.params;
+
+// Validate planId exists
+if (!planId) {
+  return Astro.redirect('/plans');
+}
+
+// Get user session (middleware handles authentication)
+
+const userId = DEFAULT_USER_ID;
+//const userId = Astro.locals.user?.id;
+
+//if (!userId) {
+//  return Astro.redirect('/auth/login');
+//}
+---
+
+<Layout title="Dashboard">
+  <div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <DashboardContainer planId={planId} client:load />
+    </div>
+  </div>
+</Layout>
