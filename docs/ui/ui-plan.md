@@ -66,7 +66,9 @@ System opiera się na **Astro 5** (Server-Side Rendering) dla szybkiego ładowan
 *   **Kluczowe informacje:** Quick Links (Current Week, Today), Goals Overview (lista celów z postępem readonly, dostępna w accordion), info o bieżącym tygodniu. Hierarchia opisana poniżej, dostępna w accordion.
 *   **Komponenty:** `QuickActionsPanel`, `GoalsOverviewList` (tytuł + progress bar), `WeeklyReviewReminder` (jeśli niedziela), .
 
-##### 2.3.1.1 Hierarchia dostępna z widoku Dashboard pod goals overview
+##### 2.3.2 Hierarchia zadań
+*   **Ścieżka:** `/plans/[id]/hierarchy`
+*   **Cel:** " Wizualizacja pełnej struktury celów, kamieni milowych i zadań z elastyczną hierarchią.
 *   **Kluczowe informacje:** 
     *   Drzewo hierarchiczne z możliwością expand/collapse dla każdego poziomu:
     *   **Root** nazwa planera

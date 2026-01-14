@@ -288,11 +288,6 @@ Archive a plan (soft delete). This sets the plan status to 'archived' without pe
 
 Get comprehensive data for a plan to populate the Dashboard and Hierarchy views. This endpoint returns a normalized structure (flat arrays) of all plan entities, optimized for client-side tree construction and filtering.
 
-**Query Parameters:**
-- `week_view` (optional): Filter scope for time-based entities. Values: `current` (default), `all`.
-- `status_view` (optional): Filter scope for completion status. Values: `active` (excludes completed/cancelled items), `all` (default).
-- `week_number` (optional): Specific week number to focus on if `week_view=current` (defaults to plan's calculated current week).
-
 **Response** `200 OK`:
 ```json
 {
@@ -361,15 +356,7 @@ Get comprehensive data for a plan to populate the Dashboard and Hierarchy views.
 
 **Business Logic & Filtering:**
 1.  **Normalized Response**: Returns flat arrays for all entities. This allows the frontend to reconstruct the complex hierarchy (Goal -> Milestone -> WeeklyGoal -> Task, etc.) defined in the UI requirements without the API imposing a fixed nesting structure.
-2.  **`week_view=current` Logic**:
-    -   **Tasks**: Returns only tasks where `week_number` matches the target week.
-    -   **Weekly Goals**: Returns only weekly goals where `week_number` matches the target week.
-    -   **Goals/Milestones**: Always returned (structural parents) .
-3.  **`status_view=active` Logic**:
-    -   **Goals**: Excludes goals with `progress_percentage = 100`.
-    -   **Milestones**: Excludes milestones with `is_completed = true`.
-    -   **Tasks**: Excludes tasks with status `completed` or `cancelled`.
-    -   **Weekly Goals**: Returned regardless of completion (as they don't have a status field).
+2.  Always return all data for selected plan
 
 **Notes:**
 - This endpoint is designed to reduce the number of HTTP requests ("waterfall") when loading the main plan view.
