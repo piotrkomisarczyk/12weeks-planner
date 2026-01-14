@@ -5,7 +5,6 @@
  */
 
 export { WeekPlannerContainer } from './WeekPlannerContainer';
-export { WeekHeader } from './WeekHeader';
 export { WeeklyGoalsSection } from './WeeklyGoalsSection';
 export { AdHocSection } from './AdHocSection';
 export { WeeklyGoalCard } from './WeeklyGoalCard';

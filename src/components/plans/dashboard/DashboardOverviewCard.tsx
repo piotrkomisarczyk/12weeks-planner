@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Calendar, Target, Clock, BarChart3, CheckCircle } from 'lucide-react';
+import { Calendar, Target, Clock, BarChart3, ListTree } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { PlanDTO, DashboardMetrics, GoalDTO } from '@/types';
 
@@ -28,6 +28,14 @@ const quickActions = [
     icon: Calendar,
     url: 'week',
     color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200',
+  },
+  {
+    id: 'hierarchy-tree',
+    label: 'Hierarchy Tree',
+    description: 'See tasks hierarchy',
+    icon: ListTree,
+    url: 'hierarchy',
+    color: 'bg-teal-50 hover:bg-teal-100 text-teal-700 border-teal-200',
   },
   {
     id: 'goals',
@@ -75,7 +83,7 @@ export function DashboardOverviewCard({
 
       <CardContent className="space-y-6">
         {/* Quick Actions */}
-        <div className="grid lg:grid-cols-4 gap-4">
+        <div className="grid lg:grid-cols-5 gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             let url: string;
@@ -86,6 +94,9 @@ export function DashboardOverviewCard({
                 break;
               case 'day':
                 url = `/plans/${plan.id}/week/${currentWeek}/day/${currentDay}`;
+                break;
+              case 'hierarchy':
+                url = `/plans/${plan.id}/hierarchy`;
                 break;
               case 'goals':
                 url = `/plans/${plan.id}/goals`;
@@ -111,7 +122,7 @@ export function DashboardOverviewCard({
         </div>
 
         {/* Goals and Task Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">{metrics.total_tasks}</div>
             <div className="text-sm text-blue-700">Total Tasks</div>
@@ -120,6 +131,15 @@ export function DashboardOverviewCard({
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">{metrics.completed_tasks}</div>
             <div className="text-sm text-green-700">Completed Tasks</div>
+          </div>
+
+          <div className="text-center p-4 bg-teal-50 rounded-lg">
+            <div className="text-2xl font-bold text-teal-600">
+              {metrics.total_tasks === 0
+                ? '0.0%'
+                : `${((metrics.completed_tasks * 100) / metrics.total_tasks).toFixed(1)} %`}
+            </div>
+            <div className="text-sm text-teal-700">Task Progress</div>
           </div>
 
           <div className="text-center p-4 bg-violet-50 rounded-lg">
@@ -151,9 +171,6 @@ export function DashboardOverviewCard({
                       className="bg-blue-600 h-2 rounded-full"
                       style={{ width: `${goal.progress_percentage}%` }}
                     />
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {(goal as any).weekly_goals_count || 0} weekly goals • {(goal as any).tasks_count || 0} tasks
                   </div>
                 </div>
               ))}

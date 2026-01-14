@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usePlanDashboard } from '../hooks/usePlanDashboard';
 import { DashboardOverviewCard } from './DashboardOverviewCard';
-import { HierarchySection } from './HierarchySection';
 import { EmptyState } from './EmptyState';
-import { WeekHeader } from '../week/WeekHeader';
 
 interface DashboardContainerProps {
   planId: string;
@@ -37,7 +35,6 @@ function calculateCurrentDay(): number {
 
 export function DashboardContainer({ planId, onNavigate }: DashboardContainerProps) {
   const { data, isLoading, error, fetchDashboard } = usePlanDashboard();
-  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
 
   const handleNavigate = (url: string) => {
     if (onNavigate) {
@@ -47,21 +44,12 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
     }
   };
 
-  const handleWeekNavigate = (weekNumber: number) => {
-    // Just update the selected week - no need to refetch data
-    setSelectedWeek(weekNumber);
-  };
-
   useEffect(() => {
-    // Load dashboard data on mount - fetch once and calculate current week
-    if (data?.plan && selectedWeek === null) {
-      const calculatedCurrentWeek = calculateCurrentWeek(data.plan);
-      setSelectedWeek(calculatedCurrentWeek);
-    } else if (!data) {
-      // Initial load - fetch all data once
+    // Load dashboard data on mount
+    if (!data) {
       fetchDashboard(planId);
     }
-  }, [planId, fetchDashboard, data, selectedWeek]);
+  }, [planId, fetchDashboard, data]);
 
   if (isLoading) {
     return (
@@ -99,8 +87,8 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
   // Check if dashboard is empty
   const isEmpty = data.goals.length === 0 && data.tasks.length === 0;
   
-  // Use selected week or calculate current week
-  const displayWeek = selectedWeek || calculateCurrentWeek(data.plan);
+  // Calculate current week for display
+  const displayWeek = calculateCurrentWeek(data.plan);
 
   return (
     <div className="space-y-6">
@@ -114,21 +102,10 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
         currentDay={calculateCurrentDay()}
         onNavigate={handleNavigate}
       />
-      {/* Week Navigation */}
-      <WeekHeader
-        weekNumber={displayWeek}
-        startDate={new Date(data.plan.start_date)}
-        planName={data.plan.name}
-        onNavigate={handleWeekNavigate}
-      />
+
       {/* Main Content */}
-      {isEmpty ? (
+      {isEmpty && (
         <EmptyState planName={data.plan.name} onNavigate={handleNavigate} />
-      ) : (
-        <div className="space-y-6">
-          {/* Hierarchy Tree */}
-          <HierarchySection data={data} selectedWeek={displayWeek} onNavigate={handleNavigate} />
-        </div>
       )}
     </div>
   );
