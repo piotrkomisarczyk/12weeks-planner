@@ -104,13 +104,6 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
 
   return (
     <div className="space-y-6">
-      {/* Week Navigation */}
-      <WeekHeader
-        weekNumber={displayWeek}
-        startDate={new Date(data.plan.start_date)}
-        planName={data.plan.name}
-        onNavigate={handleWeekNavigate}
-      />
 
       {/* Dashboard Overview Card */}
       <DashboardOverviewCard
@@ -121,7 +114,13 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
         currentDay={calculateCurrentDay()}
         onNavigate={handleNavigate}
       />
-
+      {/* Week Navigation */}
+      <WeekHeader
+        weekNumber={displayWeek}
+        startDate={new Date(data.plan.start_date)}
+        planName={data.plan.name}
+        onNavigate={handleWeekNavigate}
+      />
       {/* Main Content */}
       {isEmpty ? (
         <EmptyState planName={data.plan.name} onNavigate={handleNavigate} />
