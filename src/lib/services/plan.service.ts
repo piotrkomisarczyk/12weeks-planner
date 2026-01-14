@@ -13,7 +13,6 @@ import type {
   PlanInsert,
   PlanUpdate,
   PlanDashboardResponse,
-  DashboardOptions,
   DashboardMetrics
 } from '../../types';
 
@@ -360,55 +359,30 @@ export class PlanService {
   /**
    * Pobiera zagregowane dane dashboardu dla planera
    * Zwraca płaską strukturę wszystkich encji powiązanych z planerem
+   * Always fetches ALL data (all weeks, all statuses) - filtering is done on the client side
    *
    * @param planId - UUID planera
    * @param userId - ID użytkownika (z tokenu JWT)
-   * @param options - Opcje filtrowania (week_view, status_view, week_number)
    * @returns Promise z danymi dashboardu lub null jeśli plan nie istnieje
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    *
    * @example
    * ```typescript
-   * const dashboard = await planService.getDashboardData(planId, userId, {
-   *   weekView: 'current',
-   *   statusView: 'active',
-   *   weekNumber: 5
-   * });
+   * const dashboard = await planService.getDashboardData(planId, userId);
    * ```
    */
   async getDashboardData(
     planId: string,
-    userId: string,
-    options: DashboardOptions = {}
+    userId: string
   ): Promise<PlanDashboardResponse | null> {
-    const { weekView = 'current', statusView = 'all', weekNumber } = options;
-
     // Step 1: Verify plan exists and belongs to user
     const plan = await this.getPlanById(planId, userId);
     if (!plan) {
       return null;
     }
 
-    // Step 2: Calculate week number if needed
-    let targetWeekNumber = weekNumber;
-    if (weekView === 'current' && !targetWeekNumber) {
-      // Calculate current week based on plan start date
-      const startDate = new Date(plan.start_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      startDate.setHours(0, 0, 0, 0);
-
-      const diffTime = today.getTime() - startDate.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      targetWeekNumber = Math.floor(diffDays / 7) + 1;
-
-      // Clamp to valid range
-      if (targetWeekNumber < 1) targetWeekNumber = 1;
-      if (targetWeekNumber > 12) targetWeekNumber = 12;
-    }
-
-    // Step 3: Execute parallel queries using Promise.all for better performance
-    // First get goals, then use their IDs for milestones
+    // Step 2: Execute parallel queries to fetch ALL data
+    // No filtering on the backend - client will handle filtering based on UI state
     const goalsResult = await this.supabase
       .from('long_term_goals')
       .select('*')
@@ -426,56 +400,35 @@ export class PlanService {
         .select('*')
         .in('long_term_goal_id', goalIds)
         .order('position', { ascending: true })
-        .then(async ({ data: milestonesData, error: milestonesError }) => {
-          if (milestonesError) throw milestonesError;
-          if (statusView === 'active' && milestonesData) {
-            return milestonesData.filter(m => !m.is_completed);
-          }
-          return milestonesData;
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data;
         }),
 
-      // Weekly goals query
+      // Weekly goals query - get all weekly goals
       this.supabase
         .from('weekly_goals')
         .select('*')
         .eq('plan_id', planId)
         .order('position', { ascending: true })
-        .then(async ({ data: weeklyGoalsData, error: weeklyGoalsError }) => {
-          if (weeklyGoalsError) throw weeklyGoalsError;
-          if (weekView === 'current' && targetWeekNumber && weeklyGoalsData) {
-            return weeklyGoalsData.filter(wg => wg.week_number === targetWeekNumber);
-          }
-          return weeklyGoalsData;
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data;
         }),
 
-      // Tasks query
+      // Tasks query - get all tasks
       this.supabase
         .from('tasks')
         .select('*')
         .eq('plan_id', planId)
         .order('position', { ascending: true })
-        .then(async ({ data: tasksData, error: tasksError }) => {
-          if (tasksError) throw tasksError;
-
-          let filteredTasks = tasksData || [];
-
-          // Apply week filter
-          if (weekView === 'current' && targetWeekNumber) {
-            filteredTasks = filteredTasks.filter(t => t.week_number === targetWeekNumber);
-          }
-
-          // Apply status filter
-          if (statusView === 'active') {
-            filteredTasks = filteredTasks.filter(t =>
-              t.status === 'todo' || t.status === 'in_progress'
-            );
-          }
-
-          return filteredTasks;
+        .then(({ data, error }) => {
+          if (error) throw error;
+          return data;
         })
     ]);
 
-    // Step 4: Calculate metrics
+    // Step 3: Calculate metrics based on all data
     const metrics: DashboardMetrics = {
       total_goals: goalsResult.data?.length || 0,
       completed_goals: goalsResult.data?.filter(g => g.progress_percentage === 100).length || 0,
@@ -483,10 +436,7 @@ export class PlanService {
       completed_tasks: tasks?.filter(t => t.status === 'completed').length || 0
     };
 
-    // Step 5: Handle database errors
-    // Note: Individual query errors are handled within Promise.all
-
-    // Step 6: Return dashboard response
+    // Step 4: Return dashboard response with all data
     return {
       plan,
       goals: goalsResult.data || [],

@@ -129,6 +129,8 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 
 /**
  * Query parameters schema for GET /api/v1/plans/:id/dashboard
+ * @deprecated No longer used - API no longer accepts query parameters
+ * Kept for backward compatibility only
  *
  * Validates:
  * - week_view: must be 'current' or 'all' (optional, defaults to 'current')
@@ -150,5 +152,6 @@ export const GetDashboardQuerySchema = z.object({
 
 /**
  * Inferred TypeScript type from GetDashboardQuerySchema
+ * @deprecated No longer used
  */
 export type GetDashboardQuery = z.infer<typeof GetDashboardQuerySchema>;

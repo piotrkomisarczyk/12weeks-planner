@@ -1,7 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type {
   PlanDashboardResponse,
-  DashboardOptions,
   ErrorResponse,
   ValidationErrorResponse,
 } from '@/types';
@@ -13,7 +12,7 @@ interface UsePlanDashboardState {
 }
 
 interface UsePlanDashboardReturn extends UsePlanDashboardState {
-  fetchDashboard: (planId: string, options?: DashboardOptions) => Promise<void>;
+  fetchDashboard: (planId: string) => Promise<void>;
   refetch: () => Promise<void>;
 }
 
@@ -24,28 +23,15 @@ export function usePlanDashboard(): UsePlanDashboardReturn {
     error: null,
   });
 
-  // Store last successful parameters for refetch
-  const [lastParams, setLastParams] = useState<{
-    planId: string;
-    options?: DashboardOptions;
-  } | null>(null);
+  // Store last successful planId for refetch
+  const [lastPlanId, setLastPlanId] = useState<string | null>(null);
 
-  const fetchDashboard = useCallback(async (planId: string, options?: DashboardOptions) => {
+  const fetchDashboard = useCallback(async (planId: string) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const params = new URLSearchParams();
-      if (options?.weekView) {
-        params.append('week_view', options.weekView);
-      }
-      if (options?.statusView) {
-        params.append('status_view', options.statusView);
-      }
-      if (options?.weekNumber) {
-        params.append('week_number', options.weekNumber.toString());
-      }
-
-      const url = `/api/v1/plans/${planId}/dashboard${params.toString() ? `?${params.toString()}` : ''}`;
+      // Simple API call - no query parameters, always fetch all data
+      const url = `/api/v1/plans/${planId}/dashboard`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -68,7 +54,7 @@ export function usePlanDashboard(): UsePlanDashboardReturn {
       const data: PlanDashboardResponse = result.data;
 
       setState({ data, isLoading: false, error: null });
-      setLastParams({ planId, options });
+      setLastPlanId(planId);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to load dashboard data';
@@ -78,10 +64,10 @@ export function usePlanDashboard(): UsePlanDashboardReturn {
   }, []);
 
   const refetch = useCallback(async () => {
-    if (lastParams) {
-      await fetchDashboard(lastParams.planId, lastParams.options);
+    if (lastPlanId) {
+      await fetchDashboard(lastPlanId);
     }
-  }, [fetchDashboard, lastParams]);
+  }, [fetchDashboard, lastPlanId]);
 
   return {
     ...state,

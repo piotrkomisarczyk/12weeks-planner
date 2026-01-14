@@ -3,6 +3,7 @@
  *
  * GET - Retrieves aggregated dashboard data for a plan
  * Returns flat structure with plan, goals, milestones, weekly goals, tasks, and metrics
+ * Always returns ALL data (all weeks, all statuses) - filtering is done on the client side
  *
  * Authentication required.
  */
@@ -10,8 +11,7 @@
 import type { APIRoute } from 'astro';
 import { PlanService } from '../../../../../lib/services/plan.service';
 import {
-  PlanIdParamsSchema,
-  GetDashboardQuerySchema
+  PlanIdParamsSchema
 } from '../../../../../lib/validation/plan.validation';
 import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
 import type {
@@ -25,8 +25,9 @@ export const prerender = false;
 /**
  * GET /api/v1/plans/:id/dashboard
  * Retrieves aggregated dashboard data for a plan
+ * No query parameters - always returns all data
  */
-export const GET: APIRoute = async ({ locals, params, url }) => {
+export const GET: APIRoute = async ({ locals, params }) => {
   try {
     // Step 1: Authentication
     const userId = DEFAULT_USER_ID;
@@ -53,48 +54,14 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
       );
     }
 
-    // Step 3: Parse and validate query parameters
-    const urlSearchParams = new URL(url).searchParams;
-    const queryParams = {
-      week_view: urlSearchParams.get('week_view'),
-      status_view: urlSearchParams.get('status_view'),
-      week_number: urlSearchParams.get('week_number')
-    };
-
-    const queryValidation = GetDashboardQuerySchema.safeParse(queryParams);
-
-    if (!queryValidation.success) {
-      const details = queryValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
-        message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
-      }));
-
-      return new Response(
-        JSON.stringify({
-          error: 'Validation failed',
-          details
-        } as ValidationErrorResponse),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Step 4: Call service to fetch dashboard data
+    // Step 3: Call service to fetch dashboard data (all data, no filtering)
     const planService = new PlanService(locals.supabase);
     const dashboardData = await planService.getDashboardData(
       paramValidation.data.id,
-      userId,
-      {
-        weekView: queryValidation.data.week_view,
-        statusView: queryValidation.data.status_view,
-        weekNumber: queryValidation.data.week_number
-      }
+      userId
     );
 
-    // Step 5: Handle not found
+    // Step 4: Handle not found
     if (!dashboardData) {
       return new Response(
         JSON.stringify({
@@ -108,7 +75,7 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
       );
     }
 
-    // Step 6: Return successful response
+    // Step 5: Return successful response
     return new Response(
       JSON.stringify({ data: dashboardData }),
       {

@@ -149,6 +149,8 @@ export interface PlanDashboardResponse {
 
 /**
  * Dashboard Options - configuration for dashboard data filtering
+ * @deprecated No longer used - API always returns all data, filtering is done on client side
+ * Kept for backward compatibility only
  */
 export interface DashboardOptions {
   weekView?: 'current' | 'all';

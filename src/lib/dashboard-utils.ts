@@ -29,26 +29,17 @@ import type {
  *   - Tasks (under weekly goals from level 2)
  * Level 4:
  *   - Tasks (under weekly goals from level 3)
+ * 
+ * @param data - Dashboard data from API
+ * @param filters - Filter state (showCompleted, showAllWeeks)
+ * @param selectedWeek - Currently selected week number for filtering (when showAllWeeks is false)
  */
 export function buildHierarchyTree(
   data: PlanDashboardResponse,
-  filters: DashboardFilterState
+  filters: DashboardFilterState,
+  selectedWeek: number
 ): HierarchyTreeNode[] {
   const { showCompleted, showAllWeeks } = filters;
-
-  // Calculate current week based on plan start date
-  const startDate = new Date(data.plan.start_date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  startDate.setHours(0, 0, 0, 0);
-
-  const diffTime = today.getTime() - startDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  let currentWeek = Math.floor(diffDays / 7) + 1;
-
-  // Clamp to valid range
-  if (currentWeek < 1) currentWeek = 1;
-  if (currentWeek > 12) currentWeek = 12;
 
   // Sort weekly_goals by week_number (ascending)
   const sortedWeeklyGoals = [...data.weekly_goals].sort((a, b) => {
@@ -106,7 +97,7 @@ export function buildHierarchyTree(
 
     // Filter by week
     if (!showAllWeeks && weekNumber !== undefined && weekNumber !== null) {
-      if (weekNumber !== currentWeek) {
+      if (weekNumber !== selectedWeek) {
         return false;
       }
     }
@@ -441,7 +432,7 @@ export function buildHierarchyTree(
       'ad-hoc-group',
       'ad_hoc_group',
       'Other Tasks',
-      `/plans/${data.plan.id}/week/${currentWeek}`,
+      `/plans/${data.plan.id}/week/${selectedWeek}`,
       undefined,
       false,
       undefined,

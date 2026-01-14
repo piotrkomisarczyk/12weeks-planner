@@ -8,18 +8,19 @@ import type { PlanDashboardResponse, DashboardFilterState, HierarchyTreeNode } f
 
 interface HierarchySectionProps {
   data: PlanDashboardResponse;
+  selectedWeek: number;
   onNavigate?: (url: string) => void;
 }
 
-export function HierarchySection({ data, onNavigate }: HierarchySectionProps) {
+export function HierarchySection({ data, selectedWeek, onNavigate }: HierarchySectionProps) {
   const [filters, setFilters] = useState<DashboardFilterState>({
     showCompleted: true,
     showAllWeeks: true,
   });
 
   const hierarchyTree = useMemo(() => {
-    return buildHierarchyTree(data, filters);
-  }, [data, filters]);
+    return buildHierarchyTree(data, filters, selectedWeek);
+  }, [data, filters, selectedWeek]);
 
   const handleShowCompletedChange = (checked: boolean) => {
     setFilters(prev => ({ ...prev, showCompleted: checked }));
