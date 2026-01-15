@@ -277,7 +277,7 @@ tydzień.
 System wykorzystuje układ **Sticky Top Bar** dla zapewnienia maksymalnej przestrzeni roboczej przy zachowaniu dostępności nawigacji.
 
 ### 4.1. Global Top Bar (Zawsze widoczny)
-*   **Lewa strona:** Logo aplikacji, Breadcrumbs (Ścieżka okruszków: `Planers > [Nazwa Planu] > [Nazwa Widoku]`).
+*   **Lewa strona:** Logo aplikacji, Breadcrumbs (Ścieżka okruszków: `Plans > [Nazwa Planu] > [Nazwa Widoku]`).
 *   **Prawa strona:**
     *   Language Flag (PL/EN).
     *   User Menu (Avatar z dropdownem: Settings, Export data, Logout).
