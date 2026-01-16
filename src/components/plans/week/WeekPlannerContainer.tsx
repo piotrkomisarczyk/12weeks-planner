@@ -350,13 +350,13 @@ export function WeekPlannerContainer({
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-background">
-        <WeekHeader
-          weekNumber={weekNumber}
-          startDate={planStartDate}
-          planName={planName}
-          onNavigate={handleNavigate}
-        />
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <WeekHeader
+            weekNumber={weekNumber}
+            startDate={planStartDate}
+            planName={planName}
+            onNavigate={handleNavigate}
+          />
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -372,13 +372,13 @@ export function WeekPlannerContainer({
   if (status === 'error') {
     return (
       <div className="min-h-screen bg-background">
-        <WeekHeader
-          weekNumber={weekNumber}
-          startDate={planStartDate}
-          planName={planName}
-          onNavigate={handleNavigate}
-        />
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <WeekHeader
+            weekNumber={weekNumber}
+            startDate={planStartDate}
+            planName={planName}
+            onNavigate={handleNavigate}
+          />
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <p className="text-destructive mb-4">{error || 'Failed to load week plan'}</p>
@@ -398,49 +398,51 @@ export function WeekPlannerContainer({
   // Success state
   return (
     <div className="min-h-screen bg-background">
-      <WeekHeader
-        weekNumber={weekNumber}
-        startDate={planStartDate}
-        planName={planName}
-        onNavigate={handleNavigate}
-      />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <WeekHeader
+          weekNumber={weekNumber}
+          startDate={planStartDate}
+          planName={planName}
+          onNavigate={handleNavigate}
+        />
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          {/* Weekly Goals Section */}
-          <WeeklyGoalsSection
-            goals={data.weeklyGoals}
-            availableLongTermGoals={meta.longTermGoals}
-            availableMilestones={meta.milestones}
-            onUpdateGoal={handleUpdateGoal}
-            onDeleteGoal={handleDeleteGoal}
-            onAddGoal={handleAddGoal}
-            onAddTask={(goalId, title) => handleAddTask(goalId, title)}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={handleDeleteTask}
-            onAssignDay={handleAssignDay}
-            onLinkGoal={handleLinkGoal}
-            onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
-          />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="space-y-8">
+            {/* Weekly Goals Section */}
+            <WeeklyGoalsSection
+              goals={data.weeklyGoals}
+              availableLongTermGoals={meta.longTermGoals}
+              availableMilestones={meta.milestones}
+              onUpdateGoal={handleUpdateGoal}
+              onDeleteGoal={handleDeleteGoal}
+              onAddGoal={handleAddGoal}
+              onAddTask={(goalId, title) => handleAddTask(goalId, title)}
+              onUpdateTask={handleUpdateTask}
+              onDeleteTask={handleDeleteTask}
+              onAssignDay={handleAssignDay}
+              onLinkGoal={handleLinkGoal}
+              onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
+            />
 
-          {/* Ad-hoc Tasks Section */}
-          <AdHocSection
-            tasks={data.adHocTasks}
-            availableWeeklyGoals={data.weeklyGoals}
-            availableMilestones={meta.milestones}
-            availableLongTermGoals={meta.longTermGoals}
-            onAddTask={(title) => handleAddTask(null, title)}
-            onUpdateTask={handleUpdateTask}
-            onDeleteTask={handleDeleteTask}
-            onAssignDay={handleAssignDay}
-            onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
-          />
-        </div>
-      </DndContext>
+            {/* Ad-hoc Tasks Section */}
+            <AdHocSection
+              tasks={data.adHocTasks}
+              availableWeeklyGoals={data.weeklyGoals}
+              availableMilestones={meta.milestones}
+              availableLongTermGoals={meta.longTermGoals}
+              onAddTask={(title) => handleAddTask(null, title)}
+              onUpdateTask={handleUpdateTask}
+              onDeleteTask={handleDeleteTask}
+              onAssignDay={handleAssignDay}
+              onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
+            />
+          </div>
+        </DndContext>
+      </div>
     </div>
   );
 }

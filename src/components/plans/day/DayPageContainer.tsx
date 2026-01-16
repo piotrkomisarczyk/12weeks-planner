@@ -364,8 +364,8 @@ export function DayPageContainer({
   // Loading state
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-neutral-50 p-6">
-        <div className="mx-auto max-w-7xl">
+      <div className="min-h-screen bg-neutral-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-900 mx-auto mb-4"></div>
@@ -380,8 +380,8 @@ export function DayPageContainer({
   // Error state
   if (status === 'error') {
     return (
-      <div className="min-h-screen bg-neutral-50 p-6">
-        <div className="mx-auto max-w-7xl">
+      <div className="min-h-screen bg-neutral-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
             <p className="text-red-800 font-medium mb-4">Error loading day plan</p>
             <p className="text-red-600 text-sm mb-4">{error}</p>
@@ -404,9 +404,8 @@ export function DayPageContainer({
       onDragEnd={handleDragEnd}
     >
       <div className="min-h-screen bg-neutral-50">
-        <div className="mx-auto max-w-7xl p-6">
-          {/* Constrained width container for aligned header and slots */}
-          <div className="max-w-4xl mx-auto space-y-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-6">
             {/* Header */}
             <DayHeader
               planName={planName}

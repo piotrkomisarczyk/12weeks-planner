@@ -65,7 +65,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
   // Loading State
   if (isLoading && goals.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-2">
             <div className="size-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
@@ -79,7 +79,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
   // Error State
   if (error && goals.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-2">
             <p className="text-destructive font-semibold">Error loading goals</p>
@@ -91,7 +91,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
