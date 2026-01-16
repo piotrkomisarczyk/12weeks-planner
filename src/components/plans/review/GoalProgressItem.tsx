@@ -56,20 +56,15 @@ export default function GoalProgressItem({ goal, onProgressUpdate }: GoalProgres
 
   return (
     <div className="bg-gray-50 rounded-lg p-4 border space-y-3">
-      <div className="flex justify-start">
-        {categoryKey && (
-        <Badge
-          className={`${GOAL_CATEGORY_COLORS[categoryKey] || 'bg-gray-500 text-white'}`}
-        >
-          {categoryLabel}
-        </Badge>
-        )}
-      </div>
 
-      <div className="flex items-center justify-between">
-        <Label className="text-lg font-semibold text-gray-900">
-          {goal.title}
-        </Label>
+
+      <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="font-semibold text-base">{goal.title}</h3>
+          {categoryKey && categoryLabel && (
+            <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>
+              {categoryLabel}
+            </Badge>
+          )}
         {goal.isUpdating && (
           <div className="flex items-center text-sm text-gray-500">
             <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-900 mr-1"></div>
