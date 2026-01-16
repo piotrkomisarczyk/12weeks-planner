@@ -70,9 +70,9 @@ export const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
 ];
 
 export const GOAL_CATEGORY_COLORS: Record<GoalCategory, string> = {
-  work: 'text-xs font-semibold uppercase bg-yellow-400 text-white',
-  finance: 'text-xs font-semibold uppercase bg-green-600 text-white',
-  hobby: 'text-xs font-semibold uppercase bg-purple-600 text-white',
+  work: 'text-xs font-semibold uppercase bg-yellow-600 text-white',
+  finance: 'text-xs font-semibold uppercase bg-green-700 text-white',
+  hobby: 'text-xs font-semibold uppercase bg-purple-700 text-white',
   relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white',
   health: 'text-xs font-semibold uppercase bg-red-700 text-white',
   development: 'text-xs font-semibold uppercase bg-blue-700 text-white',
