@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Home, Calendar, Target, Clock, ClipboardList, ListTree } from 'lucide-react';
+import { Calendar, Target, Clock, ClipboardList, ListTree } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { PlanDTO, DashboardMetrics, GoalDTO } from '@/types';
 
