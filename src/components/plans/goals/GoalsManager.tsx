@@ -4,7 +4,6 @@
  * Manages goal list display and creation
  */
 
-import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useGoals } from './hooks/useGoals';
 import { GoalCard } from './GoalCard';
@@ -25,7 +24,6 @@ interface GoalsManagerProps {
  */
 export default function GoalsManager({ planContext }: GoalsManagerProps) {
   const { goals, isLoading, error, addGoal, updateGoal, deleteGoal, canAddGoal } = useGoals(planContext.id);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const handleAddGoal = async (data: {
     title: string;
@@ -36,7 +34,6 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
   }) => {
     try {
       await addGoal(data);
-      setCreateDialogOpen(false);
     } catch (error) {
       // Error is handled by the hook and dialog
       throw error;
@@ -150,7 +147,8 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
         {/* Empty State */}
         {goals.length === 0 ? (
           <EmptyState
-            onAddGoal={() => setCreateDialogOpen(true)}
+            onCreateGoal={handleAddGoal}
+            currentGoalsCount={goals.length}
             disabled={planContext.isArchived}
           />
         ) : (
@@ -176,16 +174,6 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
         )}
       </div>
 
-      {/* Hidden dialog trigger for empty state */}
-      {goals.length === 0 && (
-        <div className="hidden">
-          <CreateGoalDialog
-            onCreateGoal={handleAddGoal}
-            disabled={planContext.isArchived}
-            currentGoalsCount={goals.length}
-          />
-        </div>
-      )}
     </div>
   );
 }

@@ -105,7 +105,7 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
 
       {/* Main Content */}
       {isEmpty && (
-        <EmptyState planName={data.plan.name} onNavigate={handleNavigate} />
+        <EmptyState planId={planId} planName={data.plan.name} onNavigate={handleNavigate} />
       )}
     </div>
   );

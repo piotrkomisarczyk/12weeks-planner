@@ -119,19 +119,13 @@ export function DayHeader({
       <div className="px-6 py-4">
         {/* Plan Name and Week Badge */}
         <div className="flex items-center gap-3 mb-3">
-          <div className="text-sm text-muted-foreground">
-            {planName}
-          </div>
-          <Badge variant="secondary" className="text-xs">
-            Week {weekNumber}
-          </Badge>
         </div>
 
         {/* Day Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-3xl font-bold">
-              Day {dayNumber}
+              Day {dayNumber + (weekNumber - 1) * 7}
             </h1>
             
             {/* Date Display with Picker */}
@@ -161,6 +155,10 @@ export function DayHeader({
                 />
               </PopoverContent>
             </Popover>
+            <Badge variant="default" className="text-sm">
+              Week {weekNumber}
+            </Badge>
+
           </div>
 
           <div className="flex items-center gap-2">
@@ -207,7 +205,7 @@ export function DayHeader({
                 )}
                 title={DAY_NAMES[day - 1]}
               >
-                {DAY_NAMES[day - 1].slice(0, 3)}
+                {DAY_NAMES[day - 1]}
               </button>
             ))}
           </div>

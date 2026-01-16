@@ -77,7 +77,7 @@ export function DashboardOverviewCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-gray-900">
-          {plan.name} Dashboard
+          Dashboard
         </CardTitle>
       </CardHeader>
 

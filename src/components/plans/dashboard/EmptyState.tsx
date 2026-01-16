@@ -1,16 +1,17 @@
 import { Target, Plus, ArrowRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {
+  planId: string;
   planName: string;
   onNavigate?: (url: string) => void;
 }
 
-export function EmptyState({ planName, onNavigate }: EmptyStateProps) {
+export function EmptyState({ planId, planName, onNavigate }: EmptyStateProps) {
   const handleCreateGoal = () => {
     if (onNavigate) {
-      onNavigate(`/plans/${planName}/goals`);
+      onNavigate(`/plans/${planId}/goals`);
     }
   };
 

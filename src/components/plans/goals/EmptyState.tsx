@@ -3,15 +3,32 @@
  * Displayed when there are no goals
  */
 
+import { useCallback, useState } from 'react';
+import type { GoalCategory } from '@/types';
+import { CreateGoalDialog } from './CreateGoalDialog';
+
 interface EmptyStateProps {
-  onAddGoal: () => void;
+  onCreateGoal: (data: {
+    title: string;
+    category: GoalCategory | null;
+    description: string | null;
+    progress_percentage: number;
+    position: number;
+  }) => Promise<void>;
+  currentGoalsCount: number;
   disabled?: boolean;
 }
 
 /**
  * Empty state for when no goals exist
  */
-export function EmptyState({ onAddGoal, disabled = false }: EmptyStateProps) {
+export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false }: EmptyStateProps) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleOpenDialog = useCallback(() => {
+    setDialogOpen(true);
+  }, []);
+
   return (
     <div className="border-2 border-dashed rounded-lg p-12 text-center">
       <div className="max-w-sm mx-auto space-y-4">
@@ -40,13 +57,21 @@ export function EmptyState({ onAddGoal, disabled = false }: EmptyStateProps) {
         </div>
 
         <button
-          onClick={onAddGoal}
+          onClick={handleOpenDialog}
           disabled={disabled}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Add Your First Goal
         </button>
       </div>
+      <CreateGoalDialog
+        onCreateGoal={onCreateGoal}
+        disabled={disabled}
+        currentGoalsCount={currentGoalsCount}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        showTrigger={false}
+      />
     </div>
   );
 }

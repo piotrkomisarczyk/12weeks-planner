@@ -3,7 +3,7 @@
  * Modal dialog for creating a new goal
  */
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Plus } from 'lucide-react';
 import {
   Dialog,
@@ -38,6 +38,9 @@ interface CreateGoalDialogProps {
   }) => Promise<void>;
   disabled?: boolean;
   currentGoalsCount: number;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
 }
 
 const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
@@ -53,8 +56,15 @@ const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
  * Dialog for creating a new goal
  * Similar to wizard goal form but in a modal
  */
-export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: CreateGoalDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateGoalDialog({
+  onCreateGoal,
+  disabled,
+  currentGoalsCount,
+  open,
+  onOpenChange,
+  showTrigger = true,
+}: CreateGoalDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -64,6 +74,20 @@ export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const canAddGoal = currentGoalsCount < 6;
+  const isControlled = open !== undefined;
+  const dialogOpen = isControlled ? open : internalOpen;
+
+  const setDialogOpen = useCallback(
+    (nextOpen: boolean) => {
+      if (isControlled) {
+        onOpenChange?.(nextOpen);
+        return;
+      }
+
+      setInternalOpen(nextOpen);
+    },
+    [isControlled, onOpenChange],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +126,7 @@ export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: 
         category: 'development',
         description: '',
       });
-      setOpen(false);
+      setDialogOpen(false);
     } catch (error) {
       console.error('Failed to create goal:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create goal');
@@ -112,13 +136,15 @@ export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: 
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button disabled={!canAddGoal || disabled}>
-          <Plus className="size-4" />
-          Add Goal
-        </Button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {showTrigger && (
+        <DialogTrigger asChild>
+          <Button disabled={!canAddGoal || disabled}>
+            <Plus className="size-4" />
+            Add Goal
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add New Goal</DialogTitle>
@@ -187,7 +213,7 @@ export function CreateGoalDialog({ onCreateGoal, disabled, currentGoalsCount }: 
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >
               Cancel
