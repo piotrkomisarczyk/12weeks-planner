@@ -8,16 +8,8 @@ import { Slider } from '../../ui/slider';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Badge } from '../../ui/badge';
-import type { GoalReviewViewModel } from '../../../types';
-
-const CATEGORY_COLORS: Record<string, string> = {
-  work: 'bg-blue-500 text-white',
-  finance: 'bg-green-500 text-white',
-  hobby: 'bg-purple-500 text-white',
-  relationships: 'bg-pink-500 text-white',
-  health: 'bg-red-500 text-white',
-  development: 'bg-orange-500 text-white',
-};
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '../../../types';
+import type { GoalCategory, GoalReviewViewModel } from '../../../types';
 
 interface GoalProgressItemProps {
   goal: GoalReviewViewModel;
@@ -26,6 +18,10 @@ interface GoalProgressItemProps {
 
 export default function GoalProgressItem({ goal, onProgressUpdate }: GoalProgressItemProps) {
   const [localProgress, setLocalProgress] = useState(goal.progress_percentage);
+  const categoryKey = goal.category as GoalCategory | null;
+  const categoryLabel = categoryKey
+    ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
+    : null;
 
   // Sync with prop changes
   useEffect(() => {
@@ -61,11 +57,11 @@ export default function GoalProgressItem({ goal, onProgressUpdate }: GoalProgres
   return (
     <div className="bg-gray-50 rounded-lg p-4 border space-y-3">
       <div className="flex justify-start">
-        {goal.category && (
+        {categoryKey && (
         <Badge
-          className={`text-xs uppercase font-semibold ${CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'}`}
+          className={`${GOAL_CATEGORY_COLORS[categoryKey] || 'bg-gray-500 text-white'}`}
         >
-          {goal.category}
+          {categoryLabel}
         </Badge>
         )}
       </div>

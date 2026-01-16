@@ -60,6 +60,24 @@ export type PlanStatus = 'ready' | 'active' | 'completed' | 'archived';
 
 export type GoalCategory = 'work' | 'finance' | 'hobby' | 'relationships' | 'health' | 'development';
 
+export const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
+  { value: 'work', label: 'Work' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'hobby', label: 'Hobby' },
+  { value: 'relationships', label: 'Relationships' },
+  { value: 'health', label: 'Health' },
+  { value: 'development', label: 'Growth' },
+];
+
+export const GOAL_CATEGORY_COLORS: Record<GoalCategory, string> = {
+  work: 'text-xs font-semibold uppercase bg-yellow-400 text-white',
+  finance: 'text-xs font-semibold uppercase bg-green-600 text-white',
+  hobby: 'text-xs font-semibold uppercase bg-purple-600 text-white',
+  relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white',
+  health: 'text-xs font-semibold uppercase bg-red-700 text-white',
+  development: 'text-xs font-semibold uppercase bg-blue-700 text-white',
+};
+
 export type TaskPriority = 'A' | 'B' | 'C';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'completed' | 'cancelled' | 'postponed';

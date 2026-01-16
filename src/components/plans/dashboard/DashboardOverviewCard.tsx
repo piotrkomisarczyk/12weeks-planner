@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Calendar, Target, Clock, ClipboardList, ListTree } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { PlanDTO, DashboardMetrics, GoalDTO } from '@/types';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import type { PlanDTO, DashboardMetrics, GoalDTO, GoalCategory } from '@/types';
 
 interface DashboardOverviewCardProps {
   plan: PlanDTO;
@@ -158,12 +159,27 @@ export function DashboardOverviewCard({
           <div className="space-y-4">
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {goals.slice(0, 6).map((goal) => (
+              {goals.slice(0, 6).map((goal) => {
+                const categoryKey = goal.category as GoalCategory | null;
+                const categoryLabel = categoryKey
+                  ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
+                  : null;
+
+                return (
                 <div key={goal.id} className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900 truncate" title={goal.title}>
-                      {goal.title}
-                    </h4>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h4 className="font-medium text-gray-900 truncate" title={goal.title}>
+                        {goal.title}
+                      </h4>
+                      {categoryKey && categoryLabel && (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[categoryKey]}`}
+                        >
+                          {categoryLabel}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-sm text-gray-500">{goal.progress_percentage}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
@@ -173,7 +189,8 @@ export function DashboardOverviewCard({
                     />
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

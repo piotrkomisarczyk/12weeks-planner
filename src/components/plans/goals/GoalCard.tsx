@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { GoalForm } from './GoalForm';
 import { GoalProgress } from './GoalProgress';
 import { MilestoneManager } from './milestones/MilestoneManager';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import type { GoalDTO, GoalCategory } from '@/types';
 import type { PlanContext } from './types';
 
@@ -45,6 +46,10 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
   const [isDeleting, setIsDeleting] = useState(false);
   const [expandedValue, setExpandedValue] = useState<string>('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const categoryKey = goal.category as GoalCategory | null;
+  const categoryLabel = categoryKey
+    ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
+    : null;
 
   const handleProgressChange = async (progress: number) => {
     await onUpdate(goal.id, { progress_percentage: progress });
@@ -85,9 +90,9 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
                   {/* Title and Category */}
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold text-base">{goal.title}</h3>
-                    {goal.category && (
-                      <Badge variant="secondary" className="capitalize text-xs">
-                        {goal.category}
+                    {categoryKey && categoryLabel && (
+                      <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>
+                        {categoryLabel}
                       </Badge>
                     )}
                   </div>

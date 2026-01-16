@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import type { GoalCategory } from '@/types';
 import type { SaveStatus } from './types';
 
@@ -24,15 +25,6 @@ interface GoalFormProps {
   onUpdate: (data: { title?: string; category?: GoalCategory | null; description?: string | null }) => Promise<void>;
   disabled?: boolean;
 }
-
-const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
-  { value: 'work', label: 'Work' },
-  { value: 'finance', label: 'Finance' },
-  { value: 'hobby', label: 'Hobby' },
-  { value: 'relationships', label: 'Relationships' },
-  { value: 'health', label: 'Health' },
-  { value: 'development', label: 'Growth' },
-];
 
 /**
  * Auto-saving form for goal editing
@@ -162,7 +154,11 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
           <SelectContent>
             {GOAL_CATEGORIES.map((cat) => (
               <SelectItem key={cat.value} value={cat.value}>
-                {cat.label}
+                <span
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[cat.value]}`}
+                >
+                  {cat.label}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
