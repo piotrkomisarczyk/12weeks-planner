@@ -106,3 +106,66 @@ export function formatDate(date: Date | string): string {
   });
 }
 
+/**
+ * Gets the current week index (1-12) based on plan start date and current date
+ * Returns 1 if before start, 12 if after end, or the actual week number
+ */
+export function getCurrentWeekIndex(startDate: string, now: Date = new Date()): number {
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+
+  // If before start date, return week 1
+  if (now < start) {
+    return 1;
+  }
+
+  // Calculate the end date (start + 12 weeks)
+  const end = new Date(start);
+  end.setDate(end.getDate() + 12 * 7);
+
+  // If after end date, return week 12
+  if (now > end) {
+    return 12;
+  }
+
+  // Calculate current week number
+  const diffTime = now.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const weekNumber = Math.floor(diffDays / 7) + 1;
+
+  // Ensure within 1-12 range
+  return Math.max(1, Math.min(12, weekNumber));
+}
+
+/**
+ * Gets the current day index (1-7) within a week based on plan start date and current date
+ * Returns the day of the week where 1=Monday, 7=Sunday
+ * Returns 1 if before start, 7 if after end, or the actual day index
+ */
+export function getDayIndex(startDate: string, now: Date = new Date()): number {
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+
+  // If before start date, return day 1 (Monday)
+  if (now < start) {
+    return 1;
+  }
+
+  // Calculate the end date (start + 12 weeks)
+  const end = new Date(start);
+  end.setDate(end.getDate() + 12 * 7);
+
+  // If after end date, return day 7 (Sunday)
+  if (now > end) {
+    return 7;
+  }
+
+  // Get day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+  const dayOfWeek = now.getDay();
+  
+  // Convert to 1-7 format (1=Monday, 7=Sunday)
+  return dayOfWeek === 0 ? 7 : dayOfWeek;
+}
+

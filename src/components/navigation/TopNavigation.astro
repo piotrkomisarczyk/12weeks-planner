@@ -1,0 +1,26 @@
+---
+import type { PlanSummary } from '@/types';
+import GlobalBar from './GlobalBar.astro';
+import PlanContextBar from './PlanContextBar.astro';
+
+interface Props {
+  plan?: PlanSummary | null;
+  userEmail?: string;
+}
+
+const { plan, userEmail } = Astro.props;
+
+// Determine if we're in a plan context by checking the URL
+const currentPath = Astro.url.pathname;
+const urlParts = currentPath.split('/').filter(Boolean);
+const isInPlanContext = urlParts[0] === 'plans' && 
+                        urlParts.length >= 2 && 
+                        urlParts[1].match(/^[a-f0-9-]{36}$/i) &&
+                        plan !== null && 
+                        plan !== undefined;
+---
+
+<header class="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <GlobalBar plan={plan} userEmail={userEmail} />
+  {isInPlanContext && plan && <PlanContextBar plan={plan} />}
+</header>

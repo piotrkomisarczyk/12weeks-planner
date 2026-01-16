@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Calendar, Target, Clock, BarChart3, ListTree } from 'lucide-react';
+import { Home, Calendar, Target, Clock, ClipboardList, ListTree } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { PlanDTO, DashboardMetrics, GoalDTO } from '@/types';
 
@@ -47,9 +47,9 @@ const quickActions = [
   },
   {
     id: 'summary',
-    label: 'Summary',
-    description: 'View progress summary',
-    icon: BarChart3,
+    label: 'Review',
+    description: 'View review for this week',
+    icon: ClipboardList,
     url: 'summary',
     color: 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200',
   },

@@ -1,0 +1,92 @@
+---
+import type { PlanSummary } from '@/types';
+import { getCurrentWeekIndex, getDayIndex } from '@/lib/plan-utils';
+import NavLink from './NavLink.astro';
+
+interface Props {
+  plan: PlanSummary;
+}
+
+const { plan } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+// Calculate current week and day indices
+const now = new Date();
+const currentWeek = getCurrentWeekIndex(plan.start_date, now);
+const currentDay = getDayIndex(plan.start_date, now);
+
+// Define navigation links
+const navLinks = [
+  {
+    href: `/plans/${plan.id}`,
+    icon: 'Home',
+    label: 'Dashboard',
+  },
+    {
+    href: `/plans/${plan.id}/week/${currentWeek}/day/${currentDay}`,
+    icon: 'Sun',
+    label: 'Today',
+  },
+    {
+    href: `/plans/${plan.id}/week/${currentWeek}`,
+    icon: 'Calendar',
+    label: 'Week',
+  },
+  {
+    href: `/plans/${plan.id}/hierarchy`,
+    icon: 'ListTree',
+    label: 'Hierarchy',
+  },
+  {
+    href: `/plans/${plan.id}/goals`,
+    icon: 'Target',
+    label: 'Goals',
+  },
+  {
+    href: `/plans/${plan.id}/review/${currentWeek}`,
+    icon: 'ClipboardList',
+    label: 'Review',
+  },
+];
+
+// Determine which link is active
+const isLinkActive = (href: string): boolean => {
+  // Exact match
+  if (currentPath === href) return true;
+  
+  // For week/day/review links, match the base path
+  if (href.includes('/week/') && currentPath.includes('/week/')) {
+    // Check if it's a week-only path
+    const hrefParts = href.split('/');
+    const pathParts = currentPath.split('/');
+    
+    // Week link is active if we're on the week page (not day or review)
+    if (hrefParts.length === 6 && pathParts.length === 6) {
+      return hrefParts[5] === pathParts[5];
+    }
+  }
+  
+  if (href.includes('/day/') && currentPath.includes('/day/')) {
+    return true;
+  }
+  
+  if (href.includes('/review/') && currentPath.includes('/review/')) {
+    return true;
+  }
+  
+  return false;
+};
+---
+
+<div class="flex h-12 items-center justify-center gap-1 border-b border-border bg-muted px-4 lg:px-6 overflow-x-auto">
+  <nav class="flex items-center gap-1" aria-label="Plan navigation">
+    {navLinks.map((link) => (
+      <NavLink
+        href={link.href}
+        icon={link.icon}
+        label={link.label}
+        isActive={isLinkActive(link.href)}
+      />
+    ))}
+  </nav>
+</div>

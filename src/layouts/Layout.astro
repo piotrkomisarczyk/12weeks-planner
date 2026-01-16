@@ -1,11 +1,69 @@
 ---
 import "../styles/global.css";
+import type { PlanSummary } from '@/types';
+import { createServerClient } from '@supabase/ssr';
+import { PlanService } from '@/lib/services/plan.service';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import TopNavigation from '@/components/navigation/TopNavigation.astro';
+import { Toaster } from '@/components/ui/sonner';
 
 interface Props {
   title?: string;
 }
 
-const { title = "10x Astro Starter" } = Astro.props;
+const { title = "12 Weeks Planner" } = Astro.props;
+
+// Initialize Supabase server client
+const supabase = createServerClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_KEY,
+  {
+    cookies: {
+      get(key) {
+        return Astro.cookies.get(key)?.value;
+      },
+      set(key, value, options) {
+        Astro.cookies.set(key, value, options);
+      },
+      remove(key, options) {
+        Astro.cookies.delete(key, options);
+      },
+    },
+  }
+);
+
+// Get current user (with fallback to DEFAULT_USER_ID for development)
+const { data: { user } } = await supabase.auth.getUser();
+const userId = user?.id || DEFAULT_USER_ID;
+
+// Extract plan ID from URL if we're in a plan context
+const urlParts = Astro.url.pathname.split('/').filter(Boolean);
+let plan: PlanSummary | null = null;
+
+// Check if we're on a plan-specific page: /plans/[id]/...
+if (urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
+  const planId = urlParts[1];
+  
+  try {
+    const planService = new PlanService(supabase);
+    const fullPlan = await planService.getPlanById(planId, userId);
+    
+    if (fullPlan) {
+      // Create a minimal PlanSummary for navigation
+      plan = {
+        id: fullPlan.id,
+        name: fullPlan.name,
+        start_date: fullPlan.start_date,
+        status: fullPlan.status,
+      };
+    }
+  } catch (error) {
+    console.error('Failed to fetch plan for navigation:', error);
+    // Continue without plan data - TopNavigation will handle null plan
+  }
+}
+
+const userEmail = user?.email || 'dev@example.com';
 ---
 
 <!doctype html>
@@ -18,7 +76,11 @@ const { title = "10x Astro Starter" } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
-    <slot />
+    <TopNavigation plan={plan} userEmail={userEmail} />
+    <main class="min-h-screen bg-background">
+      <slot />
+    </main>
+    <Toaster client:load />
   </body>
 </html>
 

@@ -77,6 +77,16 @@ export type TaskType = 'weekly_main' | 'weekly_sub' | 'ad_hoc';
 export type PlanDTO = PlanEntity;
 
 /**
+ * Plan Summary - minimal plan data for navigation
+ */
+export interface PlanSummary {
+  id: string;
+  name: string;
+  start_date: string;
+  status: PlanStatus;
+}
+
+/**
  * Create Plan Command - POST /api/v1/plans
  * Only name and start_date are required from client
  */
