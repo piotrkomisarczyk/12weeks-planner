@@ -18,6 +18,11 @@ const currentDay = getDayIndex(plan.start_date, now);
 // Define navigation links
 const navLinks = [
   {
+    href: '/plans',
+    icon: 'BookOpen',
+    label: 'Plans',
+  },
+  {
     href: `/plans/${plan.id}`,
     icon: 'Home',
     label: 'Dashboard',
