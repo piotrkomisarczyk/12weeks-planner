@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -115,8 +116,8 @@ export function DayHeader({
   };
 
   return (
-    <div className="border-b bg-card rounded-lg shadow-sm">
-      <div className="px-6 py-4">
+    <Card className="rounded-lg">
+      <CardContent>
         {/* Plan Name and Week Badge */}
         <div className="flex items-center gap-3 mb-3">
         </div>
@@ -127,6 +128,10 @@ export function DayHeader({
             <h1 className="text-3xl font-bold">
               Day {dayNumber + (weekNumber - 1) * 7}
             </h1>
+
+            <Badge variant="default" className="text-sm">
+              Week {weekNumber}
+            </Badge>
             
             {/* Date Display with Picker */}
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
@@ -155,9 +160,7 @@ export function DayHeader({
                 />
               </PopoverContent>
             </Popover>
-            <Badge variant="default" className="text-sm">
-              Week {weekNumber}
-            </Badge>
+
 
           </div>
 
@@ -171,11 +174,11 @@ export function DayHeader({
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous Day
             </Button>
-            
+
             <div className="text-sm text-muted-foreground px-2">
               Day {dayNumber} / 7
             </div>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -189,7 +192,7 @@ export function DayHeader({
         </div>
 
         {/* Day of Week Progress Indicator */}
-        <div className="mt-4">
+        <div className="mt-3">
           <div className="flex gap-2">
             {Array.from({ length: 7 }, (_, i) => i + 1).map((day) => (
               <button
@@ -210,8 +213,8 @@ export function DayHeader({
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
