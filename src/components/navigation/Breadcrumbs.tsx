@@ -45,8 +45,10 @@ function parsePath(path: string, planTitle?: string): BreadcrumbSegment[] {
       });
     } else if (i > 0 && parts[i - 1] === 'plans' && part.match(/^[a-f0-9-]{36}$/i)) {
       // This is a plan ID, use plan title if available
+      const title = planTitle || 'Plan';
+      const truncatedTitle = title.length > 64 ? title.slice(0, 64) + '...' : title;
       segments.push({
-        label: planTitle || 'Plan',
+        label: truncatedTitle,
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
       });
