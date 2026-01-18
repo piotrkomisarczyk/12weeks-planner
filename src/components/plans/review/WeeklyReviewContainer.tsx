@@ -60,7 +60,7 @@ export default function WeeklyReviewContainer({
       />
 
       {/* Goal Progress Section */}
-      <Accordion type="single" collapsible defaultValue="goal-progress" className="bg-white rounded-lg border">
+      <Accordion type="single" collapsible defaultValue="goal-progress" className="bg-card rounded-lg border border-border">
         <AccordionItem value="goal-progress">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
             <h2 className="text-xl font-semibold">Goal Progress</h2>
@@ -75,7 +75,7 @@ export default function WeeklyReviewContainer({
       </Accordion>
 
       {/* Reflection Form */}
-      <Accordion type="single" collapsible defaultValue="weekly-reflection" className="bg-white rounded-lg border">
+      <Accordion type="single" collapsible defaultValue="weekly-reflection" className="bg-card rounded-lg border border-border">
         <AccordionItem value="weekly-reflection">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
             <h2 className="text-xl font-semibold">Weekly Reflection</h2>
@@ -98,8 +98,8 @@ export default function WeeklyReviewContainer({
 
       {/* Error display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700">{error}</p>
+        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+          <p className="text-destructive">{error}</p>
         </div>
       )}
     </div>

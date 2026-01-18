@@ -114,7 +114,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply bg-background;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  html.dark {
+    color-scheme: dark;
   }
 }

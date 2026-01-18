@@ -17,19 +17,19 @@ export default function ReviewCompletionStatus({
   onToggleComplete
 }: ReviewCompletionStatusProps) {
   return (
-    <div className="bg-white rounded-lg border p-6">
+    <div className="bg-card rounded-lg border border-border p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           {isCompleted ? (
-            <CheckCircle className="h-6 w-6 text-green-500" />
+            <CheckCircle className="h-6 w-6 text-green-500 dark:text-green-400" />
           ) : (
-            <Circle className="h-6 w-6 text-gray-400" />
+            <Circle className="h-6 w-6 text-muted-foreground" />
           )}
           <div>
-            <h3 className="font-medium text-gray-900">
+            <h3 className="font-medium text-foreground">
               {isCompleted ? 'Review Completed' : 'Mark Review as Complete'}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {isCompleted
                 ? 'This weekly review has been marked as complete.'
                 : 'Mark this review as complete when you\'ve finished reflecting and updating goal progress.'

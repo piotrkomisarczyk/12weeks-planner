@@ -68,12 +68,12 @@ const PRIORITY_COLORS: Record<TaskPriority, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  work: 'bg-blue-500 text-white',
-  finance: 'bg-green-500 text-white',
-  hobby: 'bg-purple-500 text-white',
-  relationships: 'bg-pink-500 text-white',
-  health: 'bg-red-500 text-white',
-  development: 'bg-orange-500 text-white',
+  work: 'bg-blue-500 text-white dark:bg-blue-600',
+  finance: 'bg-green-500 text-white dark:bg-green-600',
+  hobby: 'bg-purple-500 text-white dark:bg-purple-600',
+  relationships: 'bg-pink-500 text-white dark:bg-pink-600',
+  health: 'bg-red-500 text-white dark:bg-red-600',
+  development: 'bg-orange-500 text-white dark:bg-orange-600',
 };
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -213,7 +213,7 @@ export function TaskCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group flex items-center gap-2 rounded-md border bg-white p-2.5 hover:bg-accent/30 transition-colors shadow-sm',
+        'group flex items-center gap-2 rounded-md border border-border bg-card p-2.5 hover:bg-accent/30 transition-colors shadow-sm',
         task.status === 'completed' && 'opacity-60',
         task.isSaving && 'opacity-50 pointer-events-none',
         isDragging && 'opacity-50 shadow-lg ring-2 ring-primary'
@@ -269,7 +269,7 @@ export function TaskCard({
             <Badge 
               className={cn(
                 'text-xs uppercase font-semibold',
-                CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || 'bg-gray-500 text-white'
+                CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || 'bg-gray-500 text-white dark:bg-gray-600'
               )}
             >
               {getLongTermGoalCategory(task.long_term_goal_id)}

@@ -13,13 +13,13 @@ interface ReviewHeaderProps {
 
 export default function ReviewHeader({ planId, weekNumber }: ReviewHeaderProps) {
   return (
-    <div className="bg-white rounded-lg border p-6">
+    <div className="bg-card rounded-lg border border-border p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-foreground">
             Weekly Review - Week {weekNumber}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Reflect on your progress this week
           </p>
         </div>

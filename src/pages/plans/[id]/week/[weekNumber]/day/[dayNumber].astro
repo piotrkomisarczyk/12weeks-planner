@@ -94,14 +94,16 @@ const displayDate = dayDate.toLocaleDateString('en-US', {
 ---
 
 <Layout title={`${plan.name} - Week ${weekNumber} Day ${dayNumber}`}>
-  <DayPageContainer
-    client:load
-    planId={planId}
-    planName={plan.name}
-    planStartDate={startDate}
-    weekNumber={weekNumber}
-    dayNumber={dayNumber}
-  />
-  <Toaster client:load position="bottom-right" />
+  <div class="min-h-screen bg-background">
+    <DayPageContainer
+      client:load
+      planId={planId}
+      planName={plan.name}
+      planStartDate={startDate}
+      weekNumber={weekNumber}
+      dayNumber={dayNumber}
+    />
+    <Toaster client:load position="bottom-right" />
+  </div>
 </Layout>
 

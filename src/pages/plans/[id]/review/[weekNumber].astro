@@ -98,13 +98,15 @@ try {
 ---
 
 <Layout title={`Weekly Review - Week ${weekNumber}`}>
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-    <WeeklyReviewContainer
-      client:load
-      planId={planId}
-      weekNumber={weekNumber}
-      initialReview={weeklyReview}
-      initialGoals={goals}
-    />
+  <div class="min-h-screen bg-background">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <WeeklyReviewContainer
+        client:load
+        planId={planId}
+        weekNumber={weekNumber}
+        initialReview={weeklyReview}
+        initialGoals={goals}
+      />
+    </div>
   </div>
 </Layout>

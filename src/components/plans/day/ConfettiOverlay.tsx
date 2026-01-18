@@ -60,12 +60,12 @@ export function ConfettiOverlay() {
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
       {/* Celebration Message */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl px-8 py-6 text-center animate-bounce-in">
+        <div className="bg-card/95 backdrop-blur-sm rounded-2xl shadow-2xl px-8 py-6 text-center animate-bounce-in">
           <div className="text-6xl mb-3">🎉</div>
-          <h2 className="text-3xl font-bold text-neutral-900 mb-2">
+          <h2 className="text-3xl font-bold text-foreground mb-2">
             All Done!
           </h2>
-          <p className="text-neutral-600 text-lg">
+          <p className="text-muted-foreground text-lg">
             You've completed all tasks for today!
           </p>
           <button

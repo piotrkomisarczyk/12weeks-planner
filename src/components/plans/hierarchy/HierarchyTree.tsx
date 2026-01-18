@@ -9,7 +9,7 @@ interface HierarchyTreeProps {
 export function HierarchyTree({ nodes, onNavigate }: HierarchyTreeProps) {
   if (nodes.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No plan items to display. Try adjusting the filters above.
       </div>
     );

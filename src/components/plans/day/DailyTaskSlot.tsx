@@ -53,19 +53,19 @@ interface DailyTaskSlotProps {
 
 const SLOT_COLORS: Record<DaySlot, { bg: string; border: string; headerBg: string }> = {
   most_important: {
-    bg: 'bg-white',
-    border: 'border-red-200',
-    headerBg: 'bg-red-100',
+    bg: 'bg-card',
+    border: 'border-red-200 dark:border-red-900/60',
+    headerBg: 'bg-red-100 dark:bg-red-950/50',
   },
   secondary: {
-    bg: 'bg-white',
-    border: 'border-yellow-200',
-    headerBg: 'bg-yellow-100',
+    bg: 'bg-card',
+    border: 'border-yellow-200 dark:border-yellow-900/60',
+    headerBg: 'bg-yellow-100 dark:bg-yellow-950/50',
   },
   additional: {
-    bg: 'bg-white',
-    border: 'border-blue-200',
-    headerBg: 'bg-blue-100',
+    bg: 'bg-card',
+    border: 'border-blue-200 dark:border-blue-900/60',
+    headerBg: 'bg-blue-100 dark:bg-blue-950/50',
   },
 };
 
@@ -133,7 +133,7 @@ export function DailyTaskSlot({
                   'text-xs font-medium px-2 py-1 rounded-full',
                   isFull
                     ? 'bg-red-500 text-white'
-                    : 'bg-white/80 text-neutral-700'
+                    : 'bg-card/80 text-muted-foreground'
                 )}
               >
                 {tasks.length} / {limit}

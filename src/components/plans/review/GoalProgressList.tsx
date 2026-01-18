@@ -15,7 +15,7 @@ interface GoalProgressListProps {
 export default function GoalProgressList({ goals, onProgressUpdate }: GoalProgressListProps) {
   if (goals.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>No goals found for this plan.</p>
         <p className="text-sm mt-1">Add goals in the goals section to track progress here.</p>
       </div>

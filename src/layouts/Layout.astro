@@ -67,15 +67,28 @@ const userEmail = user?.email || 'dev@example.com';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="bg-background">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const shouldUseDark = stored === 'dark' || (!stored && prefersDark);
+          document.documentElement.classList.toggle('dark', shouldUseDark);
+          document.documentElement.style.colorScheme = shouldUseDark ? 'dark' : 'light';
+        } catch {
+          // If localStorage is unavailable, fall back to CSS defaults.
+        }
+      })();
+    </script>
     <title>{title}</title>
   </head>
-  <body>
+  <body class="bg-background text-foreground">
     <TopNavigation plan={plan} userEmail={userEmail} />
     <main class="min-h-screen bg-background">
       <slot />

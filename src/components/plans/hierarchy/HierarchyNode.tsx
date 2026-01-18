@@ -18,10 +18,10 @@ const ICONS: Record<NodeType, React.ComponentType<{ className?: string }>> = {
 };
 
 const STATUS_COLORS = {
-  todo: 'text-gray-600',
+  todo: 'text-muted-foreground',
   in_progress: 'text-blue-600 font-medium',
   completed: 'text-green-700 font-medium',
-  cancelled: 'text-gray-400 line-through',
+  cancelled: 'text-muted-foreground line-through',
   postponed: 'text-amber-600 font-medium',
 };
 
@@ -37,26 +37,26 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
 
   const getStatusIcon = () => {
     if (node.isCompleted) {
-      return <CheckCircle className="w-4 h-4 text-green-600" />;
+      return <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />;
     }
     if (node.status === 'in_progress') {
-      return <CircleSlash className="w-4 h-4 text-blue-500" />;
+      return <CircleSlash className="w-4 h-4 text-blue-500 dark:text-blue-400" />;
     }
     if (node.status === 'cancelled') {
-      return <Circle className="w-4 h-4 text-gray-400" />;
+      return <Circle className="w-4 h-4 text-muted-foreground" />;
     }
     if (node.status === 'postponed') {
-      return <Clock className="w-4 h-4 text-amber-500" />;
+      return <Clock className="w-4 h-4 text-amber-500 dark:text-amber-400" />;
     }
-    return <Circle className="w-4 h-4 text-gray-400" />;
+    return <Circle className="w-4 h-4 text-muted-foreground" />;
   };
 
   const getStatusTextColor = () => {
-    if (node.isCompleted) return 'text-green-700';
+    if (node.isCompleted) return 'text-green-700 dark:text-green-400';
     if (node.status && STATUS_COLORS[node.status as keyof typeof STATUS_COLORS]) {
       return STATUS_COLORS[node.status as keyof typeof STATUS_COLORS];
     }
-    return 'text-gray-700';
+    return 'text-foreground';
   };
 
   const handleClick = () => {
@@ -77,7 +77,7 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
   return (
     <div>
       <div
-        className="flex items-center py-2 px-2 hover:bg-gray-50 cursor-pointer rounded-md transition-colors"
+        className="flex items-center py-2 px-2 hover:bg-muted/50 cursor-pointer rounded-md transition-colors"
         style={indentationStyle}
         onClick={handleClick}
       >
@@ -85,9 +85,9 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
         <div className="w-4 h-4 mr-2 flex items-center justify-center">
           {hasChildren ? (
             isExpanded ? (
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-500" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             )
           ) : null}
         </div>
@@ -99,7 +99,7 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
 
         {/* Type Icon */}
         <div className="w-4 h-4 mr-2 flex items-center justify-center">
-          <Icon className="w-4 h-4 text-gray-500" />
+          <Icon className="w-4 h-4 text-muted-foreground" />
         </div>
 
         {/* Title */}
@@ -117,21 +117,21 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
 
         {/* Progress for goals */}
         {node.progress !== undefined && (
-          <div className="ml-2 text-xs text-gray-500">
+          <div className="ml-2 text-xs text-muted-foreground">
             {node.progress}%
           </div>
         )}
 
         {/* Priority for tasks */}
         {node.metadata.priority && (
-          <div className="ml-2 text-xs px-1 py-0.5 bg-gray-100 rounded text-gray-600">
+          <div className="ml-2 text-xs px-1 py-0.5 bg-muted rounded text-muted-foreground">
             {node.metadata.priority}
           </div>
         )}
 
         {/* Week number */}
         {node.weekNumber && (
-          <div className="ml-2 text-xs text-gray-400">
+          <div className="ml-2 text-xs text-muted-foreground">
             Week {node.weekNumber}
           </div>
         )}

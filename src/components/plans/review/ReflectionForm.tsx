@@ -61,10 +61,10 @@ export default function ReflectionForm({ values, onChange, isSaving }: Reflectio
       ))}
 
       {/* Save status indicator */}
-      <div className="flex justify-end text-sm text-gray-500">
+      <div className="flex justify-end text-sm text-muted-foreground">
         {isSaving ? (
           <span className="flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground mr-2"></div>
             Saving...
           </span>
         ) : values.lastSavedAt ? (

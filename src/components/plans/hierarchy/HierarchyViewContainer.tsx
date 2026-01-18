@@ -75,8 +75,8 @@ export function HierarchyViewContainer({ planId, onNavigate }: HierarchyViewCont
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
-          <div className="h-24 bg-gray-200 rounded-lg mb-6"></div>
-          <div className="h-96 bg-gray-200 rounded-lg"></div>
+          <div className="h-24 bg-muted rounded-lg mb-6"></div>
+          <div className="h-96 bg-muted rounded-lg"></div>
         </div>
       </div>
     );
