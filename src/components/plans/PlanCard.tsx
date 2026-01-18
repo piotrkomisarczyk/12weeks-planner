@@ -16,6 +16,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { PlanViewModel } from '@/lib/plan-utils';
 import { formatDate } from '@/lib/plan-utils';
 import { cn } from '@/lib/utils';
@@ -34,6 +39,9 @@ interface PlanCardProps {
 export function PlanCard({ plan, actions }: PlanCardProps) {
   const showActivateButton = plan.status !== 'active' && plan.status !== 'completed';
   const showArchiveButton = plan.status !== 'archived';
+
+  // Truncate plan name to 64 characters with ellipsis if longer
+  const truncatedName = plan.name.length > 64 ? `${plan.name.slice(0, 64)}...` : plan.name;
 
   // Determine card styling based on status
   const cardVariant = {
@@ -78,12 +86,21 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">{plan.name}</CardTitle>
-              <Badge variant={badgeVariant}>{plan.displayStatus}</Badge>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <CardTitle className="text-lg cursor-default">{truncatedName}</CardTitle>
+                </TooltipTrigger>
+                {plan.name.length > 64 && (
+                  <TooltipContent>
+                    <p>{plan.name}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             </div>
             <CardDescription>
               {formatDate(plan.start_date)} - {formatDate(plan.endDate)}
             </CardDescription>
+            <Badge variant={badgeVariant}>{plan.displayStatus}</Badge>
           </div>
 
           <CardAction>
@@ -137,28 +154,24 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
           </CardAction>
         </div>
       </CardHeader>
-
+      {plan.status === 'active' || plan.status === 'completed' && (
       <CardContent>
         <div className="space-y-2 text-sm">
-          {plan.currentWeek !== null && plan.status === 'active' && (
+          {plan.currentWeek !== null && (
             <div className="text-muted-foreground">
               Week {plan.currentWeek} of 12
             </div>
           )}
-          {plan.isOverdue && plan.status === 'active' && (
+          {plan.isOverdue  && (
             <div className="text-destructive font-medium">Overdue</div>
           )}
           {plan.status === 'completed' && (
             <div className="text-muted-foreground">Completed</div>
           )}
-          {plan.status === 'ready' && (
-            <div className="text-muted-foreground">Ready to start</div>
-          )}
-          {plan.status === 'archived' && (
-            <div className="text-muted-foreground">Archived</div>
-          )}
-        </div>
-      </CardContent>
+
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 }

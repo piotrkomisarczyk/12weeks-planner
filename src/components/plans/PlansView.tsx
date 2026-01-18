@@ -241,7 +241,7 @@ export function PlansView() {
             >
               Ready to Start
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
               {readyPlans.map((plan) => (
                 <PlanCard key={plan.id} plan={plan} actions={planActions} />
               ))}
@@ -258,7 +258,7 @@ export function PlansView() {
             >
               Completed
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
               {completedPlans.map((plan) => (
                 <PlanCard key={plan.id} plan={plan} actions={planActions} />
               ))}
@@ -275,7 +275,7 @@ export function PlansView() {
             >
               Archived
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
               {archivedPlans.map((plan) => (
                 <PlanCard key={plan.id} plan={plan} actions={planActions} />
               ))}
