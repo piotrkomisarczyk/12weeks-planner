@@ -116,8 +116,9 @@
   }
   html {
     @apply bg-background;
-    /* Ensure scrollbar is always visible to prevent layout shifts when dropdowns open/close */
-    overflow-y: scroll;
+    /* Keep layout stable without forcing scroll to top when menus open */
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-background text-foreground;

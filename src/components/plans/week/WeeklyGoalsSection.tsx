@@ -8,7 +8,13 @@ import { useState } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { WeeklyGoalCard } from './WeeklyGoalCard';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } from '@/types';
 import { CreateWeeklyGoalDialog } from './CreateWeeklyGoalDialog';
 
@@ -51,73 +57,69 @@ export function WeeklyGoalsSection({
     setIsCreateDialogOpen(false);
   };
 
-  return (
-    <div className="space-y-4">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold">Weekly Goals</h2>
-          <p className="text-sm text-muted-foreground">
-            Plan your goals for this week {isAtGoalLimit && `(${goals.length}/${MAX_WEEKLY_GOALS})`}
-          </p>
-        </div>
-        <Button 
-          onClick={() => setIsCreateDialogOpen(true)}
-          disabled={isAtGoalLimit}
-          title={isAtGoalLimit ? `Maximum ${MAX_WEEKLY_GOALS} weekly goals reached` : undefined}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Weekly Goal
-        </Button>
-      </div>
+  const disabledTooltipText = `Maximum weekly goals reached. You can have up to ${MAX_WEEKLY_GOALS} weekly goals. Delete an existing goal to add a new one.`;
 
-      {/* Goal Limit Warning */}
-      {isAtGoalLimit && (
-        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
-            <strong>Maximum weekly goals reached.</strong> You can have up to {MAX_WEEKLY_GOALS} weekly goals. 
-            Delete an existing goal to add a new one.
-          </p>
-        </div>
-      )}
+  return (
+    <div className="space-y-6">
+      {/* Section Header */}
+      <Card className="rounded-lg">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Weekly Goals</h2>
+              <div className="text-sm text-muted-foreground mt-1">
+                Plan your goals for this week {isAtGoalLimit && `(${goals.length}/${MAX_WEEKLY_GOALS})`}
+              </div>
+            </div>
+            {isAtGoalLimit ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <Button
+                      onClick={() => setIsCreateDialogOpen(true)}
+                      disabled
+                      aria-disabled="true"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Weekly Goal
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{disabledTooltipText}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Weekly Goal
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Goals List */}
-      {goals.length === 0 ? (
-        <div className="border-2 border-dashed rounded-lg p-12 text-center">
-          <p className="text-muted-foreground mb-4">
-            No weekly goals yet. Create your first goal to get started.
-          </p>
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)} 
-            variant="outline"
-            disabled={isAtGoalLimit}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Weekly Goal
-          </Button>
+      <SortableContext items={goals.map(g => g.id)} strategy={verticalListSortingStrategy}>
+        <div className="space-y-6">
+          {goals.map((goal) => (
+            <WeeklyGoalCard
+              key={goal.id}
+              goal={goal}
+              availableLongTermGoals={availableLongTermGoals}
+              availableMilestones={availableMilestones}
+              onUpdate={onUpdateGoal}
+              onDelete={onDeleteGoal}
+              onAddTask={onAddTask}
+              onUpdateTask={onUpdateTask}
+              onDeleteTask={onDeleteTask}
+              onAssignDay={onAssignDay}
+              onLinkGoal={onLinkGoal}
+              onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
+            />
+          ))}
         </div>
-      ) : (
-        <SortableContext items={goals.map(g => g.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-4">
-            {goals.map((goal) => (
-              <WeeklyGoalCard
-                key={goal.id}
-                goal={goal}
-                availableLongTermGoals={availableLongTermGoals}
-                availableMilestones={availableMilestones}
-                onUpdate={onUpdateGoal}
-                onDelete={onDeleteGoal}
-                onAddTask={onAddTask}
-                onUpdateTask={onUpdateTask}
-                onDeleteTask={onDeleteTask}
-                onAssignDay={onAssignDay}
-                onLinkGoal={onLinkGoal}
-                onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      )}
+      </SortableContext>
 
       {/* Create Goal Dialog */}
       <CreateWeeklyGoalDialog
@@ -129,4 +131,3 @@ export function WeeklyGoalsSection({
     </div>
   );
 }
-

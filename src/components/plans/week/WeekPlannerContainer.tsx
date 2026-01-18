@@ -411,7 +411,7 @@ export function WeekPlannerContainer({
           collisionDetection={closestCorners}
           onDragEnd={handleDragEnd}
         >
-          <div className="space-y-8">
+          <div className="space-y-6 pt-6">
             {/* Weekly Goals Section */}
             <WeeklyGoalsSection
               goals={data.weeklyGoals}

@@ -246,13 +246,6 @@ export function WeeklyGoalCard({
               />
             ))}
 
-            {/* Empty State */}
-            {goal.tasks.length === 0 && !isAddingTask && (
-              <div className="text-center py-6 text-sm text-muted-foreground">
-                No tasks yet. Add your first task below.
-              </div>
-            )}
-
           {/* Add Task */}
           {isAddingTask ? (
             <InlineAddTask
