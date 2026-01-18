@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Target, Flag, Calendar, CheckCircle, Circle, CircleSlash, Clock, Square } from 'lucide-react';
+import { BookOpen, ChevronRight, ChevronDown, Target, Flag, Calendar, CheckCircle, Circle, CircleSlash, Clock, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { HierarchyTreeNode, NodeType } from '@/types';
 
@@ -9,7 +9,7 @@ interface HierarchyNodeProps {
 }
 
 const ICONS: Record<NodeType, React.ComponentType<{ className?: string }>> = {
-  plan: Target,
+  plan: BookOpen,
   goal: Target,
   milestone: Flag,
   weekly_goal: Calendar,

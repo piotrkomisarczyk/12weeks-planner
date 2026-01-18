@@ -16,7 +16,8 @@ import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
 import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } from '@/types';
-import { Link2, MoreVertical, Trash2, Plus, Flag } from 'lucide-react';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import { Target, MoreVertical, Trash2, Plus, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WeeklyGoalCardProps {
@@ -35,13 +36,12 @@ interface WeeklyGoalCardProps {
 
 const MAX_TASKS_PER_GOAL = 15;
 
-const CATEGORY_COLORS: Record<string, string> = {
-  work: 'bg-blue-500 text-white',
-  finance: 'bg-green-500 text-white',
-  hobby: 'bg-purple-500 text-white',
-  relationships: 'bg-pink-500 text-white',
-  health: 'bg-red-500 text-white',
-  development: 'bg-orange-500 text-white',
+/**
+ * Get the display label for a goal category
+ */
+const getCategoryLabel = (category: string): string => {
+  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  return categoryItem?.label || category;
 };
 
 export function WeeklyGoalCard({
@@ -148,18 +148,15 @@ export function WeeklyGoalCard({
             {/* Category, Long-term Goal & Milestone Links */}
             <div className="flex flex-wrap gap-2 mt-2">
               {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
-                <Badge 
-                  className={cn(
-                    'text-xs uppercase font-semibold',
-                    CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'
-                  )}
+                <Badge
+                  className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'}
                 >
-                  {getLongTermGoalCategory(goal.long_term_goal_id)}
+                  {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
                 </Badge>
               )}
               {goal.long_term_goal_id && (
                 <Badge variant="outline" className="text-xs gap-1">
-                  <Link2 className="h-3 w-3" />
+                  <Target className="h-3 w-3" />
                   <span className="truncate max-w-[150px]">
                     {getLongTermGoalTitle(goal.long_term_goal_id)}
                   </span>
@@ -190,7 +187,7 @@ export function WeeklyGoalCard({
             <DropdownMenuContent align="end" className="w-48">
               {/* Link to Goal & Milestone */}
               <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
-                <Link2 className="mr-2 h-4 w-4" />
+                <Target className="mr-2 h-4 w-4" />
                 Link Goal & Milestone
               </DropdownMenuItem>
 

@@ -14,7 +14,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TaskStatusControl } from './TaskStatusControl';
 import { DragHandle } from './DragHandle';
 import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
-import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Link2 } from 'lucide-react';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
 
@@ -32,21 +33,20 @@ interface TaskItemProps {
 }
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  A: 'bg-red-500 hover:bg-red-600',
+  A: 'bg-red-700 hover:bg-red-800',
   B: 'bg-yellow-500 hover:bg-yellow-600',
   C: 'bg-blue-500 hover:bg-blue-600',
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  work: 'bg-blue-500 text-white',
-  finance: 'bg-green-500 text-white',
-  hobby: 'bg-purple-500 text-white',
-  relationships: 'bg-pink-500 text-white',
-  health: 'bg-red-500 text-white',
-  development: 'bg-orange-500 text-white',
+/**
+ * Get the display label for a goal category
+ */
+const getCategoryLabel = (category: string): string => {
+  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  return categoryItem?.label || category;
 };
 
-const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export function TaskItem({
   task,
@@ -247,20 +247,17 @@ export function TaskItem({
       
       {/* Category Badge - Only for ad-hoc tasks with assigned goal */}
       {isAdHoc && task.long_term_goal_id && getLongTermGoalCategory(task.long_term_goal_id) && (
-        <Badge 
-          className={cn(
-            'text-xs uppercase font-semibold',
-            CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || 'bg-gray-500 text-white'
-          )}
+        <Badge
+          className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || 'bg-gray-500 text-white'}
         >
-          {getLongTermGoalCategory(task.long_term_goal_id)}
+          {getCategoryLabel(getLongTermGoalCategory(task.long_term_goal_id)!)}
         </Badge>
       )}
 
       {/* Long-Term Goal Indicator */}
       {task.long_term_goal_id && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Link2 className="h-3 w-3" />
+          <Target className="h-3 w-3" />
           <span className="truncate max-w-[200px]" title={getLongTermGoalTitle(task.long_term_goal_id) || undefined}>
             {getLongTermGoalTitle(task.long_term_goal_id)}
           </span>
@@ -328,7 +325,7 @@ export function TaskItem({
           {/* Link Goal & Milestone - Only for ad-hoc tasks */}
           {!isLinkedToWeeklyGoal && (
             <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
-              <Link2 className="mr-2 h-4 w-4" />
+              <Target className="mr-2 h-4 w-4" />
               Link Goal & Milestone
             </DropdownMenuItem>
           )}

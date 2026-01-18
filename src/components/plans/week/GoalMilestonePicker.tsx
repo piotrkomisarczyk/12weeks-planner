@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Target, Flag, CheckCircle2 } from 'lucide-react';
 import type { SimpleGoal, SimpleMilestone } from '@/types';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import { cn } from '@/lib/utils';
 
 interface GoalMilestonePickerProps {
@@ -34,13 +35,12 @@ interface GoalMilestonePickerProps {
 
 type Step = 'goal' | 'milestone';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  work: 'bg-blue-500',
-  finance: 'bg-green-500',
-  hobby: 'bg-purple-500',
-  relationships: 'bg-pink-500',
-  health: 'bg-red-500',
-  development: 'bg-orange-500',
+/**
+ * Get the display label for a goal category
+ */
+const getCategoryLabel = (category: string): string => {
+  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  return categoryItem?.label || category;
 };
 
 export function GoalMilestonePicker({
@@ -166,12 +166,9 @@ export function GoalMilestonePicker({
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm mb-1">{goal.title}</div>
                           <Badge
-                            className={cn(
-                              'text-xs uppercase',
-                              CATEGORY_COLORS[goal.category] || 'bg-gray-500'
-                            )}
+                            className={GOAL_CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'}
                           >
-                            {goal.category}
+                            {getCategoryLabel(goal.category)}
                           </Badge>
                         </div>
                         {currentGoalId === goal.id && (

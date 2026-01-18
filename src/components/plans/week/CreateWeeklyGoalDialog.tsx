@@ -7,10 +7,12 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SimpleGoal } from '@/types';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 
 interface CreateWeeklyGoalDialogProps {
   open: boolean;
@@ -18,6 +20,14 @@ interface CreateWeeklyGoalDialogProps {
   onSubmit: (title: string, longTermGoalId?: string) => void;
   availableLongTermGoals: SimpleGoal[];
 }
+
+/**
+ * Get the display label for a goal category
+ */
+const getCategoryLabel = (category: string): string => {
+  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  return categoryItem?.label || category;
+};
 
 export function CreateWeeklyGoalDialog({
   open,
@@ -94,7 +104,9 @@ export function CreateWeeklyGoalDialog({
                     {availableLongTermGoals.map((goal) => (
                       <SelectItem key={goal.id} value={goal.id}>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground uppercase">{goal.category}</span>
+                          <Badge className={GOAL_CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'}>
+                            {getCategoryLabel(goal.category)}
+                          </Badge>
                           <span>{goal.title}</span>
                         </div>
                       </SelectItem>
