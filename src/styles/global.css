@@ -116,6 +116,8 @@
   }
   html {
     @apply bg-background;
+    /* Ensure scrollbar is always visible to prevent layout shifts when dropdowns open/close */
+    overflow-y: scroll;
   }
   body {
     @apply bg-background text-foreground;
