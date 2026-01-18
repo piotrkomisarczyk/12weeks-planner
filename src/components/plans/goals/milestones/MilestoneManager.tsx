@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import { useMilestones } from '../hooks/useMilestones';
 import { MilestoneList } from './MilestoneList';
 import { MilestoneForm } from './MilestoneForm';
-import type { PlanContext } from '../types';
+import type { PlanContext } from '@/types';
 import { toast } from 'sonner';
 
 interface MilestoneManagerProps {

@@ -10,7 +10,7 @@ import { GoalCard } from './GoalCard';
 import { CreateGoalDialog } from './CreateGoalDialog';
 import { EmptyState } from './EmptyState';
 import { toast } from 'sonner';
-import type { PlanContext } from './types';
+import type { PlanContext } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface GoalsManagerProps {

@@ -28,7 +28,7 @@ import { GoalProgress } from './GoalProgress';
 import { MilestoneManager } from './milestones/MilestoneManager';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import type { GoalDTO, GoalCategory } from '@/types';
-import type { PlanContext } from './types';
+import type { PlanContext } from '@/types';
 
 interface GoalCardProps {
   goal: GoalDTO;

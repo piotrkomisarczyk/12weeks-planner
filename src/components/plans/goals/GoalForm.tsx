@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import type { GoalCategory } from '@/types';
-import type { SaveStatus } from './types';
+import type { SaveStatus } from '@/types';
 
 interface GoalFormProps {
   title: string;
