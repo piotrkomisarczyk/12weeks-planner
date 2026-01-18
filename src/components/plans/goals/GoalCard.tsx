@@ -78,7 +78,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
       collapsible
       value={expandedValue}
       onValueChange={setExpandedValue}
-      className="border rounded-lg"
+      className="bg-card border rounded-lg"
     >
       <AccordionItem value={goal.id} className="border-none">
         <div className="p-4">

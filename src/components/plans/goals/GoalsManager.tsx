@@ -11,6 +11,7 @@ import { CreateGoalDialog } from './CreateGoalDialog';
 import { EmptyState } from './EmptyState';
 import { toast } from 'sonner';
 import type { PlanContext } from './types';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface GoalsManagerProps {
   planContext: PlanContext;
@@ -89,60 +90,31 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-3xl font-bold mb-1">{planContext.name}</h1>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <span>
-                {new Date(planContext.startDate).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-                {' '}-{' '}
-                {new Date(planContext.endDate).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-              </span>
-              {planContext.isArchived && (
-                <span className="px-2 py-0.5 bg-muted rounded text-xs font-medium">
-                  Archived
-                </span>
-              )}
-            </div>
-          </div>
-          <a 
-            href="/plans" 
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="size-4" />
-            Back to Plans
-          </a>
-        </div>
-      </div>
-
+    
       {/* Goals Section */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Long-Term Goals</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {goals.length} of 6 goals created
-            </p>
-          </div>
-          
-          {goals.length > 0 && (
-            <CreateGoalDialog
-              onCreateGoal={handleAddGoal}
-              disabled={planContext.isArchived}
-              currentGoalsCount={goals.length}
-            />
-          )}
-        </div>
+        {/* <div className="flex items-center justify-between"> */}
+        <Card className="rounded-lg">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Long-Term Goals</h2>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {goals.length} of 6 goals created
+                </div>
+              </div>
+
+              {goals.length > 0 && (
+                <CreateGoalDialog
+                  onCreateGoal={handleAddGoal}
+                  disabled={planContext.isArchived}
+                  currentGoalsCount={goals.length}
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        {/* </div> */}
 
         {/* Empty State */}
         {goals.length === 0 ? (
