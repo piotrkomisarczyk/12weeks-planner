@@ -12,6 +12,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
@@ -19,6 +27,14 @@ import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } 
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import { Target, MoreVertical, Trash2, Plus, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface ConfirmDialogState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  variant?: 'default' | 'destructive';
+}
 
 interface WeeklyGoalCardProps {
   goal: WeeklyGoalViewModel;
@@ -61,6 +77,12 @@ export function WeeklyGoalCard({
   const [editValue, setEditValue] = useState(goal.title);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
 
   const completedTasks = goal.tasks.filter(t => t.status === 'completed').length;
   const totalTasks = goal.tasks.length;
@@ -107,13 +129,23 @@ export function WeeklyGoalCard({
 
   const handleDelete = () => {
     const taskCount = goal.tasks.length;
-    const message = taskCount > 0
-      ? `Are you sure you want to delete this weekly goal? This will also delete ${taskCount} task${taskCount > 1 ? 's' : ''}.`
-      : 'Are you sure you want to delete this weekly goal?';
+    const description = taskCount > 0
+      ? `Are you sure you want to delete "${goal.title}"? This will also delete ${taskCount} task${taskCount > 1 ? 's' : ''}. This action cannot be undone.`
+      : `Are you sure you want to delete "${goal.title}"? This action cannot be undone.`;
 
-    if (confirm(message)) {
-      onDelete(goal.id);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Weekly Goal',
+      description,
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          onDelete(goal.id);
+        } finally {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const handleAddTask = (title: string) => {
@@ -286,6 +318,37 @@ export function WeeklyGoalCard({
         title="Link Weekly Goal"
         description="Link this weekly goal to a long-term goal and optionally a milestone."
       />
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              onClick={confirmDialog.onConfirm}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

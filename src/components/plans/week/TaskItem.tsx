@@ -11,6 +11,15 @@ import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { TaskStatusControl } from './TaskStatusControl';
 import { DragHandle } from './DragHandle';
 import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
@@ -18,6 +27,14 @@ import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
+
+interface ConfirmDialogState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  variant?: 'default' | 'destructive';
+}
 
 interface TaskItemProps {
   task: TaskViewModel;
@@ -63,6 +80,12 @@ export function TaskItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.title);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Local state for optimistic priority display (for debounced updates)
@@ -153,9 +176,19 @@ export function TaskItem({
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      onDelete(task.id);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Task',
+      description: `Are you sure you want to delete "${task.title}"? This action cannot be undone.`,
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          onDelete(task.id);
+        } finally {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const getMilestoneTitle = (milestoneId: string | null) => {
@@ -407,6 +440,37 @@ export function TaskItem({
         title="Link Task to Goal & Milestone"
         description="Link this task to a long-term goal and optionally a milestone."
       />
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              onClick={confirmDialog.onConfirm}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

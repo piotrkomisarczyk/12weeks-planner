@@ -13,6 +13,15 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -35,6 +44,14 @@ import type {
 } from '@/types';
 import { MoreVertical, Flag, Link2, Copy, MoveRight, MoveLeft, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface ConfirmDialogState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  variant?: 'default' | 'destructive';
+}
 
 interface TaskCardProps {
   task: DayTaskViewModel;
@@ -101,6 +118,12 @@ export function TaskCard({
   const [editValue, setEditValue] = useState(task.title);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [copyMoveMenuOpen, setCopyMoveMenuOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Local state for optimistic priority display (for debounced updates)
@@ -174,9 +197,19 @@ export function TaskCard({
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      onDelete(task.id);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Task',
+      description: `Are you sure you want to delete "${task.title}"? This action cannot be undone.`,
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          onDelete(task.id);
+        } finally {
+          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const handleGoalMilestoneSelect = (goalId: string | null, milestoneId: string | null) => {
@@ -479,6 +512,37 @@ export function TaskCard({
         title="Link Task to Goal & Milestone"
         description="Link this task to a long-term goal and optionally a milestone."
       />
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              onClick={confirmDialog.onConfirm}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
