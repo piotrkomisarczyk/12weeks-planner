@@ -132,8 +132,8 @@ export function DailyTaskSlot({
                 className={cn(
                   'text-xs font-medium px-2 py-1 rounded-full',
                   isFull
-                    ? 'bg-red-500 text-white'
-                    : 'bg-card/80 text-muted-foreground'
+                    ? 'bg-red-600 text-white dark:bg-red-800'
+                    : 'bg-card/80 text-muted-foreground dark:bg-card/80'
                 )}
               >
                 {tasks.length} / {limit}

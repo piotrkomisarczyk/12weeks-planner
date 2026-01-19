@@ -62,9 +62,9 @@ interface TaskCardProps {
 }
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  A: 'bg-red-500 hover:bg-red-600',
-  B: 'bg-yellow-500 hover:bg-yellow-600',
-  C: 'bg-blue-500 hover:bg-blue-600',
+  A: 'bg-red-500 hover:bg-red-600 dark:bg-red-800',
+  B: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700',
+  C: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-700',
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
