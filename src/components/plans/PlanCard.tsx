@@ -83,12 +83,12 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
       aria-label={`Plan: ${plan.name}`}
     >
       <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-1">
+        <div className="grid grid-cols-[1fr_auto] gap-4 items-start">
+          <div className="min-w-0 space-y-1">
             <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <CardTitle className="text-lg cursor-default">{truncatedName}</CardTitle>
+                  <CardTitle className="text-lg cursor-default truncate">{truncatedName}</CardTitle>
                 </TooltipTrigger>
                 {plan.name.length > 64 && (
                   <TooltipContent>
