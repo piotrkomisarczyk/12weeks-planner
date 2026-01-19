@@ -9,14 +9,25 @@ import type { MilestoneDTO } from '@/types';
 interface MilestoneListProps {
   milestones: MilestoneDTO[];
   onToggle: (id: string, isCompleted: boolean) => Promise<void>;
+  onUpdate: (id: string, data: { title?: string; due_date?: string | null }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  planStartDate: string;
+  planEndDate: string;
   disabled?: boolean;
 }
 
 /**
- * List of milestones with toggle and delete actions
+ * List of milestones with toggle, edit and delete actions
  */
-export function MilestoneList({ milestones, onToggle, onDelete, disabled = false }: MilestoneListProps) {
+export function MilestoneList({
+  milestones,
+  onToggle,
+  onUpdate,
+  onDelete,
+  planStartDate,
+  planEndDate,
+  disabled = false
+}: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
       <div className="py-4 text-center text-sm text-muted-foreground">
@@ -32,7 +43,10 @@ export function MilestoneList({ milestones, onToggle, onDelete, disabled = false
           key={milestone.id}
           milestone={milestone}
           onToggle={onToggle}
+          onUpdate={onUpdate}
           onDelete={onDelete}
+          planStartDate={planStartDate}
+          planEndDate={planEndDate}
           disabled={disabled}
         />
       ))}

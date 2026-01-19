@@ -27,6 +27,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     error,
     fetchMilestones,
     addMilestone,
+    updateMilestone,
     toggleMilestone,
     deleteMilestone,
     canAddMilestone,
@@ -70,10 +71,24 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     }
   };
 
+  const handleUpdateMilestone = async (id: string, data: { title?: string; due_date?: string | null }) => {
+    // Prevent operations if no milestones exist
+    if (milestones.length === 0) return;
+
+    try {
+      await updateMilestone(id, data);
+      toast.success('Milestone updated');
+    } catch (error) {
+      // Let the form component handle error display for validation errors
+      // Only show toast for unexpected errors (not validation-related)
+      throw error;
+    }
+  };
+
   const handleDeleteMilestone = async (id: string) => {
     // Prevent operations if no milestones exist
     if (milestones.length === 0) return;
-    
+
     try {
       await deleteMilestone(id);
       toast.success('Milestone deleted');
@@ -110,7 +125,10 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
           <MilestoneList
             milestones={milestones}
             onToggle={handleToggleMilestone}
+            onUpdate={handleUpdateMilestone}
             onDelete={handleDeleteMilestone}
+            planStartDate={planContext.startDate}
+            planEndDate={planContext.endDate}
             disabled={isDisabled}
           />
         )}
