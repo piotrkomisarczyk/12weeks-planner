@@ -50,6 +50,11 @@ export function PlansView() {
     window.location.href = '/plans/new';
   };
 
+  // Helper function to truncate plan names for modal display
+  const truncatePlanName = (name: string, maxLength: number = 50) => {
+    return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
+  };
+
   // Handler for activating a plan
   const handleActivatePlan = (id: string) => {
     const plan = viewModels.find((p) => p.id === id);
@@ -58,7 +63,7 @@ export function PlansView() {
     setConfirmDialog({
       isOpen: true,
       title: 'Activate Plan',
-      description: `Are you sure you want to activate "${plan.name}"? This will deactivate your current active plan.`,
+      description: `Are you sure you want to activate "${truncatePlanName(plan.name)}"? This will deactivate your current active plan.`,
       onConfirm: async () => {
         try {
           await activatePlan(id);
@@ -79,7 +84,7 @@ export function PlansView() {
     setConfirmDialog({
       isOpen: true,
       title: 'Archive Plan',
-      description: `Are you sure you want to archive "${plan.name}"? This will hide the plan from the main view.`,
+      description: `Are you sure you want to archive "${truncatePlanName(plan.name)}"? This will hide the plan from the main view.`,
       onConfirm: async () => {
         try {
           await archivePlan(id);
@@ -100,7 +105,7 @@ export function PlansView() {
     setConfirmDialog({
       isOpen: true,
       title: 'Delete Plan',
-      description: `Are you sure you want to delete "${plan.name}"? This action cannot be undone.`,
+      description: `Are you sure you want to delete "${truncatePlanName(plan.name)}"? This action cannot be undone.`,
       variant: 'destructive',
       onConfirm: async () => {
         try {
@@ -291,12 +296,12 @@ export function PlansView() {
           setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
         }
       >
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{confirmDialog.title}</DialogTitle>
-            <DialogDescription>{confirmDialog.description}</DialogDescription>
+            <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-2">
             <Button
               variant="outline"
               onClick={() =>
