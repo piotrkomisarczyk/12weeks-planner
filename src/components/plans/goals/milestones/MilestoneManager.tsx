@@ -52,7 +52,8 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
       await addMilestone(data);
       toast.success('Milestone added');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to add milestone');
+      // Let the form component handle error display for validation errors
+      // Only show toast for unexpected errors (not validation-related)
       throw error;
     }
   };

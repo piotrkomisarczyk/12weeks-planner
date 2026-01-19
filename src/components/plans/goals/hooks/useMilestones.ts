@@ -112,7 +112,9 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to create milestone');
+          // For validation errors, extract the specific message from details[0].message
+          const errorMessage = errorData.details?.[0]?.message || errorData.error || 'Failed to create milestone';
+          throw new Error(errorMessage);
         }
 
         const result: ItemResponse<MilestoneDTO> = await response.json();
@@ -126,12 +128,11 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
 
         return result.data;
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to create milestone';
+        // Don't set global error state for validation errors during creation
+        // Only set loading back to false, let the form handle the error display
         setState((prev) => ({
           ...prev,
           isLoading: false,
-          error: errorMessage,
         }));
         throw error;
       }
@@ -153,7 +154,9 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to update milestone');
+          // For validation errors, extract the specific message from details[0].message
+          const errorMessage = errorData.details?.[0]?.message || errorData.error || 'Failed to update milestone';
+          throw new Error(errorMessage);
         }
 
         const result: ItemResponse<MilestoneDTO> = await response.json();
@@ -166,9 +169,8 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
           ),
         }));
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to update milestone';
-        setState((prev) => ({ ...prev, error: errorMessage }));
+        // Don't set global error state for validation/update errors
+        // Let the calling component handle error display
         throw error;
       }
     },
@@ -194,7 +196,9 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete milestone');
+        // For validation errors, extract the specific message from details[0].message
+        const errorMessage = errorData.details?.[0]?.message || errorData.error || 'Failed to delete milestone';
+        throw new Error(errorMessage);
       }
 
       // Remove milestone from local state
@@ -204,12 +208,11 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
         error: null,
       }));
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to delete milestone';
+      // Don't set global error state for delete errors
+      // Let the calling component handle error display
       setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: errorMessage,
       }));
       throw error;
     }
