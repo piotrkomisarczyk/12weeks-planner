@@ -1,4 +1,4 @@
-import { MoreVertical, Play, Archive, Trash2 } from 'lucide-react';
+import { MoreVertical, Play, Archive, Trash2, Edit } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -130,6 +130,16 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = `/plans/${plan.id}/edit`;
+                  }}
+                >
+                  <Edit className="size-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 {showArchiveButton && (
                   <DropdownMenuItem
                     onClick={(e) =>
