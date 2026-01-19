@@ -3,12 +3,29 @@
  * Manages milestones for a goal with lazy loading
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMilestones } from '../hooks/useMilestones';
 import { MilestoneList } from './MilestoneList';
 import { MilestoneForm } from './MilestoneForm';
 import type { PlanContext } from '@/types';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
+interface ConfirmDialogState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  variant?: 'default' | 'destructive';
+}
 
 interface MilestoneManagerProps {
   goalId: string;
@@ -32,6 +49,15 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     deleteMilestone,
     canAddMilestone,
   } = useMilestones(goalId);
+
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
+
+  const [deletingMilestoneId, setDeletingMilestoneId] = useState<string | null>(null);
 
   // Track if milestones have been fetched for this goal
   const hasFetchedRef = useRef(false);
@@ -85,17 +111,45 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     }
   };
 
-  const handleDeleteMilestone = async (id: string) => {
+  const handleConfirmDeleteMilestone = async (id: string) => {
     // Prevent operations if no milestones exist
     if (milestones.length === 0) return;
 
+    setDeletingMilestoneId(id);
     try {
       await deleteMilestone(id);
       toast.success('Milestone deleted');
     } catch (error) {
       toast.error('Failed to delete milestone');
       throw error;
+    } finally {
+      setDeletingMilestoneId(null);
     }
+  };
+
+  const handleDeleteMilestone = (id: string) => {
+    const milestone = milestones.find((m) => m.id === id);
+    if (!milestone) return;
+
+    // Helper function to truncate milestone titles for modal display
+    const truncateTitle = (title: string, maxLength: number = 50) => {
+      return title.length > maxLength ? `${title.slice(0, maxLength)}...` : title;
+    };
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Milestone',
+      description: `Are you sure you want to delete "${truncateTitle(milestone.title)}"? This action cannot be undone.`,
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          await handleConfirmDeleteMilestone(id);
+        } catch (error) {
+          // Error handling is done in handleConfirmDeleteMilestone
+        }
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
   };
 
   const isDisabled = planContext.isArchived;
@@ -130,6 +184,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
             planStartDate={planContext.startDate}
             planEndDate={planContext.endDate}
             disabled={isDisabled}
+            deletingMilestoneId={deletingMilestoneId}
           />
         )}
       </div>
@@ -149,6 +204,37 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
       <div className="text-xs text-muted-foreground">
         {milestones.length} / 5 milestones
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              onClick={confirmDialog.onConfirm}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

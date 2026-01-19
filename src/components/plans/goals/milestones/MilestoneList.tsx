@@ -10,10 +10,11 @@ interface MilestoneListProps {
   milestones: MilestoneDTO[];
   onToggle: (id: string, isCompleted: boolean) => Promise<void>;
   onUpdate: (id: string, data: { title?: string; due_date?: string | null }) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
   planStartDate: string;
   planEndDate: string;
   disabled?: boolean;
+  deletingMilestoneId?: string | null;
 }
 
 /**
@@ -26,7 +27,8 @@ export function MilestoneList({
   onDelete,
   planStartDate,
   planEndDate,
-  disabled = false
+  disabled = false,
+  deletingMilestoneId = null
 }: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
@@ -48,6 +50,7 @@ export function MilestoneList({
           planStartDate={planStartDate}
           planEndDate={planEndDate}
           disabled={disabled}
+          isDeleting={deletingMilestoneId === milestone.id}
         />
       ))}
     </div>

@@ -18,10 +18,11 @@ interface MilestoneItemProps {
   milestone: MilestoneDTO;
   onToggle: (id: string, isCompleted: boolean) => Promise<void>;
   onUpdate: (id: string, data: { title?: string; due_date?: string | null }) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
   planStartDate: string;
   planEndDate: string;
   disabled?: boolean;
+  isDeleting?: boolean;
 }
 
 /**
@@ -35,10 +36,10 @@ export function MilestoneItem({
   onDelete,
   planStartDate,
   planEndDate,
-  disabled = false
+  disabled = false,
+  isDeleting = false
 }: MilestoneItemProps) {
   const [isToggling, setIsToggling] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editTitle, setEditTitle] = useState(milestone.title);
@@ -133,16 +134,12 @@ export function MilestoneItem({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (isToggling || isDeleting || isUpdating) return;
 
-    setIsDeleting(true);
-    try {
-      await onDelete(milestone.id);
-    } catch (error) {
-      console.error('Failed to delete milestone:', error);
-      setIsDeleting(false);
-    }
+    // onDelete now shows a confirmation dialog (synchronous operation)
+    // The actual deletion state will be managed by the parent component
+    onDelete(milestone.id);
   };
 
   const isDisabled = disabled || isToggling || isDeleting || isUpdating;
