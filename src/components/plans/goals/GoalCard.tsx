@@ -82,7 +82,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
     >
       <AccordionItem value={goal.id} className="border-none">
         <div className="p-4">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
             {/* Left: Goal Info */}
             <div className="flex-1 min-w-0">
               <AccordionTrigger className="hover:no-underline p-0">
@@ -96,65 +96,65 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
                       </Badge>
                     )}
                   </div>
-
-                  {/* Progress Bar (when collapsed) */}
-                  {expandedValue !== goal.id && (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Progress</span>
-                        <span className="font-medium">{goal.progress_percentage}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all duration-300"
-                          style={{ width: `${goal.progress_percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
+                {/* Delete Button inside AccordionTrigger */}
+                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={isDisabled}
+                      aria-label="Delete goal"
+                      className="shrink-0 mr-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Delete Goal</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones. This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowDeleteDialog(false)}
+                        disabled={isDeleting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </AccordionTrigger>
             </div>
-
-            {/* Right: Delete Button */}
-            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={isDisabled}
-                  aria-label="Delete goal"
-                  className="shrink-0"
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Delete Goal</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones. This action cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowDeleteDialog(false)}
-                    disabled={isDeleting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
+
+          {/* Progress Bar (when collapsed) - Full width */}
+          {expandedValue !== goal.id && (
+            <div className="space-y-1 mt-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Progress</span>
+                <span className="font-medium">{goal.progress_percentage}%</span>
+              </div>
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${goal.progress_percentage}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Expanded Content */}
           <AccordionContent>
