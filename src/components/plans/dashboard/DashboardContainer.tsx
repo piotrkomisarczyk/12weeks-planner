@@ -2,36 +2,14 @@ import { useEffect, useState } from 'react';
 import { usePlanDashboard } from '../hooks/usePlanDashboard';
 import { DashboardOverviewCard } from './DashboardOverviewCard';
 import { EmptyState } from './EmptyState';
+import { calculateCurrentWeek, calculateCurrentDay } from '@/lib/utils';
 
 interface DashboardContainerProps {
   planId: string;
   onNavigate?: (url: string) => void;
 }
 
-function calculateCurrentWeek(plan: any): number {
-  const startDate = new Date(plan.start_date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  startDate.setHours(0, 0, 0, 0);
 
-  const diffTime = today.getTime() - startDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  let currentWeek = Math.floor(diffDays / 7) + 1;
-
-  // Clamp to valid range
-  if (currentWeek < 1) currentWeek = 1;
-  if (currentWeek > 12) currentWeek = 12;
-
-  return currentWeek;
-}
-
-function calculateCurrentDay(): number {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-
-  // Convert to 1-7 format where Monday = 1
-  return dayOfWeek === 0 ? 7 : dayOfWeek;
-}
 
 export function DashboardContainer({ planId, onNavigate }: DashboardContainerProps) {
   const { data, isLoading, error, fetchDashboard } = usePlanDashboard();

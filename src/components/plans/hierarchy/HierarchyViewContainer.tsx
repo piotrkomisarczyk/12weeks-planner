@@ -5,6 +5,7 @@ import { WeekHeader } from '../shared/WeekHeader';
 import { HierarchyControls } from './HierarchyControls';
 import { HierarchyTree } from './HierarchyTree';
 import { buildHierarchyTree } from '@/lib/dashboard-utils';
+import { calculateCurrentWeek } from '@/lib/utils';
 import type { DashboardFilterState } from '@/types';
 
 interface HierarchyViewContainerProps {
@@ -12,22 +13,6 @@ interface HierarchyViewContainerProps {
   onNavigate?: (url: string) => void;
 }
 
-function calculateCurrentWeek(plan: any): number {
-  const startDate = new Date(plan.start_date);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  startDate.setHours(0, 0, 0, 0);
-
-  const diffTime = today.getTime() - startDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  let currentWeek = Math.floor(diffDays / 7) + 1;
-
-  // Clamp to valid range
-  if (currentWeek < 1) currentWeek = 1;
-  if (currentWeek > 12) currentWeek = 12;
-
-  return currentWeek;
-}
 
 export function HierarchyViewContainer({ planId, onNavigate }: HierarchyViewContainerProps) {
   const { data, isLoading, error, fetchDashboard } = usePlanDashboard();
