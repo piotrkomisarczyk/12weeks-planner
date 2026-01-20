@@ -25,10 +25,16 @@ import type {
 // Extract and validate route parameters
 const { id: planId, weekNumber: weekNumberParam } = Astro.params;
 
-// Validate week number
-const weekNumber = parseInt(weekNumberParam);
+// Validate params
+if (!planId) {
+  return Astro.redirect('/plans');
+}
+
+const weekNumber = parseInt(weekNumberParam || '1', 10);
+
+// Validate week number (1-12)
 if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
-  throw new Error(`Invalid week number: ${weekNumberParam}. Must be between 1 and 12.`);
+  return Astro.redirect(`/plans/${planId}/review/1`);
 }
 
 // Get Supabase client from Astro context
@@ -84,7 +90,7 @@ try {
   console.error('Error loading weekly review data:', error);
 
   // Handle plan not found or access denied
-  if (error.message?.includes('not found') || error.message?.includes('does not belong')) {
+  if (error instanceof Error && (error.message?.includes('not found') || error.message?.includes('does not belong'))) {
     throw new Error(`Plan with ID ${planId} not found or access denied`);
   }
 

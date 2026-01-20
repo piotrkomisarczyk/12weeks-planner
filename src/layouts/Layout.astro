@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import type { PlanSummary } from '@/types';
+import type { PlanSummary, PlanStatus } from '@/types';
 import { createServerClient } from '@supabase/ssr';
 import { PlanService } from '@/lib/services/plan.service';
 import { DEFAULT_USER_ID } from '@/db/supabase.client';
@@ -54,7 +54,7 @@ if (urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0
         id: fullPlan.id,
         name: fullPlan.name,
         start_date: fullPlan.start_date,
-        status: fullPlan.status,
+        status: fullPlan.status as PlanStatus,
       };
     }
   } catch (error) {
