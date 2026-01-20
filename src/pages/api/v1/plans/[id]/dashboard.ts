@@ -83,7 +83,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
         headers: {
           'Content-Type': 'application/json',
           'X-Content-Type-Options': 'nosniff',
-          'Cache-Control': 'private, max-age=60'
+          'Cache-Control': 'private, max-age=10'
         }
       }
     );
