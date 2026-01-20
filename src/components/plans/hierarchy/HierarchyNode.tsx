@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, ChevronRight, ChevronDown, Target, Flag, Calendar, CheckCircle, Circle, CircleSlash, Clock, Square } from 'lucide-react';
+import { CircleX, BookOpen, ChevronRight, ChevronDown, Target, Flag, Calendar, CheckCircle, Circle, CircleSlash, CircleArrowRight, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { HierarchyTreeNode, NodeType } from '@/types';
 
@@ -19,10 +19,10 @@ const ICONS: Record<NodeType, React.ComponentType<{ className?: string }>> = {
 
 const STATUS_COLORS = {
   todo: 'text-muted-foreground',
-  in_progress: 'text-blue-600 font-medium',
-  completed: 'text-green-700 font-medium',
+  in_progress: 'text-blue-600 dark:text-blue-400 font-medium',
+  completed: 'text-green-700 dark:text-green-600 font-medium',
   cancelled: 'text-muted-foreground line-through',
-  postponed: 'text-amber-600 font-medium',
+  postponed: 'text-amber-600 dark:text-amber-400 font-medium',
 };
 
 export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
@@ -37,22 +37,21 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
 
   const getStatusIcon = () => {
     if (node.isCompleted) {
-      return <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />;
+      return <CheckCircle className="text-green-700 dark:text-green-600" />;
     }
     if (node.status === 'in_progress') {
-      return <CircleSlash className="w-4 h-4 text-blue-500 dark:text-blue-400" />;
+      return <CircleSlash className="text-blue-500 dark:text-blue-400" />;
     }
     if (node.status === 'cancelled') {
-      return <Circle className="w-4 h-4 text-muted-foreground" />;
+      return <CircleX className="text-muted-foreground" />;
     }
     if (node.status === 'postponed') {
-      return <Clock className="w-4 h-4 text-amber-500 dark:text-amber-400" />;
+      return <CircleArrowRight className="text-amber-500 dark:text-amber-400" />;
     }
-    return <Circle className="w-4 h-4 text-muted-foreground" />;
+    return <Circle className="text-muted-foreground" />;
   };
 
   const getStatusTextColor = () => {
-    if (node.isCompleted) return 'text-green-700 dark:text-green-400';
     if (node.status && STATUS_COLORS[node.status as keyof typeof STATUS_COLORS]) {
       return STATUS_COLORS[node.status as keyof typeof STATUS_COLORS];
     }
@@ -92,14 +91,14 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
           ) : null}
         </div>
 
-        {/* Status Icon */}
-        <div className="w-5 h-5 mr-2 flex items-center justify-center">
-          {getStatusIcon()}
-        </div>
-
         {/* Type Icon */}
         <div className="w-4 h-4 mr-2 flex items-center justify-center">
-          <Icon className="w-4 h-4 text-muted-foreground" />
+          <Icon className="text-muted-foreground" />
+        </div>
+
+        {/* Status Icon */}
+        <div className="w-4 h-4 mr-2 flex items-center justify-center">
+          {getStatusIcon()}
         </div>
 
         {/* Title */}
