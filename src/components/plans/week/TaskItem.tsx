@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { TaskStatusControl } from './TaskStatusControl';
 import { DragHandle } from './DragHandle';
 import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS } from '@/types';
 import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
@@ -49,11 +49,6 @@ interface TaskItemProps {
   onUnassignFromWeeklyGoal?: (taskId: string) => void;
 }
 
-const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  A: 'bg-red-700 hover:bg-red-800',
-  B: 'bg-yellow-500 hover:bg-yellow-600',
-  C: 'bg-blue-500 hover:bg-blue-600',
-};
 
 /**
  * Get the display label for a goal category

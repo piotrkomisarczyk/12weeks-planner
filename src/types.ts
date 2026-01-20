@@ -70,15 +70,21 @@ export const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
 ];
 
 export const GOAL_CATEGORY_COLORS: Record<GoalCategory, string> = {
-  work: 'text-xs font-semibold uppercase bg-yellow-600 text-white',
-  finance: 'text-xs font-semibold uppercase bg-green-700 text-white',
-  hobby: 'text-xs font-semibold uppercase bg-purple-700 text-white',
-  relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white',
-  health: 'text-xs font-semibold uppercase bg-red-700 text-white',
-  development: 'text-xs font-semibold uppercase bg-blue-700 text-white',
+  work: 'text-xs font-semibold uppercase bg-yellow-500 text-white dark:bg-yellow-900 dark:text-gray-300',
+  finance: 'text-xs font-semibold uppercase bg-green-700 text-white dark:bg-green-900 dark:text-gray-300',
+  hobby: 'text-xs font-semibold uppercase bg-purple-700 text-white dark:bg-purple-900 dark:text-gray-300',
+  relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white dark:bg-orange-900 dark:text-gray-300',
+  health: 'text-xs font-semibold uppercase bg-red-700 text-white dark:bg-red-900 dark:text-gray-300',
+  development: 'text-xs font-semibold uppercase bg-blue-700 text-white dark:bg-blue-900 dark:text-gray-300',
 };
 
 export type TaskPriority = 'A' | 'B' | 'C';
+
+export const PRIORITY_COLORS: Record<TaskPriority, string> = {
+  A: 'bg-red-500 hover:bg-red-600 dark:bg-red-800',
+  B: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700',
+  C: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-800',
+};
 
 export type TaskStatus = 'todo' | 'in_progress' | 'completed' | 'cancelled' | 'postponed';
 

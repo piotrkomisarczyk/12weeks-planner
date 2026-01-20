@@ -35,14 +35,15 @@ import {
 import { TaskStatusControl } from '../week/TaskStatusControl';
 import { DragHandle } from '../week/DragHandle';
 import { GoalMilestonePicker } from '../week/GoalMilestonePicker';
-import type { 
-  DayTaskViewModel, 
-  TaskPriority, 
-  TaskStatus, 
-  SimpleGoal, 
+import type {
+  DayTaskViewModel,
+  TaskPriority,
+  TaskStatus,
+  SimpleGoal,
   SimpleMilestone,
 } from '@/types';
-import { MoreVertical, Flag, Link2, Copy, MoveRight, MoveLeft, ArrowRight } from 'lucide-react';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS } from '@/types';
+import { MoreVertical, Flag, Target, Copy, MoveRight, MoveLeft, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfirmDialogState {
@@ -78,22 +79,16 @@ interface TaskCardProps {
   onUnassignFromWeeklyGoal?: (taskId: string) => void;
 }
 
-const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  A: 'bg-red-500 hover:bg-red-600 dark:bg-red-800',
-  B: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700',
-  C: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-700',
+
+/**
+ * Get the display label for a goal category
+ */
+const getCategoryLabel = (category: string): string => {
+  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  return categoryItem?.label || category;
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  work: 'bg-blue-500 text-white dark:bg-blue-600',
-  finance: 'bg-green-500 text-white dark:bg-green-600',
-  hobby: 'bg-purple-500 text-white dark:bg-purple-600',
-  relationships: 'bg-pink-500 text-white dark:bg-pink-600',
-  health: 'bg-red-500 text-white dark:bg-red-600',
-  development: 'bg-orange-500 text-white dark:bg-orange-600',
-};
-
-const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export function TaskCard({
   task,
@@ -299,20 +294,20 @@ export function TaskCard({
         <div className="flex items-center gap-1.5">
           {/* Category Badge */}
           {task.long_term_goal_id && getLongTermGoalCategory(task.long_term_goal_id) && (
-            <Badge 
+            <Badge
               className={cn(
                 'text-xs uppercase font-semibold',
-                CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || 'bg-gray-500 text-white dark:bg-gray-600'
+                GOAL_CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || 'bg-gray-500 text-white dark:bg-gray-600'
               )}
             >
-              {getLongTermGoalCategory(task.long_term_goal_id)}
+              {getCategoryLabel(getLongTermGoalCategory(task.long_term_goal_id)!)}
             </Badge>
           )}
 
           {/* Long-Term Goal */}
           {task.long_term_goal_id && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Link2 className="h-3 w-3" />
+              <Target className="h-3 w-3" />
               <span className="truncate max-w-[120px]" title={getLongTermGoalTitle(task.long_term_goal_id) || undefined}>
                 {getLongTermGoalTitle(task.long_term_goal_id)}
               </span>
@@ -452,7 +447,7 @@ export function TaskCard({
           {/* Link Goal & Milestone */}
           {!isLinkedToWeeklyGoal && (
             <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
-              <Link2 className="mr-2 h-4 w-4" />
+              <Target className="mr-2 h-4 w-4" />
               Link Goal & Milestone
             </DropdownMenuItem>
           )}
