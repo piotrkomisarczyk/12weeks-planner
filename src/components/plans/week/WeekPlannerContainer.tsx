@@ -77,7 +77,8 @@ export function WeekPlannerContainer({
       await addWeeklyGoal(title, longTermGoalId);
       toast.success('Weekly goal created');
     } catch (err) {
-      toast.error('Failed to create weekly goal');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create weekly goal';
+      toast.error(errorMessage);
       console.error(err);
     }
   }, [addWeeklyGoal, data.weeklyGoals.length]);
@@ -152,7 +153,8 @@ export function WeekPlannerContainer({
     try {
       await updateTask(taskId, updates);
     } catch (err) {
-      toast.error('Failed to update task');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
+      toast.error(errorMessage);
       console.error(err);
     }
   }, [updateTask]);

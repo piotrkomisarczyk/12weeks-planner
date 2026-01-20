@@ -211,6 +211,11 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
 
       if (!response.ok) {
         const errorData = await response.json();
+        // If validation failed, show specific validation messages
+        if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
+          const messages = errorData.details.map((detail: any) => detail.message).join(', ');
+          throw new Error(messages);
+        }
         throw new Error(errorData.error || errorData.message || 'Failed to create weekly goal');
       }
 
@@ -423,6 +428,11 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
 
       if (!response.ok) {
         const errorData = await response.json();
+        // If validation failed, show specific validation messages
+        if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
+          const messages = errorData.details.map((detail: any) => detail.message).join(', ');
+          throw new Error(messages);
+        }
         throw new Error(errorData.error || 'Failed to create task');
       }
 
@@ -477,11 +487,11 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
     const updateInGoals = (goals: WeeklyGoalViewModel[]) =>
       goals.map(g => ({
         ...g,
-        tasks: g.tasks.map(t => (t.id === id ? { ...t, ...updates } : t)),
+        tasks: g.tasks.map(t => (t.id === id ? { ...t, ...updates } as TaskViewModel : t)),
       }));
 
     const updateInAdHoc = (tasks: TaskViewModel[]) =>
-      tasks.map(t => (t.id === id ? { ...t, ...updates } : t));
+      tasks.map(t => (t.id === id ? { ...t, ...updates } as TaskViewModel : t));
 
     setData(prev => ({
       ...prev,
@@ -497,7 +507,13 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update task');
+        const errorData = await response.json();
+        // If validation failed, show specific validation messages
+        if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
+          const messages = errorData.details.map((detail: any) => detail.message).join(', ');
+          throw new Error(messages);
+        }
+        throw new Error(errorData.error || 'Failed to update task');
       }
 
       const result = await response.json();

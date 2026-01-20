@@ -95,13 +95,14 @@ export function DayPageContainer({
   }, [addTask]);
 
   const handleUpdateTask = useCallback(async (
-    id: string, 
+    id: string,
     updates: Partial<DayTaskViewModel>
   ) => {
     try {
       await updateTask(id, updates);
     } catch (err) {
-      toast.error('Failed to update task');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
+      toast.error(errorMessage);
       console.error(err);
     }
   }, [updateTask]);

@@ -359,6 +359,11 @@ export function useDayPlan(
 
       if (!response.ok) {
         const errorData = await response.json();
+        // If validation failed, show specific validation messages
+        if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
+          const messages = errorData.details.map((detail: any) => detail.message).join(', ');
+          throw new Error(messages);
+        }
         throw new Error(errorData.error || 'Failed to create task');
       }
 
@@ -422,7 +427,13 @@ export function useDayPlan(
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update task');
+        const errorData = await response.json();
+        // If validation failed, show specific validation messages
+        if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
+          const messages = errorData.details.map((detail: any) => detail.message).join(', ');
+          throw new Error(messages);
+        }
+        throw new Error(errorData.error || 'Failed to update task');
       }
 
       const result = await response.json();
@@ -644,6 +655,11 @@ export function useDayPlan(
 
       if (!response.ok) {
         const errorData = await response.json();
+        // If validation failed, show specific validation messages
+        if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
+          const messages = errorData.details.map((detail: any) => detail.message).join(', ');
+          throw new Error(messages);
+        }
         throw new Error(errorData.error || 'Failed to copy task');
       }
 
