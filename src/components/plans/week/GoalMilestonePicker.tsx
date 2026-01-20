@@ -163,14 +163,15 @@ export function GoalMilestonePicker({
                     >
                       <div className="flex items-start gap-2">
                         <Target className="h-5 w-5 mt-0.5 text-muted-foreground shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm mb-1">{goal.title}</div>
-                          <Badge
-                            className={GOAL_CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'}
-                          >
-                            {getCategoryLabel(goal.category)}
-                          </Badge>
-                        </div>
+                        <div className="font-medium text-sm flex-1 min-w-0">{goal.title}</div>
+                        <Badge
+                          className={cn(
+                            'shrink-0',
+                            GOAL_CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'
+                          )}
+                        >
+                          {getCategoryLabel(goal.category)}
+                        </Badge>
                         {currentGoalId === goal.id && (
                           <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
                         )}

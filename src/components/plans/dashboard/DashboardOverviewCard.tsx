@@ -168,10 +168,10 @@ export function DashboardOverviewCard({
                 return (
                 <div key={goal.id} className="bg-card p-4 rounded-lg border border-border hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <h4 className="font-medium text-foreground truncate" title={goal.title}>
-                        {goal.title}
-                      </h4>
+                    <h4 className="font-medium text-foreground truncate min-w-0" title={goal.title}>
+                      {goal.title}
+                    </h4>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {categoryKey && categoryLabel && (
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[categoryKey]}`}
@@ -179,8 +179,8 @@ export function DashboardOverviewCard({
                           {categoryLabel}
                         </span>
                       )}
+                      <span className="text-sm text-muted-foreground">{goal.progress_percentage}%</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{goal.progress_percentage}%</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 mb-2">
                     <div
