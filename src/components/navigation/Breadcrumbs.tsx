@@ -6,9 +6,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Badge } from '@/components/ui/badge';
+import type { PlanStatus } from '@/types';
 
 interface BreadcrumbsProps {
   planTitle?: string;
+  planStatus?: PlanStatus;
   currentPath: string;
 }
 
@@ -16,12 +19,39 @@ interface BreadcrumbSegment {
   label: string;
   href?: string;
   isActive: boolean;
+  type?: 'plan';
+  planStatus?: PlanStatus;
+}
+
+/**
+ * Get badge variant for plan status
+ */
+function getStatusBadgeVariant(status: PlanStatus) {
+  switch (status) {
+    case 'ready':
+      return 'secondary';
+    case 'active':
+      return 'default';
+    case 'completed':
+      return 'secondary';
+    case 'archived':
+      return 'outline';
+    default:
+      return 'outline';
+  }
+}
+
+/**
+ * Format plan status for display
+ */
+function formatStatus(status: PlanStatus): string {
+  return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 /**
  * Parses the URL path and generates breadcrumb segments
  */
-function parsePath(path: string, planTitle?: string): BreadcrumbSegment[] {
+function parsePath(path: string, planTitle?: string, planStatus?: PlanStatus): BreadcrumbSegment[] {
   const segments: BreadcrumbSegment[] = [];
   const parts = path.split('/').filter(Boolean);
 
@@ -51,6 +81,8 @@ function parsePath(path: string, planTitle?: string): BreadcrumbSegment[] {
         label: truncatedTitle,
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
+        type: 'plan',
+        planStatus,
       });
     } else if (part === 'dashboard') {
       segments.push({
@@ -141,8 +173,8 @@ function parsePath(path: string, planTitle?: string): BreadcrumbSegment[] {
   return segments;
 }
 
-export function Breadcrumbs({ planTitle, currentPath }: BreadcrumbsProps) {
-  const breadcrumbs = parsePath(currentPath, planTitle);
+export function Breadcrumbs({ planTitle, planStatus, currentPath }: BreadcrumbsProps) {
+  const breadcrumbs = parsePath(currentPath, planTitle, planStatus);
 
   if (breadcrumbs.length === 0) {
     return null;
@@ -155,7 +187,23 @@ export function Breadcrumbs({ planTitle, currentPath }: BreadcrumbsProps) {
           <div key={index} className="contents">
             <BreadcrumbItem>
               {crumb.isActive ? (
-                <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                crumb.type === 'plan' && crumb.planStatus ? (
+                  <BreadcrumbPage className="flex items-center gap-2">
+                    <span>{crumb.label}</span>
+                    <Badge variant={getStatusBadgeVariant(crumb.planStatus)}>
+                      {formatStatus(crumb.planStatus)}
+                    </Badge>
+                  </BreadcrumbPage>
+                ) : (
+                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                )
+              ) : crumb.type === 'plan' && crumb.planStatus ? (
+                <BreadcrumbLink href={crumb.href} className="flex items-center gap-2">
+                  <span>{crumb.label}</span>
+                  <Badge variant={getStatusBadgeVariant(crumb.planStatus)}>
+                    {formatStatus(crumb.planStatus)}
+                  </Badge>
+                </BreadcrumbLink>
               ) : (
                 <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
               )}

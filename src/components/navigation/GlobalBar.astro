@@ -49,8 +49,9 @@ const currentPath = Astro.url.pathname;
     </a>
     
     <div class="hidden md:block">
-      <Breadcrumbs 
-        planTitle={plan?.name} 
+      <Breadcrumbs
+        planTitle={plan?.name}
+        planStatus={plan?.status}
         currentPath={currentPath}
         client:load
       />
