@@ -249,6 +249,7 @@ export function TaskItem({
             onBlur={handleTitleSave}
             onKeyDown={handleTitleKeyDown}
             className="h-7 text-sm"
+            maxLength={255}
             disabled={task.isSaving}
           />
         ) : (

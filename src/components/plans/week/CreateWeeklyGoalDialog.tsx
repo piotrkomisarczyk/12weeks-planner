@@ -80,6 +80,7 @@ export function CreateWeeklyGoalDialog({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Complete authentication module"
+                maxLength={255}
                 required
                 autoFocus
               />

@@ -52,6 +52,7 @@ export function InlineAddTask({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="h-9"
+        maxLength={255}
       />
       
       <Button

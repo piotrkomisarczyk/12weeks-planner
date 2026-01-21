@@ -49,6 +49,7 @@ export function PlanDetailsForm({ data, onChange, errors }: PlanDetailsFormProps
               value={data.name}
               onChange={handleNameChange}
               placeholder="e.g., Q1 2026 Goals"
+              maxLength={255}
               aria-invalid={!!errors['details.name']}
               aria-describedby={
                 errors['details.name'] ? 'plan-name-error' : undefined

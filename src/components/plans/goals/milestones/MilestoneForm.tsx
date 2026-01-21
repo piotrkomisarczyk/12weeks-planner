@@ -120,6 +120,7 @@ export function MilestoneForm({
             placeholder="Add milestone..."
             disabled={disabled || isSubmitting}
             className="h-9"
+            maxLength={255}
           />
         </div>
 

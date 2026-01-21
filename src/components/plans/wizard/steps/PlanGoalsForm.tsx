@@ -99,6 +99,7 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
                   onChange={(e) =>
                     handleGoalChange(goal.id, 'title', e.target.value)
                   }
+                  maxLength={255}
                   placeholder="e.g., Launch new product"
                   aria-invalid={!!errors[`goals.${index}.title`]}
                   aria-describedby={

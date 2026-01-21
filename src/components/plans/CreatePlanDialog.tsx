@@ -123,6 +123,7 @@ export function CreatePlanDialog({ onCreatePlan, trigger }: CreatePlanDialogProp
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               placeholder="e.g., Q1 2024 Goals"
               aria-invalid={!!errors.name}
+              maxLength={255}
               aria-describedby={errors.name ? 'name-error' : undefined}
             />
             {errors.name && (

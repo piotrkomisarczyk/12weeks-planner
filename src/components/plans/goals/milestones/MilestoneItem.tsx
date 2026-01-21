@@ -174,6 +174,7 @@ export function MilestoneItem({
               disabled={isDisabled}
               className="h-8 text-sm"
               placeholder="Milestone title..."
+              maxLength={255}
             />
           </div>
 

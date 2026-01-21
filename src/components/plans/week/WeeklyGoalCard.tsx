@@ -166,6 +166,7 @@ export function WeeklyGoalCard({
                 onBlur={handleTitleSave}
                 onKeyDown={handleTitleKeyDown}
                 className="h-8 font-semibold"
+                maxLength={255}
                 autoFocus
               />
             ) : (
