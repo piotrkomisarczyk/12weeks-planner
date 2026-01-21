@@ -90,52 +90,56 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
                   {/* Title */}
                   <h3 className="font-semibold text-base">{goal.title}</h3>
                 </div>
-                {/* Category Badge and Delete Button inside AccordionTrigger */}
+                {/* Category Badge inside AccordionTrigger */}
                 <div className="flex items-center gap-2 shrink-0">
                   {expandedValue !== goal.id && categoryKey && categoryLabel && (
                     <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>
                       {categoryLabel}
                     </Badge>
                   )}
-                  <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={isDisabled}
-                        aria-label="Delete goal"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Delete Goal</DialogTitle>
-                        <DialogDescription>
-                          Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones. This action cannot be undone.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowDeleteDialog(false)}
-                          disabled={isDeleting}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleDelete}
-                          disabled={isDeleting}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          {isDeleting ? 'Deleting...' : 'Delete'}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </AccordionTrigger>
+            </div>
+
+            {/* Delete Button outside AccordionTrigger */}
+            <div className="shrink-0">
+              <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isDisabled}
+                    aria-label="Delete goal"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete Goal</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones. This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowDeleteDialog(false)}
+                      disabled={isDeleting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
