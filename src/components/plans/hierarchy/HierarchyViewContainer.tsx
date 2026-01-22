@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { WeekHeader } from '../shared/WeekHeader';
 import { HierarchyControls } from './HierarchyControls';
 import { HierarchyTree } from './HierarchyTree';
+import { Legend } from './Legend';
 import { buildHierarchyTree } from '@/lib/dashboard-utils';
 import { calculateCurrentWeek } from '@/lib/utils';
 import type { DashboardFilterState } from '@/types';
@@ -97,6 +98,9 @@ export function HierarchyViewContainer({ planId, onNavigate }: HierarchyViewCont
         planName={data.plan.name}
         onNavigate={handleWeekNavigate}
       />
+
+      {/* Legend Card */}
+      <Legend />
 
       {/* Hierarchy Card */}
       <Card>
