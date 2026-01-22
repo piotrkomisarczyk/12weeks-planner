@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 interface DayHeaderProps {
   planName: string;
+  planId: string;
   dayNumber: number;
   weekNumber: number;
   computedDate: string; // YYYY-MM-DD format
@@ -53,6 +54,7 @@ function getPlanDateRange(planStartDate: Date): { start: Date; end: Date } {
 
 export function DayHeader({
   planName,
+  planId,
   dayNumber,
   weekNumber,
   computedDate,
@@ -61,7 +63,6 @@ export function DayHeader({
 }: DayHeaderProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  const planId = window.location.pathname.split('/')[2];
   const currentDate = new Date(computedDate);
   const { start: planStart, end: planEnd } = getPlanDateRange(planStartDate);
   

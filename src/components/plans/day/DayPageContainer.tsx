@@ -410,6 +410,7 @@ export function DayPageContainer({
             {/* Header */}
             <DayHeader
               planName={planName}
+              planId={planId}
               dayNumber={dayNumber}
               weekNumber={weekNumber}
               computedDate={data.date}
