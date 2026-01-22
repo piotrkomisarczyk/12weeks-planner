@@ -10,7 +10,7 @@ import { Label } from '../../ui/label';
 import { Badge } from '../../ui/badge';
 import { Checkbox } from '../../ui/checkbox';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '../../../types';
-import type { GoalCategory, GoalReviewViewModel, MilestoneDTO } from '../../../types';
+import type { GoalCategory, GoalReviewViewModel } from '../../../types';
 
 interface GoalProgressItemProps {
   goal: GoalReviewViewModel;
@@ -20,6 +20,7 @@ interface GoalProgressItemProps {
 
 export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneToggle }: GoalProgressItemProps) {
   const [localProgress, setLocalProgress] = useState(goal.progress_percentage);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const categoryKey = goal.category as GoalCategory | null;
   const categoryLabel = categoryKey
     ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
@@ -29,6 +30,26 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
   useEffect(() => {
     setLocalProgress(goal.progress_percentage);
   }, [goal.progress_percentage]);
+
+  // Track theme changes for proper spinner styling
+  useEffect(() => {
+    const updateTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'dark' : 'light');
+    };
+
+    // Set initial theme
+    updateTheme();
+
+    // Watch for theme changes - this is needed for the spinner to work correctly during theme changes
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleSliderChange = (value: number[]) => {
     const newProgress = value[0];
@@ -128,6 +149,7 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
             className="w-20 text-center"
+            style={{ colorScheme: theme }}
             min={0}
             max={100}
             step={5}
