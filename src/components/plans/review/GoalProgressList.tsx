@@ -10,9 +10,10 @@ import type { GoalReviewViewModel } from '../../../types';
 interface GoalProgressListProps {
   goals: GoalReviewViewModel[];
   onProgressUpdate: (goalId: string, progress: number) => void;
+  onMilestoneToggle?: (milestoneId: string, isCompleted: boolean) => void;
 }
 
-export default function GoalProgressList({ goals, onProgressUpdate }: GoalProgressListProps) {
+export default function GoalProgressList({ goals, onProgressUpdate, onMilestoneToggle }: GoalProgressListProps) {
   if (goals.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -29,6 +30,7 @@ export default function GoalProgressList({ goals, onProgressUpdate }: GoalProgre
           key={goal.id}
           goal={goal}
           onProgressUpdate={onProgressUpdate}
+          onMilestoneToggle={onMilestoneToggle}
         />
       ))}
     </div>

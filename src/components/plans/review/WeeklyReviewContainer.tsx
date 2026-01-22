@@ -39,6 +39,7 @@ export default function WeeklyReviewContainer({
     error,
     updateReflection,
     updateGoalProgress,
+    toggleMilestone,
     toggleCompletion
   } = useWeeklyReview({
     planId,
@@ -69,6 +70,7 @@ export default function WeeklyReviewContainer({
             <GoalProgressList
               goals={goals}
               onProgressUpdate={updateGoalProgress}
+              onMilestoneToggle={toggleMilestone}
             />
           </AccordionContent>
         </AccordionItem>

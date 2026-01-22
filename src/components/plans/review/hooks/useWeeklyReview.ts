@@ -18,6 +18,7 @@ interface UseWeeklyReviewReturn extends UseWeeklyReviewState {
     value: string
   ) => void;
   updateGoalProgress: (goalId: string, progress: number) => void;
+  toggleMilestone: (milestoneId: string, isCompleted: boolean) => void;
   toggleCompletion: () => Promise<void>;
 }
 
@@ -211,6 +212,86 @@ export function useWeeklyReview({
   }, [state.goals]);
 
   /**
+   * Toggles milestone completion status
+   */
+  const toggleMilestone = useCallback(async (milestoneId: string, isCompleted: boolean) => {
+    // Find milestone and store original state for rollback
+    let originalCompleted: boolean | null = null;
+    let goalIndex = -1;
+    let milestoneIndex = -1;
+
+    // Find the milestone in the goals state
+    for (let g = 0; g < state.goals.length; g++) {
+      const goal = state.goals[g];
+      if (goal.milestones) {
+        const mIndex = goal.milestones.findIndex(m => m.id === milestoneId);
+        if (mIndex !== -1) {
+          originalCompleted = goal.milestones[mIndex].is_completed;
+          goalIndex = g;
+          milestoneIndex = mIndex;
+          break;
+        }
+      }
+    }
+
+    if (goalIndex === -1 || milestoneIndex === -1) return;
+
+    // Optimistic update
+    setState(prev => ({
+      ...prev,
+      goals: prev.goals.map((goal, gIndex) =>
+        gIndex === goalIndex && goal.milestones
+          ? {
+              ...goal,
+              milestones: goal.milestones.map((milestone, mIndex) =>
+                mIndex === milestoneIndex
+                  ? { ...milestone, is_completed: isCompleted }
+                  : milestone
+              )
+            }
+          : goal
+      ),
+      error: null
+    }));
+
+    try {
+      const response = await fetch(`/api/v1/milestones/${milestoneId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_completed: isCompleted })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update milestone');
+      }
+
+    } catch (error) {
+      console.error('Error updating milestone:', error);
+
+      // Rollback optimistic update
+      setState(prev => ({
+        ...prev,
+        goals: prev.goals.map((goal, gIndex) =>
+          gIndex === goalIndex && goal.milestones
+            ? {
+                ...goal,
+                milestones: goal.milestones.map((milestone, mIndex) =>
+                  mIndex === milestoneIndex
+                    ? { ...milestone, is_completed: originalCompleted! }
+                    : milestone
+                )
+              }
+            : goal
+        ),
+        error: 'Failed to update milestone'
+      }));
+
+      toast.error('Failed to update milestone. Changes have been reverted.');
+    }
+  }, [state.goals]);
+
+  /**
    * Toggles review completion status
    */
   const toggleCompletion = useCallback(async () => {
@@ -257,6 +338,7 @@ export function useWeeklyReview({
     ...state,
     updateReflection,
     updateGoalProgress,
+    toggleMilestone,
     toggleCompletion,
   };
 }

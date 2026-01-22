@@ -982,7 +982,9 @@ export interface WeeklyReviewViewModel extends Omit<WeeklyReviewDTO, 'id'> {
 
 /**
  * Goal Review ViewModel - extends GoalDTO with UI-specific fields for progress updates
+ * Includes milestones for review display
  */
 export interface GoalReviewViewModel extends GoalDTO {
   isUpdating: boolean; // Whether progress update is in progress
+  milestones?: MilestoneDTO[]; // Milestones for the goal
 }

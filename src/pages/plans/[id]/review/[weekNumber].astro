@@ -78,13 +78,22 @@ try {
     lastSavedAt: null
   };
 
-  // Load goals for the plan
+  // Load goals for the plan with milestones
   const goalsData = await goalService.getGoalsByPlanId(planId, DEFAULT_USER_ID);
 
-  goals = goalsData.map(goal => ({
-    ...goal,
-    isUpdating: false
-  }));
+  // Fetch milestones for each goal
+  const goalsWithMilestones = await Promise.all(
+    goalsData.map(async (goal) => {
+      const goalWithMilestones = await goalService.getGoalWithMilestones(goal.id, DEFAULT_USER_ID);
+      return {
+        ...goal,
+        isUpdating: false,
+        milestones: goalWithMilestones?.milestones || []
+      };
+    })
+  );
+
+  goals = goalsWithMilestones;
 
 } catch (error) {
   console.error('Error loading weekly review data:', error);
