@@ -184,7 +184,7 @@ export function DashboardOverviewCard({
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 mb-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full"
+                      className="bg-primary h-2 rounded-full"
                       style={{ width: `${goal.progress_percentage}%` }}
                     />
                   </div>
@@ -203,7 +203,7 @@ export function DashboardOverviewCard({
           </div>
           <div className="w-full bg-muted rounded-full h-3">
             <div
-              className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+              className="bg-primary h-3 rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>

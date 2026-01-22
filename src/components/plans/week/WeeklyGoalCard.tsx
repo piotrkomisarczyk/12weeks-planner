@@ -245,12 +245,9 @@ export function WeeklyGoalCard({
               <span>Progress</span>
               <span>{completedTasks} / {totalTasks} tasks</span>
             </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
-                className={cn(
-                  'h-full transition-all duration-300',
-                  progressPercentage === 100 ? 'bg-green-500' : 'bg-primary'
-                )}
+                className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
