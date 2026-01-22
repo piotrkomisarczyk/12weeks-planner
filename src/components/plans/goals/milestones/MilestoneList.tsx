@@ -1,8 +1,9 @@
 /**
  * MilestoneList Component
- * Displays list of milestones for a goal
+ * Displays list of milestones for a goal with drag and drop support
  */
 
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { MilestoneItem } from './MilestoneItem';
 import type { MilestoneDTO } from '@/types';
 
@@ -15,6 +16,7 @@ interface MilestoneListProps {
   planEndDate: string;
   disabled?: boolean;
   deletingMilestoneId?: string | null;
+  dragDisabled?: boolean;
 }
 
 /**
@@ -28,7 +30,8 @@ export function MilestoneList({
   planStartDate,
   planEndDate,
   disabled = false,
-  deletingMilestoneId = null
+  deletingMilestoneId = null,
+  dragDisabled = false
 }: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
@@ -40,19 +43,25 @@ export function MilestoneList({
 
   return (
     <div className="space-y-1">
-      {milestones.map((milestone) => (
-        <MilestoneItem
-          key={milestone.id}
-          milestone={milestone}
-          onToggle={onToggle}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-          planStartDate={planStartDate}
-          planEndDate={planEndDate}
-          disabled={disabled}
-          isDeleting={deletingMilestoneId === milestone.id}
-        />
-      ))}
+      <SortableContext
+        items={milestones.map(m => m.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {milestones.map((milestone) => (
+          <MilestoneItem
+            key={milestone.id}
+            milestone={milestone}
+            onToggle={onToggle}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+            planStartDate={planStartDate}
+            planEndDate={planEndDate}
+            disabled={disabled}
+            isDeleting={deletingMilestoneId === milestone.id}
+            dragDisabled={dragDisabled}
+          />
+        ))}
+      </SortableContext>
     </div>
   );
 }

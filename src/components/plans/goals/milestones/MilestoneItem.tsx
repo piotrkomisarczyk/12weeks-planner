@@ -4,6 +4,8 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Trash2, CalendarIcon, Edit3, RotateCcw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -12,6 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { DragHandle } from '../../week/DragHandle';
 import type { MilestoneDTO } from '@/types';
 
 interface MilestoneItemProps {
@@ -23,6 +26,7 @@ interface MilestoneItemProps {
   planEndDate: string;
   disabled?: boolean;
   isDeleting?: boolean;
+  dragDisabled?: boolean;
 }
 
 /**
@@ -37,7 +41,8 @@ export function MilestoneItem({
   planStartDate,
   planEndDate,
   disabled = false,
-  isDeleting = false
+  isDeleting = false,
+  dragDisabled = false
 }: MilestoneItemProps) {
   const [isToggling, setIsToggling] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -49,6 +54,22 @@ export function MilestoneItem({
   const [showCalendar, setShowCalendar] = useState(false);
   const [editError, setEditError] = useState<string>('');
   const milestoneRef = useRef<HTMLDivElement>(null);
+
+  // Sortable hook for drag and drop
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: milestone.id, disabled: dragDisabled || disabled });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   // Handle click outside to exit edit mode
   useEffect(() => {
@@ -149,12 +170,26 @@ export function MilestoneItem({
 
   return (
     <div
-      ref={milestoneRef}
+      ref={(node) => {
+        setNodeRef(node);
+        milestoneRef.current = node;
+      }}
+      style={style}
       className={cn(
         'flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors group',
-        milestone.is_completed && 'opacity-60'
+        milestone.is_completed && 'opacity-60',
+        isDragging && 'opacity-50 shadow-lg ring-2 ring-primary'
       )}
     >
+      {/* Drag Handle */}
+      <DragHandle
+        listeners={listeners}
+        attributes={attributes}
+        setActivatorNodeRef={setActivatorNodeRef}
+        disabled={isDisabled}
+        isDragging={isDragging}
+      />
+
       {/* Checkbox */}
       <Checkbox
         checked={milestone.is_completed}

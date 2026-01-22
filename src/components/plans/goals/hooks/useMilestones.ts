@@ -25,6 +25,7 @@ interface UseMilestonesReturn extends UseMilestonesState {
   updateMilestone: (id: string, data: UpdateMilestoneCommand) => Promise<void>;
   toggleMilestone: (id: string, isCompleted: boolean) => Promise<void>;
   deleteMilestone: (id: string) => Promise<void>;
+  reorderMilestones: (reorderedMilestones: MilestoneDTO[]) => Promise<void>;
   canAddMilestone: boolean;
 }
 
@@ -218,6 +219,45 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
     }
   }, []);
 
+  // Reorder milestones via drag and drop
+  const reorderMilestones = useCallback(async (reorderedMilestones: MilestoneDTO[]) => {
+    // Store original state for potential rollback
+    const originalMilestones = [...state.milestones];
+
+    // Optimistic update: update local state immediately
+    setState((prev) => ({
+      ...prev,
+      milestones: reorderedMilestones,
+    }));
+
+    try {
+      // Update positions via API calls
+      const updatePromises = reorderedMilestones.map((milestone, index) =>
+        fetch(`/api/v1/milestones/${milestone.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ position: index + 1 }),
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to update position for milestone ${milestone.id}`);
+          }
+          return response.json();
+        })
+      );
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      // Revert local state on error
+      setState((prev) => ({
+        ...prev,
+        milestones: originalMilestones,
+      }));
+      throw error;
+    }
+  }, [state.milestones]);
+
   return {
     ...state,
     fetchMilestones,
@@ -225,6 +265,7 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
     updateMilestone,
     toggleMilestone,
     deleteMilestone,
+    reorderMilestones,
     canAddMilestone,
   };
 }

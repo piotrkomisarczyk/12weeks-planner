@@ -3,7 +3,15 @@
  * Manages milestones for a goal with lazy loading
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+  type DragEndEvent,
+} from '@dnd-kit/core';
 import { useMilestones } from '../hooks/useMilestones';
 import { MilestoneList } from './MilestoneList';
 import { MilestoneForm } from './MilestoneForm';
@@ -47,6 +55,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     updateMilestone,
     toggleMilestone,
     deleteMilestone,
+    reorderMilestones,
     canAddMilestone,
   } = useMilestones(goalId);
 
@@ -58,6 +67,15 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   });
 
   const [deletingMilestoneId, setDeletingMilestoneId] = useState<string | null>(null);
+
+  // Drag and Drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Track if milestones have been fetched for this goal
   const hasFetchedRef = useRef(false);
@@ -152,6 +170,30 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     });
   };
 
+  // Handle milestone reordering via drag and drop
+  const handleReorderMilestones = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = milestones.findIndex(m => m.id === active.id);
+    const newIndex = milestones.findIndex(m => m.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+    // Create new order
+    const reorderedMilestones = [...milestones];
+    const [movedMilestone] = reorderedMilestones.splice(oldIndex, 1);
+    reorderedMilestones.splice(newIndex, 0, movedMilestone);
+
+    try {
+      await reorderMilestones(reorderedMilestones);
+    } catch (error) {
+      console.error('Failed to reorder milestones:', error);
+      toast.error('Failed to reorder milestones');
+    }
+  }, [milestones, reorderMilestones]);
+
   const isDisabled = planContext.isArchived;
 
   return (
@@ -176,16 +218,23 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
         {/* Milestone List */}
         {!isLoading && !error && (
-          <MilestoneList
-            milestones={milestones}
-            onToggle={handleToggleMilestone}
-            onUpdate={handleUpdateMilestone}
-            onDelete={handleDeleteMilestone}
-            planStartDate={planContext.startDate}
-            planEndDate={planContext.endDate}
-            disabled={isDisabled}
-            deletingMilestoneId={deletingMilestoneId}
-          />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragEnd={handleReorderMilestones}
+          >
+            <MilestoneList
+              milestones={milestones}
+              onToggle={handleToggleMilestone}
+              onUpdate={handleUpdateMilestone}
+              onDelete={handleDeleteMilestone}
+              planStartDate={planContext.startDate}
+              planEndDate={planContext.endDate}
+              disabled={isDisabled}
+              deletingMilestoneId={deletingMilestoneId}
+              dragDisabled={isDisabled}
+            />
+          </DndContext>
         )}
       </div>
 
