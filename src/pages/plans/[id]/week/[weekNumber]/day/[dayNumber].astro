@@ -75,15 +75,6 @@ if (dayDate > endDate) {
   return Astro.redirect(`/plans/${planId}/week/12/day/7`);
 }
 
-// If plan started and is not active, prevent navigating into future days
-const hasPlanStarted = currentDate >= startDate;
-if (plan.status !== 'active' && hasPlanStarted && dayDate > currentDate) {
-  const currentWeek = plan.current_week || 1;
-  const currentDayOfWeek = 1; // Default to Monday
-  if (weekNumber !== currentWeek || dayNumber !== currentDayOfWeek) {
-    return Astro.redirect(`/plans/${planId}/week/${currentWeek}/day/${currentDayOfWeek}`);
-  }
-}
 
 // Compute display date for the day
 const displayDate = dayDate.toLocaleDateString('en-US', { 

@@ -64,14 +64,6 @@ const currentDate = new Date();
 const weekStartDate = new Date(startDate);
 weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
 
-// If plan started and is not active, prevent navigating into future weeks
-const hasPlanStarted = currentDate >= startDate;
-if (plan.status !== 'active' && hasPlanStarted && weekStartDate > currentDate) {
-  const currentWeek = plan.current_week || 1;
-  if (weekNumber !== currentWeek) {
-    return Astro.redirect(`/plans/${planId}/week/${currentWeek}`);
-  }
-}
 ---
 
 <Layout title={`${plan.name} - Week ${weekNumber}`}>
