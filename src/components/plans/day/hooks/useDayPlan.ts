@@ -32,8 +32,7 @@ interface UseDayPlanReturn {
   status: LoadingStatus;
   error: string | null;
   isSaving: boolean;
-  showConfetti: boolean;
-  
+
   // Task Actions
   addTask: (slot: DaySlot, title: string) => Promise<void>;
   updateTask: (id: string, updates: Partial<UpdateTaskCommand>) => Promise<void>;
@@ -134,26 +133,7 @@ export function useDayPlan(
   const [status, setStatus] = useState<LoadingStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
 
-  /**
-   * Check if all tasks are completed (for confetti effect)
-   */
-  const checkConfetti = useCallback((viewData: DayViewData) => {
-    const allTasks = [
-      viewData.slots.mostImportant,
-      ...viewData.slots.secondary,
-      ...viewData.slots.additional,
-    ].filter(Boolean) as DayTaskViewModel[];
-    
-    if (allTasks.length === 0) {
-      setShowConfetti(false);
-      return;
-    }
-    
-    const allCompleted = allTasks.every(task => task.status === 'completed');
-    setShowConfetti(allCompleted);
-  }, []);
 
   /**
    * Fetch all data for the day view
@@ -233,7 +213,6 @@ export function useDayPlan(
       };
 
       setData(viewData);
-      checkConfetti(viewData);
 
       // Set metadata
       setMeta({
@@ -262,7 +241,7 @@ export function useDayPlan(
       setError(err instanceof Error ? err.message : 'An error occurred');
       setStatus('error');
     }
-  }, [planId, weekNumber, dayNumber, planStartDate, checkConfetti]);
+  }, [planId, weekNumber, dayNumber, planStartDate]);
 
   // Initial fetch
   useEffect(() => {
@@ -455,7 +434,6 @@ export function useDayPlan(
             ),
           },
         };
-        checkConfetti(newData);
         return newData;
       });
     } catch (err) {
@@ -466,7 +444,7 @@ export function useDayPlan(
     } finally {
       setIsSaving(false);
     }
-  }, [data, checkConfetti]);
+  }, [data]);
 
   /**
    * Delete a task
@@ -729,7 +707,6 @@ export function useDayPlan(
     status,
     error,
     isSaving,
-    showConfetti,
     addTask,
     updateTask,
     deleteTask,

@@ -19,7 +19,6 @@ import { toast } from 'sonner';
 import { useDayPlan } from './hooks/useDayPlan';
 import { DayHeader } from './DayHeader';
 import { DailyTaskSlot } from './DailyTaskSlot';
-import { ConfettiOverlay } from './ConfettiOverlay';
 import type { DaySlot, DayTaskViewModel, TaskStatus, TaskPriority } from '@/types';
 
 interface DayPageContainerProps {
@@ -43,7 +42,6 @@ export function DayPageContainer({
     status,
     error,
     isSaving,
-    showConfetti,
     addTask,
     updateTask,
     deleteTask,
@@ -501,9 +499,6 @@ export function DayPageContainer({
               <span className="text-sm">Saving...</span>
             </div>
           )}
-
-          {/* Confetti overlay */}
-          {showConfetti && <ConfettiOverlay />}
         </div>
       </div>
     </DndContext>

@@ -8,5 +8,4 @@ export { DayPageContainer } from './DayPageContainer';
 export { DayHeader } from './DayHeader';
 export { DailyTaskSlot } from './DailyTaskSlot';
 export { TaskCard } from './TaskCard';
-export { ConfettiOverlay } from './ConfettiOverlay';
 
