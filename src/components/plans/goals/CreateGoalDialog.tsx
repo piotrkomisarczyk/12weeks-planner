@@ -194,7 +194,7 @@ export function CreateGoalDialog({
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="new-goal-description">
-              Description <span className="text-muted-foreground text-xs">(Optional)</span>
+              Why is it important? / How will you measure your success? <span className="text-muted-foreground text-xs">(Optional)</span>
             </Label>
             <Textarea
               id="new-goal-description"

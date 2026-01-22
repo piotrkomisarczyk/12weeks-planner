@@ -168,7 +168,7 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="goal-description">
-          Description <span className="text-muted-foreground text-xs">(Optional)</span>
+          Why is it important? / How will you measure your success? <span className="text-muted-foreground text-xs">(Optional)</span>
         </Label>
         <Textarea
           id="goal-description"

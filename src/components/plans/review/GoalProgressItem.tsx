@@ -77,7 +77,7 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
 
       {goal.description && (
         <div>
-          <h4 className="text-sm font-semibold text-foreground mb-1">Why it is important / How you know you've succeeded:</h4>
+          <Label className="text-base font-medium text-foreground mb-1">Why is it important? / How will you measure your success?</Label>
           <p className="text-sm text-muted-foreground">{goal.description}</p>
         </div>
       )}
