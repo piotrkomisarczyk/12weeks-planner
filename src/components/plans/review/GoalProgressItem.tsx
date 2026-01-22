@@ -10,6 +10,7 @@ import { Label } from '../../ui/label';
 import { Badge } from '../../ui/badge';
 import { Checkbox } from '../../ui/checkbox';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '../../../types';
+import { formatTextWithLineBreaks } from '../../../lib/utils';
 import type { GoalCategory, GoalReviewViewModel } from '../../../types';
 
 interface GoalProgressItemProps {
@@ -99,7 +100,10 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
       {goal.description && (
         <div>
           <Label className="text-base font-medium text-foreground mb-1">Why is it important? / How will you measure your success?</Label>
-          <p className="text-sm text-muted-foreground">{goal.description}</p>
+          <p
+            className="text-sm text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(goal.description) }}
+          />
         </div>
       )}
 

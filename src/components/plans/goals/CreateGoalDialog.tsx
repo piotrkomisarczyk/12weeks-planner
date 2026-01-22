@@ -194,13 +194,14 @@ export function CreateGoalDialog({
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="new-goal-description">
-              Why is it important? / How will you measure your success? <span className="text-muted-foreground text-xs">(Optional)</span>
+              Why is it important? How will you measure your success?
+              <span className="text-muted-foreground text-xs">(Optional)</span>
             </Label>
             <Textarea
               id="new-goal-description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Why is this goal important to you?"
+              placeholder="Why? Success Criteria?"
               rows={3}
             />
           </div>

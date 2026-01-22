@@ -36,3 +36,12 @@ export function calculateCurrentDay(): number {
   // Convert to 1-7 format where Monday = 1
   return dayOfWeek === 0 ? 7 : dayOfWeek;
 }
+
+/**
+ * Converts newlines (\n) to HTML line breaks (<br>) for display in React components
+ * This preserves line breaks when text is stored with newlines but displayed as HTML
+ */
+export function formatTextWithLineBreaks(text: string | null | undefined): string {
+  if (!text) return '';
+  return text.replace(/\n/g, '<br>');
+}

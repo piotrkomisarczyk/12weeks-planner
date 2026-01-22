@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { GoalFormDialog } from './GoalFormDialog';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import { formatTextWithLineBreaks } from '@/lib/utils';
 import type { GoalDTO, GoalCategory, CreateGoalCommand, UpdateGoalCommand } from '@/types';
 
 interface GoalsStepProps {
@@ -120,9 +121,10 @@ export function GoalsStep({
                       )}
                     </div>
                     {goal.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {goal.description}
-                      </p>
+                      <p
+                        className="text-sm text-muted-foreground line-clamp-2"
+                        dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(goal.description) }}
+                      />
                     )}
                     <div className="mt-2">
                       <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">

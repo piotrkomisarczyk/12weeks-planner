@@ -1,6 +1,7 @@
 import { Target, TrendingUp, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { formatTextWithLineBreaks } from '@/lib/utils';
 import type { GoalDTO } from '@/types';
 
 interface GoalProgressCardProps {
@@ -73,9 +74,11 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
 
           {/* Description */}
           {goal.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2" title={goal.description}>
-              {goal.description}
-            </p>
+            <p
+              className="text-sm text-muted-foreground line-clamp-2"
+              title={goal.description}
+              dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(goal.description) }}
+            />
           )}
         </div>
       </CardContent>
