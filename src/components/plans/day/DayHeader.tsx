@@ -51,19 +51,17 @@ function getPlanDateRange(planStartDate: Date): { start: Date; end: Date } {
   return { start, end };
 }
 
-export function DayHeader({ 
-  planName, 
-  dayNumber, 
-  weekNumber, 
-  computedDate, 
+export function DayHeader({
+  planName,
+  dayNumber,
+  weekNumber,
+  computedDate,
   planStartDate,
-  onNavigate 
+  onNavigate
 }: DayHeaderProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  
-  const canGoPrev = dayNumber > 1;
-  const canGoNext = dayNumber < 7;
-  
+
+  const planId = window.location.pathname.split('/')[2];
   const currentDate = new Date(computedDate);
   const { start: planStart, end: planEnd } = getPlanDateRange(planStartDate);
   
@@ -86,7 +84,7 @@ export function DayHeader({
     // Navigate to the new day
     if (result.weekNumber !== weekNumber) {
       // Different week - navigate to that week and day
-      window.location.href = `/plans/${window.location.pathname.split('/')[2]}/week/${result.weekNumber}/day/${result.dayNumber}`;
+      window.location.href = `/plans/${planId}/week/${result.weekNumber}/day/${result.dayNumber}`;
     } else {
       // Same week - just navigate to the day
       onNavigate(result.dayNumber);
@@ -98,7 +96,6 @@ export function DayHeader({
   const handlePreviousDay = () => {
     if (dayNumber === 1 && weekNumber > 1) {
       // Go to last day of previous week
-      const planId = window.location.pathname.split('/')[2];
       window.location.href = `/plans/${planId}/week/${weekNumber - 1}/day/7`;
     } else if (dayNumber > 1) {
       onNavigate(dayNumber - 1);
@@ -108,11 +105,14 @@ export function DayHeader({
   const handleNextDay = () => {
     if (dayNumber === 7 && weekNumber < 12) {
       // Go to first day of next week
-      const planId = window.location.pathname.split('/')[2];
       window.location.href = `/plans/${planId}/week/${weekNumber + 1}/day/1`;
     } else if (dayNumber < 7) {
       onNavigate(dayNumber + 1);
     }
+  };
+
+  const handleWeekBadgeClick = () => {
+    window.location.href = `/plans/${planId}/week/${weekNumber}`;
   };
 
   return (
@@ -129,7 +129,11 @@ export function DayHeader({
               Day {dayNumber + (weekNumber - 1) * 7}
             </h1>
 
-            <Badge variant="default" className="text-sm">
+            <Badge
+              variant="default"
+              className="text-sm cursor-pointer hover:bg-primary/80 transition-colors"
+              onClick={handleWeekBadgeClick}
+            >
               Week {weekNumber}
             </Badge>
             
