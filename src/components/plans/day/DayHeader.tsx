@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn, computeDayNumberFromDate, getPlanDateRange, normalizeDateToMidnight, parseDateString } from '@/lib/utils';
+import { DAY_NAMES } from '@/types';
 
 interface DayHeaderProps {
   planName: string;
@@ -23,8 +24,6 @@ interface DayHeaderProps {
   planStartDate: Date;
   onNavigate: (dayNumber: number) => void;
 }
-
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export function DayHeader({
   planName,

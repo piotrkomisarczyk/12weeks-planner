@@ -50,6 +50,8 @@ interface WeeklyGoalCardProps {
   goal: WeeklyGoalViewModel;
   availableLongTermGoals: SimpleGoal[];
   availableMilestones: SimpleMilestone[];
+  planId: string;
+  weekNumber: number;
   onUpdate: (id: string, updates: Partial<WeeklyGoalViewModel>) => void;
   onDelete: (id: string) => void;
   onAddTask: (goalId: string, title: string) => void;
@@ -87,6 +89,8 @@ export function WeeklyGoalCard({
   goal,
   availableLongTermGoals,
   availableMilestones,
+  planId,
+  weekNumber,
   onUpdate,
   onDelete,
   onAddTask,
@@ -104,7 +108,7 @@ export function WeeklyGoalCard({
   const [editValue, setEditValue] = useState(goal.title);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [expandedValue, setExpandedValue] = useState<string>('');
+  const [expandedValue, setExpandedValue] = useState<string>(goal.id);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     title: '',
@@ -401,6 +405,8 @@ export function WeeklyGoalCard({
                       isAdHoc={false}
                       availableMilestones={availableMilestones}
                       availableLongTermGoals={availableLongTermGoals}
+                      planId={planId}
+                      weekNumber={weekNumber}
                       onUpdate={onUpdateTask}
                       onDelete={onDeleteTask}
                       onAssignDay={onAssignDay}

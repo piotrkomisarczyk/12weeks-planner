@@ -23,6 +23,8 @@ interface AdHocSectionProps {
   availableWeeklyGoals: WeeklyGoalViewModel[];
   availableMilestones: SimpleMilestone[];
   availableLongTermGoals: SimpleGoal[];
+  planId: string;
+  weekNumber: number;
   onAddTask: (title: string) => void;
   onUpdateTask: (taskId: string, updates: Partial<TaskViewModel>) => void;
   onDeleteTask: (taskId: string) => void;
@@ -37,6 +39,8 @@ export function AdHocSection({
   availableWeeklyGoals,
   availableMilestones,
   availableLongTermGoals,
+  planId,
+  weekNumber,
   onAddTask,
   onUpdateTask,
   onDeleteTask,
@@ -103,6 +107,8 @@ export function AdHocSection({
                       availableMilestones={availableMilestones}
                       availableLongTermGoals={availableLongTermGoals}
                       availableWeeklyGoals={availableWeeklyGoals}
+                      planId={planId}
+                      weekNumber={weekNumber}
                       onUpdate={onUpdateTask}
                       onDelete={onDeleteTask}
                       onAssignDay={onAssignDay}

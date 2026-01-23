@@ -20,6 +20,7 @@ import { WeekHeader } from './WeekHeader';
 import { WeeklyGoalsSection } from './WeeklyGoalsSection';
 import { AdHocSection } from './AdHocSection';
 import type { WeeklyGoalViewModel, TaskViewModel } from '@/types';
+import { DAY_NAMES } from '@/types';
 
 interface WeekPlannerContainerProps {
   planId: string;
@@ -213,14 +214,14 @@ export function WeekPlannerContainer({
 
       // Check limit (10 tasks per day)
       if (tasksAssignedToDay >= 10) {
-        toast.error(`Cannot assign more than 10 tasks to a day. Day ${day} already has ${tasksAssignedToDay} tasks.`);
+        toast.error(`Cannot assign more than 10 tasks to a day. ${DAY_NAMES[day - 1]} already has ${tasksAssignedToDay} tasks.`);
         return;
       }
     }
 
     try {
       await updateTask(taskId, { due_day: day });
-      toast.success(day ? `Assigned to day ${day}` : 'Day cleared');
+      toast.success(day ? `Task assigned to ${DAY_NAMES[day - 1]}` : 'Day cleared');
     } catch (err) {
       toast.error('Failed to assign day');
       console.error(err);
@@ -439,6 +440,8 @@ export function WeekPlannerContainer({
               goals={data.weeklyGoals}
               availableLongTermGoals={meta.longTermGoals}
               availableMilestones={meta.milestones}
+              planId={planId}
+              weekNumber={weekNumber}
               onUpdateGoal={handleUpdateGoal}
               onDeleteGoal={handleDeleteGoal}
               onAddGoal={handleAddGoal}
@@ -458,6 +461,8 @@ export function WeekPlannerContainer({
               availableWeeklyGoals={data.weeklyGoals}
               availableMilestones={meta.milestones}
               availableLongTermGoals={meta.longTermGoals}
+              planId={planId}
+              weekNumber={weekNumber}
               onAddTask={(title) => handleAddTask(null, title)}
               onUpdateTask={handleUpdateTask}
               onDeleteTask={handleDeleteTask}

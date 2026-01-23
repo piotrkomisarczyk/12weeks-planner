@@ -20,6 +20,7 @@ import { useDayPlan } from './hooks/useDayPlan';
 import { DayHeader } from './DayHeader';
 import { DailyTaskSlot } from './DailyTaskSlot';
 import type { DaySlot, DayTaskViewModel, TaskStatus, TaskPriority } from '@/types';
+import { DAY_NAMES } from '@/types';
 
 interface DayPageContainerProps {
   planId: string;
@@ -197,7 +198,7 @@ export function DayPageContainer({
       } else {
         // Move to specific day
         await moveTask(id, weekNumber, day);
-        toast.success(`Task moved to day ${day}`);
+        toast.success(`Task assigned to ${DAY_NAMES[day - 1]}`);
       }
     } catch (err) {
       toast.error('Failed to assign day');

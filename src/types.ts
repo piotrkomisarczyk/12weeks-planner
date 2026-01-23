@@ -90,6 +90,12 @@ export type TaskStatus = 'todo' | 'in_progress' | 'completed' | 'cancelled' | 'p
 
 export type TaskType = 'weekly_main' | 'weekly_sub' | 'ad_hoc';
 
+/**
+ * Day names array for consistent day name display
+ * Index 0 = Monday, Index 6 = Sunday (matches DayOfWeek type where 1=Monday, 7=Sunday)
+ */
+export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
+
 // ============================================================================
 // PLAN DTOs
 // ============================================================================

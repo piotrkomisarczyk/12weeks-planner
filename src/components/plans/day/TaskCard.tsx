@@ -42,7 +42,7 @@ import type {
   SimpleGoal,
   SimpleMilestone,
 } from '@/types';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS } from '@/types';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS, DAY_NAMES } from '@/types';
 import { MoreVertical, Flag, Target, Copy, MoveRight, MoveLeft, ArrowRight, Trash2, Calendar, Clock, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -87,8 +87,6 @@ const getCategoryLabel = (category: string): string => {
   const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
   return categoryItem?.label || category;
 };
-
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export function TaskCard({
   task,

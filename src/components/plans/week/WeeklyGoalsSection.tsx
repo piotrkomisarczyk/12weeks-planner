@@ -22,6 +22,8 @@ interface WeeklyGoalsSectionProps {
   goals: WeeklyGoalViewModel[];
   availableLongTermGoals: SimpleGoal[];
   availableMilestones: SimpleMilestone[];
+  planId: string;
+  weekNumber: number;
   onUpdateGoal: (id: string, updates: Partial<WeeklyGoalViewModel>) => void;
   onDeleteGoal: (id: string) => void;
   onAddGoal: (title: string, longTermGoalId?: string) => void;
@@ -41,6 +43,8 @@ export function WeeklyGoalsSection({
   goals,
   availableLongTermGoals,
   availableMilestones,
+  planId,
+  weekNumber,
   onUpdateGoal,
   onDeleteGoal,
   onAddGoal,
@@ -112,6 +116,8 @@ export function WeeklyGoalsSection({
               goal={goal}
               availableLongTermGoals={availableLongTermGoals}
               availableMilestones={availableMilestones}
+              planId={planId}
+              weekNumber={weekNumber}
               onUpdate={onUpdateGoal}
               onDelete={onDeleteGoal}
               onAddTask={onAddTask}

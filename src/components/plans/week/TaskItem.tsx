@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { TaskStatusControl } from './TaskStatusControl';
 import { DragHandle } from './DragHandle';
 import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS } from '@/types';
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS, DAY_NAMES } from '@/types';
 import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target, Trash2, Clock, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
@@ -42,6 +42,8 @@ interface TaskItemProps {
   availableMilestones: SimpleMilestone[];
   availableLongTermGoals: SimpleGoal[];
   availableWeeklyGoals?: WeeklyGoalViewModel[];
+  planId: string;
+  weekNumber: number;
   onUpdate: (id: string, updates: Partial<TaskViewModel>) => void;
   onDelete: (id: string) => void;
   onAssignDay: (id: string, day: number | null) => void;
@@ -58,14 +60,14 @@ const getCategoryLabel = (category: string): string => {
   return categoryItem?.label || category;
 };
 
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
 export function TaskItem({
   task,
   isAdHoc = false,
   availableMilestones,
   availableLongTermGoals,
   availableWeeklyGoals = [],
+  planId,
+  weekNumber,
   onUpdate,
   onDelete,
   onAssignDay,
@@ -75,6 +77,7 @@ export function TaskItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.title);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isDayBadgeHovered, setIsDayBadgeHovered] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     title: '',
@@ -82,7 +85,7 @@ export function TaskItem({
     onConfirm: () => {},
   });
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   // Local state for optimistic priority display (for debounced updates)
   const [displayedPriority, setDisplayedPriority] = useState(task.priority);
   
@@ -268,10 +271,18 @@ export function TaskItem({
 
       {/* Day Indicator */}
       {task.due_day && (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <button
+          onClick={() => window.location.href = `/plans/${planId}/week/${weekNumber}/day/${task.due_day}`}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+          title={`Go to day view for ${DAY_NAMES[task.due_day - 1]}`}
+          onMouseEnter={() => setIsDayBadgeHovered(true)}
+          onMouseLeave={() => setIsDayBadgeHovered(false)}
+        >
+          <Badge variant={isDayBadgeHovered ? "default" : "outline"}>
           <Calendar className="h-3 w-3" />
           <span className="font-bold">{DAY_NAMES[task.due_day - 1]}</span>
-        </div>
+          </Badge>
+        </button>
       )}
       
       {/* Category Badge - Only for ad-hoc tasks with assigned goal */}
@@ -286,24 +297,26 @@ export function TaskItem({
       {/* Long-Term Goal Indicator */}
       {task.long_term_goal_id && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Badge variant="outline">
           <Target className="h-3 w-3" />
           <span className="truncate max-w-[200px]" title={getLongTermGoalTitle(task.long_term_goal_id) || undefined}>
             {getLongTermGoalTitle(task.long_term_goal_id)}
           </span>
+          </Badge>
         </div>
       )}
 
       {/* Milestone Indicator */}
       {task.milestone_id && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Badge variant="outline">
           <Flag className="h-3 w-3" />
           <span className="truncate max-w-[200px]" title={getMilestoneTitle(task.milestone_id) || undefined}>
             {getMilestoneTitle(task.milestone_id)}
           </span>
+          </Badge>
         </div>
       )}
-
-
 
       {/* Priority Badge */}
       <Badge
