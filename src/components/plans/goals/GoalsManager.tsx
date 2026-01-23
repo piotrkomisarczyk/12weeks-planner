@@ -24,7 +24,7 @@ interface GoalsManagerProps {
  * @param planContext - Plan metadata for validation and display
  */
 export default function GoalsManager({ planContext }: GoalsManagerProps) {
-  const { goals, isLoading, error, addGoal, updateGoal, deleteGoal, canAddGoal } = useGoals(planContext.id);
+  const { goals, isLoading, error, addGoal, updateGoal, deleteGoal, moveGoalUp, moveGoalDown, canAddGoal } = useGoals(planContext.id);
 
   const handleAddGoal = async (data: {
     title: string;
@@ -57,6 +57,24 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     } catch (error) {
       toast.error('Failed to delete goal');
       throw error;
+    }
+  };
+
+  const handleMoveGoalUp = async (id: string) => {
+    try {
+      await moveGoalUp(id);
+    } catch (error) {
+      toast.error('Failed to move goal up');
+      console.error(error);
+    }
+  };
+
+  const handleMoveGoalDown = async (id: string) => {
+    try {
+      await moveGoalDown(id);
+    } catch (error) {
+      toast.error('Failed to move goal down');
+      console.error(error);
     }
   };
 
@@ -126,13 +144,17 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
         ) : (
           /* Goals List */
           <div className="space-y-4">
-            {goals.map((goal) => (
+            {goals.map((goal, index) => (
               <GoalCard
                 key={goal.id}
                 goal={goal}
                 planContext={planContext}
                 onUpdate={handleUpdateGoal}
                 onDelete={handleDeleteGoal}
+                onMoveUp={handleMoveGoalUp}
+                onMoveDown={handleMoveGoalDown}
+                isFirst={index === 0}
+                isLast={index === goals.length - 1}
               />
             ))}
           </div>

@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -35,6 +35,10 @@ interface GoalCardProps {
   planContext: PlanContext;
   onUpdate: (id: string, data: Partial<GoalDTO>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 /**
@@ -42,7 +46,7 @@ interface GoalCardProps {
  * Collapsed: Shows title, category, progress bar
  * Expanded: Shows full form, progress slider, and milestones
  */
-export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProps) {
+export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst = false, isLast = false }: GoalCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [expandedValue, setExpandedValue] = useState<string>('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -101,8 +105,41 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete }: GoalCardProp
               </AccordionTrigger>
             </div>
 
-            {/* Delete Button outside AccordionTrigger */}
-            <div className="shrink-0">
+            {/* Position Controls and Actions Menu outside AccordionTrigger */}
+            <div className="shrink-0 flex items-center gap-1">
+              {/* Move Up Button */}
+              {onMoveUp && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Move goal up"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp(goal.id);
+                  }}
+                  disabled={isFirst}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Move Down Button */}
+              {onMoveDown && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Move goal down"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown(goal.id);
+                  }}
+                  disabled={isLast}
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Delete Button */}
               <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <DialogTrigger asChild>
                   <Button

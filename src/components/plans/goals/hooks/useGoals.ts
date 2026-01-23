@@ -24,6 +24,9 @@ interface UseGoalsReturn extends UseGoalsState {
   addGoal: (data: Omit<CreateGoalCommand, 'plan_id'>) => Promise<GoalDTO>;
   updateGoal: (id: string, data: UpdateGoalCommand) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
+  reorderGoals: (newOrder: GoalDTO[]) => Promise<void>;
+  moveGoalUp: (id: string) => Promise<void>;
+  moveGoalDown: (id: string) => Promise<void>;
   canAddGoal: boolean;
 }
 
@@ -207,6 +210,90 @@ export function useGoals(planId: string): UseGoalsReturn {
     }
   }, []);
 
+  // Reorder goals
+  const reorderGoals = useCallback(async (newOrder: GoalDTO[]) => {
+    const previousData = { ...state };
+
+    // Update positions
+    const goalsWithNewPositions = newOrder.map((goal, index) => ({
+      ...goal,
+      position: index + 1,
+    }));
+
+    setState(prev => ({
+      ...prev,
+      goals: goalsWithNewPositions,
+    }));
+
+    try {
+      // Update each goal's position
+      await Promise.all(
+        goalsWithNewPositions.map(goal =>
+          fetch(`/api/v1/goals/${goal.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ position: goal.position }),
+          })
+        )
+      );
+    } catch (err) {
+      console.error('Error reordering goals:', err);
+      // Rollback
+      setState(previousData);
+      throw err;
+    }
+  }, [state]);
+
+  // Move a goal up (decrease position)
+  const moveGoalUp = useCallback(async (id: string) => {
+    const currentIndex = state.goals.findIndex(g => g.id === id);
+
+    // Can't move up if already at the top
+    if (currentIndex <= 0) return;
+
+    const previousData = { ...state };
+    const newOrder = [...state.goals];
+
+    // Swap with previous goal
+    [newOrder[currentIndex - 1], newOrder[currentIndex]] = [newOrder[currentIndex], newOrder[currentIndex - 1]];
+
+    try {
+      await reorderGoals(newOrder);
+      // Refetch to ensure consistency
+      await fetchGoals();
+    } catch (err) {
+      console.error('Error moving goal up:', err);
+      setState(previousData);
+      throw err;
+    }
+  }, [state, reorderGoals, fetchGoals]);
+
+  // Move a goal down (increase position)
+  const moveGoalDown = useCallback(async (id: string) => {
+    const currentIndex = state.goals.findIndex(g => g.id === id);
+
+    // Can't move down if already at the bottom
+    if (currentIndex < 0 || currentIndex >= state.goals.length - 1) return;
+
+    const previousData = { ...state };
+    const newOrder = [...state.goals];
+
+    // Swap with next goal
+    [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
+
+    try {
+      await reorderGoals(newOrder);
+      // Refetch to ensure consistency
+      await fetchGoals();
+    } catch (err) {
+      console.error('Error moving goal down:', err);
+      setState(previousData);
+      throw err;
+    }
+  }, [state, reorderGoals, fetchGoals]);
+
   // Fetch goals on mount
   useEffect(() => {
     fetchGoals();
@@ -218,6 +305,9 @@ export function useGoals(planId: string): UseGoalsReturn {
     addGoal,
     updateGoal,
     deleteGoal,
+    reorderGoals,
+    moveGoalUp,
+    moveGoalDown,
     canAddGoal,
   };
 }
