@@ -20,11 +20,11 @@ interface PlanGoalsFormProps {
 
 /**
  * Step 2: Plan Goals Form
- * Allows user to add/remove and configure 1-5 goals
+ * Allows user to add/remove and configure 1-6 goals
  */
 export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
   const handleAddGoal = () => {
-    if (goals.length >= 5) return;
+    if (goals.length >= 6) return;
 
     const newGoal: GoalFormData = {
       id: crypto.randomUUID(),
@@ -54,7 +54,7 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
       <div className="rounded-lg border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">Long-Term Goals</h2>
         <p className="text-muted-foreground mb-6 text-sm">
-          Define 1 to 5 long-term goals you want to achieve during this 12-week period.
+          Define 1 to 6 long-term goals you want to achieve during this 12-week period.
           Each goal should be specific and meaningful.
         </p>
 
@@ -172,15 +172,15 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
             type="button"
             variant="outline"
             onClick={handleAddGoal}
-            disabled={goals.length >= 5}
+            disabled={goals.length >= 6}
             className="w-full"
           >
             <Plus className="size-4" />
-            Add Goal {goals.length < 5 && `(${goals.length}/5)`}
+            Add Goal {goals.length < 6 && `(${goals.length}/6)`}
           </Button>
-          {goals.length >= 5 && (
+          {goals.length >= 6 && (
             <p className="text-muted-foreground mt-2 text-xs">
-              Maximum of 5 goals reached. Remove a goal to add another.
+              Maximum of 6 goals reached. Remove a goal to add another.
             </p>
           )}
         </div>

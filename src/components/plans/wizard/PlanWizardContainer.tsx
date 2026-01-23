@@ -88,8 +88,8 @@ export function PlanWizardContainer() {
 
     if (wizardState.goals.length === 0) {
       errors['goals'] = 'At least one goal is required';
-    } else if (wizardState.goals.length > 5) {
-      errors['goals'] = 'Maximum 5 goals allowed';
+    } else if (wizardState.goals.length > 6) {
+      errors['goals'] = 'Maximum 6 goals allowed';
     }
 
     wizardState.goals.forEach((goal, index) => {
