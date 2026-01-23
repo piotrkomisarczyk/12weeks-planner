@@ -421,7 +421,7 @@ export function DayPageContainer({
             {/* Most Important */}
             <DailyTaskSlot
               slot="most_important"
-              title="Most Important"
+              title="Most Important Tasks"
               limit={1}
               tasks={data.slots.mostImportant ? [data.slots.mostImportant] : []}
               availableLongTermGoals={meta.longTermGoals}
@@ -445,7 +445,7 @@ export function DayPageContainer({
             {/* Secondary */}
             <DailyTaskSlot
               slot="secondary"
-              title="Secondary"
+              title="Secondary Tasks"
               limit={2}
               tasks={data.slots.secondary}
               availableLongTermGoals={meta.longTermGoals}
@@ -469,7 +469,7 @@ export function DayPageContainer({
             {/* Additional */}
             <DailyTaskSlot
               slot="additional"
-              title="Additional"
+              title="Additional Tasks"
               limit={7}
               tasks={data.slots.additional}
               availableLongTermGoals={meta.longTermGoals}

@@ -81,9 +81,9 @@ export const GOAL_CATEGORY_COLORS: Record<GoalCategory, string> = {
 export type TaskPriority = 'A' | 'B' | 'C';
 
 export const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  A: 'bg-red-500 hover:bg-red-600 dark:bg-red-800',
-  B: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700',
-  C: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-800',
+  A: 'bg-red-600 hover:bg-red-700 dark:bg-red-800 hover:dark:bg-red-900',
+  B: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700 hover:dark:bg-yellow-800',
+  C: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-800 hover:dark:bg-blue-900',
 };
 
 export type TaskStatus = 'todo' | 'in_progress' | 'completed' | 'cancelled' | 'postponed';
