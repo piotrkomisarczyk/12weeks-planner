@@ -31,6 +31,8 @@ interface WeeklyGoalsSectionProps {
   onAssignDay: (taskId: string, day: number | null) => void;
   onLinkGoal: (goalId: string, longTermGoalId: string | null, milestoneId: string | null) => void;
   onUnassignFromWeeklyGoal: (taskId: string) => void;
+  onMoveGoalUp?: (id: string) => void;
+  onMoveGoalDown?: (id: string) => void;
 }
 
 const MAX_WEEKLY_GOALS = 3;
@@ -48,6 +50,8 @@ export function WeeklyGoalsSection({
   onAssignDay,
   onLinkGoal,
   onUnassignFromWeeklyGoal,
+  onMoveGoalUp,
+  onMoveGoalDown,
 }: WeeklyGoalsSectionProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const isAtGoalLimit = goals.length >= MAX_WEEKLY_GOALS;
@@ -102,7 +106,7 @@ export function WeeklyGoalsSection({
       {/* Goals List */}
       <SortableContext items={goals.map(g => g.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-6">
-          {goals.map((goal) => (
+          {goals.map((goal, index) => (
             <WeeklyGoalCard
               key={goal.id}
               goal={goal}
@@ -116,6 +120,10 @@ export function WeeklyGoalsSection({
               onAssignDay={onAssignDay}
               onLinkGoal={onLinkGoal}
               onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
+              onMoveUp={onMoveGoalUp}
+              onMoveDown={onMoveGoalDown}
+              isFirst={index === 0}
+              isLast={index === goals.length - 1}
             />
           ))}
         </div>

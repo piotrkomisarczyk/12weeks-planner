@@ -35,7 +35,7 @@ import { InlineAddTask } from './InlineAddTask';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
 import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } from '@/types';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import { Target, MoreVertical, Trash2, Plus, Flag } from 'lucide-react';
+import { Target, MoreVertical, Trash2, Plus, Flag, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfirmDialogState {
@@ -58,6 +58,10 @@ interface WeeklyGoalCardProps {
   onAssignDay: (taskId: string, day: number | null) => void;
   onLinkGoal: (goalId: string, longTermGoalId: string | null, milestoneId: string | null) => void;
   onUnassignFromWeeklyGoal: (taskId: string) => void;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 const MAX_TASKS_PER_GOAL = 15;
@@ -91,6 +95,10 @@ export function WeeklyGoalCard({
   onAssignDay,
   onLinkGoal,
   onUnassignFromWeeklyGoal,
+  onMoveUp,
+  onMoveDown,
+  isFirst = false,
+  isLast = false,
 }: WeeklyGoalCardProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editValue, setEditValue] = useState(goal.title);
@@ -253,8 +261,41 @@ export function WeeklyGoalCard({
               </AccordionTrigger>
             </div>
 
-            {/* Actions Menu outside AccordionTrigger */}
-            <div className="shrink-0">
+            {/* Position Controls and Actions Menu outside AccordionTrigger */}
+            <div className="shrink-0 flex items-center gap-1">
+              {/* Move Up Button */}
+              {onMoveUp && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Move goal up"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp(goal.id);
+                  }}
+                  disabled={isFirst}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Move Down Button */}
+              {onMoveDown && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Move goal down"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown(goal.id);
+                  }}
+                  disabled={isLast}
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Actions Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

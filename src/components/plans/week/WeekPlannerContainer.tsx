@@ -43,6 +43,8 @@ export function WeekPlannerContainer({
     updateWeeklyGoal,
     deleteWeeklyGoal,
     reorderWeeklyGoals,
+    moveWeeklyGoalUp,
+    moveWeeklyGoalDown,
     addTask,
     updateTask,
     deleteTask,
@@ -136,6 +138,24 @@ export function WeekPlannerContainer({
       console.error(err);
     }
   }, [updateWeeklyGoal, updateTask, data.weeklyGoals, refetch]);
+
+  const handleMoveGoalUp = useCallback(async (id: string) => {
+    try {
+      await moveWeeklyGoalUp(id);
+    } catch (err) {
+      toast.error('Failed to move goal up');
+      console.error(err);
+    }
+  }, [moveWeeklyGoalUp]);
+
+  const handleMoveGoalDown = useCallback(async (id: string) => {
+    try {
+      await moveWeeklyGoalDown(id);
+    } catch (err) {
+      toast.error('Failed to move goal down');
+      console.error(err);
+    }
+  }, [moveWeeklyGoalDown]);
 
   // Task handlers
   const handleAddTask = useCallback(async (weeklyGoalId: string | null, title: string) => {
@@ -428,6 +448,8 @@ export function WeekPlannerContainer({
               onAssignDay={handleAssignDay}
               onLinkGoal={handleLinkGoal}
               onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
+              onMoveGoalUp={handleMoveGoalUp}
+              onMoveGoalDown={handleMoveGoalDown}
             />
 
             {/* Ad-hoc Tasks Section */}

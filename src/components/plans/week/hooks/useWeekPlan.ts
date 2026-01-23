@@ -30,6 +30,8 @@ interface UseWeekPlanReturn {
   updateWeeklyGoal: (id: string, updates: Partial<UpdateWeeklyGoalCommand>) => Promise<void>;
   deleteWeeklyGoal: (id: string) => Promise<void>;
   reorderWeeklyGoals: (newOrder: WeeklyGoalViewModel[]) => Promise<void>;
+  moveWeeklyGoalUp: (id: string) => Promise<void>;
+  moveWeeklyGoalDown: (id: string) => Promise<void>;
   
   // Task Actions
   addTask: (weeklyGoalId: string | null, title: string) => Promise<void>;
@@ -347,6 +349,58 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       throw err;
     }
   }, [data]);
+
+  /**
+   * Move a weekly goal up (decrease position)
+   */
+  const moveWeeklyGoalUp = useCallback(async (id: string) => {
+    const currentIndex = data.weeklyGoals.findIndex(g => g.id === id);
+    
+    // Can't move up if already at the top
+    if (currentIndex <= 0) return;
+
+    const previousData = { ...data };
+    const newOrder = [...data.weeklyGoals];
+    
+    // Swap with previous goal
+    [newOrder[currentIndex - 1], newOrder[currentIndex]] = [newOrder[currentIndex], newOrder[currentIndex - 1]];
+
+    try {
+      await reorderWeeklyGoals(newOrder);
+      // Refetch to ensure consistency
+      await fetchData();
+    } catch (err) {
+      console.error('Error moving weekly goal up:', err);
+      setData(previousData);
+      throw err;
+    }
+  }, [data, reorderWeeklyGoals, fetchData]);
+
+  /**
+   * Move a weekly goal down (increase position)
+   */
+  const moveWeeklyGoalDown = useCallback(async (id: string) => {
+    const currentIndex = data.weeklyGoals.findIndex(g => g.id === id);
+    
+    // Can't move down if already at the bottom
+    if (currentIndex < 0 || currentIndex >= data.weeklyGoals.length - 1) return;
+
+    const previousData = { ...data };
+    const newOrder = [...data.weeklyGoals];
+    
+    // Swap with next goal
+    [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
+
+    try {
+      await reorderWeeklyGoals(newOrder);
+      // Refetch to ensure consistency
+      await fetchData();
+    } catch (err) {
+      console.error('Error moving weekly goal down:', err);
+      setData(previousData);
+      throw err;
+    }
+  }, [data, reorderWeeklyGoals, fetchData]);
 
   /**
    * Add a new task
@@ -682,6 +736,8 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
     updateWeeklyGoal,
     deleteWeeklyGoal,
     reorderWeeklyGoals,
+    moveWeeklyGoalUp,
+    moveWeeklyGoalDown,
     addTask,
     updateTask,
     deleteTask,
