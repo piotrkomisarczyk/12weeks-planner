@@ -350,9 +350,6 @@ export function WeeklyGoalCard({
                 </div>
               )}
 
-              {/* Divider */}
-              <div className="border-t" />
-
               {/* Task List */}
               <SortableContext items={goal.tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
