@@ -37,19 +37,15 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
 
   return (
     <Card className="rounded-lg">
-      <CardContent className="p-4">
-        {/* Plan Name */}
-        {/* <div className="text-2xl font-bold text-gray-900 mb-2"> */}
-          {/* {planName} */}
-        {/* </div> */}
+      <CardContent>
 
         {/* Week Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-3xl font-bold">
               Week {weekNumber}
             </h1>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-base text-muted-foreground">
               {formatDate(start)} - {formatDate(end)}
             </div>
           </div>
@@ -83,21 +79,23 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
 
         {/* Progress Indicator */}
         <div className="mt-3">
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             {Array.from({ length: 12 }, (_, i) => i + 1).map((week) => (
               <button
                 key={week}
                 onClick={() => onNavigate(week)}
                 className={cn(
-                  'flex-1 h-1.5 rounded-full transition-all',
+                  'flex-1 py-0.75 px-1 text-center rounded-md transition-all text-xs font-medium',
                   week === weekNumber
-                    ? 'bg-primary'
+                    ? 'bg-primary text-primary-foreground'
                     : week < weekNumber
-                    ? 'bg-primary/40 hover:bg-primary/60'
-                    : 'bg-muted hover:bg-muted-foreground/20'
+                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 )}
                 title={`Week ${week}`}
-              />
+              >
+                {week}
+              </button>
             ))}
           </div>
         </div>

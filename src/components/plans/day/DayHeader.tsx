@@ -92,9 +92,7 @@ export function DayHeader({
   return (
     <Card className="rounded-lg">
       <CardContent>
-        {/* Plan Name and Week Badge */}
-        <div className="flex items-center gap-3 mb-3">
-        </div>
+
 
         {/* Day Navigation */}
         <div className="flex items-center justify-between">
@@ -179,7 +177,7 @@ export function DayHeader({
                 key={day}
                 onClick={() => onNavigate(day)}
                 className={cn(
-                  'flex-1 py-2 px-1 text-center rounded-md transition-all text-xs font-medium',
+                  'flex-1 py-0.75 px-1 text-center rounded-md transition-all text-xs font-medium',
                   day === dayNumber
                     ? 'bg-primary text-primary-foreground'
                     : day < dayNumber
