@@ -358,101 +358,7 @@ export function TaskCard({
             <MoreVertical className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          {/* Priority submenu with full status selection */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <ArrowUp className="mr-2 h-4 w-4" />
-              Change Priority
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem onClick={() => {
-                setDisplayedPriority('A');
-                onPriorityChange(task.id, 'A');
-              }}>
-                <Badge className={cn('mr-2 text-white', PRIORITY_COLORS.A)}>A</Badge>
-                High Priority
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                setDisplayedPriority('B');
-                onPriorityChange(task.id, 'B');
-              }}>
-                <Badge className={cn('mr-2 text-white', PRIORITY_COLORS.B)}>B</Badge>
-                Medium Priority
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                setDisplayedPriority('C');
-                onPriorityChange(task.id, 'C');
-              }}>
-                <Badge className={cn('mr-2 text-white', PRIORITY_COLORS.C)}>C</Badge>
-                Low Priority
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          {/* Assign to Day (only show in week view or for changing day) */}
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Clock className="mr-2 h-4 w-4" />
-              Assign to Day
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              {DAY_NAMES.map((day, index) => (
-                <DropdownMenuItem
-                  key={index}
-                  onClick={() => onAssignDay(task.id, index + 1)}
-                  className={index + 1 === dayNumber ? 'bg-accent' : ''}
-                >
-                  {day} {index + 1 === dayNumber && '(current)'}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onAssignDay(task.id, null)}>
-                Clear Day
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-
-          <DropdownMenuSeparator />
-
-          {/* Copy/Move Actions (Day View) */}
-          {variant === 'day' && onCopy && onMove && (
-            <>
-              <DropdownMenuItem 
-                onClick={() => onCopy(task.id)}
-                disabled={!canCopyMove}
-              >
-                <Copy className="mr-2 h-4 w-4" />
-                Copy to Another Day
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem 
-                onClick={() => {
-                  // Move within same week to different day - show simple prompt
-                  const day = prompt(`Move to which day? (1-7, current: ${dayNumber})`);
-                  if (day) {
-                    const dayNum = parseInt(day, 10);
-                    if (dayNum >= 1 && dayNum <= 7) {
-                      onMove(task.id, weekNumber, dayNum);
-                    }
-                  }
-                }}
-                disabled={!canCopyMove}
-              >
-                <MoveRight className="mr-2 h-4 w-4" />
-                Move to Another Day
-              </DropdownMenuItem>
-
-              {!canCopyMove && (
-                <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                  Cannot copy/move completed or cancelled tasks
-                </div>
-              )}
-
-              <DropdownMenuSeparator />
-            </>
-          )}
-
+        <DropdownMenuContent align="end" className="w-60">
           {/* Link Goal & Milestone */}
           {!isLinkedToWeeklyGoal && (
             <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
@@ -490,6 +396,100 @@ export function TaskCard({
               <MoveLeft className="mr-2 h-4 w-4" />
               Unassign from Weekly Goal
             </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator />
+
+          {/* Priority submenu with full status selection */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <ArrowUp className="mr-2 h-4 w-4" />
+              Change Priority
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => {
+                setDisplayedPriority('A');
+                onPriorityChange(task.id, 'A');
+              }}>
+                <Badge className={cn('mr-2 text-white', PRIORITY_COLORS.A)}>A</Badge>
+                High Priority
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                setDisplayedPriority('B');
+                onPriorityChange(task.id, 'B');
+              }}>
+                <Badge className={cn('mr-2 text-white', PRIORITY_COLORS.B)}>B</Badge>
+                Medium Priority
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                setDisplayedPriority('C');
+                onPriorityChange(task.id, 'C');
+              }}>
+                <Badge className={cn('mr-2 text-white', PRIORITY_COLORS.C)}>C</Badge>
+                Low Priority
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          <DropdownMenuSeparator />
+
+          {/* Assign to Day (only show in week view or for changing day) */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Clock className="mr-2 h-4 w-4" />
+              Assign to Day
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              {DAY_NAMES.map((day, index) => (
+                <DropdownMenuItem
+                  key={index}
+                  onClick={() => onAssignDay(task.id, index + 1)}
+                  className={index + 1 === dayNumber ? 'bg-accent' : ''}
+                >
+                  {day} {index + 1 === dayNumber && '(current)'}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onAssignDay(task.id, null)}>
+                Clear Day
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* Copy/Move Actions (Day View) */}
+          {variant === 'day' && onCopy && onMove && (
+            <>
+              <DropdownMenuItem
+                onClick={() => {
+                  // Move within same week to different day - show simple prompt
+                  const day = prompt(`Move to which day? (1-7, current: ${dayNumber})`);
+                  if (day) {
+                    const dayNum = parseInt(day, 10);
+                    if (dayNum >= 1 && dayNum <= 7) {
+                      onMove(task.id, weekNumber, dayNum);
+                    }
+                  }
+                }}
+                disabled={!canCopyMove}
+              >
+                <MoveRight className="mr-2 h-4 w-4" />
+                Move to Week/Day
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => onCopy(task.id)}
+                disabled={!canCopyMove}
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy to Week/Day
+              </DropdownMenuItem>
+
+              {!canCopyMove && (
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  Cannot copy/move completed or cancelled tasks
+                </div>
+              )}
+            </>
           )}
 
           <DropdownMenuSeparator />
