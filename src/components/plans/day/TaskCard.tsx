@@ -459,30 +459,81 @@ export function TaskCard({
           {/* Copy/Move Actions (Day View) */}
           {variant === 'day' && onCopy && onMove && (
             <>
-              <DropdownMenuItem
-                onClick={() => {
-                  // Move within same week to different day - show simple prompt
-                  const day = prompt(`Move to which day? (1-7, current: ${dayNumber})`);
-                  if (day) {
-                    const dayNum = parseInt(day, 10);
-                    if (dayNum >= 1 && dayNum <= 7) {
-                      onMove(task.id, weekNumber, dayNum);
-                    }
-                  }
-                }}
-                disabled={!canCopyMove}
-              >
-                <MoveRight className="mr-2 h-4 w-4" />
-                Move to Week/Day
-              </DropdownMenuItem>
+              {/* Move to Week/Day Submenu */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger disabled={!canCopyMove}>
+                  <MoveRight className="mr-2 h-4 w-4" />
+                  Move to Week/Day
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                  {/* Week selection */}
+                  {(() => {
+                    const currentWeek = weekNumber;
+                    const weeks = Array.from({ length: 12 }, (_, i) => i + 1); // Show all 12 weeks
 
-              <DropdownMenuItem
-                onClick={() => onCopy(task.id)}
-                disabled={!canCopyMove}
-              >
-                <Copy className="mr-2 h-4 w-4" />
-                Copy to Week/Day
-              </DropdownMenuItem>
+                    return weeks.map(weekNum => (
+                      <DropdownMenuSub key={weekNum}>
+                        <DropdownMenuSubTrigger className={weekNum === currentWeek ? 'bg-accent' : ''}>
+                          {weekNum === currentWeek ? 'Current' : `Week ${weekNum}`}
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          {/* Day selection */}
+                          {DAY_NAMES.map((dayName, index) => {
+                            const dayNum = index + 1;
+                            return (
+                              <DropdownMenuItem
+                                key={dayNum}
+                                onClick={() => onMove(task.id, weekNum, dayNum)}
+                                className={weekNum === currentWeek && dayNum === dayNumber ? 'bg-accent' : ''}
+                              >
+                                {dayName} {weekNum === currentWeek && dayNum === dayNumber && '(current)'}
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    ));
+                  })()}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+
+              {/* Copy to Week/Day Submenu */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger disabled={!canCopyMove}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy to Week/Day
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+                  {/* Week selection */}
+                  {(() => {
+                    const currentWeek = weekNumber;
+                    const weeks = Array.from({ length: 12 }, (_, i) => i + 1); // Show all 12 weeks
+
+                    return weeks.map(weekNum => (
+                      <DropdownMenuSub key={weekNum}>
+                        <DropdownMenuSubTrigger className={weekNum === currentWeek ? 'bg-accent' : ''}>
+                          {weekNum === currentWeek ? 'Current' : `Week ${weekNum}`}
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          {/* Day selection */}
+                          {DAY_NAMES.map((dayName, index) => {
+                            const dayNum = index + 1;
+                            return (
+                              <DropdownMenuItem
+                                key={dayNum}
+                                onClick={() => onCopy(task.id, weekNum, dayNum)}
+                                className={weekNum === currentWeek && dayNum === dayNumber ? 'bg-accent' : ''}
+                              >
+                                {dayName} {weekNum === currentWeek && dayNum === dayNumber && '(current)'}
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    ));
+                  })()}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
 
               {!canCopyMove && (
                 <div className="px-2 py-1.5 text-xs text-muted-foreground">
