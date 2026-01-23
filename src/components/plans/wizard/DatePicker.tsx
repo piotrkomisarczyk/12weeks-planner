@@ -3,7 +3,7 @@ import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, normalizeDateToMidnight } from '@/lib/utils';
 
 interface DatePickerProps {
   value: Date | undefined;
@@ -43,7 +43,11 @@ export function DatePicker({ value, onChange, disabled, error }: DatePickerProps
           mode="single"
           selected={value}
           onSelect={onChange}
-          disabled={disableNonMondays}
+          disabled={(date) => {
+            const normalizedDate = normalizeDateToMidnight(date);
+            return disableNonMondays(normalizedDate);
+          }}
+          weekStartsOn={1}
           initialFocus
         />
       </PopoverContent>

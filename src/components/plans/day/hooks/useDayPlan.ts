@@ -23,6 +23,7 @@ import {
   getWeekOrder,
   generateDayViewPositions,
 } from '@/lib/position-utils';
+import { computePlanDate } from '@/lib/utils';
 
 type LoadingStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -52,16 +53,6 @@ const SLOT_LIMITS = {
   secondary: 2,
   additional: 7,
 } as const;
-
-/**
- * Helper: compute date from plan start date, week number, and day number
- */
-function computeDate(planStartDate: Date, weekNumber: number, dayNumber: number): string {
-  const date = new Date(planStartDate);
-  const daysToAdd = (weekNumber - 1) * 7 + (dayNumber - 1);
-  date.setDate(date.getDate() + daysToAdd);
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD
-}
 
 /**
  * Helper: map priority to default slot
@@ -116,7 +107,7 @@ export function useDayPlan(
   const [data, setData] = useState<DayViewData>({
     weekNumber,
     dayNumber,
-    date: computeDate(planStartDate, weekNumber, dayNumber),
+    date: computePlanDate(planStartDate, weekNumber, dayNumber),
     slots: {
       mostImportant: null,
       secondary: [],
@@ -204,7 +195,7 @@ export function useDayPlan(
       const viewData: DayViewData = {
         weekNumber,
         dayNumber,
-        date: computeDate(planStartDate, weekNumber, dayNumber),
+        date: computePlanDate(planStartDate, weekNumber, dayNumber),
         slots: {
           mostImportant: tasksBySlot.most_important[0] || null,
           secondary: tasksBySlot.secondary,

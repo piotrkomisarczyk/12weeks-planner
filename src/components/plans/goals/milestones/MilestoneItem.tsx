@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, normalizeDateToMidnight } from '@/lib/utils';
 import { DragHandle } from '../../week/DragHandle';
 import type { MilestoneDTO } from '@/types';
 
@@ -237,7 +237,11 @@ export function MilestoneItem({
                   setEditDueDate(date);
                   setShowCalendar(false);
                 }}
-                disabled={(date) => date < minDate || date > maxDate}
+                disabled={(date) => {
+                  const normalizedDate = normalizeDateToMidnight(date);
+                  return normalizedDate < minDate || normalizedDate > maxDate;
+                }}
+                weekStartsOn={1}
                 initialFocus
               />
             </PopoverContent>

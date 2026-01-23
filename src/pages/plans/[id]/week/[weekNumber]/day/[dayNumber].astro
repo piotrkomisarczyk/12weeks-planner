@@ -13,6 +13,7 @@ import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import Layout from '@/layouts/Layout.astro';
 import { DayPageContainer } from '@/components/plans/day';
 import { Toaster } from '@/components/ui/sonner';
+import { getMondayOffset } from '@/lib/utils';
 
 export const prerender = false;
 
@@ -61,13 +62,18 @@ if (plan.status === 'archived') {
 // Parse start date
 const startDate = new Date(plan.start_date);
 
-// Calculate end date (12 weeks from start)
-const endDate = new Date(startDate);
-endDate.setDate(startDate.getDate() + (12 * 7) - 1);
+// Calculate week start date (Monday of the week containing plan start)
+const weekStartDate = new Date(startDate);
+const mondayOffset = getMondayOffset(weekStartDate);
+weekStartDate.setDate(weekStartDate.getDate() + mondayOffset);
+
+// Calculate end date (12 weeks from week start)
+const endDate = new Date(weekStartDate);
+endDate.setDate(weekStartDate.getDate() + (12 * 7) - 1);
 
 // Check if the requested week/day is valid based on plan dates
 const currentDate = new Date();
-const dayDate = new Date(startDate);
+const dayDate = new Date(weekStartDate);
 dayDate.setDate(dayDate.getDate() + (weekNumber - 1) * 7 + (dayNumber - 1));
 
 // If day is beyond plan end date, redirect to last day of plan
@@ -91,7 +97,7 @@ const displayDate = dayDate.toLocaleDateString('en-US', {
       client:load
       planId={planId}
       planName={plan.name}
-      planStartDate={startDate}
+      planStartDate={weekStartDate}
       weekNumber={weekNumber}
       dayNumber={dayNumber}
     />

@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, computeDayNumberFromDate, getPlanDateRange, normalizeDateToMidnight } from '@/lib/utils';
 
 interface DayHeaderProps {
   planName: string;
@@ -25,32 +25,6 @@ interface DayHeaderProps {
 }
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-/**
- * Compute day number from a date relative to plan start
- */
-function computeDayNumberFromDate(date: Date, planStartDate: Date): { weekNumber: number; dayNumber: number } | null {
-  const daysDiff = Math.floor((date.getTime() - planStartDate.getTime()) / (1000 * 60 * 60 * 24));
-  
-  if (daysDiff < 0 || daysDiff >= 12 * 7) {
-    return null; // Out of plan range
-  }
-  
-  const weekNumber = Math.floor(daysDiff / 7) + 1;
-  const dayNumber = (daysDiff % 7) + 1;
-  
-  return { weekNumber, dayNumber };
-}
-
-/**
- * Get valid date range for the plan (84 days = 12 weeks)
- */
-function getPlanDateRange(planStartDate: Date): { start: Date; end: Date } {
-  const start = new Date(planStartDate);
-  const end = new Date(planStartDate);
-  end.setDate(end.getDate() + (12 * 7) - 1);
-  return { start, end };
-}
 
 export function DayHeader({
   planName,
@@ -158,9 +132,10 @@ export function DayHeader({
                   selected={currentDate}
                   onSelect={handleDateSelect}
                   disabled={(date) => {
-                    // Disable dates outside plan range
-                    return date < planStart || date > planEnd;
+                    const normalizedDate = normalizeDateToMidnight(date);
+                    return normalizedDate < planStart || normalizedDate > planEnd;
                   }}
+                  weekStartsOn={1}
                   initialFocus
                 />
               </PopoverContent>

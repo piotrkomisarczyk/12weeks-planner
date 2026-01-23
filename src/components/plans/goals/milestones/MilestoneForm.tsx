@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, normalizeDateToMidnight } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 
@@ -148,7 +148,11 @@ export function MilestoneForm({
                 setDueDate(date);
                 setShowCalendar(false);
               }}
-              disabled={(date) => date < minDate || date > maxDate}
+              disabled={(date) => {
+                const normalizedDate = normalizeDateToMidnight(date);
+                return normalizedDate < minDate || normalizedDate > maxDate;
+              }}
+              weekStartsOn={1}
               initialFocus
             />
           </PopoverContent>
