@@ -306,20 +306,24 @@ export function TaskCard({
           {/* Long-Term Goal */}
           {task.long_term_goal_id && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Badge variant="outline">
               <Target className="h-3 w-3" />
               <span className="truncate max-w-[120px]" title={getLongTermGoalTitle(task.long_term_goal_id) || undefined}>
                 {getLongTermGoalTitle(task.long_term_goal_id)}
               </span>
+              </Badge>
             </div>
           )}
 
           {/* Milestone */}
           {task.milestone_id && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Badge variant="outline">
               <Flag className="h-3 w-3" />
               <span className="truncate max-w-[120px]" title={getMilestoneTitle(task.milestone_id) || undefined}>
                 {getMilestoneTitle(task.milestone_id)}
               </span>
+              </Badge>
             </div>
           )}
 
