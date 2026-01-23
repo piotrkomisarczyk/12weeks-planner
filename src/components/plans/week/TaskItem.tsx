@@ -24,7 +24,7 @@ import { TaskStatusControl } from './TaskStatusControl';
 import { DragHandle } from './DragHandle';
 import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS } from '@/types';
-import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target } from 'lucide-react';
+import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target, Trash2, Clock, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
 
@@ -332,7 +332,7 @@ export function TaskItem({
           {/* Assign to Day */}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Calendar className="mr-2 h-4 w-4" />
+              <Clock className="mr-2 h-4 w-4" />
               Assign to Day
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
@@ -361,7 +361,10 @@ export function TaskItem({
 
           {/* Priority */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>Priority</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>
+              <ArrowUp className="mr-2 h-4 w-4" />
+              Change Priority
+            </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem onClick={() => handlePriorityChange('A')}>
                 <Badge className={cn('mr-2', PRIORITY_COLORS.A)}>A</Badge>
@@ -384,7 +387,7 @@ export function TaskItem({
           {isAdHoc && onAssignToWeeklyGoal && (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <MoveRight className="mr-2 h-4 w-4" />
+                <Calendar className="mr-2 h-4 w-4" />
                 Assign to Weekly Goal
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
@@ -419,6 +422,7 @@ export function TaskItem({
             onClick={handleDelete}
             className="text-destructive focus:text-destructive"
           >
+            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
             Delete Task
           </DropdownMenuItem>
         </DropdownMenuContent>

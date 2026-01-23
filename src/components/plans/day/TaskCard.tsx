@@ -43,7 +43,7 @@ import type {
   SimpleMilestone,
 } from '@/types';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS } from '@/types';
-import { MoreVertical, Flag, Target, Copy, MoveRight, MoveLeft, ArrowRight } from 'lucide-react';
+import { MoreVertical, Flag, Target, Copy, MoveRight, MoveLeft, ArrowRight, Trash2, Calendar, Clock, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfirmDialogState {
@@ -359,7 +359,10 @@ export function TaskCard({
         <DropdownMenuContent align="end" className="w-56">
           {/* Priority submenu with full status selection */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>Change Priority</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>
+              <ArrowUp className="mr-2 h-4 w-4" />
+              Change Priority
+            </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem onClick={() => {
                 setDisplayedPriority('A');
@@ -387,7 +390,10 @@ export function TaskCard({
 
           {/* Assign to Day (only show in week view or for changing day) */}
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>Assign to Day</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>
+              <Clock className="mr-2 h-4 w-4" />
+              Assign to Day
+            </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               {DAY_NAMES.map((day, index) => (
                 <DropdownMenuItem
@@ -457,7 +463,7 @@ export function TaskCard({
           {!isLinkedToWeeklyGoal && onAssignToWeeklyGoal && (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <MoveRight className="mr-2 h-4 w-4" />
+                <Calendar className="mr-2 h-4 w-4" />
                 Assign to Weekly Goal
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
@@ -491,6 +497,7 @@ export function TaskCard({
             onClick={handleDelete}
             className="text-destructive focus:text-destructive"
           >
+            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
             Delete Task
           </DropdownMenuItem>
         </DropdownMenuContent>
