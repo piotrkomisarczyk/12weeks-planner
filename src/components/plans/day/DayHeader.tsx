@@ -130,6 +130,7 @@ export function DayHeader({
                 <Calendar
                   mode="single"
                   selected={currentDate}
+                  defaultMonth={currentDate}
                   onSelect={handleDateSelect}
                   disabled={(date) => {
                     const normalizedDate = normalizeDateToMidnight(date);
