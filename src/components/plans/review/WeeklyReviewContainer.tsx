@@ -64,7 +64,7 @@ export default function WeeklyReviewContainer({
       <Accordion type="single" collapsible defaultValue="goal-progress" className="bg-card rounded-lg border border-border">
         <AccordionItem value="goal-progress">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
-            <h2 className="text-xl font-semibold">Update your goal progress</h2>
+            <h2 className="text-xl font-semibold">Update progress for your goals</h2>
           </AccordionTrigger>
           <AccordionContent className="px-6 pb-4">
             <GoalProgressList
@@ -80,7 +80,7 @@ export default function WeeklyReviewContainer({
       <Accordion type="single" collapsible defaultValue="weekly-reflection" className="bg-card rounded-lg border border-border">
         <AccordionItem value="weekly-reflection">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
-            <h2 className="text-xl font-semibold">Reflect on your last week</h2>
+            <h2 className="text-xl font-semibold">Reflect on last week</h2>
           </AccordionTrigger>
           <AccordionContent className="px-6 pb-4">
             <ReflectionForm
