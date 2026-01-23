@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { DAY_NAMES } from "@/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -155,4 +156,16 @@ export function computeDayNumberFromDate(
   const dayNumber = (daysDiff % 7) + 1;
 
   return { weekNumber, dayNumber };
+}
+
+/**
+ * Get the day name from a day number (1-7, Monday=1)
+ * @param dayNumber - Day number (1-7, where 1=Monday, 7=Sunday)
+ * @returns Day name (e.g., "Monday", "Tuesday", etc.) or null if invalid day number
+ */
+export function getDayName(dayNumber: number): string | null {
+  if (dayNumber < 1 || dayNumber > 7) {
+    return null;
+  }
+  return DAY_NAMES[dayNumber - 1];
 }

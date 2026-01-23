@@ -6,6 +6,7 @@ import type {
   PlanStatus,
   TaskStatus,
 } from '@/types';
+import { getDayName } from '@/lib/utils';
 
 /**
  * Builds a hierarchical tree structure from flat dashboard data
@@ -243,7 +244,7 @@ export function buildHierarchyTree(
             undefined,
             task.week_number || undefined,
             task.priority,
-            task.due_day ? `${data.plan.start_date} + ${(task.week_number! - 1) * 7 + task.due_day} days` : undefined,
+            task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
             4
           );
 
@@ -273,7 +274,7 @@ export function buildHierarchyTree(
           undefined,
           task.week_number || undefined,
           task.priority,
-          task.due_day ? `${data.plan.start_date} + ${(task.week_number! - 1) * 7 + task.due_day} days` : undefined,
+          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
           3
         );
 
@@ -326,7 +327,7 @@ export function buildHierarchyTree(
           undefined,
           task.week_number || undefined,
           task.priority,
-          task.due_day ? `${data.plan.start_date} + ${(task.week_number! - 1) * 7 + task.due_day} days` : undefined,
+          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
           3
         );
 
@@ -356,7 +357,7 @@ export function buildHierarchyTree(
         undefined,
         task.week_number || undefined,
         task.priority,
-        task.due_day ? `${data.plan.start_date} + ${(task.week_number! - 1) * 7 + task.due_day} days` : undefined,
+          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
         2
       );
 
@@ -411,7 +412,7 @@ export function buildHierarchyTree(
         undefined,
         task.week_number || undefined,
         task.priority,
-        task.due_day ? `${data.plan.start_date} + ${(task.week_number! - 1) * 7 + task.due_day} days` : undefined,
+          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
         2 // Level 2: tasks under weekly goal at level 1
       );
 
@@ -457,7 +458,7 @@ export function buildHierarchyTree(
         undefined,
         task.week_number || undefined,
         task.priority,
-        task.due_day ? `${data.plan.start_date} + ${(task.week_number! - 1) * 7 + task.due_day} days` : undefined,
+          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
         2
       );
 

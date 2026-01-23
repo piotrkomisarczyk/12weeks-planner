@@ -128,6 +128,13 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
           </div>
         )}
 
+        {/* Day name for tasks */}
+        {node.type === 'task' && node.metadata.date && (
+          <div className="ml-2 text-xs text-muted-foreground">
+            {node.metadata.date}
+          </div>
+        )}
+
         {/* Week number */}
         {node.weekNumber && (
           <div className="ml-2 text-xs text-muted-foreground">
