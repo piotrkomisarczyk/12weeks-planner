@@ -44,7 +44,7 @@ export function InlineAddTask({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="p-1 flex items-center gap-2">
       <Input
         ref={inputRef}
         value={value}
