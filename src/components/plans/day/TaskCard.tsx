@@ -278,8 +278,7 @@ export function TaskCard({
           <button
             onClick={handleTitleClick}
             className={cn(
-              'text-left text-sm w-full truncate hover:text-primary transition-colors',
-              task.status === 'completed' && 'line-through'
+              'text-left text-sm w-full truncate hover:text-primary transition-colors'              
             )}
             disabled={task.status === 'completed'}
           >
