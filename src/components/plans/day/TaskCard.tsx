@@ -22,16 +22,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TaskStatusControl } from '../week/TaskStatusControl';
 import { DragHandle } from '../week/DragHandle';
 import { GoalMilestonePicker } from '../week/GoalMilestonePicker';
@@ -41,10 +42,12 @@ import type {
   TaskStatus,
   SimpleGoal,
   SimpleMilestone,
+  PlanStatus,
 } from '@/types';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS, DAY_NAMES } from '@/types';
 import { MoreVertical, Flag, Target, Copy, MoveRight, MoveLeft, ArrowRight, Trash2, Calendar, Clock, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getDisabledTooltip } from '@/lib/utils';
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -67,6 +70,8 @@ interface TaskCardProps {
   }>;
   weekNumber: number;
   dayNumber: number;
+  planStatus: PlanStatus;
+  isReadOnly: boolean;
   onUpdate: (id: string, updates: Partial<DayTaskViewModel>) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TaskStatus) => void;
@@ -96,6 +101,8 @@ export function TaskCard({
   availableWeeklyGoals,
   weekNumber,
   dayNumber,
+  planStatus,
+  isReadOnly,
   onUpdate,
   onDelete,
   onStatusChange,
@@ -156,7 +163,7 @@ export function TaskCard({
   };
 
   const handleTitleClick = () => {
-    if (task.status !== 'completed') {
+    if (task.status !== 'completed' && !isReadOnly) {
       setIsEditing(true);
     }
   };
@@ -180,6 +187,8 @@ export function TaskCard({
   };
 
   const handlePriorityClick = () => {
+    if (isReadOnly) return;
+
     const priorities: TaskPriority[] = ['A', 'B', 'C'];
     const currentIndex = priorities.indexOf(displayedPriority);
     const nextPriority = priorities[(currentIndex + 1) % priorities.length];
@@ -246,20 +255,42 @@ export function TaskCard({
       )}
     >
       {/* Drag Handle */}
-      <DragHandle 
-        listeners={listeners}
-        attributes={attributes}
-        setActivatorNodeRef={setActivatorNodeRef}
-        disabled={task.isSaving}
-        isDragging={isDragging}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <DragHandle
+              listeners={listeners}
+              attributes={attributes}
+              setActivatorNodeRef={setActivatorNodeRef}
+              disabled={task.isSaving || isReadOnly}
+              isDragging={isDragging}
+            />
+          </div>
+        </TooltipTrigger>
+        {isReadOnly && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'general')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Task Status Control */}
-      <TaskStatusControl
-        status={task.status}
-        onChange={handleStatusChange}
-        disabled={task.isSaving}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <TaskStatusControl
+              status={task.status}
+              onChange={handleStatusChange}
+              disabled={task.isSaving || isReadOnly || planStatus === 'ready'}
+            />
+          </div>
+        </TooltipTrigger>
+        {(isReadOnly || planStatus === 'ready') && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'task_status')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Title */}
       <div className="flex-1 min-w-0">
@@ -275,15 +306,24 @@ export function TaskCard({
             disabled={task.isSaving}
           />
         ) : (
-          <button
-            onClick={handleTitleClick}
-            className={cn(
-              'text-left text-sm w-full truncate hover:text-primary transition-colors'              
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleTitleClick}
+                className={cn(
+                  'text-left text-sm w-full truncate hover:text-primary transition-colors'
+                )}
+                disabled={task.status === 'completed' || isReadOnly}
+              >
+                {task.title}
+              </button>
+            </TooltipTrigger>
+            {isReadOnly && (
+              <TooltipContent>
+                <p>{getDisabledTooltip(planStatus, 'general')}</p>
+              </TooltipContent>
             )}
-            disabled={task.status === 'completed'}
-          >
-            {task.title}
-          </button>
+          </Tooltip>
         )}
       </div>
 
@@ -339,24 +379,34 @@ export function TaskCard({
       )}
 
       {/* Priority Badge */}
-      <Badge
-        className={cn('text-xs font-semibold text-white cursor-pointer', PRIORITY_COLORS[displayedPriority])}
-        onClick={handlePriorityClick}
-        title="Click to change priority"
-      >
-        {displayedPriority}
-      </Badge>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            className={cn('text-xs font-semibold text-white cursor-pointer', PRIORITY_COLORS[displayedPriority])}
+            onClick={handlePriorityClick}
+            title={isReadOnly ? undefined : "Click to change priority"}
+          >
+            {displayedPriority}
+          </Badge>
+        </TooltipTrigger>
+        {isReadOnly && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'general')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Context Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
-            aria-label="Task options"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+      {!isReadOnly && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
+              aria-label="Task options"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
           {/* Link Goal & Milestone */}
           {!isLinkedToWeeklyGoal && (
@@ -554,6 +604,7 @@ export function TaskCard({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      )}
 
       {/* Goal & Milestone Picker Dialog */}
       <GoalMilestonePicker

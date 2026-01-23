@@ -33,8 +33,9 @@ import {
 import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
-import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } from '@/types';
+import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, PlanStatus } from '@/types';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import { getDisabledTooltip } from '@/lib/utils';
 import { Target, MoreVertical, Trash2, Plus, Flag, ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,6 +53,8 @@ interface WeeklyGoalCardProps {
   availableMilestones: SimpleMilestone[];
   planId: string;
   weekNumber: number;
+  planStatus: PlanStatus;
+  isReadOnly: boolean;
   onUpdate: (id: string, updates: Partial<WeeklyGoalViewModel>) => void;
   onDelete: (id: string) => void;
   onAddTask: (goalId: string, title: string) => void;
@@ -91,6 +94,8 @@ export function WeeklyGoalCard({
   availableMilestones,
   planId,
   weekNumber,
+  planStatus,
+  isReadOnly,
   onUpdate,
   onDelete,
   onAddTask,
@@ -215,21 +220,27 @@ export function WeeklyGoalCard({
                   ) : (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <h3 
+                        <h3
                           className="font-semibold text-base"
                           onDoubleClick={(e) => {
-                            e.stopPropagation();
-                            setIsEditingTitle(true);
+                            if (!isReadOnly) {
+                              e.stopPropagation();
+                              setIsEditingTitle(true);
+                            }
                           }}
                         >
                           {truncateTitle(goal.title)}
                         </h3>
                       </TooltipTrigger>
-                      {goal.title.length > MAX_TITLE_LENGTH && (
+                      {isReadOnly ? (
+                        <TooltipContent side="top">
+                          <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                        </TooltipContent>
+                      ) : goal.title.length > MAX_TITLE_LENGTH ? (
                         <TooltipContent side="top" className="max-w-md">
                           <p>{goal.title}</p>
                         </TooltipContent>
-                      )}
+                      ) : null}
                     </Tooltip>
                   )}
 
@@ -268,7 +279,7 @@ export function WeeklyGoalCard({
             {/* Position Controls and Actions Menu outside AccordionTrigger */}
             <div className="shrink-0 flex items-center gap-1">
               {/* Move Up Button */}
-              {onMoveUp && (
+              {onMoveUp && !isReadOnly && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -284,7 +295,7 @@ export function WeeklyGoalCard({
               )}
 
               {/* Move Down Button */}
-              {onMoveDown && (
+              {onMoveDown && !isReadOnly && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -300,17 +311,18 @@ export function WeeklyGoalCard({
               )}
 
               {/* Actions Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Weekly goal actions"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
+              {!isReadOnly && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Weekly goal actions"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   {/* Link to Goal & Milestone */}
                   <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
@@ -330,6 +342,7 @@ export function WeeklyGoalCard({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              )}
             </div>
           </div>
 
@@ -407,6 +420,8 @@ export function WeeklyGoalCard({
                       availableLongTermGoals={availableLongTermGoals}
                       planId={planId}
                       weekNumber={weekNumber}
+                      planStatus={planStatus}
+                      isReadOnly={isReadOnly}
                       onUpdate={onUpdateTask}
                       onDelete={onDeleteTask}
                       onAssignDay={onAssignDay}
@@ -426,9 +441,9 @@ export function WeeklyGoalCard({
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsAddingTask(true)}
-                      disabled={isAtTaskLimit}
+                      disabled={isAtTaskLimit || isReadOnly}
                       className="w-full mt-2"
-                      title={isAtTaskLimit ? `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached` : undefined}
+                      title={isReadOnly ? getDisabledTooltip(planStatus, 'general') : isAtTaskLimit ? `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached` : undefined}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Add Task {isAtTaskLimit && `(${totalTasks}/${MAX_TASKS_PER_GOAL})`}

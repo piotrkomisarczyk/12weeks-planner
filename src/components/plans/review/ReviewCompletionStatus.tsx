@@ -5,17 +5,24 @@
 
 import React from 'react';
 import { Button } from '../../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { CheckCircle, Circle } from 'lucide-react';
+import { getDisabledTooltip, isPlanReadOnly, isPlanReady } from '../../../lib/utils';
+import type { PlanStatus } from '../../../types';
 
 interface ReviewCompletionStatusProps {
   isCompleted: boolean;
   onToggleComplete: () => void;
+  planStatus: PlanStatus;
 }
 
 export default function ReviewCompletionStatus({
   isCompleted,
-  onToggleComplete
+  onToggleComplete,
+  planStatus
 }: ReviewCompletionStatusProps) {
+  // Compute read-only state for review (ready or completed/archived)
+  const isReadOnly = isPlanReadOnly(planStatus) || isPlanReady(planStatus);
   return (
     <div className="bg-card rounded-lg border border-border p-6">
       <div className="flex items-center justify-between">
@@ -38,23 +45,33 @@ export default function ReviewCompletionStatus({
           </div>
         </div>
 
-        <Button
-          onClick={onToggleComplete}
-          variant={isCompleted ? 'outline' : 'default'}
-          className="flex items-center space-x-2"
-        >
-          {isCompleted ? (
-            <>
-              <Circle className="h-4 w-4" />
-              <span>Mark as Incomplete</span>
-            </>
-          ) : (
-            <>
-              <CheckCircle className="h-4 w-4" />
-              <span>Mark as Complete</span>
-            </>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={onToggleComplete}
+              variant={isCompleted ? 'outline' : 'default'}
+              className="flex items-center space-x-2"
+              disabled={isReadOnly}
+            >
+              {isCompleted ? (
+                <>
+                  <Circle className="h-4 w-4" />
+                  <span>Mark as Incomplete</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Mark as Complete</span>
+                </>
+              )}
+            </Button>
+          </TooltipTrigger>
+          {isReadOnly && (
+            <TooltipContent>
+              <p>Review completion cannot be changed - plan is {planStatus === 'ready' ? 'in ready state' : planStatus === 'completed' ? 'completed' : 'archived'}</p>
+            </TooltipContent>
           )}
-        </Button>
+        </Tooltip>
       </div>
     </div>
   );

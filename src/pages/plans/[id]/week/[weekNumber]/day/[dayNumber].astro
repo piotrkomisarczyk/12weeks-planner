@@ -14,6 +14,7 @@ import Layout from '@/layouts/Layout.astro';
 import { DayPageContainer } from '@/components/plans/day';
 import { Toaster } from '@/components/ui/sonner';
 import { getMondayOffset } from '@/lib/utils';
+import type { PlanStatus } from '@/types';
 
 export const prerender = false;
 
@@ -54,10 +55,6 @@ if (!plan) {
   return Astro.redirect('/plans');
 }
 
-// Check if plan is archived - don't allow editing archived plans
-if (plan.status === 'archived') {
-  return Astro.redirect(`/plans/${planId}/goals`);
-}
 
 // Parse start date - use timezone-safe parsing by splitting the date string
 const [year, month, day] = plan.start_date.split('-').map(Number);
@@ -101,6 +98,7 @@ const displayDate = dayDate.toLocaleDateString('en-US', {
       planStartDate={startDate}
       weekNumber={weekNumber}
       dayNumber={dayNumber}
+      planStatus={plan.status as PlanStatus}
     />
     <Toaster client:load position="bottom-right" />
   </div>

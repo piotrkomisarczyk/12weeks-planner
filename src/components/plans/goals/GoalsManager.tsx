@@ -10,8 +10,9 @@ import { GoalCard } from './GoalCard';
 import { CreateGoalDialog } from './CreateGoalDialog';
 import { EmptyState } from './EmptyState';
 import { toast } from 'sonner';
-import type { PlanContext } from '@/types';
+import type { PlanContext, PlanStatus } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { isPlanReadOnly } from '@/lib/utils';
 
 interface GoalsManagerProps {
   planContext: PlanContext;
@@ -25,6 +26,9 @@ interface GoalsManagerProps {
  */
 export default function GoalsManager({ planContext }: GoalsManagerProps) {
   const { goals, isLoading, error, addGoal, updateGoal, deleteGoal, moveGoalUp, moveGoalDown, canAddGoal } = useGoals(planContext.id);
+
+  // Compute flags from plan status
+  const isReadOnly = isPlanReadOnly(planContext.status as PlanStatus);
 
   const handleAddGoal = async (data: {
     title: string;
@@ -125,7 +129,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
               {goals.length > 0 && (
                 <CreateGoalDialog
                   onCreateGoal={handleAddGoal}
-                  disabled={planContext.isArchived}
+                  disabled={isReadOnly}
                   currentGoalsCount={goals.length}
                 />
               )}
@@ -139,7 +143,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
           <EmptyState
             onCreateGoal={handleAddGoal}
             currentGoalsCount={goals.length}
-            disabled={planContext.isArchived}
+            disabled={isReadOnly}
           />
         ) : (
           /* Goals List */

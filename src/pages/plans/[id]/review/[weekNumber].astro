@@ -12,10 +12,12 @@ import Layout from '@/layouts/Layout.astro';
 import WeeklyReviewContainer from '@/components/plans/review/WeeklyReviewContainer.tsx';
 import { WeeklyReviewService } from '@/lib/services/weekly-review.service';
 import { GoalService } from '@/lib/services/goal.service';
+import { PlanService } from '@/lib/services/plan.service';
 import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import type {
   WeeklyReviewViewModel,
-  GoalReviewViewModel
+  GoalReviewViewModel,
+  PlanStatus
 } from '@/types';
 
 // ============================================================================
@@ -46,12 +48,17 @@ if (!supabase) {
 // Initialize services
 const weeklyReviewService = new WeeklyReviewService(supabase);
 const goalService = new GoalService(supabase);
+const planService = new PlanService(supabase);
 
 // Load data from API
+let plan;
 let weeklyReview: WeeklyReviewViewModel;
 let goals: GoalReviewViewModel[];
 
 try {
+  // Load plan data
+  plan = await planService.getPlanById(planId, DEFAULT_USER_ID);
+
   // Load weekly review (may not exist - lazy creation)
   const reviewData = await weeklyReviewService.getWeeklyReviewByWeek(
     planId,
@@ -110,6 +117,12 @@ try {
 // ============================================================================
 // PAGE RENDER
 // ============================================================================
+
+// Ensure plan exists
+if (!plan) {
+  throw new Error(`Plan with ID ${planId} not found or access denied`);
+}
+
 ---
 
 <Layout title={`Weekly Review - Week ${weekNumber}`}>
@@ -121,6 +134,7 @@ try {
         weekNumber={weekNumber}
         initialReview={weeklyReview}
         initialGoals={goals}
+        planStatus={plan.status as PlanStatus}
       />
     </div>
   </div>

@@ -15,8 +15,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone } from '@/types';
+import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, PlanStatus } from '@/types';
 import { CreateWeeklyGoalDialog } from './CreateWeeklyGoalDialog';
+import { getDisabledTooltip } from '@/lib/utils';
 
 interface WeeklyGoalsSectionProps {
   goals: WeeklyGoalViewModel[];
@@ -24,6 +25,8 @@ interface WeeklyGoalsSectionProps {
   availableMilestones: SimpleMilestone[];
   planId: string;
   weekNumber: number;
+  planStatus: PlanStatus;
+  isReadOnly: boolean;
   onUpdateGoal: (id: string, updates: Partial<WeeklyGoalViewModel>) => void;
   onDeleteGoal: (id: string) => void;
   onAddGoal: (title: string, longTermGoalId?: string) => void;
@@ -45,6 +48,8 @@ export function WeeklyGoalsSection({
   availableMilestones,
   planId,
   weekNumber,
+  planStatus,
+  isReadOnly,
   onUpdateGoal,
   onDeleteGoal,
   onAddGoal,
@@ -79,7 +84,7 @@ export function WeeklyGoalsSection({
                 Plan your goals for this week {isAtGoalLimit && `(${goals.length}/${MAX_WEEKLY_GOALS})`}
               </div>
             </div>
-            {isAtGoalLimit ? (
+            {(isAtGoalLimit || isReadOnly) ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex">
@@ -94,7 +99,7 @@ export function WeeklyGoalsSection({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{disabledTooltipText}</p>
+                  <p>{isReadOnly ? getDisabledTooltip(planStatus, 'general') : disabledTooltipText}</p>
                 </TooltipContent>
               </Tooltip>
             ) : (
@@ -118,6 +123,8 @@ export function WeeklyGoalsSection({
               availableMilestones={availableMilestones}
               planId={planId}
               weekNumber={weekNumber}
+              planStatus={planStatus}
+              isReadOnly={isReadOnly}
               onUpdate={onUpdateGoal}
               onDelete={onDeleteGoal}
               onAddTask={onAddTask}

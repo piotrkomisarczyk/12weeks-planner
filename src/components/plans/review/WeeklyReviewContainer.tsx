@@ -5,7 +5,8 @@
 
 import type {
   WeeklyReviewViewModel,
-  GoalReviewViewModel
+  GoalReviewViewModel,
+  PlanStatus
 } from '../../../types';
 import { useWeeklyReview } from './hooks/useWeeklyReview';
 import ReviewHeader from './ReviewHeader';
@@ -18,20 +19,26 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '../../ui/accordion';
+import { isPlanReadOnly, isPlanReady } from '../../../lib/utils';
 
 interface WeeklyReviewContainerProps {
   planId: string;
   weekNumber: number;
   initialReview: WeeklyReviewViewModel;
   initialGoals: GoalReviewViewModel[];
+  planStatus: PlanStatus;
 }
 
 export default function WeeklyReviewContainer({
   planId,
   weekNumber,
   initialReview,
-  initialGoals
+  initialGoals,
+  planStatus
 }: WeeklyReviewContainerProps) {
+  // Compute flags from plan status
+  const isReadOnly = isPlanReadOnly(planStatus) || isPlanReady(planStatus);
+
   // Use custom hook for state management and business logic
   const {
     review,
@@ -71,6 +78,7 @@ export default function WeeklyReviewContainer({
               goals={goals}
               onProgressUpdate={updateGoalProgress}
               onMilestoneToggle={toggleMilestone}
+              planStatus={planStatus}
             />
           </AccordionContent>
         </AccordionItem>
@@ -87,6 +95,7 @@ export default function WeeklyReviewContainer({
               values={review}
               onChange={updateReflection}
               isSaving={review.isSaving}
+              planStatus={planStatus}
             />
           </AccordionContent>
         </AccordionItem>
@@ -96,6 +105,7 @@ export default function WeeklyReviewContainer({
       <ReviewCompletionStatus
         isCompleted={review.is_completed}
         onToggleComplete={toggleCompletion}
+        planStatus={planStatus}
       />
 
       {/* Error display */}

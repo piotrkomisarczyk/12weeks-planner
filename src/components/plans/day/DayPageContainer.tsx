@@ -19,8 +19,9 @@ import { toast } from 'sonner';
 import { useDayPlan } from './hooks/useDayPlan';
 import { DayHeader } from './DayHeader';
 import { DailyTaskSlot } from './DailyTaskSlot';
-import type { DaySlot, DayTaskViewModel, TaskStatus, TaskPriority } from '@/types';
+import type { DaySlot, DayTaskViewModel, TaskStatus, TaskPriority, PlanStatus } from '@/types';
 import { DAY_NAMES } from '@/types';
+import { isPlanReadOnly, canChangeTaskStatus } from '@/lib/utils';
 
 interface DayPageContainerProps {
   planId: string;
@@ -28,6 +29,7 @@ interface DayPageContainerProps {
   planStartDate: Date;
   weekNumber: number;
   dayNumber: number;
+  planStatus: PlanStatus;
 }
 
 export function DayPageContainer({
@@ -36,6 +38,7 @@ export function DayPageContainer({
   planStartDate,
   weekNumber,
   dayNumber,
+  planStatus,
 }: DayPageContainerProps) {
   const {
     data,
@@ -56,8 +59,12 @@ export function DayPageContainer({
   // Debounce ref for priority changes
   const priorityChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Drag and Drop sensors
-  const sensors = useSensors(
+  // Compute derived flags for plan status restrictions
+  const isReadOnly = isPlanReadOnly(planStatus);
+  const canChangeStatus = canChangeTaskStatus(planStatus);
+
+  // Drag and Drop sensors - conditionally disabled for read-only plans
+  const sensors = isReadOnly ? [] : useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
@@ -117,13 +124,19 @@ export function DayPageContainer({
   }, [deleteTask]);
 
   const handleStatusChange = useCallback(async (id: string, newStatus: TaskStatus) => {
+    // Check if status changes are allowed based on plan status
+    if (!canChangeStatus) {
+      toast.error('Cannot change task status - plan is in ready state');
+      return;
+    }
+
     try {
       await updateTask(id, { status: newStatus });
     } catch (err) {
       toast.error('Failed to update task status');
       console.error(err);
     }
-  }, [updateTask]);
+  }, [updateTask, canChangeStatus]);
 
   const handlePriorityChange = useCallback((id: string, newPriority: TaskPriority) => {
     // Clear any existing debounce timeout
@@ -441,6 +454,8 @@ export function DayPageContainer({
               onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
               weekNumber={weekNumber}
               dayNumber={dayNumber}
+              planStatus={planStatus}
+              isReadOnly={isReadOnly}
             />
 
             {/* Secondary */}
@@ -465,6 +480,8 @@ export function DayPageContainer({
               onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
               weekNumber={weekNumber}
               dayNumber={dayNumber}
+              planStatus={planStatus}
+              isReadOnly={isReadOnly}
             />
 
             {/* Additional */}
@@ -489,6 +506,8 @@ export function DayPageContainer({
               onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
               weekNumber={weekNumber}
               dayNumber={dayNumber}
+              planStatus={planStatus}
+              isReadOnly={isReadOnly}
             />
             </div>
           </div>

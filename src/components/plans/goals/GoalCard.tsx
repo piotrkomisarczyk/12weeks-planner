@@ -23,12 +23,14 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GoalForm } from './GoalForm';
 import { GoalProgress } from './GoalProgress';
 import { MilestoneManager } from './milestones/MilestoneManager';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { GoalDTO, GoalCategory } from '@/types';
+import type { GoalDTO, GoalCategory, PlanStatus } from '@/types';
 import type { PlanContext } from '@/types';
+import { isPlanReadOnly, isPlanReady, canChangeGoalProgress, getDisabledTooltip } from '@/lib/utils';
 
 interface GoalCardProps {
   goal: GoalDTO;
@@ -74,7 +76,12 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
     }
   };
 
-  const isDisabled = planContext.isArchived || isDeleting;
+  // Compute flags from plan status
+  const planStatus = planContext.status as PlanStatus;
+  const isReadOnly = isPlanReadOnly(planStatus);
+  const isReady = isPlanReady(planStatus);
+  const canChangeProgress = canChangeGoalProgress(planStatus);
+  const isDisabled = isReadOnly || isDeleting;
 
   return (
     <Accordion
@@ -109,49 +116,76 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
             <div className="shrink-0 flex items-center gap-1">
               {/* Move Up Button */}
               {onMoveUp && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Move goal up"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveUp(goal.id);
-                  }}
-                  disabled={isFirst}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Move goal up"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMoveUp(goal.id);
+                      }}
+                      disabled={isFirst || isReadOnly}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  {isReadOnly && (
+                    <TooltipContent>
+                      <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               )}
 
               {/* Move Down Button */}
               {onMoveDown && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Move goal down"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveDown(goal.id);
-                  }}
-                  disabled={isLast}
-                >
-                  <ArrowDown className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Move goal down"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMoveDown(goal.id);
+                      }}
+                      disabled={isLast || isReadOnly}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  {isReadOnly && (
+                    <TooltipContent>
+                      <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               )}
 
               {/* Delete Button */}
               <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={isDisabled}
-                    aria-label="Delete goal"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </DialogTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={isDisabled}
+                        aria-label="Delete goal"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </DialogTrigger>
+                  </TooltipTrigger>
+                  {isReadOnly && (
+                    <TooltipContent>
+                      <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Delete Goal</DialogTitle>
@@ -205,15 +239,26 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
             category={goal.category as GoalCategory | null}
             description={goal.description}
             onUpdate={handleFormUpdate}
-            disabled={isDisabled}
+            disabled={isReadOnly}
           />
 
               {/* Progress Slider */}
-              <GoalProgress
-                progress={goal.progress_percentage}
-                onChange={handleProgressChange}
-                disabled={isDisabled}
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <GoalProgress
+                      progress={goal.progress_percentage}
+                      onChange={handleProgressChange}
+                      disabled={!canChangeProgress}
+                    />
+                  </div>
+                </TooltipTrigger>
+                {!canChangeProgress && (
+                  <TooltipContent>
+                    <p>{getDisabledTooltip(planStatus, 'progress')}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
 
               {/* Divider */}
               <div className="border-t" />

@@ -5,7 +5,7 @@
 
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { MilestoneItem } from './MilestoneItem';
-import type { MilestoneDTO } from '@/types';
+import type { MilestoneDTO, PlanStatus } from '@/types';
 
 interface MilestoneListProps {
   milestones: MilestoneDTO[];
@@ -17,6 +17,7 @@ interface MilestoneListProps {
   disabled?: boolean;
   deletingMilestoneId?: string | null;
   dragDisabled?: boolean;
+  planStatus: PlanStatus;
 }
 
 /**
@@ -31,7 +32,8 @@ export function MilestoneList({
   planEndDate,
   disabled = false,
   deletingMilestoneId = null,
-  dragDisabled = false
+  dragDisabled = false,
+  planStatus
 }: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
@@ -59,6 +61,7 @@ export function MilestoneList({
             disabled={disabled}
             isDeleting={deletingMilestoneId === milestone.id}
             dragDisabled={dragDisabled}
+            planStatus={planStatus}
           />
         ))}
       </SortableContext>

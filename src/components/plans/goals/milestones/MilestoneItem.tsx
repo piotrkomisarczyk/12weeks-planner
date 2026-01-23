@@ -12,10 +12,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { cn, normalizeDateToMidnight } from '@/lib/utils';
 import { DragHandle } from '../../week/DragHandle';
-import type { MilestoneDTO } from '@/types';
+import type { MilestoneDTO, PlanStatus } from '@/types';
+import { getDisabledTooltip } from '@/lib/utils';
 
 interface MilestoneItemProps {
   milestone: MilestoneDTO;
@@ -27,6 +29,7 @@ interface MilestoneItemProps {
   disabled?: boolean;
   isDeleting?: boolean;
   dragDisabled?: boolean;
+  planStatus: PlanStatus;
 }
 
 /**
@@ -42,7 +45,8 @@ export function MilestoneItem({
   planEndDate,
   disabled = false,
   isDeleting = false,
-  dragDisabled = false
+  dragDisabled = false,
+  planStatus
 }: MilestoneItemProps) {
   const [isToggling, setIsToggling] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -90,7 +94,12 @@ export function MilestoneItem({
 
   const handleToggle = async () => {
     if (isToggling || isDeleting) return;
-    
+
+    // Check if toggling is allowed based on plan status
+    if (planStatus === 'ready' || planStatus === 'completed' || planStatus === 'archived') {
+      return; // Silently prevent toggle
+    }
+
     setIsToggling(true);
     try {
       await onToggle(milestone.id, !milestone.is_completed);
@@ -164,6 +173,8 @@ export function MilestoneItem({
   };
 
   const isDisabled = disabled || isToggling || isDeleting || isUpdating;
+  const canToggleMilestone = planStatus === 'active';
+  const checkboxDisabled = isDisabled || !canToggleMilestone;
 
   const minDate = new Date(planStartDate);
   const maxDate = new Date(planEndDate);
@@ -191,12 +202,23 @@ export function MilestoneItem({
       />
 
       {/* Checkbox */}
-      <Checkbox
-        checked={milestone.is_completed}
-        onCheckedChange={handleToggle}
-        disabled={isDisabled}
-        aria-label={`Mark "${milestone.title}" as ${milestone.is_completed ? 'incomplete' : 'complete'}`}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <Checkbox
+              checked={milestone.is_completed}
+              onCheckedChange={handleToggle}
+              disabled={checkboxDisabled}
+              aria-label={`Mark "${milestone.title}" as ${milestone.is_completed ? 'incomplete' : 'complete'}`}
+            />
+          </div>
+        </TooltipTrigger>
+        {!canToggleMilestone && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'milestone')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Edit Mode */}
       {isEditing ? (
@@ -283,28 +305,46 @@ export function MilestoneItem({
           {/* Action Buttons */}
           <div className="flex gap-1 shrink-0">
             {/* Edit Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleEdit}
-              disabled={isDisabled}
-              className="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label={`Edit milestone "${milestone.title}"`}
-            >
-              <Edit3 className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleEdit}
+                  disabled={isDisabled}
+                  className="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={`Edit milestone "${milestone.title}"`}
+                >
+                  <Edit3 className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              {isDisabled && (planStatus === 'completed' || planStatus === 'archived') && (
+                <TooltipContent>
+                  <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
 
             {/* Delete Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDelete}
-              disabled={isDisabled}
-              className="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label={`Delete milestone "${milestone.title}"`}
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDelete}
+                  disabled={isDisabled}
+                  className="size-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={`Delete milestone "${milestone.title}"`}
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              {isDisabled && (planStatus === 'completed' || planStatus === 'archived') && (
+                <TooltipContent>
+                  <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
         </>
       )}

@@ -15,8 +15,9 @@ import {
 import { useMilestones } from '../hooks/useMilestones';
 import { MilestoneList } from './MilestoneList';
 import { MilestoneForm } from './MilestoneForm';
-import type { PlanContext } from '@/types';
+import type { PlanContext, PlanStatus } from '@/types';
 import { toast } from 'sonner';
+import { isPlanReadOnly, isPlanReady } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -68,8 +69,13 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
   const [deletingMilestoneId, setDeletingMilestoneId] = useState<string | null>(null);
 
-  // Drag and Drop sensors
-  const sensors = useSensors(
+  // Compute flags from plan status
+  const planStatus = planContext.status as PlanStatus;
+  const isReadOnly = isPlanReadOnly(planStatus);
+  const isReady = isPlanReady(planStatus);
+
+  // Drag and Drop sensors - conditionally disabled for read-only plans
+  const sensors = isReadOnly ? [] : useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
@@ -230,16 +236,17 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
               onDelete={handleDeleteMilestone}
               planStartDate={planContext.startDate}
               planEndDate={planContext.endDate}
-              disabled={isDisabled}
+              disabled={isReadOnly}
               deletingMilestoneId={deletingMilestoneId}
-              dragDisabled={isDisabled}
+              dragDisabled={isReadOnly}
+              planStatus={planStatus}
             />
           </DndContext>
         )}
       </div>
 
       {/* Add Milestone Form */}
-      {!isDisabled && (
+      {!isReadOnly && (
         <MilestoneForm
           onAdd={handleAddMilestone}
           planStartDate={planContext.startDate}

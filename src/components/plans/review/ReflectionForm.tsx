@@ -5,7 +5,9 @@
 
 import { Textarea } from '../../ui/textarea';
 import { Label } from '../../ui/label';
-import type { WeeklyReviewViewModel } from '../../../types';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import { getDisabledTooltip, isPlanReadOnly, isPlanReady } from '../../../lib/utils';
+import type { WeeklyReviewViewModel, PlanStatus } from '../../../types';
 
 interface ReflectionFormProps {
   values: WeeklyReviewViewModel;
@@ -14,6 +16,7 @@ interface ReflectionFormProps {
     value: string
   ) => void;
   isSaving: boolean;
+  planStatus: PlanStatus;
 }
 
 const reflectionFields = [
@@ -34,7 +37,10 @@ const reflectionFields = [
   }
 ];
 
-export default function ReflectionForm({ values, onChange, isSaving }: ReflectionFormProps) {
+export default function ReflectionForm({ values, onChange, isSaving, planStatus }: ReflectionFormProps) {
+  // Compute read-only state for review (ready or completed/archived)
+  const isReadOnly = isPlanReadOnly(planStatus) || isPlanReady(planStatus);
+
   const handleChange = (
     field: keyof Pick<WeeklyReviewViewModel, 'what_worked' | 'what_did_not_work' | 'what_to_improve'>,
     value: string
@@ -49,14 +55,23 @@ export default function ReflectionForm({ values, onChange, isSaving }: Reflectio
           <Label htmlFor={field.key} className="text-base font-medium">
             {field.label}
           </Label>
-          <Textarea
-            id={field.key}
-            value={values[field.key] || ''}
-            onChange={(e) => handleChange(field.key, e.target.value)}
-            placeholder={field.placeholder}
-            className="min-h-24 resize-none"
-            disabled={isSaving}
-          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Textarea
+                id={field.key}
+                value={values[field.key] || ''}
+                onChange={(e) => handleChange(field.key, e.target.value)}
+                placeholder={field.placeholder}
+                className="min-h-24 resize-none"
+                disabled={isSaving || isReadOnly}
+              />
+            </TooltipTrigger>
+            {isReadOnly && (
+              <TooltipContent>
+                <p>{getDisabledTooltip(planStatus, 'reflection')}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
         </div>
       ))}
 

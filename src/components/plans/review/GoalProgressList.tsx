@@ -5,15 +5,16 @@
 
 import React from 'react';
 import GoalProgressItem from './GoalProgressItem';
-import type { GoalReviewViewModel } from '../../../types';
+import type { GoalReviewViewModel, PlanStatus } from '../../../types';
 
 interface GoalProgressListProps {
   goals: GoalReviewViewModel[];
   onProgressUpdate: (goalId: string, progress: number) => void;
   onMilestoneToggle?: (milestoneId: string, isCompleted: boolean) => void;
+  planStatus: PlanStatus;
 }
 
-export default function GoalProgressList({ goals, onProgressUpdate, onMilestoneToggle }: GoalProgressListProps) {
+export default function GoalProgressList({ goals, onProgressUpdate, onMilestoneToggle, planStatus }: GoalProgressListProps) {
   if (goals.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -31,6 +32,7 @@ export default function GoalProgressList({ goals, onProgressUpdate, onMilestoneT
           goal={goal}
           onProgressUpdate={onProgressUpdate}
           onMilestoneToggle={onMilestoneToggle}
+          planStatus={planStatus}
         />
       ))}
     </div>

@@ -16,7 +16,8 @@ import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import type { TaskViewModel, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
+import type { TaskViewModel, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal, PlanStatus } from '@/types';
+import { getDisabledTooltip } from '@/lib/utils';
 
 interface AdHocSectionProps {
   tasks: TaskViewModel[];
@@ -25,6 +26,8 @@ interface AdHocSectionProps {
   availableLongTermGoals: SimpleGoal[];
   planId: string;
   weekNumber: number;
+  planStatus: PlanStatus;
+  isReadOnly: boolean;
   onAddTask: (title: string) => void;
   onUpdateTask: (taskId: string, updates: Partial<TaskViewModel>) => void;
   onDeleteTask: (taskId: string) => void;
@@ -41,6 +44,8 @@ export function AdHocSection({
   availableLongTermGoals,
   planId,
   weekNumber,
+  planStatus,
+  isReadOnly,
   onAddTask,
   onUpdateTask,
   onDeleteTask,
@@ -109,6 +114,8 @@ export function AdHocSection({
                       availableWeeklyGoals={availableWeeklyGoals}
                       planId={planId}
                       weekNumber={weekNumber}
+                      planStatus={planStatus}
+                      isReadOnly={isReadOnly}
                       onUpdate={onUpdateTask}
                       onDelete={onDeleteTask}
                       onAssignDay={onAssignDay}
@@ -135,9 +142,9 @@ export function AdHocSection({
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsAddingTask(true)}
-                      disabled={isAtTaskLimit}
+                      disabled={isAtTaskLimit || isReadOnly}
                       className="w-full mt-2"
-                      title={isAtTaskLimit ? `Maximum ${MAX_AD_HOC_TASKS} ad-hoc tasks reached` : undefined}
+                      title={isReadOnly ? getDisabledTooltip(planStatus, 'general') : isAtTaskLimit ? `Maximum ${MAX_AD_HOC_TASKS} ad-hoc tasks reached` : undefined}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Add Task {isAtTaskLimit && `(${tasks.length}/${MAX_AD_HOC_TASKS})`}

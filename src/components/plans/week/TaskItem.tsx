@@ -22,8 +22,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { TaskStatusControl } from './TaskStatusControl';
 import { DragHandle } from './DragHandle';
-import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal } from '@/types';
+import type { TaskViewModel, TaskPriority, TaskStatus, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal, PlanStatus } from '@/types';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS, DAY_NAMES } from '@/types';
+import { getDisabledTooltip } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target, Trash2, Clock, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
@@ -44,6 +46,8 @@ interface TaskItemProps {
   availableWeeklyGoals?: WeeklyGoalViewModel[];
   planId: string;
   weekNumber: number;
+  planStatus: PlanStatus;
+  isReadOnly: boolean;
   onUpdate: (id: string, updates: Partial<TaskViewModel>) => void;
   onDelete: (id: string) => void;
   onAssignDay: (id: string, day: number | null) => void;
@@ -68,6 +72,8 @@ export function TaskItem({
   availableWeeklyGoals = [],
   planId,
   weekNumber,
+  planStatus,
+  isReadOnly,
   onUpdate,
   onDelete,
   onAssignDay,
@@ -135,7 +141,7 @@ export function TaskItem({
   };
 
   const handleTitleClick = () => {
-    if (task.status !== 'completed') {
+    if (task.status !== 'completed' && !isReadOnly) {
       setIsEditing(true);
     }
   };
@@ -227,20 +233,42 @@ export function TaskItem({
       )}
     >
       {/* Drag Handle */}
-      <DragHandle 
-        listeners={listeners}
-        attributes={attributes}
-        setActivatorNodeRef={setActivatorNodeRef}
-        disabled={task.isSaving}
-        isDragging={isDragging}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <DragHandle
+              listeners={listeners}
+              attributes={attributes}
+              setActivatorNodeRef={setActivatorNodeRef}
+              disabled={task.isSaving || isReadOnly}
+              isDragging={isDragging}
+            />
+          </div>
+        </TooltipTrigger>
+        {isReadOnly && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'general')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Task Status Control */}
-      <TaskStatusControl
-        status={task.status}
-        onChange={handleStatusChange}
-        disabled={task.isSaving}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <TaskStatusControl
+              status={task.status}
+              onChange={handleStatusChange}
+              disabled={task.isSaving || isReadOnly || planStatus === 'ready'}
+            />
+          </div>
+        </TooltipTrigger>
+        {(isReadOnly || planStatus === 'ready') && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'task_status')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Title */}
       <div className="flex-1 min-w-0">
@@ -256,15 +284,24 @@ export function TaskItem({
             disabled={task.isSaving}
           />
         ) : (
-          <button
-            onClick={handleTitleClick}
-            className={cn(
-              'text-left text-sm w-full truncate hover:text-primary transition-colors'
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleTitleClick}
+                className={cn(
+                  'text-left text-sm w-full truncate hover:text-primary transition-colors'
+                )}
+                disabled={task.status === 'completed' || isReadOnly}
+              >
+                {task.title}
+              </button>
+            </TooltipTrigger>
+            {isReadOnly && (
+              <TooltipContent>
+                <p>{getDisabledTooltip(planStatus, 'general')}</p>
+              </TooltipContent>
             )}
-            disabled={task.status === 'completed'}
-          >
-            {task.title}
-          </button>
+          </Tooltip>
         )}
       </div>
 
@@ -318,28 +355,39 @@ export function TaskItem({
       )}
 
       {/* Priority Badge */}
-      <Badge
-        className={cn('text-xs font-semibold text-white cursor-pointer', PRIORITY_COLORS[displayedPriority as TaskPriority])}
-        onClick={() => {
-          const priorities: TaskPriority[] = ['A', 'B', 'C'];
-          const currentIndex = priorities.indexOf(displayedPriority as TaskPriority);
-          const nextPriority = priorities[(currentIndex + 1) % priorities.length] as TaskPriority;
-          handlePriorityChange(nextPriority);
-        }}
-      >
-        {displayedPriority}
-      </Badge>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            className={cn('text-xs font-semibold text-white', isReadOnly ? '' : 'cursor-pointer', PRIORITY_COLORS[displayedPriority as TaskPriority])}
+            onClick={() => {
+              if (isReadOnly) return;
+              const priorities: TaskPriority[] = ['A', 'B', 'C'];
+              const currentIndex = priorities.indexOf(displayedPriority as TaskPriority);
+              const nextPriority = priorities[(currentIndex + 1) % priorities.length] as TaskPriority;
+              handlePriorityChange(nextPriority);
+            }}
+          >
+            {displayedPriority}
+          </Badge>
+        </TooltipTrigger>
+        {isReadOnly && (
+          <TooltipContent>
+            <p>{getDisabledTooltip(planStatus, 'general')}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       {/* Context Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
-            aria-label="Task options"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+      {!isReadOnly && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
+              aria-label="Task options"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           {/* Assign to Day */}
           <DropdownMenuSub>
@@ -439,6 +487,7 @@ export function TaskItem({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      )}
 
       {/* Goal & Milestone Picker Dialog */}
       <GoalMilestonePicker

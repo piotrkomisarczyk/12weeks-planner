@@ -13,6 +13,7 @@ import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import Layout from '@/layouts/Layout.astro';
 import { WeekPlannerContainer } from '@/components/plans/week';
 import { Toaster } from '@/components/ui/sonner';
+import type { PlanStatus } from '@/types';
 
 export const prerender = false;
 
@@ -47,10 +48,6 @@ if (!plan) {
   return Astro.redirect('/plans');
 }
 
-// Check if plan is archived - don't allow editing archived plans
-if (plan.status === 'archived') {
-  return Astro.redirect(`/plans/${planId}/goals`);
-}
 
 // Parse start date
 const startDate = new Date(plan.start_date);
@@ -73,6 +70,7 @@ weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
     weekNumber={weekNumber}
     planName={plan.name}
     planStartDate={startDate}
+    planStatus={plan.status as PlanStatus}
   />
   <Toaster client:load position="bottom-right" />
 </Layout>

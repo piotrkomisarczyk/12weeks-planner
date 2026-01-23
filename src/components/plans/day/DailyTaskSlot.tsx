@@ -14,13 +14,14 @@ import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InlineAddTask } from '../week/InlineAddTask';
 import { TaskCard } from './TaskCard';
-import type { 
-  DaySlot, 
-  DayTaskViewModel, 
-  TaskStatus, 
+import type {
+  DaySlot,
+  DayTaskViewModel,
+  TaskStatus,
   TaskPriority,
   SimpleGoal,
   SimpleMilestone,
+  PlanStatus,
 } from '@/types';
 
 interface DailyTaskSlotProps {
@@ -38,6 +39,8 @@ interface DailyTaskSlotProps {
   }>;
   weekNumber: number;
   dayNumber: number;
+  planStatus: PlanStatus;
+  isReadOnly: boolean;
   onAddTask: (title: string) => void;
   onUpdateTask: (id: string, updates: Partial<DayTaskViewModel>) => void;
   onDeleteTask: (id: string) => void;
@@ -79,6 +82,8 @@ export function DailyTaskSlot({
   availableWeeklyGoals,
   weekNumber,
   dayNumber,
+  planStatus,
+  isReadOnly,
   onAddTask,
   onUpdateTask,
   onDeleteTask,
@@ -159,6 +164,8 @@ export function DailyTaskSlot({
                     availableWeeklyGoals={availableWeeklyGoals}
                     weekNumber={weekNumber}
                     dayNumber={dayNumber}
+                    planStatus={planStatus}
+                    isReadOnly={isReadOnly}
                     onUpdate={onUpdateTask}
                     onDelete={onDeleteTask}
                     onStatusChange={onStatusChange}
@@ -192,7 +199,7 @@ export function DailyTaskSlot({
                   variant="outline"
                   size="sm"
                   onClick={() => setIsAdding(true)}
-                  disabled={isFull}
+                  disabled={isFull || isReadOnly}
                   className="w-full"
                 >
                   <Plus className="h-4 w-4 mr-2" />

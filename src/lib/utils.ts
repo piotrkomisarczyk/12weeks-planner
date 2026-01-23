@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { DAY_NAMES } from "@/types"
+import { DAY_NAMES, type PlanStatus } from "@/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -168,4 +168,72 @@ export function getDayName(dayNumber: number): string | null {
     return null;
   }
   return DAY_NAMES[dayNumber - 1];
+}
+
+// ============================================================================
+// PLAN STATUS MANAGEMENT UTILITIES
+// ============================================================================
+
+/**
+ * Determines if plan is in read-only mode
+ * Read-only mode applies to 'completed' and 'archived' plans
+ */
+export function isPlanReadOnly(status: PlanStatus): boolean {
+  return status === 'completed' || status === 'archived';
+}
+
+/**
+ * Determines if plan is in ready state
+ * Ready state applies to 'ready' plans
+ */
+export function isPlanReady(status: PlanStatus): boolean {
+  return status === 'ready';
+}
+
+/**
+ * Determines if task status can be changed
+ * Task status can only be changed in 'active' plans
+ */
+export function canChangeTaskStatus(status: PlanStatus): boolean {
+  return status === 'active';
+}
+
+/**
+ * Determines if goal progress can be changed
+ * Goal progress can be changed in 'active' and 'ready' plans
+ */
+export function canChangeGoalProgress(status: PlanStatus): boolean {
+  return status === 'active' || status === 'ready';
+}
+
+/**
+ * Gets tooltip message for disabled component
+ * @param status - The plan status
+ * @param context - The context for the tooltip message
+ */
+export function getDisabledTooltip(status: PlanStatus, context: 'task_status' | 'progress' | 'milestone' | 'reflection' | 'general'): string {
+  if (status === 'ready') {
+    switch (context) {
+      case 'task_status':
+        return 'Task status cannot be changed - plan is in ready state';
+      case 'progress':
+        return 'Progress cannot be changed - plan is in ready state';
+      case 'milestone':
+        return 'Milestone completion cannot be changed - plan is in ready state';
+      case 'reflection':
+        return 'Reflection cannot be edited - plan is in ready state';
+      default:
+        return 'This action is disabled - plan is in ready state';
+    }
+  }
+
+  if (status === 'completed') {
+    return 'Plan is completed - editing disabled';
+  }
+
+  if (status === 'archived') {
+    return 'Plan is archived - editing disabled';
+  }
+
+  return '';
 }

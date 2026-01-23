@@ -19,14 +19,16 @@ import { useWeekPlan } from './hooks/useWeekPlan';
 import { WeekHeader } from './WeekHeader';
 import { WeeklyGoalsSection } from './WeeklyGoalsSection';
 import { AdHocSection } from './AdHocSection';
-import type { WeeklyGoalViewModel, TaskViewModel } from '@/types';
+import type { WeeklyGoalViewModel, TaskViewModel, PlanStatus } from '@/types';
 import { DAY_NAMES } from '@/types';
+import { isPlanReadOnly } from '@/lib/utils';
 
 interface WeekPlannerContainerProps {
   planId: string;
   weekNumber: number;
   planName: string;
   planStartDate: Date;
+  planStatus: PlanStatus;
 }
 
 export function WeekPlannerContainer({
@@ -34,6 +36,7 @@ export function WeekPlannerContainer({
   weekNumber,
   planName,
   planStartDate,
+  planStatus,
 }: WeekPlannerContainerProps) {
   const {
     data,
@@ -53,8 +56,11 @@ export function WeekPlannerContainer({
     refetch,
   } = useWeekPlan(planId, weekNumber);
 
-  // Drag and Drop sensors
-  const sensors = useSensors(
+  // Compute derived flags for plan status restrictions
+  const isReadOnly = isPlanReadOnly(planStatus);
+
+  // Drag and Drop sensors - conditionally disabled for read-only plans
+  const sensors = isReadOnly ? [] : useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
@@ -442,6 +448,8 @@ export function WeekPlannerContainer({
               availableMilestones={meta.milestones}
               planId={planId}
               weekNumber={weekNumber}
+              planStatus={planStatus}
+              isReadOnly={isReadOnly}
               onUpdateGoal={handleUpdateGoal}
               onDeleteGoal={handleDeleteGoal}
               onAddGoal={handleAddGoal}
@@ -463,6 +471,8 @@ export function WeekPlannerContainer({
               availableLongTermGoals={meta.longTermGoals}
               planId={planId}
               weekNumber={weekNumber}
+              planStatus={planStatus}
+              isReadOnly={isReadOnly}
               onAddTask={(title) => handleAddTask(null, title)}
               onUpdateTask={handleUpdateTask}
               onDeleteTask={handleDeleteTask}
