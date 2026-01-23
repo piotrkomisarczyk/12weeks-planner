@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import { cn, computeDayNumberFromDate, getPlanDateRange, normalizeDateToMidnight } from '@/lib/utils';
+import { cn, computeDayNumberFromDate, getPlanDateRange, normalizeDateToMidnight, parseDateString } from '@/lib/utils';
 
 interface DayHeaderProps {
   planName: string;
@@ -37,7 +37,7 @@ export function DayHeader({
 }: DayHeaderProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  const currentDate = new Date(computedDate);
+  const currentDate = parseDateString(computedDate);
   const { start: planStart, end: planEnd } = getPlanDateRange(planStartDate);
   
   // Format date for display

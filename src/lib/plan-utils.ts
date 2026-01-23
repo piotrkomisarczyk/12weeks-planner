@@ -19,9 +19,12 @@ export function isMonday(date: Date): boolean {
 
 /**
  * Calculates the end date (start_date + 12 weeks)
+ * Uses timezone-safe date parsing
  */
 function calculateEndDate(startDate: string): Date {
-  const start = new Date(startDate);
+  // Parse date string safely to avoid timezone issues
+  const [year, month, day] = startDate.split('-').map(Number);
+  const start = new Date(year, month - 1, day);
   const end = new Date(start);
   end.setDate(end.getDate() + 12 * 7); // 12 weeks = 84 days
   return end;
@@ -29,13 +32,15 @@ function calculateEndDate(startDate: string): Date {
 
 /**
  * Calculates the current week number (1-12) based on today's date
+ * Uses UTC-based calendar day calculations to avoid DST issues
  * Returns null if current date is outside the plan's time range
  */
 function calculateCurrentWeek(startDate: string, endDate: Date): number | null {
-  const start = new Date(startDate);
+  // Parse date string safely to avoid timezone issues
+  const [year, month, day] = startDate.split('-').map(Number);
+  const start = new Date(year, month - 1, day, 0, 0, 0, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time for accurate comparison
-  start.setHours(0, 0, 0, 0);
   endDate.setHours(0, 0, 0, 0);
 
   // If today is before start date or after end date, return null
@@ -43,9 +48,10 @@ function calculateCurrentWeek(startDate: string, endDate: Date): number | null {
     return null;
   }
 
-  // Calculate weeks elapsed since start
-  const diffTime = today.getTime() - start.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  // Calculate weeks elapsed since start using UTC to avoid DST issues
+  const utc1 = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const utc2 = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
   const weekNumber = Math.floor(diffDays / 7) + 1;
 
   return weekNumber >= 1 && weekNumber <= 12 ? weekNumber : null;
@@ -96,9 +102,17 @@ export function transformPlansToViewModels(plans: PlanDTO[]): PlanViewModel[] {
 
 /**
  * Formats a date to a readable string (e.g., "Jan 1, 2024")
+ * Uses timezone-safe date parsing for string inputs
  */
 export function formatDate(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  let dateObj: Date;
+  if (typeof date === 'string') {
+    // Parse date string safely to avoid timezone issues
+    const [year, month, day] = date.split('-').map(Number);
+    dateObj = new Date(year, month - 1, day);
+  } else {
+    dateObj = date;
+  }
   return dateObj.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -108,11 +122,13 @@ export function formatDate(date: Date | string): string {
 
 /**
  * Gets the current week index (1-12) based on plan start date and current date
+ * Uses UTC-based calendar day calculations to avoid DST issues
  * Returns 1 if before start, 12 if after end, or the actual week number
  */
 export function getCurrentWeekIndex(startDate: string, now: Date = new Date()): number {
-  const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
+  // Parse date string safely to avoid timezone issues
+  const [year, month, day] = startDate.split('-').map(Number);
+  const start = new Date(year, month - 1, day, 0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
 
   // If before start date, return week 1
@@ -129,9 +145,10 @@ export function getCurrentWeekIndex(startDate: string, now: Date = new Date()): 
     return 12;
   }
 
-  // Calculate current week number
-  const diffTime = now.getTime() - start.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  // Calculate current week number using UTC to avoid DST issues
+  const utc1 = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+  const utc2 = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
   const weekNumber = Math.floor(diffDays / 7) + 1;
 
   // Ensure within 1-12 range
@@ -144,8 +161,9 @@ export function getCurrentWeekIndex(startDate: string, now: Date = new Date()): 
  * Returns 1 if before start, 7 if after end, or the actual day index
  */
 export function getDayIndex(startDate: string, now: Date = new Date()): number {
-  const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
+  // Parse date string safely to avoid timezone issues
+  const [year, month, day] = startDate.split('-').map(Number);
+  const start = new Date(year, month - 1, day, 0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
 
   // If before start date, return day 1 (Monday)

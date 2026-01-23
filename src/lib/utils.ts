@@ -7,16 +7,20 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Calculates the current week number (1-12) based on plan start date and today's date
+ * Uses UTC-based calendar day calculations to avoid DST issues
  * Clamps the result to be within the valid range of 1-12
  */
 export function calculateCurrentWeek(plan: { start_date: string }): number {
-  const startDate = new Date(plan.start_date);
+  const startDate = parseDateString(plan.start_date);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   startDate.setHours(0, 0, 0, 0);
 
-  const diffTime = today.getTime() - startDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  // Use UTC to calculate calendar days to avoid DST issues
+  const utc1 = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const utc2 = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  
+  const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
   let currentWeek = Math.floor(diffDays / 7) + 1;
 
   // Clamp to valid range
@@ -58,6 +62,18 @@ export function normalizeDateToMidnight(date: Date): Date {
 }
 
 /**
+ * Parses a YYYY-MM-DD string to a Date in local timezone
+ * This avoids timezone issues that occur when using new Date(string)
+ * which treats the string as UTC and can shift to the previous day
+ * @param dateString - Date string in YYYY-MM-DD format
+ * @returns Date object in local timezone at midnight
+ */
+export function parseDateString(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
+/**
  * Get valid date range for a 12-week plan
  * Normalizes dates to midnight to avoid timezone issues
  * @param planStartDate - The start date of the plan
@@ -88,18 +104,24 @@ export function getMondayOffset(date: Date): number {
  * @param planStartDate - The start date of the plan
  * @param weekNumber - Week number (1-12)
  * @param dayNumber - Day number (1-7, Monday=1)
- * @returns ISO date string (YYYY-MM-DD)
+ * @returns ISO date string (YYYY-MM-DD) in local timezone
  */
 export function computePlanDate(planStartDate: Date, weekNumber: number, dayNumber: number): string {
   const date = new Date(planStartDate);
   const mondayOffset = getMondayOffset(date);
   const daysToAdd = (weekNumber - 1) * 7 + (dayNumber - 1) + mondayOffset;
   date.setDate(date.getDate() + daysToAdd);
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  // Format as YYYY-MM-DD in local timezone (don't use toISOString which converts to UTC)
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
  * Compute week and day number from a date relative to plan start
+ * Uses UTC-based calendar day calculations to avoid DST issues
  * @param date - The date to convert
  * @param planStartDate - The start date of the plan
  * @returns Object with weekNumber and dayNumber, or null if out of plan range (12 weeks)
@@ -111,9 +133,19 @@ export function computeDayNumberFromDate(
   const normalizedDate = normalizeDateToMidnight(date);
   const normalizedPlanStart = normalizeDateToMidnight(planStartDate);
 
-  const daysDiff = Math.floor(
-    (normalizedDate.getTime() - normalizedPlanStart.getTime()) / (1000 * 60 * 60 * 24)
+  // Use UTC to calculate calendar days to avoid DST issues
+  const utc1 = Date.UTC(
+    normalizedPlanStart.getFullYear(),
+    normalizedPlanStart.getMonth(),
+    normalizedPlanStart.getDate()
   );
+  const utc2 = Date.UTC(
+    normalizedDate.getFullYear(),
+    normalizedDate.getMonth(),
+    normalizedDate.getDate()
+  );
+
+  const daysDiff = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
 
   if (daysDiff < 0 || daysDiff >= 12 * 7) {
     return null; // Out of plan range
