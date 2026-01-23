@@ -15,20 +15,12 @@ interface DashboardOverviewCardProps {
 
 const quickActions = [
   {
-    id: 'today',
-    label: 'Today',
-    description: 'View today\'s tasks',
-    icon: Clock,
-    url: 'day',
-    color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900/60',
-  },
-  {
-    id: 'current-week',
-    label: 'Current Week',
-    description: 'Plan this week\'s activities',
-    icon: Calendar,
-    url: 'week',
-    color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950/40 dark:hover:bg-green-950/60 dark:text-green-200 dark:border-green-900/60',
+    id: 'goals',
+    label: 'Goals View',
+    description: 'Manage your long-term goals',
+    icon: Target,
+    url: 'goals',
+    color: 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:hover:bg-purple-950/60 dark:text-purple-200 dark:border-purple-900/60',
   },
   {
     id: 'hierarchy-tree',
@@ -39,12 +31,20 @@ const quickActions = [
     color: 'bg-teal-50 hover:bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950/40 dark:hover:bg-teal-950/60 dark:text-teal-200 dark:border-teal-900/60',
   },
   {
-    id: 'goals',
-    label: 'Goals View',
-    description: 'Manage your long-term goals',
-    icon: Target,
-    url: 'goals',
-    color: 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:hover:bg-purple-950/60 dark:text-purple-200 dark:border-purple-900/60',
+    id: 'current-week',
+    label: 'Current Week',
+    description: 'Plan this week\'s activities',
+    icon: Calendar,
+    url: 'week',
+    color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950/40 dark:hover:bg-green-950/60 dark:text-green-200 dark:border-green-900/60',
+  },
+  {
+    id: 'today',
+    label: 'Today',
+    description: 'View today\'s tasks',
+    icon: Clock,
+    url: 'day',
+    color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900/60',
   },
   {
     id: 'summary',
@@ -124,30 +124,35 @@ export function DashboardOverviewCard({
 
         {/* Goals and Task Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg dark:bg-blue-950/40">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-200">{metrics.total_tasks}</div>
-            <div className="text-sm text-blue-700 dark:text-blue-300">Total Tasks</div>
-          </div>
-
-          <div className="text-center p-4 bg-green-50 rounded-lg dark:bg-green-950/40">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-200">{metrics.completed_tasks}</div>
-            <div className="text-sm text-green-700 dark:text-green-300">Completed Tasks</div>
-          </div>
-
-          <div className="text-center p-4 bg-teal-50 rounded-lg dark:bg-teal-950/40">
-            <div className="text-2xl font-bold text-teal-600 dark:text-teal-200">
-              {metrics.total_tasks === 0
-                ? '0.0%'
-                : `${((metrics.completed_tasks * 100) / metrics.total_tasks).toFixed(1)} %`}
-            </div>
-            <div className="text-sm text-teal-700 dark:text-teal-300">Task Progress</div>
-          </div>
-
+          {/* Total Goals */}
           <div className="text-center p-4 bg-violet-50 rounded-lg dark:bg-violet-950/40">
             <div className="text-2xl font-bold text-violet-600 dark:text-violet-200">{metrics.total_goals}</div>
             <div className="text-sm text-violet-700 dark:text-violet-300">Total Goals</div>
           </div>
 
+          {/* Total Tasks */}
+          <div className="text-center p-4 bg-teal-50 rounded-lg dark:bg-teal-950/40">
+            <div className="text-2xl font-bold text-teal-600 dark:text-teal-200">{metrics.total_tasks}</div>
+            <div className="text-sm text-teal-600 dark:text-teal-200">Total Tasks</div>
+          </div>
+
+          {/* Completed Tasks */}
+          <div className="text-center p-4 bg-green-50 rounded-lg dark:bg-green-950/40">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-200">{metrics.completed_tasks}</div>
+            <div className="text-sm text-green-700 dark:text-green-300">Completed Tasks</div>
+          </div>
+
+          {/* Task Progress */}
+          <div className="text-center p-4 bg-blue-50 rounded-lg dark:bg-blue-950/40">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-200">
+              {metrics.total_tasks === 0
+                ? '0.0%'
+                : `${((metrics.completed_tasks * 100) / metrics.total_tasks).toFixed(1)} %`}
+            </div>
+            <div className="text-sm text-blue-600 dark:text-blue-200">Task Progress</div>
+          </div>
+
+          {/* Completed Goals */}
           <div className="text-center p-4 bg-orange-50 rounded-lg dark:bg-orange-950/40">
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-200">{metrics.completed_goals}</div>
             <div className="text-sm text-orange-700 dark:text-orange-300">Completed Goals</div>

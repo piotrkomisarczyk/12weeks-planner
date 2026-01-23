@@ -37,15 +37,10 @@ const navLinks = [
     icon: 'Home',
     label: 'Dashboard',
   },
-    {
-    href: `/plans/${plan.id}/week/${currentWeek}/day/${currentDay}`,
-    icon: 'Clock',
-    label: 'Today',
-  },
-    {
-    href: `/plans/${plan.id}/week/${viewedWeek}`,
-    icon: 'Calendar',
-    label: 'Week',
+  {
+    href: `/plans/${plan.id}/goals`,
+    icon: 'Target',
+    label: 'Goals',
   },
   {
     href: `/plans/${plan.id}/hierarchy`,
@@ -53,9 +48,14 @@ const navLinks = [
     label: 'Hierarchy',
   },
   {
-    href: `/plans/${plan.id}/goals`,
-    icon: 'Target',
-    label: 'Goals',
+    href: `/plans/${plan.id}/week/${viewedWeek}`,
+    icon: 'Calendar',
+    label: 'Week',
+  },
+  {
+    href: `/plans/${plan.id}/week/${currentWeek}/day/${currentDay}`,
+    icon: 'Clock',
+    label: 'Today',
   },
   {
     href: `/plans/${plan.id}/review/${currentWeek}`,
