@@ -7,7 +7,12 @@
 
 import { useState } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +25,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
 import { GoalMilestonePicker } from './GoalMilestonePicker';
@@ -51,6 +61,7 @@ interface WeeklyGoalCardProps {
 }
 
 const MAX_TASKS_PER_GOAL = 15;
+const MAX_TITLE_LENGTH = 120;
 
 /**
  * Get the display label for a goal category
@@ -58,6 +69,14 @@ const MAX_TASKS_PER_GOAL = 15;
 const getCategoryLabel = (category: string): string => {
   const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
   return categoryItem?.label || category;
+};
+
+/**
+ * Truncate title to max length and add ellipsis if needed
+ */
+const truncateTitle = (title: string, maxLength: number = MAX_TITLE_LENGTH): string => {
+  if (title.length <= maxLength) return title;
+  return title.substring(0, maxLength - 3) + '...';
 };
 
 export function WeeklyGoalCard({
@@ -77,6 +96,7 @@ export function WeeklyGoalCard({
   const [editValue, setEditValue] = useState(goal.title);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [expandedValue, setExpandedValue] = useState<string>('');
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     title: '',
@@ -154,155 +174,235 @@ export function WeeklyGoalCard({
   };
 
   return (
-    <Card className="group">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          {/* Goal Title */}
-          <div className="flex-1 min-w-0">
-            {isEditingTitle ? (
-              <Input
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onBlur={handleTitleSave}
-                onKeyDown={handleTitleKeyDown}
-                className="h-8 font-semibold"
-                maxLength={255}
-                autoFocus
-              />
-            ) : (
-              <button
-                onClick={() => setIsEditingTitle(true)}
-                className="text-left font-semibold text-base hover:text-primary transition-colors w-full"
-              >
-                {goal.title}
-              </button>
-            )}
+    <Accordion
+      type="single"
+      collapsible
+      value={expandedValue}
+      onValueChange={setExpandedValue}
+      className="bg-card border rounded-lg"
+    >
+      <AccordionItem value={goal.id} className="border-none">
+        <div className="p-4">
+          <div className="flex items-start gap-4">
+            {/* Left: Goal Info */}
+            <div className="flex-1 min-w-0">
+              <AccordionTrigger className="hover:no-underline p-0">
+                <div className="text-left space-y-2 w-full">
+                  {/* Title */}
+                  {isEditingTitle ? (
+                    <Input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={handleTitleSave}
+                      onKeyDown={handleTitleKeyDown}
+                      className="h-8 font-semibold"
+                      maxLength={255}
+                      autoFocus
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h3 
+                          className="font-semibold text-base"
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            setIsEditingTitle(true);
+                          }}
+                        >
+                          {truncateTitle(goal.title)}
+                        </h3>
+                      </TooltipTrigger>
+                      {goal.title.length > MAX_TITLE_LENGTH && (
+                        <TooltipContent side="top" className="max-w-md">
+                          <p>{goal.title}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  )}
 
-            {/* Category, Long-term Goal & Milestone Links */}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
-                <Badge
-                  className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'}
-                >
-                  {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
-                </Badge>
-              )}
-              {goal.long_term_goal_id && (
-                <Badge variant="outline" className="text-xs gap-1">
-                  <Target className="h-3 w-3" />
-                  <span className="truncate max-w-[150px]">
-                    {getLongTermGoalTitle(goal.long_term_goal_id)}
-                  </span>
-                </Badge>
-              )}
-              {goal.milestone_id && (
-                <Badge variant="outline" className="text-xs gap-1">
-                  <Flag className="h-3 w-3" />
-                  <span className="truncate max-w-[150px]">
-                    {getMilestoneTitle(goal.milestone_id)}
-                  </span>
-                </Badge>
-              )}
+                  {/* Category, Long-term Goal & Milestone Links - shown when collapsed */}
+                  {expandedValue !== goal.id && (
+                    <div className="flex flex-wrap gap-2">
+                      {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
+                        <Badge
+                          className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'}
+                        >
+                          {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
+                        </Badge>
+                      )}
+                      {goal.long_term_goal_id && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Target className="h-3 w-3" />
+                          <span className="truncate max-w-[150px]">
+                            {getLongTermGoalTitle(goal.long_term_goal_id)}
+                          </span>
+                        </Badge>
+                      )}
+                      {goal.milestone_id && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Flag className="h-3 w-3" />
+                          <span className="truncate max-w-[150px]">
+                            {getMilestoneTitle(goal.milestone_id)}
+                          </span>
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </AccordionTrigger>
+            </div>
+
+            {/* Actions Menu outside AccordionTrigger */}
+            <div className="shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Weekly goal actions"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {/* Link to Goal & Milestone */}
+                  <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
+                    <Target className="mr-2 h-4 w-4" />
+                    Link Goal & Milestone
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  {/* Delete */}
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Goal
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
-          {/* Actions Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {/* Link to Goal & Milestone */}
-              <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
-                <Target className="mr-2 h-4 w-4" />
-                Link Goal & Milestone
-              </DropdownMenuItem>
+          {/* Progress Bar (when collapsed) */}
+          {expandedValue !== goal.id && totalTasks > 0 && (
+            <div className="space-y-1 mt-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Progress</span>
+                <span className="font-medium">{completedTasks} / {totalTasks} tasks</span>
+              </div>
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            </div>
+          )}
 
-              <DropdownMenuSeparator />
+          {/* Expanded Content */}
+          <AccordionContent>
+            <div className="space-y-4 pt-4">
+              {/* Category, Long-term Goal & Milestone Links - shown when expanded */}
+              <div className="flex flex-wrap gap-2">
+                {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
+                  <Badge
+                    className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'}
+                  >
+                    {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
+                  </Badge>
+                )}
+                {goal.long_term_goal_id && (
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Target className="h-3 w-3" />
+                    <span className="truncate max-w-[150px]">
+                      {getLongTermGoalTitle(goal.long_term_goal_id)}
+                    </span>
+                  </Badge>
+                )}
+                {goal.milestone_id && (
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Flag className="h-3 w-3" />
+                    <span className="truncate max-w-[150px]">
+                      {getMilestoneTitle(goal.milestone_id)}
+                    </span>
+                  </Badge>
+                )}
+              </div>
 
-              {/* Delete */}
-              <DropdownMenuItem
-                onClick={handleDelete}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Goal
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              {/* Progress Bar (when expanded) */}
+              {totalTasks > 0 && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Progress</span>
+                    <span className="font-medium">{completedTasks} / {totalTasks} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Divider */}
+              <div className="border-t" />
+
+              {/* Task List */}
+              <SortableContext items={goal.tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {goal.tasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      isAdHoc={false}
+                      availableMilestones={availableMilestones}
+                      availableLongTermGoals={availableLongTermGoals}
+                      onUpdate={onUpdateTask}
+                      onDelete={onDeleteTask}
+                      onAssignDay={onAssignDay}
+                      onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
+                    />
+                  ))}
+
+                  {/* Add Task */}
+                  {isAddingTask ? (
+                    <InlineAddTask
+                      onAdd={handleAddTask}
+                      onCancel={() => setIsAddingTask(false)}
+                      placeholder="Enter task title..."
+                    />
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsAddingTask(true)}
+                      disabled={isAtTaskLimit}
+                      className="w-full mt-2"
+                      title={isAtTaskLimit ? `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached` : undefined}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Task {isAtTaskLimit && `(${totalTasks}/${MAX_TASKS_PER_GOAL})`}
+                    </Button>
+                  )}
+
+                  {/* Task Limit Warning */}
+                  {isAtTaskLimit && (
+                    <p className="text-xs text-amber-600 mt-2">
+                      Maximum task limit reached ({MAX_TASKS_PER_GOAL} tasks per goal)
+                    </p>
+                  )}
+                </div>
+              </SortableContext>
+            </div>
+          </AccordionContent>
         </div>
-
-        {/* Progress Bar */}
-        {totalTasks > 0 && (
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-              <span>Progress</span>
-              <span>{completedTasks} / {totalTasks} tasks</span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent className="pt-0">
-        {/* Task List */}
-        <SortableContext items={goal.tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
-            {goal.tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                isAdHoc={false}
-                availableMilestones={availableMilestones}
-                availableLongTermGoals={availableLongTermGoals}
-                onUpdate={onUpdateTask}
-                onDelete={onDeleteTask}
-                onAssignDay={onAssignDay}
-                onUnassignFromWeeklyGoal={onUnassignFromWeeklyGoal}
-              />
-            ))}
-
-          {/* Add Task */}
-          {isAddingTask ? (
-            <InlineAddTask
-              onAdd={handleAddTask}
-              onCancel={() => setIsAddingTask(false)}
-              placeholder="Enter task title..."
-            />
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsAddingTask(true)}
-              disabled={isAtTaskLimit}
-              className="w-full mt-2"
-              title={isAtTaskLimit ? `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached` : undefined}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Task {isAtTaskLimit && `(${totalTasks}/${MAX_TASKS_PER_GOAL})`}
-            </Button>
-          )}
-
-          {/* Task Limit Warning */}
-          {isAtTaskLimit && (
-            <p className="text-xs text-amber-600 mt-2">
-              Maximum task limit reached ({MAX_TASKS_PER_GOAL} tasks per goal)
-            </p>
-          )}
-          </div>
-        </SortableContext>
-      </CardContent>
+      </AccordionItem>
 
       {/* Goal & Milestone Picker Dialog */}
       <GoalMilestonePicker
@@ -347,7 +447,7 @@ export function WeeklyGoalCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </Accordion>
   );
 }
 
