@@ -47,28 +47,30 @@ export default function ReviewCompletionStatus({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              onClick={onToggleComplete}
-              variant={isCompleted ? 'outline' : 'default'}
-              className="flex items-center space-x-2"
-              disabled={isReadOnly}
-            >
-              {isCompleted ? (
-                <>
-                  <Circle className="h-4 w-4" />
-                  <span>Mark as Incomplete</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Mark as Complete</span>
-                </>
-              )}
-            </Button>
+            <span className="inline-flex">
+              <Button
+                onClick={onToggleComplete}
+                variant={isCompleted ? 'outline' : 'default'}
+                className="flex items-center space-x-2"
+                disabled={isReadOnly}
+              >
+                {isCompleted ? (
+                  <>
+                    <Circle className="h-4 w-4" />
+                    <span>Mark as Incomplete</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Mark as Complete</span>
+                  </>
+                )}
+              </Button>
+            </span>
           </TooltipTrigger>
           {isReadOnly && (
             <TooltipContent>
-              <p>Review completion cannot be changed - plan is {planStatus === 'ready' ? 'in ready state' : planStatus === 'completed' ? 'completed' : 'archived'}</p>
+              <p>{getDisabledTooltip(planStatus, 'general')}</p>
             </TooltipContent>
           )}
         </Tooltip>

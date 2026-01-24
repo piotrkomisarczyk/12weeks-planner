@@ -15,6 +15,7 @@ import {
 import { TaskItem } from './TaskItem';
 import { InlineAddTask } from './InlineAddTask';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Plus } from 'lucide-react';
 import type { TaskViewModel, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal, PlanStatus } from '@/types';
 import { getDisabledTooltip } from '@/lib/utils';
@@ -138,17 +139,31 @@ export function AdHocSection({
                       placeholder="Enter task title..."
                     />
                   ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsAddingTask(true)}
-                      disabled={isAtTaskLimit || isReadOnly}
-                      className="w-full mt-2"
-                      title={isReadOnly ? getDisabledTooltip(planStatus, 'general') : isAtTaskLimit ? `Maximum ${MAX_AD_HOC_TASKS} ad-hoc tasks reached` : undefined}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Task {isAtTaskLimit && `(${tasks.length}/${MAX_AD_HOC_TASKS})`}
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex w-full">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsAddingTask(true)}
+                            disabled={isAtTaskLimit || isReadOnly}
+                            className="w-full mt-2"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Task {isAtTaskLimit && `(${tasks.length}/${MAX_AD_HOC_TASKS})`}
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      {(isReadOnly || isAtTaskLimit) && (
+                        <TooltipContent>
+                          <p>
+                            {isReadOnly 
+                              ? getDisabledTooltip(planStatus, 'general') 
+                              : `Maximum ${MAX_AD_HOC_TASKS} ad-hoc tasks reached`}
+                          </p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
                   )}
 
                   {/* Task Limit Warning */}

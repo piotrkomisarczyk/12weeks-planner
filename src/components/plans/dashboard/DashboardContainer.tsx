@@ -3,6 +3,7 @@ import { usePlanDashboard } from '../hooks/usePlanDashboard';
 import { DashboardOverviewCard } from './DashboardOverviewCard';
 import { EmptyState } from './EmptyState';
 import { calculateCurrentWeek, calculateCurrentDay } from '@/lib/utils';
+import type { PlanStatus } from '@/types';
 
 interface DashboardContainerProps {
   planId: string;
@@ -83,7 +84,12 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
 
       {/* Main Content */}
       {isEmpty && (
-        <EmptyState planId={planId} planName={data.plan.name} onNavigate={handleNavigate} />
+        <EmptyState 
+          planId={planId} 
+          planName={data.plan.name} 
+          planStatus={data.plan.status as PlanStatus}
+          onNavigate={handleNavigate} 
+        />
       )}
     </div>
   );

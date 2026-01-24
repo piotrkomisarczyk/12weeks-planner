@@ -200,10 +200,11 @@ export function canChangeTaskStatus(status: PlanStatus): boolean {
 
 /**
  * Determines if goal progress can be changed
- * Goal progress can be changed in 'active' and 'ready' plans
+ * Goal progress can only be changed in 'active' plans
+ * In 'ready' state, goal form fields remain editable but progress is disabled
  */
 export function canChangeGoalProgress(status: PlanStatus): boolean {
-  return status === 'active' || status === 'ready';
+  return status === 'active';
 }
 
 /**

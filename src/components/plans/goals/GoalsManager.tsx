@@ -144,6 +144,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
             onCreateGoal={handleAddGoal}
             currentGoalsCount={goals.length}
             disabled={isReadOnly}
+            planStatus={planContext.status as PlanStatus}
           />
         ) : (
           /* Goals List */

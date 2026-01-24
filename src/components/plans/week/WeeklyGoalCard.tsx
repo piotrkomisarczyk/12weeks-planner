@@ -437,17 +437,31 @@ export function WeeklyGoalCard({
                       placeholder="Enter task title..."
                     />
                   ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsAddingTask(true)}
-                      disabled={isAtTaskLimit || isReadOnly}
-                      className="w-full mt-2"
-                      title={isReadOnly ? getDisabledTooltip(planStatus, 'general') : isAtTaskLimit ? `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached` : undefined}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Task {isAtTaskLimit && `(${totalTasks}/${MAX_TASKS_PER_GOAL})`}
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex w-full">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsAddingTask(true)}
+                            disabled={isAtTaskLimit || isReadOnly}
+                            className="w-full mt-2"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Task {isAtTaskLimit && `(${totalTasks}/${MAX_TASKS_PER_GOAL})`}
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      {(isReadOnly || isAtTaskLimit) && (
+                        <TooltipContent>
+                          <p>
+                            {isReadOnly 
+                              ? getDisabledTooltip(planStatus, 'general') 
+                              : `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached`}
+                          </p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
                   )}
 
                   {/* Task Limit Warning */}

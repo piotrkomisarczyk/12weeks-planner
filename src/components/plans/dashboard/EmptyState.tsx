@@ -1,14 +1,18 @@
 import { Target, Plus, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { PlanStatus } from '@/types';
+import { isPlanReadOnly, getDisabledTooltip } from '@/lib/utils';
 
 interface EmptyStateProps {
   planId: string;
   planName: string;
+  planStatus: PlanStatus;
   onNavigate?: (url: string) => void;
 }
 
-export function EmptyState({ planId, planName, onNavigate }: EmptyStateProps) {
+export function EmptyState({ planId, planName, planStatus, onNavigate }: EmptyStateProps) {
   const handleCreateGoal = () => {
     if (onNavigate) {
       onNavigate(`/plans/${planId}/goals`);
@@ -20,6 +24,9 @@ export function EmptyState({ planId, planName, onNavigate }: EmptyStateProps) {
       onNavigate('/plans/new');
     }
   };
+
+  const isArchived = isPlanReadOnly(planStatus);
+  const tooltipMessage = isArchived ? getDisabledTooltip(planStatus, 'general') : '';
 
   return (
     <Card className="border-dashed border-2 border-gray-300">
@@ -38,15 +45,46 @@ export function EmptyState({ planId, planName, onNavigate }: EmptyStateProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={handleCreateGoal} className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Create Your First Goal
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button 
+                    onClick={handleCreateGoal} 
+                    disabled={isArchived}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Your First Goal
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {isArchived && (
+                <TooltipContent>
+                  <p>{tooltipMessage}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
 
-            <Button variant="outline" onClick={handleViewWizard} className="flex items-center gap-2">
-              <ArrowRight className="w-4 h-4" />
-              View Planning Wizard
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleViewWizard} 
+                    disabled={isArchived}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                    View Planning Wizard
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {isArchived && (
+                <TooltipContent>
+                  <p>{tooltipMessage}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
 
           <div className="mt-8 text-sm text-gray-500">

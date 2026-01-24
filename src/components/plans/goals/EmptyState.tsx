@@ -4,8 +4,10 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { GoalCategory } from '@/types';
+import type { GoalCategory, PlanStatus } from '@/types';
 import { CreateGoalDialog } from './CreateGoalDialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { getDisabledTooltip } from '@/lib/utils';
 
 interface EmptyStateProps {
   onCreateGoal: (data: {
@@ -17,17 +19,20 @@ interface EmptyStateProps {
   }) => Promise<void>;
   currentGoalsCount: number;
   disabled?: boolean;
+  planStatus?: PlanStatus;
 }
 
 /**
  * Empty state for when no goals exist
  */
-export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false }: EmptyStateProps) {
+export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false, planStatus }: EmptyStateProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleOpenDialog = useCallback(() => {
     setDialogOpen(true);
   }, []);
+
+  const tooltipMessage = disabled && planStatus ? getDisabledTooltip(planStatus, 'general') : '';
 
   return (
     <div className="border-2 border-dashed rounded-lg p-12 text-center">
@@ -56,13 +61,24 @@ export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false }
           </p>
         </div>
 
-        <button
-          onClick={handleOpenDialog}
-          disabled={disabled}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          Add Your First Goal
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">
+              <button
+                onClick={handleOpenDialog}
+                disabled={disabled}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Add Your First Goal
+              </button>
+            </span>
+          </TooltipTrigger>
+          {disabled && tooltipMessage && (
+            <TooltipContent>
+              <p>{tooltipMessage}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
       </div>
       <CreateGoalDialog
         onCreateGoal={onCreateGoal}

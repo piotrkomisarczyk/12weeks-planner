@@ -9,9 +9,10 @@
 import { useState } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getDisabledTooltip } from '@/lib/utils';
 import { InlineAddTask } from '../week/InlineAddTask';
 import { TaskCard } from './TaskCard';
 import type {
@@ -195,16 +196,31 @@ export function DailyTaskSlot({
             {/* Add Button */}
             <div className="px-4 pb-4">
               {!isAdding && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsAdding(true)}
-                  disabled={isFull || isReadOnly}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {isFull ? `Slot Full (max ${limit})` : 'Add Task'}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex w-full">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAdding(true)}
+                        disabled={isFull || isReadOnly}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        {isFull ? `Slot Full (max ${limit})` : 'Add Task'}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {(isReadOnly || isFull) && (
+                    <TooltipContent>
+                      <p>
+                        {isReadOnly 
+                          ? getDisabledTooltip(planStatus, 'general') 
+                          : `Slot Full (max ${limit})`}
+                      </p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               )}
             </div>
           </AccordionContent>
