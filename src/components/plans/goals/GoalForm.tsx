@@ -4,16 +4,18 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
 import type { GoalCategory } from '@/types';
 import type { SaveStatus } from '@/types';
@@ -143,26 +145,40 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
       {/* Category */}
       <div className="space-y-2">
         <Label htmlFor="goal-category">Category</Label>
-        <Select
-          value={category || undefined}
-          onValueChange={handleCategoryChange}
-          disabled={disabled}
-        >
-          <SelectTrigger id="goal-category" className="w-full">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {GOAL_CATEGORIES.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              id="goal-category"
+              variant="outline"
+              className="w-full justify-between"
+              disabled={disabled}
+            >
+              {category ? (
                 <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[cat.value]}`}
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[category]}`}
                 >
-                  {cat.label}
+                  {GOAL_CATEGORIES.find((cat) => cat.value === category)?.label}
                 </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              ) : (
+                <span className="text-muted-foreground">Select category</span>
+              )}
+              <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]" align="start">
+            <DropdownMenuRadioGroup value={category || undefined} onValueChange={handleCategoryChange}>
+              {GOAL_CATEGORIES.map((cat) => (
+                <DropdownMenuRadioItem key={cat.value} value={cat.value}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[cat.value]}`}
+                  >
+                    {cat.label}
+                  </span>
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Description */}
