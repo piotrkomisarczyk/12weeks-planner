@@ -12,7 +12,7 @@ W katalogu `src/pages` zostaną dodane/zmodyfikowane następujące ścieżki:
 | `/login` | Astro (SSR) | Public | Strona logowania. Jeśli użytkownik jest zalogowany -> przekierowanie do `/`. |
 | `/register` | Astro (SSR) | Public | Strona rejestracji. Jeśli zalogowany -> przekierowanie do `/`. |
 | `/forgot-password` | Astro (SSR) | Public | Formularz proszący o email do resetu hasła. |
-| `/update-password` | Astro (SSR) | Public | Formularz zmiany hasła (dostępny po kliknięciu w link z maila lub dla zalogowanego). |
+| `/update-password` | Astro (SSR) | Public/Protected | Formularz zmiany hasła. Dostępny z linku resetującego (token w URL) lub dla zalogowanego użytkownika (zmiana hasła). |
 | `/auth/callback` | API Route | Public | Endpoint do obsługi przekierowań OAuth/Magic Link i wymiany kodu na sesję (PKCE). |
 
 ### 1.2. Komponenty React (`src/components/auth`)
@@ -38,7 +38,7 @@ Nowe komponenty wykorzystujące `react-hook-form` oraz `zod` do walidacji, stylo
 *   **`Layout.astro`** (Główny): Zostanie zaktualizowany o warunkowe wyświetlanie elementów nawigacji (np. `UserMenu`) tylko dla zalogowanych użytkowników.
 
 ### 1.4. Integracja z UX
-*   **UserMenu**: Rozszerzenie istniejącego komponentu o obsługę wylogowania, która wywoła funkcję `supabase.auth.signOut()` i przekieruje na stronę logowania.
+*   **UserMenu**: Rozszerzenie istniejącego komponentu o obsługę wylogowania, która wywoła funkcję `supabase.auth.signOut()` i przekieruje na stronę logowania, oraz opcję zmiany hasła.
 *   **Obsługa Błędów**: Wykorzystanie komponentu `Sonner` (Toast) do wyświetlania błędów autentykacji (np. "Nieprawidłowe dane logowania", "Użytkownik już istnieje").
 
 ---
@@ -82,8 +82,10 @@ Middleware będzie pełnić rolę "Strażnika" (Auth Guard).
 1.  Użytkownik wypełnia formularz na `/login`.
 2.  Frontend wywołuje `supabase.auth.signInWithPassword()`.
 3.  Biblioteka Supabase automatycznie ustawia ciasteczka sesyjne.
-4.  Frontend odświeża stronę lub przekierowuje na Dashboard.
-5.  Middleware weryfikuje ciasteczka przy kolejnym żądaniu.
+4.  Frontend przekierowuje na stronę główną (`/`) lub dedykowany endpoint dashboardu.
+5.  **Logika przekierowania (zgodnie z US-002):** Aplikacja (strona główna lub middleware) sprawdza, czy użytkownik posiada aktywny planer.
+    *   Jeśli **tak**: Użytkownik trafia na Dashboard aktywnego planera.
+    *   Jeśli **nie**: Użytkownik trafia na widok listy planerów (lub kreatora nowego planera).
 
 ### 3.3. Odzyskiwanie Hasła (US-003)
 1.  Użytkownik podaje email na `/forgot-password`.
@@ -99,6 +101,13 @@ Middleware będzie pełnić rolę "Strażnika" (Auth Guard).
 4.  Przekierowanie na `/login`.
 5.  **Auto-logout**: Tokeny Supabase mają czas życia (domyślnie 1h dla access token). Mechanizm refresh token (obsługiwany przez `@supabase/ssr`) odnawia sesję, dopóki użytkownik jest aktywny. Przy braku aktywności i wygaśnięciu refresh tokena, middleware przekieruje do logowania.
 
+### 3.5. Zmiana Hasła - Zalogowany Użytkownik (US-003)
+1.  Zalogowany użytkownik wybiera opcję zmiany hasła z `UserMenu`.
+2.  Przekierowanie na `/update-password` (lub dedykowany widok w ustawieniach).
+3.  Użytkownik wprowadza nowe hasło i potwierdzenie.
+4.  Frontend wywołuje `supabase.auth.updateUser({ password: newPassword })`.
+5.  Po sukcesie wyświetlany jest komunikat (Toast) o zmianie hasła; użytkownik pozostaje zalogowany.
+
 ---
 
 ## 4. Baza Danych i RLS
@@ -107,8 +116,8 @@ Analiza pliku `docs/db-plan.md` oraz migracji wskazuje, że RLS został wdrożon
 
 ### 4.1. Tabele Użytkowników
 Aplikacja korzysta bezpośrednio z tabeli `auth.users` w relacjach kluczy obcych (np. `plans.user_id`).
-*   **Nie jest wymagana** osobna tabela `public.users` dla MVP, chyba że planujemy przechowywać dane profilowe (imię, nazwisko, avatar) inne niż te w metadanych Auth.
-*   Tabela `user_metrics` istnieje i ma relację 1:1 z `auth.users`.
+*   **Nie jest wymagana** osobna tabela `public.users` dla MVP.
+*   **Flagi i metryki**: Tabela `user_metrics` (relacja 1:1 z `auth.users`) przechowuje dodatkowe dane użytkownika, takie jak flagi (np. `first_planner_completed` wymagane przez US-001/Metryki).
 
 ### 4.2. Wdrożenie RLS (Row Level Security)
 Należy utworzyć nową migrację SQL, która:
@@ -129,7 +138,8 @@ Należy sprawdzić, czy triggery do `user_metrics` (opisane w planie DB) są wdr
 
 1.  **Setup Bibliotek**: Instalacja `@supabase/ssr`, konfiguracja zmiennych środowiskowych.
 2.  **Helpers & Middleware**: Implementacja `client.ts`, `server.ts` i aktualizacja `middleware/index.ts`.
-3.  **UI Auth**: Stworzenie layoutu i stron `/login`, `/register`.
-4.  **Database**: Utworzenie migracji "Re-enable RLS".
-5.  **Integration**: Podpięcie formularzy React pod logikę Supabase.
-6.  **User Menu**: Aktualizacja logiki wylogowania.
+3.  **UI Auth**: Stworzenie layoutu i stron `/login`, `/register`, `/forgot-password`, `/update-password`.
+4.  **Komponenty Formularzy**: Implementacja formularzy w React (`LoginForm`, `RegisterForm`, etc.).
+5.  **Database**: Utworzenie migracji "Re-enable RLS" oraz weryfikacja triggerów `user_metrics`.
+6.  **Integration**: Podpięcie formularzy React pod logikę Supabase.
+7.  **User Menu**: Aktualizacja logiki wylogowania i dodanie opcji zmiany hasła.
