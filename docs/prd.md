@@ -20,7 +20,7 @@ Większość aplikacji typu to-do list obsługuje jedynie proste, krótkotermino
 
 ### Zarządzanie planerami
 - Tworzenie 12-tygodniowych planerów zaczynających się od poniedziałku aktualnego tygodnia.
-- Nawigacja między planerami: poprzedni/następny, przeglądanie archiwalnych.
+- Nawigacja między planerami: wybór konkretnego planera, przeglądanie gotowych i  archiwalnych.
 - Minimalnie 1 cel, maksymalnie 6 celów na planer (walidacja formularza).
 
 ### Cele
@@ -91,11 +91,13 @@ Kryteria akceptacji:
 Tytuł: Logowanie użytkownika  
 Opis: Jako zarejestrowany użytkownik, chcę się zalogować, aby uzyskać dostęp do swoich planerów.  
 Kryteria akceptacji:  
-- Formularz logowania z email i hasłem.  
-- Po sukcesie, przekierowanie do dashboardu z listą planerów.  
+- Formularz logowania z email i hasłem.
+- Link do formularza rejestracji użytkownika
+- Po sukcesie, przekierowanie do widoku z listą planerów, a jeśli istnieje aktywny plan to do widoku dashboard aktywnego planu
 - Błąd dla niepoprawnych danych logowania.  
-- Alternatywa: link do resetu hasła.  
+- Alternatywa: link do resetu hasła.
 - Edge case: sesja wygasa po bezczynności, wymaga ponownego logowania.
+- Aby korzystać z dowolnych stron i podstron systemu Użytkownik musi być zalogowany
 
 ### US-003
 Tytuł: Reset hasła  
@@ -106,6 +108,7 @@ Kryteria akceptacji:
 - Nowy formularz hasła po kliknięciu linku (potwierdzenie nowego hasła).  
 - Po sukcesie, przekierowanie do logowania.  
 - Edge case: wygaśnięcie linku resetu po 1 godzinie.
+- Możliwość rozpoczęcia procedury zmiany hasła z UserMenu w prawym górnym rogu serwisu dla zalogowanego użytkownika.
 
 ### US-004
 Tytuł: Tworzenie nowego planera  
@@ -222,10 +225,10 @@ Kryteria akceptacji:
 Tytuł: Wylogowanie i bezpieczeństwo  
 Opis: Jako użytkownik, chcę się wylogować, aby chronić dane.  
 Kryteria akceptacji:  
-- Przycisk wylogowania na dashboardzie.  
+- Użytkownik może się wylogować z systemu poprzez użycie UserMenu w prawym górym rogu i opcji Logout
 - Czyszczenie sesji.  
 - Automatyczne wylogowanie po bezczynności 1h.  
-- Edge case: próba dostępu bez logowania – przekierowanie do login.
+- Edge case: próba dostępu bez logowania – przekierowanie do formularza logowania.
 
 ### US-012
 Tytuł: Archiwizacja planera  
@@ -248,7 +251,7 @@ Kryteria akceptacji:
 Tytuł: Zmiana języka aplikacji na dashboardzie  
 Opis: Jako użytkownik, chcę móc zmienić język aplikacji. Do wyboru są język angielski i polski (w MVP tylko język angielski dostępny).  
 Kryteria akceptacji:  
-- Na dashboardzie po prawej u góry dostępne 2 ikonki z flagami
+- Na górnej belce nawigacyjnej po prawej u góry dostępne 2 ikonki z flagami
 - Po kliknięciu w odpowiednią ikonę zmienia się język aplikacji
 
 ### US-015 
