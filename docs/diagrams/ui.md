@@ -4,7 +4,7 @@ Poniższy diagram przedstawia architekturę interfejsu użytkownika dla modułu 
 
 <mermaid_diagram>
 ```mermaid
-flowchart TD
+flowchart LR
     %% Definicje stylów
     classDef page fill:#f9f,stroke:#333,stroke-width:2px;
     classDef component fill:#9cf,stroke:#333,stroke-width:2px;
