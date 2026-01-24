@@ -36,7 +36,7 @@ const quickActions = [
     description: 'Plan this week\'s activities',
     icon: Calendar,
     url: 'week',
-    color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950/40 dark:hover:bg-green-950/60 dark:text-green-200 dark:border-green-900/60',
+    color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900/60',
   },
   {
     id: 'today',
@@ -44,7 +44,7 @@ const quickActions = [
     description: 'View today\'s tasks',
     icon: Clock,
     url: 'day',
-    color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900/60',
+    color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950/40 dark:hover:bg-green-950/60 dark:text-green-200 dark:border-green-900/60',
   },
   {
     id: 'summary',
@@ -136,12 +136,6 @@ export function DashboardOverviewCard({
             <div className="text-sm text-teal-600 dark:text-teal-200">Total Tasks</div>
           </div>
 
-          {/* Completed Tasks */}
-          <div className="text-center p-4 bg-green-50 rounded-lg dark:bg-green-950/40">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-200">{metrics.completed_tasks}</div>
-            <div className="text-sm text-green-700 dark:text-green-300">Completed Tasks</div>
-          </div>
-
           {/* Task Progress */}
           <div className="text-center p-4 bg-blue-50 rounded-lg dark:bg-blue-950/40">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-200">
@@ -149,7 +143,13 @@ export function DashboardOverviewCard({
                 ? '0.0%'
                 : `${((metrics.completed_tasks * 100) / metrics.total_tasks).toFixed(1)} %`}
             </div>
-            <div className="text-sm text-blue-600 dark:text-blue-200">Task Progress</div>
+            <div className="text-sm text-blue-700 dark:text-blue-300">Task Progress</div>
+          </div>
+
+          {/* Completed Tasks */}
+          <div className="text-center p-4 bg-green-50 rounded-lg dark:bg-green-950/40">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-200">{metrics.completed_tasks}</div>
+            <div className="text-sm text-green-600 dark:text-green-200">Completed Tasks</div>
           </div>
 
           {/* Completed Goals */}
