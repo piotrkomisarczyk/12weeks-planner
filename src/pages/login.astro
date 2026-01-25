@@ -1,0 +1,16 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { Toaster } from '@/components/ui/sonner';
+
+// TODO: Add middleware check - if user is logged in, redirect to /
+// const user = Astro.locals.user;
+// if (user) {
+//   return Astro.redirect('/');
+// }
+---
+
+<AuthLayout title="Sign In" description="Sign in to your 12 Weeks Planner account">
+  <LoginForm client:load />
+  <Toaster client:load />
+</AuthLayout>
