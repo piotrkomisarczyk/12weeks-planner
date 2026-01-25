@@ -23,15 +23,26 @@ export function UserMenu({ userEmail }: UserMenuProps) {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
+      // Call logout API endpoint
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
         toast.error('Failed to log out', {
-          description: error.message,
+          description: data.message || 'An error occurred',
         });
-      } else {
-        // Redirect to home/login page
-        window.location.href = '/';
+        return;
       }
+
+      // Success - redirect to login page
+      toast.success('Logged out successfully');
+      window.location.href = '/login';
     } catch (error) {
       toast.error('Failed to log out', {
         description: 'An unexpected error occurred',

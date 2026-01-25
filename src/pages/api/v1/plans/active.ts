@@ -13,16 +13,29 @@
 
 import type { APIRoute } from 'astro';
 import { PlanService } from '../../../../lib/services/plan.service';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
 import type { ErrorResponse, ItemResponse, PlanDTO } from '../../../../types';
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication - Get user from locals (set by middleware)
+    const user = locals.user;
+    
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: 'Unauthorized',
+          message: 'Authentication required'
+        } as ErrorResponse),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    const userId = user.id;
 
     // Step 2: No validation needed (no parameters)
 

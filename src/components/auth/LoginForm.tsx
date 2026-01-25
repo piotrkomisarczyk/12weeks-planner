@@ -57,27 +57,54 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validate()) {
+
+    const isValid = validate();
+    
+    if (!isValid) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual login logic with Supabase
-      // const { error } = await supabase.auth.signInWithPassword({
-      //   email: formData.email,
-      //   password: formData.password,
-      // });
-      
-      // Placeholder for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      toast.success('Login successful');
-      // window.location.href = '/';
+      // Call login API endpoint
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors (400)
+        if (response.status === 400 && data.details) {
+          const newErrors: Record<string, string> = {};
+          data.details.forEach((detail: { path: string[]; message: string }) => {
+            const field = detail.path[0];
+            newErrors[field] = detail.message;
+          });
+          setErrors(newErrors);
+          return;
+        }
+
+        // Handle authentication errors (401) and other errors
+        toast.error(data.error || 'An error occurred. Please try again.');
+        return;
+      }
+
+      // Success - redirect to home page
+      // toast.success('Login successful');
+      window.location.href = '/';
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Invalid email or password. Please try again.');
+      toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

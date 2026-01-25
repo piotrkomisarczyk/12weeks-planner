@@ -1,9 +1,66 @@
 import { defineMiddleware } from 'astro:middleware';
 
-import { supabaseClient } from '../db/supabase.client.ts';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export const onRequest = defineMiddleware((context, next) => {
-  context.locals.supabase = supabaseClient;
+/**
+ * Public paths that don't require authentication
+ * Includes auth pages and API endpoints
+ */
+const PUBLIC_PATHS = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/update-password',
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/logout',
+  '/api/auth/reset-password',
+];
+
+/**
+ * Auth middleware
+ * - Creates Supabase server client per request
+ * - Checks user session
+ * - Protects routes requiring authentication
+ * - Redirects logged-in users from auth pages
+ */
+export const onRequest = defineMiddleware(async (context, next) => {
+  const { locals, cookies, url, request, redirect } = context;
+
+  // Create Supabase server client
+  const supabase = createServerSupabaseClient({
+    cookies,
+    headers: request.headers,
+  });
+
+  // Attach supabase client to locals for use in pages/endpoints
+  locals.supabase = supabase;
+
+  // Get user session
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Attach user to locals
+  locals.user = user
+    ? {
+        id: user.id,
+        email: user.email,
+      }
+    : null;
+
+  const isPublicPath = PUBLIC_PATHS.includes(url.pathname);
+
+  // Redirect logged-in users away from auth pages
+  if (user && isPublicPath && url.pathname !== '/api/auth/logout') {
+    return redirect('/');
+  }
+
+  // Redirect non-authenticated users to login
+  if (!user && !isPublicPath) {
+    return redirect('/login');
+  }
+
   return next();
 });
 
