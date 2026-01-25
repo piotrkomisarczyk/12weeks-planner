@@ -65,6 +65,25 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
+    // Check if email is verified
+    if (!data.user.email_confirmed_at) {
+      // Sign out the user immediately
+      await locals.supabase.auth.signOut();
+      
+      return new Response(
+        JSON.stringify({
+          error: 'Please verify your email address before logging in. Check your inbox for the verification link.',
+          code: 'EMAIL_NOT_VERIFIED',
+        }),
+        {
+          status: 403,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+
     // Return success with user data
     return new Response(
       JSON.stringify({

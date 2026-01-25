@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   '/register',
   '/forgot-password',
   '/update-password',
+  '/auth/callback',
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/logout',
@@ -41,8 +42,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Attach user to locals
-  locals.user = user
+  // Check if email is verified (required for access)
+  const isEmailVerified = user?.email_confirmed_at !== null;
+
+  // Attach user to locals only if email is verified
+  locals.user = user && isEmailVerified
     ? {
         id: user.id,
         email: user.email,

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,31 @@ export function LoginForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check for URL parameters (verification status, errors)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const verified = params.get('verified');
+    const error = params.get('error');
+
+    if (verified === 'true') {
+      toast.success('Email verified successfully! You can now log in.');
+      // Clean URL
+      window.history.replaceState({}, '', '/login');
+    }
+
+    if (error) {
+      const errorMessages: Record<string, string> = {
+        invalid_callback: 'Invalid verification link. Please try again.',
+        link_expired: 'Verification link has expired. Please request a new one.',
+        verification_failed: 'Email verification failed. Please try again.',
+        unexpected: 'An unexpected error occurred. Please try again.',
+      };
+      toast.error(errorMessages[error] || 'An error occurred.');
+      // Clean URL
+      window.history.replaceState({}, '', '/login');
+    }
+  }, []);
 
   // Validate form
   const validate = useCallback((): boolean => {
@@ -91,6 +116,14 @@ export function LoginForm() {
             newErrors[field] = detail.message;
           });
           setErrors(newErrors);
+          return;
+        }
+
+        // Handle email not verified (403)
+        if (response.status === 403 && data.code === 'EMAIL_NOT_VERIFIED') {
+          toast.error(data.error, {
+            duration: 6000,
+          });
           return;
         }
 
