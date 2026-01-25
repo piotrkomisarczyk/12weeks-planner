@@ -7,22 +7,44 @@ export const prerender = false;
  * Handles email verification and password reset callbacks from Supabase
  * 
  * This endpoint is called when user clicks verification link in email
- * Supabase sends token_hash and type parameters
+ * Supabase can send either:
+ * - token_hash and type parameters (OTP flow)
+ * - code parameter (PKCE flow for password reset)
  * 
  * Flow:
- * 1. Extract token_hash and type from URL
+ * 1. Check for PKCE code or token_hash
  * 2. Exchange token for session using Supabase
  * 3. Redirect to appropriate page based on type
  * 
  * @returns Redirect to login (email verification) or update-password (password reset)
  */
-export const GET: APIRoute = async ({ url, locals, redirect }) => {
+export const GET: APIRoute = async ({ url, locals, redirect, cookies }) => {
   const token_hash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type');
+  const code = url.searchParams.get('code');
 
-  // Validate required parameters
+  // Handle PKCE flow (password reset with code)
+  if (code) {
+    try {
+      const { data, error } = await locals.supabase.auth.exchangeCodeForSession(code);
+
+      if (error) {
+        console.error('PKCE code exchange error:', error);
+        return redirect('/forgot-password?error=invalid_code');
+      }
+
+      console.log('PKCE code exchange successful, redirecting to update-password');
+      // Redirect to update password page
+      return redirect('/update-password');
+    } catch (error) {
+      console.error('PKCE callback error:', error);
+      return redirect('/forgot-password?error=unexpected');
+    }
+  }
+
+  // Handle OTP flow (email verification with token_hash)
   if (!token_hash || !type) {
-    console.error('Missing token_hash or type in callback URL');
+    console.error('Missing required parameters in callback URL');
     return redirect('/login?error=invalid_callback');
   }
 

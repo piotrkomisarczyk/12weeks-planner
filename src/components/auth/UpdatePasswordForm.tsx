@@ -39,10 +39,10 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
       
       if (error || !data.session) {
         // No valid session/token - redirect to forgot password
-        toast.error('Your reset password link has expired');
+        toast.error('Your reset password link has expired. Please request a new one.');
         setTimeout(() => {
           window.location.href = '/forgot-password';
-        }, 2000);
+        }, 3000);
         setHasValidToken(false);
         return;
       }
@@ -50,10 +50,10 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
       setHasValidToken(true);
     } catch (error) {
       console.error('Token validation error:', error);
-      toast.error('Your reset password link has expired');
+      toast.error(`Error validating reset link: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setTimeout(() => {
         window.location.href = '/forgot-password';
-      }, 2000);
+      }, 3000);
       setHasValidToken(false);
     }
   };
@@ -127,12 +127,21 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabaseClient.auth.updateUser({
-        password: formData.password,
+      // Call server-side API to update password
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          password: formData.password,
+        }),
       });
 
-      if (error) {
-        throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update password');
       }
       
       toast.success('Password updated successfully');
@@ -151,7 +160,8 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
       }
     } catch (error) {
       console.error('Password update error:', error);
-      toast.error('Failed to update password. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update password. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -43,9 +43,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { email } = validationResult.data;
 
     // Get origin from request headers for redirect URL
+    // Redirect to /auth/callback which will handle the PKCE code exchange
     const origin = new URL(request.url).origin;
-    const redirectTo = `${origin}/update-password`;
-
+    const redirectTo = `${origin}/auth/callback`;
     // Send password reset email
     const { error } = await locals.supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
