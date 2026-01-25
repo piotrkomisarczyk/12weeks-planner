@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { TaskService } from '../../../../lib/services/task.service';
 import { dailyTasksParamsSchema } from '../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../lib/utils';
 
 export const prerender = false;
 
@@ -28,7 +28,11 @@ export const prerender = false;
 export const GET: APIRoute = async ({ url, locals }) => {
   try {
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Parse query parameters
     const params = {

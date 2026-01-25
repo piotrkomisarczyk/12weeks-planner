@@ -3,7 +3,6 @@ import "../styles/global.css";
 import type { PlanSummary, PlanStatus } from '@/types';
 import { createServerClient } from '@supabase/ssr';
 import { PlanService } from '@/lib/services/plan.service';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import TopNavigation from '@/components/navigation/TopNavigation.astro';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -32,16 +31,16 @@ const supabase = createServerClient(
   }
 );
 
-// Get current user (with fallback to DEFAULT_USER_ID for development)
+// Get current user - middleware should have already verified authentication
 const { data: { user } } = await supabase.auth.getUser();
-const userId = user?.id || DEFAULT_USER_ID;
+const userId = user?.id;
 
 // Extract plan ID from URL if we're in a plan context
 const urlParts = Astro.url.pathname.split('/').filter(Boolean);
 let plan: PlanSummary | null = null;
 
 // Check if we're on a plan-specific page: /plans/[id]/...
-if (urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
+if (userId && urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
   const planId = urlParts[1];
   
   try {

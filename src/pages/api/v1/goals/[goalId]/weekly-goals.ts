@@ -7,9 +7,9 @@ import type { APIRoute } from 'astro';
 import { GoalService } from '../../../../../lib/services/goal.service';
 import { WeeklyGoalService } from '../../../../../lib/services/weekly-goal.service';
 import { GoalIdParamsSchema } from '../../../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../../lib/utils';
 import type { 
-  ErrorResponse, 
+  ErrorResponse,
   ValidationErrorResponse, 
   ListResponse, 
   WeeklyGoalDTO 
@@ -19,8 +19,12 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ locals, params }) => {
   try {
-    // Authentication (MVP: using DEFAULT_USER_ID)
-    const userId = DEFAULT_USER_ID;
+    // Authentication
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Validate URL params
     const validationResult = GoalIdParamsSchema.safeParse({ id: params.goalId });

@@ -26,13 +26,13 @@
  */
 
 import type { APIRoute } from 'astro';
-import { supabaseClient, DEFAULT_USER_ID } from '../../../db/supabase.client';
 import { MilestoneService } from '../../../lib/services/milestone.service';
 import {
   listMilestonesQuerySchema,
   createMilestoneSchema,
 } from '../../../lib/validation/milestone.validation';
 import { z } from 'zod';
+import { GetUnauthorizedResponse } from '../../../lib/utils';
 import type {
   ErrorResponse,
   ValidationErrorResponse,
@@ -47,10 +47,14 @@ export const prerender = false;
  * GET /api/v1/milestones
  * List milestones with optional filters
  */
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Parse and validate query parameters
     const url = new URL(request.url);
@@ -64,7 +68,7 @@ export const GET: APIRoute = async ({ request }) => {
     const validatedParams = listMilestonesQuerySchema.parse(queryParams);
 
     // Step 3: Get milestones from service
-    const milestoneService = new MilestoneService(supabaseClient);
+    const milestoneService = new MilestoneService(locals.supabase);
     const result = await milestoneService.listMilestones(
       validatedParams,
       userId
@@ -125,10 +129,14 @@ export const GET: APIRoute = async ({ request }) => {
  * POST /api/v1/milestones
  * Create a new milestone
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Parse request body
     let body;
@@ -153,7 +161,7 @@ export const POST: APIRoute = async ({ request }) => {
     const validatedData = createMilestoneSchema.parse(body);
 
     // Step 4: Create milestone via service
-    const milestoneService = new MilestoneService(supabaseClient);
+    const milestoneService = new MilestoneService(locals.supabase);
     const milestone = await milestoneService.createMilestone(
       validatedData,
       userId

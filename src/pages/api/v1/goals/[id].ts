@@ -13,14 +13,14 @@ import {
   GoalIdParamsSchema,
   validateUpdateGoalCommand 
 } from '../../../../lib/validation/goal.validation';
+import { GetUnauthorizedResponse } from '../../../../lib/utils';
 import type { 
+  ErrorResponse,
   GoalDTO,
   GoalWithMilestonesDTO,
   ItemResponse, 
-  ValidationErrorResponse, 
-  ErrorResponse
+  ValidationErrorResponse
 } from '../../../../types';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
 
 export const prerender = false;
 
@@ -36,8 +36,12 @@ export const prerender = false;
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    // 1. Use DEFAULT_USER_ID for now (authentication will be added later)
-    const userId = DEFAULT_USER_ID;
+    // 1. Authentication
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // 2. Validate goal ID from URL parameter
     let goalId: string;
@@ -127,8 +131,12 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    // 1. Use DEFAULT_USER_ID for now (authentication will be added later)
-    const userId = DEFAULT_USER_ID;
+    // 1. Authentication
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // 2. Validate goal ID from URL parameter
     let goalId: string;
@@ -269,8 +277,12 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    // 1. Use DEFAULT_USER_ID for now (authentication will be added later)
-    const userId = DEFAULT_USER_ID;
+    // 1. Authentication
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // 2. Validate goal ID from URL parameter
     let goalId: string;

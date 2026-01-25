@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { ExportService } from '../../../lib/services/export.service';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../lib/utils';
 import type { ExportDataDTO, ErrorResponse } from '../../../types';
 
 export const prerender = false;
@@ -35,23 +35,13 @@ export const prerender = false;
 export const GET: APIRoute = async ({ locals }) => {
   try {
     // 1. Authentication check
-    // Note: Using DEFAULT_USER_ID for development/testing
-    // In production, this should be replaced with proper auth from locals.supabase
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
+    
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
-
-    // Uncomment for production authentication:
-    // const { data: { user }, error: authError } = await supabase.auth.getUser();
-    // if (authError || !user) {
-    //   return new Response(
-    //     JSON.stringify({
-    //       error: 'Unauthorized',
-    //       message: 'Authentication required',
-    //     } as ErrorResponse),
-    //     { status: 401, headers: { 'Content-Type': 'application/json' } }
-    //   );
-    // }
-    // const userId = user.id;
 
     // 2. Export user data using service
     const exportService = new ExportService(supabase);

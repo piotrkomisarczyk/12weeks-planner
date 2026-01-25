@@ -4,7 +4,7 @@ import {
   taskIdSchema,
   copyTaskSchema,
 } from '../../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../../lib/utils';
 
 export const prerender = false;
 
@@ -38,7 +38,11 @@ export const prerender = false;
 export const POST: APIRoute = async ({ params, request, locals }) => {
   try {
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Validate task ID
     const idValidation = taskIdSchema.safeParse(params);

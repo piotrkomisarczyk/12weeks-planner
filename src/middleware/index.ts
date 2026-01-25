@@ -55,13 +55,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const isPublicPath = PUBLIC_PATHS.includes(url.pathname);
 
-  // Redirect logged-in users away from auth pages
-  if (user && isPublicPath && url.pathname !== '/api/auth/logout') {
+  // Redirect logged-in users with verified email away from auth pages
+  if (locals.user && isPublicPath && url.pathname !== '/api/auth/logout') {
     return redirect('/plans');
   }
 
   // Redirect non-authenticated users to login
-  if (!user && !isPublicPath) {
+  // Note: Users with unverified emails are treated as non-authenticated
+  if (!locals.user && !isPublicPath) {
     return redirect('/login');
   }
 

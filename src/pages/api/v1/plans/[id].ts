@@ -14,7 +14,7 @@ import {
   PlanIdParamsSchema,
   UpdatePlanBodySchema
 } from '../../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../lib/utils';
 import type {
   ErrorResponse,
   ValidationErrorResponse,
@@ -32,7 +32,11 @@ export const prerender = false;
 export const GET: APIRoute = async ({ locals, params }) => {
   try {
     // Step 1: Authentication
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate URL parameter
     const paramValidation = PlanIdParamsSchema.safeParse(params);
@@ -111,7 +115,11 @@ export const GET: APIRoute = async ({ locals, params }) => {
 export const PATCH: APIRoute = async ({ locals, params, request }) => {
   try {
     // Step 1: Authentication
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate URL parameter
     const paramValidation = PlanIdParamsSchema.safeParse(params);
@@ -230,7 +238,11 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
 export const DELETE: APIRoute = async ({ locals, params }) => {
   try {
     // Step 1: Authentication
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate URL parameter
     const paramValidation = PlanIdParamsSchema.safeParse(params);

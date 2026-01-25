@@ -23,13 +23,13 @@
  */
 
 import type { APIRoute } from 'astro';
-import { supabaseClient, DEFAULT_USER_ID } from '../../../../db/supabase.client';
 import { MilestoneService } from '../../../../lib/services/milestone.service';
 import {
   uuidSchema,
   updateMilestoneSchema,
 } from '../../../../lib/validation/milestone.validation';
 import { z } from 'zod';
+import { GetUnauthorizedResponse } from '../../../../lib/utils';
 import type {
   ErrorResponse,
   ValidationErrorResponse,
@@ -44,16 +44,20 @@ export const prerender = false;
  * GET /api/v1/milestones/:id
  * Get a single milestone by ID
  */
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate milestone ID
     const milestoneId = uuidSchema.parse(params.id);
 
     // Step 3: Get milestone from service
-    const milestoneService = new MilestoneService(supabaseClient);
+    const milestoneService = new MilestoneService(locals.supabase);
     const milestone = await milestoneService.getMilestoneById(
       milestoneId,
       userId
@@ -129,10 +133,14 @@ export const GET: APIRoute = async ({ params }) => {
  * PATCH /api/v1/milestones/:id
  * Update a milestone (partial update)
  */
-export const PATCH: APIRoute = async ({ params, request }) => {
+export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate milestone ID
     const milestoneId = uuidSchema.parse(params.id);
@@ -160,7 +168,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
     const validatedData = updateMilestoneSchema.parse(body);
 
     // Step 5: Update milestone via service
-    const milestoneService = new MilestoneService(supabaseClient);
+    const milestoneService = new MilestoneService(locals.supabase);
     const milestone = await milestoneService.updateMilestone(
       milestoneId,
       validatedData,
@@ -237,16 +245,20 @@ export const PATCH: APIRoute = async ({ params, request }) => {
  * DELETE /api/v1/milestones/:id
  * Delete a milestone
  */
-export const DELETE: APIRoute = async ({ params }) => {
+export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate milestone ID
     const milestoneId = uuidSchema.parse(params.id);
 
     // Step 3: Delete milestone via service
-    const milestoneService = new MilestoneService(supabaseClient);
+    const milestoneService = new MilestoneService(locals.supabase);
     await milestoneService.deleteMilestone(milestoneId, userId);
 
     // Step 4: Return success response

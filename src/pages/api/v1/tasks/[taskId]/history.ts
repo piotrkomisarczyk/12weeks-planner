@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { TaskService } from '../../../../../lib/services/task.service';
 import { taskIdParamSchema } from '../../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../../lib/utils';
 import type { ListResponse, TaskHistoryDTO, ErrorResponse } from '../../../../../types';
 
 export const prerender = false;
@@ -23,23 +23,12 @@ export const prerender = false;
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
     // 1. Authentication check
-    // Note: Using DEFAULT_USER_ID for development/testing
-    // In production, this should be replaced with proper auth from locals.supabase
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
 
-    // Uncomment for production authentication:
-    // const { data: { user }, error: authError } = await supabase.auth.getUser();
-    // if (authError || !user) {
-    //   return new Response(
-    //     JSON.stringify({
-    //       error: 'Unauthorized',
-    //       message: 'Authentication required',
-    //     } as ErrorResponse),
-    //     { status: 401, headers: { 'Content-Type': 'application/json' } }
-    //   );
-    // }
-    // const userId = user.id;
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // 2. Validate path parameters
     const validationResult = taskIdParamSchema.safeParse(params);

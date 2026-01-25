@@ -27,9 +27,9 @@ import {
   GetPlansQuerySchema,
   CreatePlanBodySchema 
 } from '../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../lib/utils';
 import type { 
-  ErrorResponse, 
+  ErrorResponse,
   ValidationErrorResponse,
   ItemResponse,
   PlanDTO
@@ -39,9 +39,12 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ locals, url }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication - Get authenticated user from middleware
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Parse and validate query parameters
     const queryParams = {
@@ -119,9 +122,12 @@ export const GET: APIRoute = async ({ locals, url }) => {
  */
 export const POST: APIRoute = async ({ locals, request }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication - Get authenticated user from middleware
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Parse request body
     let body;

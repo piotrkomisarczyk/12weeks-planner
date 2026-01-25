@@ -9,7 +9,6 @@
  */
 
 import { PlanService } from '@/lib/services/plan.service';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import Layout from '@/layouts/Layout.astro';
 import { DayPageContainer } from '@/components/plans/day';
 import { Toaster } from '@/components/ui/sonner';
@@ -39,8 +38,14 @@ if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 7) {
   return Astro.redirect(`/plans/${planId}/week/${weekNumber}/day/1`);
 }
 
+// Get user session (middleware handles authentication)
+const userId = Astro.locals.user?.id;
+
+if (!userId) {
+  return Astro.redirect('/login');
+}
+
 // Fetch plan data on server
-const userId = DEFAULT_USER_ID;
 const planService = new PlanService(Astro.locals.supabase);
 
 let plan;

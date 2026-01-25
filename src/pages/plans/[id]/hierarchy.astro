@@ -1,7 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import { HierarchyViewContainer } from '@/components/plans/hierarchy';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 
 // Extract planId from URL params
 const { id: planId } = Astro.params;
@@ -12,12 +11,11 @@ if (!planId) {
 }
 
 // Get user session (middleware handles authentication)
-const userId = DEFAULT_USER_ID;
-//const userId = Astro.locals.user?.id;
+const userId = Astro.locals.user?.id;
 
-//if (!userId) {
-//  return Astro.redirect('/auth/login');
-//}
+if (!userId) {
+  return Astro.redirect('/login');
+}
 ---
 
 <Layout title="Hierarchy">

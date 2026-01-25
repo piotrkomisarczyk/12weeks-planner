@@ -30,7 +30,7 @@ import {
   WeeklyReviewIdParamsSchema,
   validateUpdateWeeklyReviewCommand
 } from '../../../../lib/validation/weekly-review.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../lib/utils';
 import type {
   ErrorResponse,
   ValidationErrorResponse,
@@ -46,9 +46,12 @@ export const prerender = false;
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate weekly review ID from URL parameter
     let weeklyReviewId: string;
@@ -141,9 +144,12 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate weekly review ID from URL parameter
     let weeklyReviewId: string;
@@ -289,9 +295,12 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    // TODO: Implement real authentication with JWT token verification
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate weekly review ID from URL parameter
     let weeklyReviewId: string;

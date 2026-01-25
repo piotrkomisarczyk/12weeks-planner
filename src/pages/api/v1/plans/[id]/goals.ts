@@ -16,9 +16,9 @@ import type { APIRoute } from 'astro';
 import { GoalService } from '../../../../../lib/services/goal.service';
 import { PlanService } from '../../../../../lib/services/plan.service';
 import { PlanIdParamsSchema } from '../../../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../../lib/utils';
 import type { 
-  ErrorResponse, 
+  ErrorResponse,
   ValidationErrorResponse, 
   ListResponse, 
   GoalDTO 
@@ -32,8 +32,12 @@ export const prerender = false;
  */
 export const GET: APIRoute = async ({ locals, params }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate URL params
     const validationResult = PlanIdParamsSchema.safeParse(params);

@@ -4,7 +4,7 @@ import {
   taskIdSchema,
   updateTaskSchema,
 } from '../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../lib/utils';
 
 export const prerender = false;
 
@@ -26,7 +26,11 @@ export const prerender = false;
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Validate task ID
     const validation = taskIdSchema.safeParse(params);
@@ -99,7 +103,11 @@ export const GET: APIRoute = async ({ params, locals }) => {
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Validate task ID
     const idValidation = taskIdSchema.safeParse(params);
@@ -182,7 +190,11 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
     const supabase = locals.supabase;
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Validate task ID
     const validation = taskIdSchema.safeParse(params);

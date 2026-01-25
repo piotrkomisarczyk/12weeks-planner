@@ -10,7 +10,7 @@
 import type { APIRoute } from 'astro';
 import { PlanService } from '../../../../../lib/services/plan.service';
 import { PlanIdParamsSchema } from '../../../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import { GetUnauthorizedResponse } from '../../../../../lib/utils';
 import type {
   ErrorResponse,
   ValidationErrorResponse,
@@ -26,7 +26,11 @@ export const prerender = false;
 export const POST: APIRoute = async ({ locals, params }) => {
   try {
     // Step 1: Authentication
-    const userId = DEFAULT_USER_ID;
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate URL parameter
     const paramValidation = PlanIdParamsSchema.safeParse(params);

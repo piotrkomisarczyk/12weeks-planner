@@ -14,10 +14,10 @@
  */
 
 import type { APIRoute } from 'astro';
-import { supabaseClient, DEFAULT_USER_ID } from '../../../../../db/supabase.client';
 import { MilestoneService } from '../../../../../lib/services/milestone.service';
 import { uuidSchema } from '../../../../../lib/validation/milestone.validation';
 import { z } from 'zod';
+import { GetUnauthorizedResponse } from '../../../../../lib/utils';
 import type {
   ErrorResponse,
   ValidationErrorResponse,
@@ -31,16 +31,20 @@ export const prerender = false;
  * GET /api/v1/goals/:goalId/milestones
  * Get all milestones for a specific goal
  */
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    // Step 1: Authentication - Using default user for MVP
-    const userId = DEFAULT_USER_ID;
+    // Step 1: Authentication
+    const userId = locals.user?.id;
+    
+    if (!userId) {
+      return GetUnauthorizedResponse();
+    }
 
     // Step 2: Validate goal ID
     const goalId = uuidSchema.parse(params.goalId);
 
     // Step 3: Get milestones from service
-    const milestoneService = new MilestoneService(supabaseClient);
+    const milestoneService = new MilestoneService(locals.supabase);
     const milestones = await milestoneService.getMilestonesByGoalId(
       goalId,
       userId

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { DAY_NAMES, type PlanStatus } from "@/types"
+import { DAY_NAMES, type PlanStatus, type ErrorResponse } from "@/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -237,4 +237,26 @@ export function getDisabledTooltip(status: PlanStatus, context: 'task_status' | 
   }
 
   return '';
+}
+
+// ============================================================================
+// API RESPONSE UTILITIES
+// ============================================================================
+
+/**
+ * Returns a standardized 401 Unauthorized response
+ * Used when user authentication is required but not provided
+ * @returns Response object with 401 status and error message
+ */
+export function GetUnauthorizedResponse(): Response {
+  return new Response(
+    JSON.stringify({
+      error: 'Unauthorized',
+      message: 'You must be logged in to access this resource'
+    } as ErrorResponse),
+    {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    }
+  );
 }

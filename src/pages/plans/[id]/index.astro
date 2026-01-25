@@ -1,7 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import { DashboardContainer } from '@/components/plans/dashboard';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 
 // Extract planId from URL params
 const { id: planId } = Astro.params;
@@ -12,13 +11,11 @@ if (!planId) {
 }
 
 // Get user session (middleware handles authentication)
+const userId = Astro.locals.user?.id;
 
-const userId = DEFAULT_USER_ID;
-//const userId = Astro.locals.user?.id;
-
-//if (!userId) {
-//  return Astro.redirect('/auth/login');
-//}
+if (!userId) {
+  return Astro.redirect('/login');
+}
 ---
 
 <Layout title="Dashboard">

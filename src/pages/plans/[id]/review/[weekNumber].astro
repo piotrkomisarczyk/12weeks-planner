@@ -13,7 +13,6 @@ import WeeklyReviewContainer from '@/components/plans/review/WeeklyReviewContain
 import { WeeklyReviewService } from '@/lib/services/weekly-review.service';
 import { GoalService } from '@/lib/services/goal.service';
 import { PlanService } from '@/lib/services/plan.service';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import type {
   WeeklyReviewViewModel,
   GoalReviewViewModel,
@@ -39,6 +38,13 @@ if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
   return Astro.redirect(`/plans/${planId}/review/1`);
 }
 
+// Get user session (middleware handles authentication)
+const userId = Astro.locals.user?.id;
+
+if (!userId) {
+  return Astro.redirect('/login');
+}
+
 // Get Supabase client from Astro context
 const supabase = Astro.locals.supabase;
 if (!supabase) {
@@ -57,13 +63,13 @@ let goals: GoalReviewViewModel[];
 
 try {
   // Load plan data
-  plan = await planService.getPlanById(planId, DEFAULT_USER_ID);
+  plan = await planService.getPlanById(planId, userId);
 
   // Load weekly review (may not exist - lazy creation)
   const reviewData = await weeklyReviewService.getWeeklyReviewByWeek(
     planId,
     weekNumber,
-    DEFAULT_USER_ID
+    userId
   );
 
   // Convert to ViewModel (handle null case for lazy creation)
@@ -86,12 +92,12 @@ try {
   };
 
   // Load goals for the plan with milestones
-  const goalsData = await goalService.getGoalsByPlanId(planId, DEFAULT_USER_ID);
+  const goalsData = await goalService.getGoalsByPlanId(planId, userId);
 
   // Fetch milestones for each goal
   const goalsWithMilestones = await Promise.all(
     goalsData.map(async (goal) => {
-      const goalWithMilestones = await goalService.getGoalWithMilestones(goal.id, DEFAULT_USER_ID);
+      const goalWithMilestones = await goalService.getGoalWithMilestones(goal.id, userId);
       return {
         ...goal,
         isUpdating: false,
