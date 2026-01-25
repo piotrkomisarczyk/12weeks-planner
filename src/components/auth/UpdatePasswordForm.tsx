@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { supabaseClient } from '@/db/supabase.client';
 
 interface UpdatePasswordFormProps {
   isLoggedIn?: boolean;
@@ -20,6 +21,42 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasValidToken, setHasValidToken] = useState<boolean | null>(null);
+
+  // Check for valid reset token on mount (only for password reset flow)
+  useEffect(() => {
+    if (!isLoggedIn) {
+      checkResetToken();
+    } else {
+      setHasValidToken(true); // Logged-in users don't need a token
+    }
+  }, [isLoggedIn]);
+
+  // Check if user has valid reset token
+  const checkResetToken = async () => {
+    try {
+      const { data, error } = await supabaseClient.auth.getSession();
+      
+      if (error || !data.session) {
+        // No valid session/token - redirect to forgot password
+        toast.error('Your reset password link has expired');
+        setTimeout(() => {
+          window.location.href = '/forgot-password';
+        }, 2000);
+        setHasValidToken(false);
+        return;
+      }
+      
+      setHasValidToken(true);
+    } catch (error) {
+      console.error('Token validation error:', error);
+      toast.error('Your reset password link has expired');
+      setTimeout(() => {
+        window.location.href = '/forgot-password';
+      }, 2000);
+      setHasValidToken(false);
+    }
+  };
 
   // Validate password strength
   const validatePasswordStrength = (password: string): string | null => {
@@ -90,23 +127,27 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual password update logic with Supabase
-      // const { error } = await supabase.auth.updateUser({
-      //   password: formData.password,
-      // });
-      
-      // Placeholder for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { error } = await supabaseClient.auth.updateUser({
+        password: formData.password,
+      });
+
+      if (error) {
+        throw error;
+      }
       
       toast.success('Password updated successfully');
       
       // Redirect based on context
       if (isLoggedIn) {
-        // For logged-in users, stay on the page or redirect to settings
-        // window.location.href = '/settings';
+        // For logged-in users, redirect to plans
+        setTimeout(() => {
+          window.location.href = '/plans';
+        }, 1500);
       } else {
         // For password reset flow, redirect to login
-        window.location.href = '/login';
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
       }
     } catch (error) {
       console.error('Password update error:', error);
@@ -115,6 +156,28 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state while checking token
+  if (hasValidToken === null) {
+    return (
+      <Card className="p-6">
+        <div className="text-center">
+          <p className="text-muted-foreground">Verifying reset link...</p>
+        </div>
+      </Card>
+    );
+  }
+
+  // Don't render form if token is invalid (redirect will happen)
+  if (hasValidToken === false) {
+    return (
+      <Card className="p-6">
+        <div className="text-center">
+          <p className="text-destructive">Invalid or expired reset link. Redirecting...</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
@@ -190,7 +253,7 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
       {/* Cancel/Back Link */}
       {isLoggedIn ? (
         <div className="mt-6 text-center text-sm">
-          <a href="/" className="text-primary hover:underline">
+          <a href="/plans" className="text-primary hover:underline">
             Cancel
           </a>
         </div>

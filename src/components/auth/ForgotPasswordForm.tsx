@@ -49,13 +49,19 @@ export function ForgotPasswordForm() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual password reset logic with Supabase
-      // const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      //   redirectTo: `${window.location.origin}/update-password`,
-      // });
-      
-      // Placeholder for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send reset email');
+      }
       
       setShowSuccess(true);
       toast.success('Password reset email sent');

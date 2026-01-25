@@ -15,7 +15,7 @@ const PUBLIC_PATHS = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/logout',
-  '/api/auth/reset-password',
+  '/api/auth/forgot-password',
 ];
 
 /**
@@ -55,8 +55,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const isPublicPath = PUBLIC_PATHS.includes(url.pathname);
 
-  // Redirect logged-in users with verified email away from auth pages
-  if (locals.user && isPublicPath && url.pathname !== '/api/auth/logout') {
+  // Auth pages that logged-in users should not access
+  const AUTH_ONLY_PAGES = ['/login', '/register', '/forgot-password'];
+
+  // Redirect logged-in users with verified email away from auth-only pages
+  if (locals.user && AUTH_ONLY_PAGES.includes(url.pathname)) {
     return redirect('/plans');
   }
 
