@@ -47,8 +47,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       password,
       options: {
         // Email redirect URL after verification
-        // Supabase will append token_hash and type parameters
-        emailRedirectTo: `${new URL(request.url).origin}/auth/callback`,
+        // Include 'next' parameter to distinguish from password reset flow
+        emailRedirectTo: `${new URL(request.url).origin}/auth/callback?next=email-confirmed`,
       },
     });
 

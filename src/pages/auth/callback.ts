@@ -9,21 +9,22 @@ export const prerender = false;
  * This endpoint is called when user clicks verification link in email
  * Supabase can send either:
  * - token_hash and type parameters (OTP flow)
- * - code parameter (PKCE flow for password reset)
+ * - code parameter (PKCE flow for both password reset and email confirmation)
  * 
  * Flow:
  * 1. Check for PKCE code or token_hash
  * 2. Exchange token for session using Supabase
- * 3. Redirect to appropriate page based on type
+ * 3. Redirect to appropriate page based on type or next parameter
  * 
- * @returns Redirect to login (email verification) or update-password (password reset)
+ * @returns Redirect to appropriate page based on the auth flow
  */
 export const GET: APIRoute = async ({ url, locals, redirect, cookies }) => {
   const token_hash = url.searchParams.get('token_hash');
   const type = url.searchParams.get('type');
   const code = url.searchParams.get('code');
+  const next = url.searchParams.get('next'); // Optional parameter to specify redirect destination
 
-  // Handle PKCE flow (password reset with code)
+  // Handle PKCE flow (used for both password reset and email confirmation)
   if (code) {
     try {
       const { data, error } = await locals.supabase.auth.exchangeCodeForSession(code);
@@ -33,8 +34,17 @@ export const GET: APIRoute = async ({ url, locals, redirect, cookies }) => {
         return redirect('/forgot-password?error=invalid_code');
       }
 
-      console.log('PKCE code exchange successful, redirecting to update-password');
-      // Redirect to update password page
+      console.log('PKCE code exchange successful');
+      
+      // Determine where to redirect based on the 'next' parameter or user metadata
+      // If 'next' parameter is provided, use it
+      if (next === 'email-confirmed') {
+        return redirect('/email-confirmed');
+      }
+      
+      // Check if this is a password recovery flow
+      // Password recovery is indicated by the user's app_metadata or the absence of 'next' parameter
+      // For password reset, redirect to update-password page
       return redirect('/update-password');
     } catch (error) {
       console.error('PKCE callback error:', error);
