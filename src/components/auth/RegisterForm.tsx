@@ -1,119 +1,67 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RegisterBodySchema, type RegisterBody } from '@/lib/validation/auth.validation';
 
 /**
  * Registration form component
  * Handles new user registration with email and password
+ * Uses react-hook-form with zod validation
  */
 export function RegisterForm() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
-  // Validate password strength
-  const validatePasswordStrength = (password: string): string | null => {
-    if (password.length < 8) {
-      return 'Password must be at least 8 characters long';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!/[a-z]/.test(password)) {
-      return 'Password must contain at least one lowercase letter';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'Password must contain at least one number';
-    }
-    return null;
-  };
-
-  // Validate form
-  const validate = useCallback((): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else {
-      const strengthError = validatePasswordStrength(formData.password);
-      if (strengthError) {
-        newErrors.password = strengthError;
-      }
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
-
-  // Handle input changes
-  const handleChange = useCallback((field: 'email' | 'password' | 'confirmPassword') => {
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[field];
-          return newErrors;
-        });
-      }
-    };
-  }, [errors]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterBody>({
+    resolver: zodResolver(RegisterBodySchema),
+    mode: 'onBlur',
+  });
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: RegisterBody) => {
     try {
-      // TODO: Implement actual registration logic with Supabase
-      // const { error } = await supabase.auth.signUp({
-      //   email: formData.email,
-      //   password: formData.password,
-      // });
-      
-      // Placeholder for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors or registration failures
+        if (result.details && Array.isArray(result.details)) {
+          // Show first validation error
+          toast.error(result.details[0]?.message || result.error);
+        } else {
+          toast.error(result.error || 'Registration failed. Please try again.');
+        }
+        return;
+      }
+
+      // Registration successful
+      setRegisteredEmail(data.email);
       setShowSuccess(true);
       toast.success('Registration successful! Please check your email to verify your account.');
     } catch (error) {
       console.error('Registration error:', error);
-      toast.error('Registration failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 
+  // Success screen - email verification required
   if (showSuccess) {
     return (
       <Card className="p-6">
@@ -135,19 +83,22 @@ export function RegisterForm() {
           </div>
           <h2 className="mb-2 text-xl font-bold">Check your email</h2>
           <p className="text-muted-foreground mb-6 text-sm">
-            We've sent a verification link to <strong>{formData.email}</strong>.
+            We've sent a verification link to <strong>{registeredEmail}</strong>.
             Please check your inbox and click the link to verify your account.
           </p>
           <Alert>
             <AlertDescription>
-              Didn't receive the email? <span>Check your spam folder or{' '}
-              <button
-                type="button"
-                className="text-primary hover:underline"
-                onClick={() => setShowSuccess(false)}
-              >
-                try again.
-              </button></span>
+              Didn't receive the email?{' '}
+              <span>
+                Check your spam folder or{' '}
+                <button
+                  type="button"
+                  className="text-primary hover:underline"
+                  onClick={() => setShowSuccess(false)}
+                >
+                  try again.
+                </button>
+              </span>
             </AlertDescription>
           </Alert>
           <div className="mt-6">
@@ -160,6 +111,7 @@ export function RegisterForm() {
     );
   }
 
+  // Registration form
   return (
     <Card className="p-6">
       <div className="mb-6">
@@ -169,7 +121,7 @@ export function RegisterForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Email Field */}
         <div className="space-y-2">
           <Label htmlFor="email">
@@ -178,8 +130,7 @@ export function RegisterForm() {
           <Input
             id="email"
             type="email"
-            value={formData.email}
-            onChange={handleChange('email')}
+            {...register('email')}
             placeholder="you@example.com"
             autoComplete="email"
             aria-invalid={!!errors.email}
@@ -187,7 +138,7 @@ export function RegisterForm() {
           />
           {errors.email && (
             <p id="email-error" className="text-sm text-destructive">
-              {errors.email}
+              {errors.email.message}
             </p>
           )}
         </div>
@@ -200,16 +151,17 @@ export function RegisterForm() {
           <Input
             id="password"
             type="password"
-            value={formData.password}
-            onChange={handleChange('password')}
+            {...register('password')}
             placeholder="Create a strong password"
             autoComplete="new-password"
             aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'password-error password-hint' : 'password-hint'}
+            aria-describedby={
+              errors.password ? 'password-error password-hint' : 'password-hint'
+            }
           />
           {errors.password && (
             <p id="password-error" className="text-sm text-destructive">
-              {errors.password}
+              {errors.password.message}
             </p>
           )}
           <p id="password-hint" className="text-xs text-muted-foreground">
@@ -225,8 +177,7 @@ export function RegisterForm() {
           <Input
             id="confirmPassword"
             type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange('confirmPassword')}
+            {...register('confirmPassword')}
             placeholder="Confirm your password"
             autoComplete="new-password"
             aria-invalid={!!errors.confirmPassword}
@@ -234,17 +185,13 @@ export function RegisterForm() {
           />
           {errors.confirmPassword && (
             <p id="confirm-password-error" className="text-sm text-destructive">
-              {errors.confirmPassword}
+              {errors.confirmPassword.message}
             </p>
           )}
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
       </form>

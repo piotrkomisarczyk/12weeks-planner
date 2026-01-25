@@ -53,7 +53,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Redirect logged-in users away from auth pages
   if (user && isPublicPath && url.pathname !== '/api/auth/logout') {
-    return redirect('/');
+    return redirect('/plans');
   }
 
   // Redirect non-authenticated users to login
