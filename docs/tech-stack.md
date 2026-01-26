@@ -15,3 +15,10 @@ Backend:
 CI/CD i Hosting:
 - Github Actions - tworzenie pipeline'ów CI/CD
 - DigitalOcean - do hostowania aplikacji za pośrednictwem obrazu docker
+
+Testowanie:
+- Vitest - testy jednostkowe dla logiki biznesowej i walidacji
+- Playwright - testy E2E oraz testy regresji wizualnej
+- Axe-core - audyt dostępności (walidacja ARIA labels)
+- Postman/REST Client - manualne testy endpointów API (pliki .http w katalogu api-tests/)
+- Supabase Dashboard/SQL Editor - weryfikacja stanów bazy danych i polityk RLS

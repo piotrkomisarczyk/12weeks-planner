@@ -62,6 +62,14 @@ Individual users seeking an advanced, structured approach to goal planning beyon
 - **Husky** - Git hooks for pre-commit quality checks
 - **lint-staged** - Run linters on staged files
 
+### Testing
+
+- **[Vitest](https://vitest.dev/)** - Unit testing framework for logic and validation
+- **[Playwright](https://playwright.dev/)** - End-to-end testing and visual regression testing
+- **[Axe-core](https://github.com/dequelabs/axe-core)** - Automated accessibility testing (ARIA labels validation)
+- **Postman/REST Client** - Manual API endpoint testing using `.http` files from `api-tests/` directory
+- **Supabase Dashboard/SQL Editor** - Database state verification and Row Level Security (RLS) policy testing
+
 ## Getting Started Locally
 
 ### Prerequisites
