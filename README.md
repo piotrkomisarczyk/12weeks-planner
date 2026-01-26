@@ -18,12 +18,12 @@ A web application for planning and monitoring long-term goals using a structured
 
 ### Key Features
 
-- **Hierarchical Goal Management**: Organize your work with a three-tier hierarchy (goals → weekly tasks → daily tasks)
+- **Hierarchical Goal Management**: Organize your work with a three-tier hierarchy (goals → milestones → weekly tasks → daily tasks)
 - **Task Prioritization**: Categorize tasks using A/B/C priority levels to focus on what matters most
 - **Advanced Task States**: Track progress with multiple states (to-do, in progress, completed, cancelled, postponed)
 - **Visual Progress Tracking**: Monitor goal achievement with visual progress bars
 - **Weekly Reflections**: Build self-awareness through structured weekly summary questions
-- **Multiple Views**: Navigate between dashboard, goals, weekly planning, daily tasks, and summaries
+- **Multiple Views**: Navigate between dashboard, goals, weekly planning, daily tasks, hierarchy view and weekly summaries
 - **Privacy-Focused**: Personal planners with secure authentication - your data stays yours
 - **Bilingual Support**: Available in English and Polish
 
@@ -69,6 +69,8 @@ Individual users seeking an advanced, structured approach to goal planning beyon
 - **[Axe-core](https://github.com/dequelabs/axe-core)** - Automated accessibility testing (ARIA labels validation)
 - **Postman/REST Client** - Manual API endpoint testing using `.http` files from `api-tests/` directory
 - **Supabase Dashboard/SQL Editor** - Database state verification and Row Level Security (RLS) policy testing
+
+For detailed testing documentation, see [docs/TESTING.md](docs/TESTING.md).
 
 ## Getting Started Locally
 
@@ -125,6 +127,15 @@ Individual users seeking an advanced, structured approach to goal planning beyon
 | `npm run lint` | Checks code for linting errors |
 | `npm run lint:fix` | Automatically fixes linting errors where possible |
 | `npm run format` | Formats code using Prettier |
+| `npm test` | Runs all unit tests once |
+| `npm run test:watch` | Runs unit tests in watch mode (auto-rerun on changes) |
+| `npm run test:ui` | Opens Vitest UI for interactive test debugging |
+| `npm run test:coverage` | Runs unit tests with coverage report |
+| `npm run test:e2e` | Runs E2E tests with Playwright (headless) |
+| `npm run test:e2e:ui` | Opens Playwright UI for interactive E2E testing |
+| `npm run test:e2e:headed` | Runs E2E tests with browser visible |
+| `npm run test:e2e:debug` | Runs E2E tests in debug mode with Playwright Inspector |
+| `npm run test:e2e:codegen` | Opens Playwright codegen tool for recording tests |
 
 ### Development Workflow
 

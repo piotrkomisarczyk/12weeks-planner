@@ -26,3 +26,11 @@ pnpm-debug.log*
 # supabase
 supabase/.gitignore
 supabase/config.toml
+
+# test coverage
+coverage/
+
+# playwright
+playwright-report/
+test-results/
+.playwright/
