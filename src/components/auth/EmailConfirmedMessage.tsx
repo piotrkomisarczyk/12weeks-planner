@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
  * User can also click a button to go immediately
  */
 export function EmailConfirmedMessage() {
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(15);
 
   useEffect(() => {
     // Countdown timer
