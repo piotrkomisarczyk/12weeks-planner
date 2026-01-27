@@ -70,12 +70,12 @@ export const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
 ];
 
 export const GOAL_CATEGORY_COLORS: Record<GoalCategory, string> = {
-  work: 'text-xs font-semibold uppercase bg-yellow-500 text-white dark:bg-yellow-900 dark:text-gray-300',
-  finance: 'text-xs font-semibold uppercase bg-green-700 text-white dark:bg-green-900 dark:text-gray-300',
-  hobby: 'text-xs font-semibold uppercase bg-purple-700 text-white dark:bg-purple-900 dark:text-gray-300',
-  relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white dark:bg-orange-900 dark:text-gray-300',
-  health: 'text-xs font-semibold uppercase bg-red-700 text-white dark:bg-red-900 dark:text-gray-300',
-  development: 'text-xs font-semibold uppercase bg-blue-700 text-white dark:bg-blue-900 dark:text-gray-300',
+  work: 'text-xs font-semibold uppercase bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-900 dark:text-yellow-200 dark:hover:bg-yellow-800',
+  finance: 'text-xs font-semibold uppercase bg-green-700 text-white hover:bg-green-800 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800',
+  hobby: 'text-xs font-semibold uppercase bg-purple-700 text-white hover:bg-purple-800 dark:bg-purple-900 dark:text-purple-200 dark:hover:bg-purple-800',
+  relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-900 dark:text-orange-200 dark:hover:bg-orange-800',
+  health: 'text-xs font-semibold uppercase bg-red-700 text-white hover:bg-red-800 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800',
+  development: 'text-xs font-semibold uppercase bg-blue-700 text-white hover:bg-blue-800 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800',
 };
 
 export type TaskPriority = 'A' | 'B' | 'C';
