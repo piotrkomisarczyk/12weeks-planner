@@ -3,15 +3,14 @@
 -- affected tables: plans, long_term_goals, milestones, weekly_goals, tasks, task_history, weekly_reviews, user_metrics
 -- considerations: this is the foundational schema - all tables use uuid for primary keys and include created_at/updated_at timestamps
 
--- enable uuid extension if not already enabled
-create extension if not exists "uuid-ossp";
+-- note: using gen_random_uuid() which is built into postgresql 13+ (no extension needed)
 
 -- ============================================================================
 -- table: plans
 -- description: central table storing 12-week planners for users
 -- ============================================================================
 create table plans (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   start_date date not null,
@@ -31,7 +30,7 @@ comment on column plans.status is 'planner status: active, completed, or archive
 -- description: stores long-term goals (3-5 goals per planner)
 -- ============================================================================
 create table long_term_goals (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   plan_id uuid not null references plans(id) on delete cascade,
   title text not null,
   description text,
@@ -54,7 +53,7 @@ comment on column long_term_goals.position is 'display order of goals (1-5)';
 -- description: stores milestones (up to 5 per long-term goal)
 -- ============================================================================
 create table milestones (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   long_term_goal_id uuid not null references long_term_goals(id) on delete cascade,
   title text not null,
   description text,
@@ -76,7 +75,7 @@ comment on column milestones.position is 'step order within goal (1-5)';
 -- description: stores weekly goals (main task for the week)
 -- ============================================================================
 create table weekly_goals (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   plan_id uuid not null references plans(id) on delete cascade,
   long_term_goal_id uuid references long_term_goals(id) on delete set null,
   week_number integer not null check (week_number >= 1 and week_number <= 12),
@@ -99,7 +98,7 @@ comment on column weekly_goals.position is 'display order of task';
 -- description: stores tasks (can be linked to weekly goals or ad-hoc)
 -- ============================================================================
 create table tasks (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   weekly_goal_id uuid references weekly_goals(id) on delete cascade,
   plan_id uuid not null references plans(id) on delete cascade,
   milestone_id uuid references milestones(id) on delete set null,
@@ -131,7 +130,7 @@ comment on column tasks.position is 'task order in list';
 -- description: stores task status change history (for multi-day tasks)
 -- ============================================================================
 create table task_history (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   task_id uuid not null references tasks(id) on delete cascade,
   status text not null check (status in ('todo', 'in_progress', 'completed', 'cancelled', 'postponed')),
   changed_at timestamptz not null default now(),
@@ -149,7 +148,7 @@ comment on column task_history.due_day is 'day of week when task was in this sta
 -- description: stores weekly summaries (3 questions)
 -- ============================================================================
 create table weekly_reviews (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   plan_id uuid not null references plans(id) on delete cascade,
   week_number integer not null check (week_number >= 1 and week_number <= 12),
   what_worked text,
@@ -173,7 +172,7 @@ comment on column weekly_reviews.is_completed is 'whether summary is filled out'
 -- description: stores user metrics (for tracking mvp success)
 -- ============================================================================
 create table user_metrics (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   first_planner_created boolean not null default false,
   first_planner_completed boolean not null default false,

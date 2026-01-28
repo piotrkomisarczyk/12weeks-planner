@@ -1,0 +1,12 @@
+# environment variables
+.env
+.env.test
+.env.production
+
+# test coverage
+coverage/
+
+# playwright
+playwright-report/
+test-results/
+.playwright/
