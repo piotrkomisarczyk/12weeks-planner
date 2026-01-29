@@ -74,7 +74,6 @@ const endDate = new Date(weekStartDate);
 endDate.setDate(weekStartDate.getDate() + 12 * 7 - 1);
 
 // Check if the requested week/day is valid based on plan dates
-const currentDate = new Date();
 const dayDate = new Date(weekStartDate);
 dayDate.setDate(dayDate.getDate() + (weekNumber - 1) * 7 + (dayNumber - 1));
 
@@ -82,14 +81,6 @@ dayDate.setDate(dayDate.getDate() + (weekNumber - 1) * 7 + (dayNumber - 1));
 if (dayDate > endDate) {
   return Astro.redirect(`/plans/${planId}/week/12/day/7`);
 }
-
-// Compute display date for the day
-const displayDate = dayDate.toLocaleDateString("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
 ---
 
 <Layout title={`${plan.name} - Week ${weekNumber} Day ${dayNumber}`}>

@@ -57,7 +57,9 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     isOpen: false,
     title: "",
     description: "",
-    onConfirm: () => {},
+    onConfirm: () => {
+      // Placeholder function, will be replaced when dialog is opened
+    },
   });
 
   const [deletingMilestoneId, setDeletingMilestoneId] = useState<string | null>(null);
@@ -65,7 +67,6 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   // Compute flags from plan status
   const planStatus = planContext.status as PlanStatus;
   const isReadOnly = isPlanReadOnly(planStatus);
-  const isReady = isPlanReady(planStatus);
 
   // Drag and Drop sensors - conditionally disabled for read-only plans
   const sensors = isReadOnly
@@ -90,14 +91,9 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   }, [isGoalExpanded, fetchMilestones, isLoading]);
 
   const handleAddMilestone = async (data: { title: string; due_date: string | null; position: number }) => {
-    try {
-      await addMilestone(data);
-      toast.success("Milestone added");
-    } catch (error) {
-      // Let the form component handle error display for validation errors
-      // Only show toast for unexpected errors (not validation-related)
-      throw error;
-    }
+    // Let the form component handle error display for validation errors
+    await addMilestone(data);
+    toast.success("Milestone added");
   };
 
   const handleToggleMilestone = async (id: string, isCompleted: boolean) => {
@@ -106,9 +102,8 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
     try {
       await toggleMilestone(id, isCompleted);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update milestone");
-      throw error;
     }
   };
 
@@ -116,14 +111,9 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     // Prevent operations if no milestones exist
     if (milestones.length === 0) return;
 
-    try {
-      await updateMilestone(id, data);
-      toast.success("Milestone updated");
-    } catch (error) {
-      // Let the form component handle error display for validation errors
-      // Only show toast for unexpected errors (not validation-related)
-      throw error;
-    }
+    // Let the form component handle error display for validation errors
+    await updateMilestone(id, data);
+    toast.success("Milestone updated");
   };
 
   const handleConfirmDeleteMilestone = async (id: string) => {

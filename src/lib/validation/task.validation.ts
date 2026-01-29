@@ -39,7 +39,9 @@ const taskTypeSchema = z.enum(["weekly_main", "weekly_sub", "ad_hoc"], {
 
 /**
  * Week number schema (1-12, nullable, optional)
+ * Note: Currently not exported but kept for potential future use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const weekNumberSchema = z
   .number()
   .int()
@@ -51,7 +53,9 @@ const weekNumberSchema = z
 /**
  * Due day schema (1-7, nullable, optional)
  * 1 = Monday, 7 = Sunday
+ * Note: Currently not exported but kept for potential future use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const dueDaySchema = z
   .number()
   .int()

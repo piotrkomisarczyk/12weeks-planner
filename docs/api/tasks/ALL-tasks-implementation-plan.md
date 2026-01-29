@@ -13,12 +13,14 @@ Ten dokument opisuje implementację 7 endpointów REST API dla zarządzania zada
 7. **DELETE /api/v1/tasks/:id** - Usunięcie zadania
 
 Zadania mogą być:
+
 - Związane z weekly goals (task_type: weekly_main, weekly_sub)
 - Zadaniami ad-hoc niezwiązanymi z weekly goals
 - Opcjonalnie powiązane bezpośrednio z long-term goals
 - Opcjonalnie powiązane bezpośrednio z milestones
 
 **Elastyczna hierarchia relacji:**
+
 ```
 plans (1) ---> (N) tasks (zadania ad-hoc)
 weekly_goals (1) ---> (N) tasks (zadania tygodniowe)
@@ -36,6 +38,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks`
 
 **Query Parameters**:
+
 - **Wymagane**:
   - `plan_id` (UUID) - ID planera
 - **Opcjonalne**:
@@ -51,6 +54,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
   - `offset` (number, default: 0) - offset paginacji
 
 **Response 200 OK**:
+
 ```json
 {
   "data": [
@@ -77,11 +81,11 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Uwagi**:
+
 - Zadania mogą być powiązane z weekly goals, long-term goals, milestones lub dowolną ich kombinacją
 - Filtrowanie po long_term_goal_id zwraca wszystkie zadania bezpośrednio powiązane z tym celem długoterminowym
 - Filtrowanie po milestone_id zwraca wszystkie zadania bezpośrednio powiązane z tym kamieniem milowym
 - Filtrowanie po weekly_goal_id zwraca wszystkie zadania bezpośrednio powiązane z tym celem tygodniowym
-
 
 ---
 
@@ -91,12 +95,14 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks/daily`
 
 **Query Parameters**:
+
 - **Wymagane**:
   - `plan_id` (UUID) - ID planera
   - `week_number` (number, 1-12) - numer tygodnia
   - `due_day` (number, 1-7) - dzień tygodnia (1=poniedziałek)
 
 **Response 200 OK**:
+
 ```json
 {
   "data": {
@@ -133,6 +139,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Uwagi**:
+
 - Zwraca zadania pogrupowane według priorytetu dla lepszego planowania dziennego
 - `most_important` to pierwsze zadanie z priorytetem A (lub null jeśli brak)
 - `secondary` to wszystkie zadania z priorytetem B
@@ -146,9 +153,11 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks/:id`
 
 **URL Parameters**:
+
 - `id` (UUID) - ID zadania
 
 **Response 200 OK**:
+
 ```json
 {
   "data": {
@@ -202,6 +211,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks`
 
 **Request Body**:
+
 ```json
 {
   "plan_id": "uuid",
@@ -220,6 +230,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Walidacja**:
+
 - `plan_id`: Wymagane, musi być valid UUID
 - `weekly_goal_id`: Opcjonalne (null dla ad-hoc tasks)
 - `long_term_goal_id`: Opcjonalne (null dla zadań nie powiązanych bezpośrednio z celem)
@@ -239,6 +250,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 - Maksymalnie 6 long-term goals per plan (egzekwowane przez trigger bazy danych)
 
 **Response 201 Created**:
+
 ```json
 {
   "data": {
@@ -262,6 +274,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Uwagi**:
+
 - Zadania wspierają elastyczne hierarchie: mogą być powiązane z weekly goals, long-term goals, milestones lub dowolną kombinacją
 - Dla organizacji hierarchicznej: goal → milestone → task LUB goal → task LUB goal → milestone → weekly_goal → task LUB goal → weekly_goal → task
 - Zadania ad-hoc NIE mają powiązania z weekly_goal (weekly_goal_id = null). Mogą mieć powiązania bezpośrednio z goal lub też z milestone lub z oboma goal i milestone (wtedy milestone musi być powiązany z goal). Zadania ad-hoc mogą także w ogóle nie mieć powiązań (wszystkie foreign keys null).
@@ -274,9 +287,11 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks/:id`
 
 **URL Parameters**:
+
 - `id` (UUID) - ID zadania
 
 **Request Body**: Partial update - wszystkie pola opcjonalne
+
 ```json
 {
   "status": "completed",
@@ -288,6 +303,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Walidacja**: Taka sama jak przy tworzeniu, wszystkie pola opcjonalne
 
 **Response 200 OK**:
+
 ```json
 {
   "data": {
@@ -311,6 +327,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Uwagi**:
+
 - Można aktualizować long_term_goal_id i milestone_id aby zmienić powiązania zadania
 - Ustawienie na null usuwa powiązania
 - Zmiany statusu są automatycznie logowane do task_history przez trigger bazy danych
@@ -323,9 +340,11 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks/:id/copy`
 
 **URL Parameters**:
+
 - `id` (UUID) - ID zadania do skopiowania
 
 **Request Body**:
+
 ```json
 {
   "week_number": 4,
@@ -334,10 +353,12 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Walidacja**:
+
 - `week_number`: Opcjonalne, zakres 1-12 (jeśli null, kopiuje do nieprzypisanych)
 - `due_day`: Opcjonalne, zakres 1-7 (jeśli null, kopiuje bez konkretnego dnia)
 
 **Response 201 Created**:
+
 ```json
 {
   "data": {
@@ -362,6 +383,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Uwagi**:
+
 - Skopiowane zadanie zachowuje wszystkie powiązania (weekly_goal_id, long_term_goal_id, milestone_id)
 - Status jest resetowany do 'todo' dla nowej kopii
 - Oryginalne zadanie pozostaje niezmienione
@@ -374,9 +396,11 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 **Struktura URL**: `/api/v1/tasks/:id`
 
 **URL Parameters**:
+
 - `id` (UUID) - ID zadania
 
 **Response 200 OK**:
+
 ```json
 {
   "message": "Task deleted successfully"
@@ -384,6 +408,7 @@ milestones (1) ---> (N) tasks (opcjonalne powiązanie bezpośrednie)
 ```
 
 **Uwagi**:
+
 - Usunięcie kaskadowe do task_history
 
 ---
@@ -408,9 +433,9 @@ export interface DailyTasksDTO {
   date: string;
   week_number: number;
   due_day: number;
-  most_important: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status' | 'task_type'> | null;
-  secondary: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status' | 'task_type'>[];
-  additional: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status' | 'task_type'>[];
+  most_important: Pick<TaskDTO, "id" | "title" | "priority" | "status" | "task_type"> | null;
+  secondary: Pick<TaskDTO, "id" | "title" | "priority" | "status" | "task_type">[];
+  additional: Pick<TaskDTO, "id" | "title" | "priority" | "status" | "task_type">[];
 }
 
 // Historia zadania
@@ -425,35 +450,35 @@ export type TaskHistoryDTO = TaskHistoryEntity;
 // Tworzenie zadania
 export type CreateTaskCommand = Pick<
   TaskInsert,
-  | 'plan_id'
-  | 'weekly_goal_id'
-  | 'long_term_goal_id'
-  | 'milestone_id'
-  | 'title'
-  | 'description'
-  | 'priority'
-  | 'status'
-  | 'task_type'
-  | 'week_number'
-  | 'due_day'
-  | 'position'
+  | "plan_id"
+  | "weekly_goal_id"
+  | "long_term_goal_id"
+  | "milestone_id"
+  | "title"
+  | "description"
+  | "priority"
+  | "status"
+  | "task_type"
+  | "week_number"
+  | "due_day"
+  | "position"
 >;
 
 // Aktualizacja zadania
 export type UpdateTaskCommand = Partial<
   Pick<
     TaskUpdate,
-    | 'weekly_goal_id'
-    | 'long_term_goal_id'
-    | 'milestone_id'
-    | 'title'
-    | 'description'
-    | 'priority'
-    | 'status'
-    | 'task_type'
-    | 'week_number'
-    | 'due_day'
-    | 'position'
+    | "weekly_goal_id"
+    | "long_term_goal_id"
+    | "milestone_id"
+    | "title"
+    | "description"
+    | "priority"
+    | "status"
+    | "task_type"
+    | "week_number"
+    | "due_day"
+    | "position"
   >
 >;
 
@@ -498,7 +523,7 @@ export interface ValidationErrorDetail {
 }
 
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 ```
@@ -611,6 +636,7 @@ Client Response (201 Created)
 ```
 
 **Database Triggers:**
+
 - `log_task_status_change` - automatycznie loguje początkowy status do task_history
 - `validate_weekly_subtask_count` - sprawdza max 15 subtasków per weekly_goal
 - `validate_ad_hoc_task_count` - sprawdza max 100 ad-hoc tasks per week
@@ -702,7 +728,7 @@ Client Response (200 OK) or 404 Not Found
 W fazie MVP używamy uproszczonej autentykacji:
 
 ```typescript
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
 
 const userId = DEFAULT_USER_ID;
 ```
@@ -714,6 +740,7 @@ const userId = DEFAULT_USER_ID;
 Wszystkie operacje chronione przez polityki RLS w bazie danych:
 
 **Polityka dla tasks**:
+
 ```sql
 -- Users can view own tasks
 CREATE POLICY "Users can view own tasks"
@@ -734,6 +761,7 @@ Polityki obejmują: SELECT, INSERT, UPDATE, DELETE.
 ### 5.3. Walidacja danych wejściowych
 
 **Obrona przed atakami**:
+
 - SQL Injection → chronione przez Supabase parametryzowane zapytania
 - XSS → walidacja długości i typu pól tekstowych
 - Invalid UUIDs → walidacja przez Zod UUID schema
@@ -741,6 +769,7 @@ Polityki obejmują: SELECT, INSERT, UPDATE, DELETE.
 - Range violations → walidacja zakresów (week_number: 1-12, due_day: 1-7)
 
 **Zod Schemas** (szczegóły w sekcji 8):
+
 - Wszystkie UUID muszą być walidowane jako `z.string().uuid()`
 - Enums walidowane jako `z.enum(['option1', 'option2'])`
 - Liczby z zakresem: `z.number().int().min(1).max(12)`
@@ -748,47 +777,37 @@ Polityki obejmują: SELECT, INSERT, UPDATE, DELETE.
 ### 5.4. Walidacja relacji Foreign Key
 
 **Foreign Key Checks**:
+
 - `plan_id` must exist in plans table
 - `weekly_goal_id` (if provided) must exist in weekly_goals table
 - `long_term_goal_id` (if provided) must exist in long_term_goals table
 - `milestone_id` (if provided) must exist in milestones table
 
 **Service powinien sprawdzić**:
+
 ```typescript
 // Verify plan exists and belongs to user
-const { data: plan } = await supabase
-  .from('plans')
-  .select('id')
-  .eq('id', plan_id)
-  .single();
+const { data: plan } = await supabase.from("plans").select("id").eq("id", plan_id).single();
 
 if (!plan) {
-  return { error: 'Plan not found' };
+  return { error: "Plan not found" };
 }
 
 // Verify long-term goal if provided
 if (long_term_goal_id) {
-  const { data: goal } = await supabase
-    .from('long_term_goals')
-    .select('id')
-    .eq('id', long_term_goal_id)
-    .single();
+  const { data: goal } = await supabase.from("long_term_goals").select("id").eq("id", long_term_goal_id).single();
 
   if (!goal) {
-    return { error: 'Long-term goal not found' };
+    return { error: "Long-term goal not found" };
   }
 }
 
 // Verify milestone if provided
 if (milestone_id) {
-  const { data: milestone } = await supabase
-    .from('milestones')
-    .select('id')
-    .eq('id', milestone_id)
-    .single();
+  const { data: milestone } = await supabase.from("milestones").select("id").eq("id", milestone_id).single();
 
   if (!milestone) {
-    return { error: 'Milestone not found' };
+    return { error: "Milestone not found" };
   }
 }
 ```
@@ -798,6 +817,7 @@ if (milestone_id) {
 **Rekomendacja**: Implementacja rate limiting na poziomie middleware lub reverse proxy (np. Nginx) w produkcji.
 
 **Przykładowe limity**:
+
 - GET endpoints: 100 requests/minute
 - POST/PATCH/DELETE: 50 requests/minute
 
@@ -811,20 +831,20 @@ if (milestone_id) {
 
 ### 6.1. Standardowe kody błędów
 
-| Kod | Scenariusz | Response Body |
-|-----|------------|---------------|
-| 400 | Brak wymaganego parametru | `{"error": "Validation failed", "details": [...]}` |
-| 400 | Nieprawidłowy format UUID | `{"error": "Validation failed", "details": [...]}` |
-| 400 | Nieprawidłowa wartość enum | `{"error": "Validation failed", "details": [...]}` |
-| 400 | Zakres poza limitem | `{"error": "Validation failed", "details": [...]}` |
-| 400 | Przekroczenie limitu zadań | `{"error": "Constraint violation", "message": "..."}` |
-| 401 | Brak autoryzacji | `{"error": "Unauthorized"}` |
-| 404 | Zadanie nie znalezione | `{"error": "Task not found"}` |
-| 404 | Plan nie znaleziony | `{"error": "Plan not found"}` |
-| 404 | Weekly goal nie znaleziony | `{"error": "Weekly goal not found"}` |
-| 404 | Long-term goal nie znaleziony | `{"error": "Long-term goal not found"}` |
-| 404 | Milestone nie znaleziony | `{"error": "Milestone not found"}` |
-| 500 | Błąd bazy danych | `{"error": "Internal server error"}` |
+| Kod | Scenariusz                    | Response Body                                         |
+| --- | ----------------------------- | ----------------------------------------------------- |
+| 400 | Brak wymaganego parametru     | `{"error": "Validation failed", "details": [...]}`    |
+| 400 | Nieprawidłowy format UUID     | `{"error": "Validation failed", "details": [...]}`    |
+| 400 | Nieprawidłowa wartość enum    | `{"error": "Validation failed", "details": [...]}`    |
+| 400 | Zakres poza limitem           | `{"error": "Validation failed", "details": [...]}`    |
+| 400 | Przekroczenie limitu zadań    | `{"error": "Constraint violation", "message": "..."}` |
+| 401 | Brak autoryzacji              | `{"error": "Unauthorized"}`                           |
+| 404 | Zadanie nie znalezione        | `{"error": "Task not found"}`                         |
+| 404 | Plan nie znaleziony           | `{"error": "Plan not found"}`                         |
+| 404 | Weekly goal nie znaleziony    | `{"error": "Weekly goal not found"}`                  |
+| 404 | Long-term goal nie znaleziony | `{"error": "Long-term goal not found"}`               |
+| 404 | Milestone nie znaleziony      | `{"error": "Milestone not found"}`                    |
+| 500 | Błąd bazy danych              | `{"error": "Internal server error"}`                  |
 
 ### 6.2. Walidacja biznesowa
 
@@ -840,24 +860,25 @@ if (milestone_id) {
    - Error: `"Cannot add more than 10 tasks per day"`
 
 **Obsługa w service**:
+
 ```typescript
 try {
-  const result = await supabase.from('tasks').insert(data);
+  const result = await supabase.from("tasks").insert(data);
   if (result.error) {
-    if (result.error.message.includes('Cannot add more than')) {
+    if (result.error.message.includes("Cannot add more than")) {
       return { error: result.error.message };
     }
     throw result.error;
   }
 } catch (error) {
-
-  return { error: 'Internal server error' };
+  return { error: "Internal server error" };
 }
 ```
 
 ### 6.3. Error Response Format
 
 **Validation Error**:
+
 ```json
 {
   "error": "Validation failed",
@@ -872,6 +893,7 @@ try {
 ```
 
 **Simple Error**:
+
 ```json
 {
   "error": "Task not found"
@@ -879,6 +901,7 @@ try {
 ```
 
 **Constraint Error**:
+
 ```json
 {
   "error": "Cannot add more than 15 subtasks to a weekly goal"
@@ -892,6 +915,7 @@ try {
 ### 7.1. Indeksy bazodanowe
 
 **Istniejące indeksy** (z db-plan.md):
+
 ```sql
 CREATE INDEX idx_tasks_weekly_goal_id ON tasks(weekly_goal_id);
 CREATE INDEX idx_tasks_plan_id ON tasks(plan_id);
@@ -905,6 +929,7 @@ CREATE INDEX idx_tasks_task_type ON tasks(task_type);
 ```
 
 **Composite Index dla często używanych zapytań**:
+
 ```sql
 CREATE INDEX idx_tasks_plan_week_day ON tasks(plan_id, week_number, due_day);
 CREATE INDEX idx_tasks_week_status ON tasks(plan_id, week_number, status);
@@ -913,16 +938,19 @@ CREATE INDEX idx_tasks_week_status ON tasks(plan_id, week_number, status);
 ### 7.2. Query Optimization
 
 **GET /api/v1/tasks - Lista zadań**:
+
 - Używaj `.select()` z konkretnymi polami zamiast `SELECT *`
 - Limit defaultowo 50 (zapobiega nadmiernym transferom)
 - Offset pagination (prostsze niż cursor dla MVP)
 
 **GET /api/v1/tasks/daily**:
+
 - Query ograniczony do konkretnego dnia (plan_id + week_number + due_day)
 - Indeks `idx_tasks_plan_week_day` znacznie przyspiesza
 - Select tylko niezbędne pola dla UI (id, title, priority, status, task_type)
 
 **GET /api/v1/tasks/:id**:
+
 - Pojedynczy query dla task (index na PK)
 - Drugi query dla history (index na task_id)
 - Można rozważyć LEFT JOIN w przyszłości
@@ -932,6 +960,7 @@ CREATE INDEX idx_tasks_week_status ON tasks(plan_id, week_number, status);
 **Uwaga**: Przy pobieraniu listy zadań z powiązanymi danymi:
 
 **Nieprawidłowe** (N+1):
+
 ```typescript
 for (const task of tasks) {
   const weeklyGoal = await getWeeklyGoal(task.weekly_goal_id); // N queries
@@ -940,16 +969,18 @@ for (const task of tasks) {
 ```
 
 **Prawidłowe** (JOIN lub batch):
+
 ```typescript
 const { data: tasks } = await supabase
-  .from('tasks')
-  .select('*, weekly_goals(*), long_term_goals(*), milestones(*)')
-  .eq('plan_id', planId);
+  .from("tasks")
+  .select("*, weekly_goals(*), long_term_goals(*), milestones(*)")
+  .eq("plan_id", planId);
 ```
 
 ### 7.4. Caching Strategy
 
 **Rekomendacje dla przyszłości**:
+
 - Cache dla częstych query (np. daily tasks dla current week)
 - Invalidation przy UPDATE/DELETE/CREATE
 - Redis lub Astro built-in caching
@@ -961,6 +992,7 @@ const { data: tasks } = await supabase
 **Supabase**: Automatycznie zarządza connection pooling.
 
 **Best Practices**:
+
 - Używaj pojedynczego Supabase client instance
 - Nie twórz nowych połączeń dla każdego requesta
 - Supabase SDK automatycznie pooluje połączenia
@@ -974,39 +1006,38 @@ const { data: tasks } = await supabase
 **Plik**: `/src/lib/validation/task.validation.ts`
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // UUID schema (reusable)
-const uuidSchema = z.string().uuid({ message: 'Invalid UUID format' });
+const uuidSchema = z.string().uuid({ message: "Invalid UUID format" });
 
 // Enum schemas
-const taskPrioritySchema = z.enum(['A', 'B', 'C'], {
-  errorMap: () => ({ message: 'Priority must be A, B, or C' }),
+const taskPrioritySchema = z.enum(["A", "B", "C"], {
+  errorMap: () => ({ message: "Priority must be A, B, or C" }),
 });
 
-const taskStatusSchema = z.enum(
-  ['todo', 'in_progress', 'completed', 'cancelled', 'postponed'],
-  { errorMap: () => ({ message: 'Invalid status' }) }
-);
+const taskStatusSchema = z.enum(["todo", "in_progress", "completed", "cancelled", "postponed"], {
+  errorMap: () => ({ message: "Invalid status" }),
+});
 
-const taskTypeSchema = z.enum(['weekly_main', 'weekly_sub', 'ad_hoc'], {
-  errorMap: () => ({ message: 'Invalid task type' }),
+const taskTypeSchema = z.enum(["weekly_main", "weekly_sub", "ad_hoc"], {
+  errorMap: () => ({ message: "Invalid task type" }),
 });
 
 // Week and day schemas
 const weekNumberSchema = z
   .number()
   .int()
-  .min(1, 'Week number must be at least 1')
-  .max(12, 'Week number must be at most 12')
+  .min(1, "Week number must be at least 1")
+  .max(12, "Week number must be at most 12")
   .nullable()
   .optional();
 
 const dueDaySchema = z
   .number()
   .int()
-  .min(1, 'Due day must be at least 1 (Monday)')
-  .max(7, 'Due day must be at most 7 (Sunday)')
+  .min(1, "Due day must be at least 1 (Monday)")
+  .max(7, "Due day must be at most 7 (Sunday)")
   .nullable()
   .optional();
 
@@ -1031,13 +1062,9 @@ export const dailyTasksParamsSchema = z.object({
   week_number: z.coerce
     .number()
     .int()
-    .min(1, 'Week number must be at least 1')
-    .max(12, 'Week number must be at most 12'),
-  due_day: z.coerce
-    .number()
-    .int()
-    .min(1, 'Due day must be at least 1')
-    .max(7, 'Due day must be at most 7'),
+    .min(1, "Week number must be at least 1")
+    .max(12, "Week number must be at most 12"),
+  due_day: z.coerce.number().int().min(1, "Due day must be at least 1").max(7, "Due day must be at most 7"),
 });
 
 // 3. Task ID Param Schema (for :id endpoints)
@@ -1051,14 +1078,11 @@ export const createTaskSchema = z.object({
   weekly_goal_id: uuidSchema.nullable().optional(),
   long_term_goal_id: uuidSchema.nullable().optional(),
   milestone_id: uuidSchema.nullable().optional(),
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(255, 'Title must be at most 255 characters'),
+  title: z.string().min(1, "Title is required").max(255, "Title must be at most 255 characters"),
   description: z.string().nullable().optional(),
-  priority: taskPrioritySchema.default('C'),
-  status: taskStatusSchema.default('todo'),
-  task_type: taskTypeSchema.default('weekly_sub'),
+  priority: taskPrioritySchema.default("C"),
+  status: taskStatusSchema.default("todo"),
+  task_type: taskTypeSchema.default("weekly_sub"),
   week_number: weekNumberSchema,
   due_day: dueDaySchema,
   position: z.number().int().positive().default(1).optional(),
@@ -1070,11 +1094,7 @@ export const updateTaskSchema = z
     weekly_goal_id: uuidSchema.nullable().optional(),
     long_term_goal_id: uuidSchema.nullable().optional(),
     milestone_id: uuidSchema.nullable().optional(),
-    title: z
-      .string()
-      .min(1, 'Title cannot be empty')
-      .max(255, 'Title must be at most 255 characters')
-      .optional(),
+    title: z.string().min(1, "Title cannot be empty").max(255, "Title must be at most 255 characters").optional(),
     description: z.string().nullable().optional(),
     priority: taskPrioritySchema.optional(),
     status: taskStatusSchema.optional(),
@@ -1084,7 +1104,7 @@ export const updateTaskSchema = z
     position: z.number().int().positive().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
-    message: 'At least one field must be provided for update',
+    message: "At least one field must be provided for update",
   });
 
 // 6. Copy Task Body Schema
@@ -1103,6 +1123,7 @@ export type CopyTaskData = z.infer<typeof copyTaskSchema>;
 ```
 
 **Testy walidacji** - powinny być pokryte:
+
 - ✅ Valid UUID vs invalid UUID
 - ✅ Enum values (valid vs invalid)
 - ✅ Number ranges (week: 1-12, day: 1-7)
@@ -1116,7 +1137,7 @@ export type CopyTaskData = z.infer<typeof copyTaskSchema>;
 **Plik**: `/src/lib/services/task.service.ts`
 
 ```typescript
-import type { SupabaseClient } from '../../db/supabase.client';
+import type { SupabaseClient } from "../../db/supabase.client";
 import type {
   TaskDTO,
   TaskWithHistoryDTO,
@@ -1128,14 +1149,14 @@ import type {
   ItemResponse,
   SuccessResponse,
   ErrorResponse,
-} from '../../types';
+} from "../../types";
 import type {
   ListTasksParams,
   DailyTasksParams,
   CreateTaskData,
   UpdateTaskData,
   CopyTaskData,
-} from '../validation/task.validation';
+} from "../validation/task.validation";
 
 /**
  * Task Service
@@ -1150,35 +1171,32 @@ export class TaskService {
    */
   async listTasks(params: ListTasksParams): Promise<ListResponse<TaskDTO> | ErrorResponse> {
     try {
-      let query = this.supabase
-        .from('tasks')
-        .select('*', { count: 'exact' })
-        .eq('plan_id', params.plan_id);
+      let query = this.supabase.from("tasks").select("*", { count: "exact" }).eq("plan_id", params.plan_id);
 
       // Apply optional filters
       if (params.week_number !== undefined && params.week_number !== null) {
-        query = query.eq('week_number', params.week_number);
+        query = query.eq("week_number", params.week_number);
       }
       if (params.due_day !== undefined && params.due_day !== null) {
-        query = query.eq('due_day', params.due_day);
+        query = query.eq("due_day", params.due_day);
       }
       if (params.task_type) {
-        query = query.eq('task_type', params.task_type);
+        query = query.eq("task_type", params.task_type);
       }
       if (params.weekly_goal_id) {
-        query = query.eq('weekly_goal_id', params.weekly_goal_id);
+        query = query.eq("weekly_goal_id", params.weekly_goal_id);
       }
       if (params.long_term_goal_id) {
-        query = query.eq('long_term_goal_id', params.long_term_goal_id);
+        query = query.eq("long_term_goal_id", params.long_term_goal_id);
       }
       if (params.milestone_id) {
-        query = query.eq('milestone_id', params.milestone_id);
+        query = query.eq("milestone_id", params.milestone_id);
       }
       if (params.status) {
-        query = query.eq('status', params.status);
+        query = query.eq("status", params.status);
       }
       if (params.priority) {
-        query = query.eq('priority', params.priority);
+        query = query.eq("priority", params.priority);
       }
 
       // Apply pagination
@@ -1187,13 +1205,13 @@ export class TaskService {
       query = query.range(offset, offset + limit - 1);
 
       // Order by position (default ordering)
-      query = query.order('position', { ascending: true });
+      query = query.order("position", { ascending: true });
 
       const { data, error, count } = await query;
 
       if (error) {
-        console.error('Error listing tasks:', error);
-        return { error: 'Failed to fetch tasks' };
+        console.error("Error listing tasks:", error);
+        return { error: "Failed to fetch tasks" };
       }
 
       return {
@@ -1201,8 +1219,8 @@ export class TaskService {
         count: count ?? undefined,
       };
     } catch (error) {
-      console.error('Unexpected error in listTasks:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in listTasks:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1216,17 +1234,17 @@ export class TaskService {
   ): Promise<ItemResponse<DailyTasksDTO> | ErrorResponse> {
     try {
       const { data: tasks, error } = await this.supabase
-        .from('tasks')
-        .select('id, title, priority, status, task_type')
-        .eq('plan_id', params.plan_id)
-        .eq('week_number', params.week_number)
-        .eq('due_day', params.due_day)
-        .order('priority', { ascending: true }) // A, B, C
-        .order('position', { ascending: true });
+        .from("tasks")
+        .select("id, title, priority, status, task_type")
+        .eq("plan_id", params.plan_id)
+        .eq("week_number", params.week_number)
+        .eq("due_day", params.due_day)
+        .order("priority", { ascending: true }) // A, B, C
+        .order("position", { ascending: true });
 
       if (error) {
-        console.error('Error fetching daily tasks:', error);
-        return { error: 'Failed to fetch daily tasks' };
+        console.error("Error fetching daily tasks:", error);
+        return { error: "Failed to fetch daily tasks" };
       }
 
       // Calculate actual date
@@ -1234,12 +1252,12 @@ export class TaskService {
       const dayOffset = params.due_day - 1;
       const taskDate = new Date(planStartDate);
       taskDate.setDate(taskDate.getDate() + weekOffset * 7 + dayOffset);
-      const dateString = taskDate.toISOString().split('T')[0];
+      const dateString = taskDate.toISOString().split("T")[0];
 
       // Categorize by priority
-      const mostImportant = tasks.find((t) => t.priority === 'A') || null;
-      const secondary = tasks.filter((t) => t.priority === 'B');
-      const additional = tasks.filter((t) => t.priority === 'C');
+      const mostImportant = tasks.find((t) => t.priority === "A") || null;
+      const secondary = tasks.filter((t) => t.priority === "B");
+      const additional = tasks.filter((t) => t.priority === "C");
 
       const dailyTasks: DailyTasksDTO = {
         date: dateString,
@@ -1252,8 +1270,8 @@ export class TaskService {
 
       return { data: dailyTasks };
     } catch (error) {
-      console.error('Unexpected error in getDailyTasks:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in getDailyTasks:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1264,26 +1282,22 @@ export class TaskService {
   async getTaskById(taskId: string): Promise<ItemResponse<TaskWithHistoryDTO> | ErrorResponse> {
     try {
       // Fetch task
-      const { data: task, error: taskError } = await this.supabase
-        .from('tasks')
-        .select('*')
-        .eq('id', taskId)
-        .single();
+      const { data: task, error: taskError } = await this.supabase.from("tasks").select("*").eq("id", taskId).single();
 
       if (taskError || !task) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // Fetch history
       const { data: history, error: historyError } = await this.supabase
-        .from('task_history')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('changed_at', { ascending: true });
+        .from("task_history")
+        .select("*")
+        .eq("task_id", taskId)
+        .order("changed_at", { ascending: true });
 
       if (historyError) {
-        console.error('Error fetching task history:', historyError);
-        return { error: 'Failed to fetch task history' };
+        console.error("Error fetching task history:", historyError);
+        return { error: "Failed to fetch task history" };
       }
 
       const taskWithHistory: TaskWithHistoryDTO = {
@@ -1293,8 +1307,8 @@ export class TaskService {
 
       return { data: taskWithHistory };
     } catch (error) {
-      console.error('Unexpected error in getTaskById:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in getTaskById:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1306,74 +1320,74 @@ export class TaskService {
     try {
       // Verify plan exists (RLS will also check ownership)
       const { data: plan, error: planError } = await this.supabase
-        .from('plans')
-        .select('id')
-        .eq('id', taskData.plan_id)
+        .from("plans")
+        .select("id")
+        .eq("id", taskData.plan_id)
         .single();
 
       if (planError || !plan) {
-        return { error: 'Plan not found' };
+        return { error: "Plan not found" };
       }
 
       // If weekly_goal_id provided, verify it exists
       if (taskData.weekly_goal_id) {
         const { data: weeklyGoal, error: goalError } = await this.supabase
-          .from('weekly_goals')
-          .select('id')
-          .eq('id', taskData.weekly_goal_id)
+          .from("weekly_goals")
+          .select("id")
+          .eq("id", taskData.weekly_goal_id)
           .single();
 
         if (goalError || !weeklyGoal) {
-          return { error: 'Weekly goal not found' };
+          return { error: "Weekly goal not found" };
         }
       }
 
       // If long_term_goal_id provided, verify it exists
       if (taskData.long_term_goal_id) {
         const { data: longTermGoal, error: goalError } = await this.supabase
-          .from('long_term_goals')
-          .select('id')
-          .eq('id', taskData.long_term_goal_id)
+          .from("long_term_goals")
+          .select("id")
+          .eq("id", taskData.long_term_goal_id)
           .single();
 
         if (goalError || !longTermGoal) {
-          return { error: 'Long-term goal not found' };
+          return { error: "Long-term goal not found" };
         }
       }
 
       // If milestone_id provided, verify it exists
       if (taskData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
-          .from('milestones')
-          .select('id')
-          .eq('id', taskData.milestone_id)
+          .from("milestones")
+          .select("id")
+          .eq("id", taskData.milestone_id)
           .single();
 
         if (milestoneError || !milestone) {
-          return { error: 'Milestone not found' };
+          return { error: "Milestone not found" };
         }
       }
 
       // Insert task
       const { data: newTask, error: insertError } = await this.supabase
-        .from('tasks')
+        .from("tasks")
         .insert(taskData)
         .select()
         .single();
 
       if (insertError) {
         // Check for constraint violations (triggers)
-        if (insertError.message.includes('Cannot add more than')) {
+        if (insertError.message.includes("Cannot add more than")) {
           return { error: insertError.message };
         }
-        console.error('Error creating task:', insertError);
-        return { error: 'Failed to create task' };
+        console.error("Error creating task:", insertError);
+        return { error: "Failed to create task" };
       }
 
       return { data: newTask as TaskDTO };
     } catch (error) {
-      console.error('Unexpected error in createTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in createTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1381,84 +1395,81 @@ export class TaskService {
    * Update task
    * PATCH /api/v1/tasks/:id
    */
-  async updateTask(
-    taskId: string,
-    updateData: UpdateTaskData
-  ): Promise<ItemResponse<TaskDTO> | ErrorResponse> {
+  async updateTask(taskId: string, updateData: UpdateTaskData): Promise<ItemResponse<TaskDTO> | ErrorResponse> {
     try {
       // Check if task exists
       const { data: existingTask, error: fetchError } = await this.supabase
-        .from('tasks')
-        .select('id')
-        .eq('id', taskId)
+        .from("tasks")
+        .select("id")
+        .eq("id", taskId)
         .single();
 
       if (fetchError || !existingTask) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // If weekly_goal_id provided, verify it exists
       if (updateData.weekly_goal_id) {
         const { data: weeklyGoal, error: goalError } = await this.supabase
-          .from('weekly_goals')
-          .select('id')
-          .eq('id', updateData.weekly_goal_id)
+          .from("weekly_goals")
+          .select("id")
+          .eq("id", updateData.weekly_goal_id)
           .single();
 
         if (goalError || !weeklyGoal) {
-          return { error: 'Weekly goal not found' };
+          return { error: "Weekly goal not found" };
         }
       }
 
       // If long_term_goal_id provided, verify it exists
       if (updateData.long_term_goal_id) {
         const { data: longTermGoal, error: goalError } = await this.supabase
-          .from('long_term_goals')
-          .select('id')
-          .eq('id', updateData.long_term_goal_id)
+          .from("long_term_goals")
+          .select("id")
+          .eq("id", updateData.long_term_goal_id)
           .single();
 
         if (goalError || !longTermGoal) {
-          return { error: 'Long-term goal not found' };
+          return { error: "Long-term goal not found" };
         }
       }
 
       // If milestone_id provided, verify it exists
       if (updateData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
-          .from('milestones')
-          .select('id')
-          .eq('id', updateData.milestone_id)
+          .from("milestones")
+          .select("id")
+          .eq("id", updateData.milestone_id)
           .single();
 
         if (milestoneError || !milestone) {
-          return { error: 'Milestone not found' };
+          return { error: "Milestone not found" };
         }
       }
 
       // Update task
       const { data: updatedTask, error: updateError } = await this.supabase
-        .from('tasks')
+        .from("tasks")
         .update(updateData)
-        .eq('id', taskId)
+        .eq("id", taskId)
         .select()
         .single();
 
       if (updateError) {
         // Check for constraint violations (triggers)
-        if (updateError.message.includes('Cannot add more than')) {
+        if (updateError.message.includes("Cannot add more than")) {
           return { error: updateError.message };
         }
-        console.error('Error updating task:', updateError);
-        return { error: 'Failed to update task' };
+        console.error("Error updating task:", updateError);
+        return { error: "Failed to update task" };
       }
 
       // Trigger log_task_status_change will automatically log status changes
 
       return { data: updatedTask as TaskDTO };
     } catch (error) {
-      console.error('Unexpected error in updateTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in updateTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1466,20 +1477,17 @@ export class TaskService {
    * Copy task to another week/day
    * POST /api/v1/tasks/:id/copy
    */
-  async copyTask(
-    taskId: string,
-    copyData: CopyTaskData
-  ): Promise<SuccessResponse | ErrorResponse> {
+  async copyTask(taskId: string, copyData: CopyTaskData): Promise<SuccessResponse | ErrorResponse> {
     try {
       // Fetch original task
       const { data: originalTask, error: fetchError } = await this.supabase
-        .from('tasks')
-        .select('*')
-        .eq('id', taskId)
+        .from("tasks")
+        .select("*")
+        .eq("id", taskId)
         .single();
 
       if (fetchError || !originalTask) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // Create new task with copied data
@@ -1491,7 +1499,7 @@ export class TaskService {
         title: originalTask.title,
         description: originalTask.description,
         priority: originalTask.priority,
-        status: 'todo' as const, // Reset status
+        status: "todo" as const, // Reset status
         task_type: originalTask.task_type,
         week_number: copyData.week_number ?? originalTask.week_number,
         due_day: copyData.due_day ?? originalTask.due_day,
@@ -1499,23 +1507,23 @@ export class TaskService {
       };
 
       const { data: copiedTask, error: insertError } = await this.supabase
-        .from('tasks')
+        .from("tasks")
         .insert(newTaskData)
         .select()
         .single();
 
       if (insertError) {
-        console.error('Error copying task:', insertError);
-        return { error: 'Failed to copy task' };
+        console.error("Error copying task:", insertError);
+        return { error: "Failed to copy task" };
       }
 
       return {
         data: { id: copiedTask.id, ...copiedTask },
-        message: 'Task copied successfully',
+        message: "Task copied successfully",
       };
     } catch (error) {
-      console.error('Unexpected error in copyTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in copyTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1527,30 +1535,27 @@ export class TaskService {
     try {
       // Check if task exists
       const { data: existingTask, error: fetchError } = await this.supabase
-        .from('tasks')
-        .select('id')
-        .eq('id', taskId)
+        .from("tasks")
+        .select("id")
+        .eq("id", taskId)
         .single();
 
       if (fetchError || !existingTask) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // Delete task (cascades to task_history)
-      const { error: deleteError } = await this.supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId);
+      const { error: deleteError } = await this.supabase.from("tasks").delete().eq("id", taskId);
 
       if (deleteError) {
-        console.error('Error deleting task:', deleteError);
-        return { error: 'Failed to delete task' };
+        console.error("Error deleting task:", deleteError);
+        return { error: "Failed to delete task" };
       }
 
-      return { message: 'Task deleted successfully' };
+      return { message: "Task deleted successfully" };
     } catch (error) {
-      console.error('Unexpected error in deleteTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in deleteTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
@@ -1559,11 +1564,7 @@ export class TaskService {
    */
   async getPlanStartDate(planId: string): Promise<Date | null> {
     try {
-      const { data, error } = await this.supabase
-        .from('plans')
-        .select('start_date')
-        .eq('id', planId)
-        .single();
+      const { data, error } = await this.supabase.from("plans").select("start_date").eq("id", planId).single();
 
       if (error || !data) {
         return null;
@@ -1571,7 +1572,7 @@ export class TaskService {
 
       return new Date(data.start_date);
     } catch (error) {
-      console.error('Error fetching plan start date:', error);
+      console.error("Error fetching plan start date:", error);
       return null;
     }
   }
@@ -1587,10 +1588,10 @@ export class TaskService {
 **Plik**: `/src/pages/api/v1/tasks/index.ts`
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { TaskService } from '../../../../lib/services/task.service';
-import { listTasksSchema, createTaskSchema } from '../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import type { APIRoute } from "astro";
+import { TaskService } from "../../../../lib/services/task.service";
+import { listTasksSchema, createTaskSchema } from "../../../../lib/validation/task.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
 
 export const prerender = false;
 
@@ -1602,17 +1603,17 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     // Parse query parameters
     const params = {
-      plan_id: url.searchParams.get('plan_id'),
-      week_number: url.searchParams.get('week_number'),
-      due_day: url.searchParams.get('due_day'),
-      task_type: url.searchParams.get('task_type'),
-      weekly_goal_id: url.searchParams.get('weekly_goal_id'),
-      long_term_goal_id: url.searchParams.get('long_term_goal_id'),
-      milestone_id: url.searchParams.get('milestone_id'),
-      status: url.searchParams.get('status'),
-      priority: url.searchParams.get('priority'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset'),
+      plan_id: url.searchParams.get("plan_id"),
+      week_number: url.searchParams.get("week_number"),
+      due_day: url.searchParams.get("due_day"),
+      task_type: url.searchParams.get("task_type"),
+      weekly_goal_id: url.searchParams.get("weekly_goal_id"),
+      long_term_goal_id: url.searchParams.get("long_term_goal_id"),
+      milestone_id: url.searchParams.get("milestone_id"),
+      status: url.searchParams.get("status"),
+      priority: url.searchParams.get("priority"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     // Validate query parameters
@@ -1620,14 +1621,14 @@ export const GET: APIRoute = async ({ url, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
-            received: err.code === 'invalid_type' ? params[err.path[0] as keyof typeof params] : undefined,
+            received: err.code === "invalid_type" ? params[err.path[0] as keyof typeof params] : undefined,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1635,22 +1636,22 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.listTasks(validation.data);
 
-    if ('error' in result) {
+    if ("error" in result) {
       return new Response(JSON.stringify({ error: result.error }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in GET /api/v1/tasks:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in GET /api/v1/tasks:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -1669,13 +1670,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1683,33 +1684,33 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.createTask(validation.data);
 
-    if ('error' in result) {
+    if ("error" in result) {
       // Determine status code
       const status =
-        result.error === 'Plan not found' ||
-        result.error === 'Weekly goal not found' ||
-        result.error === 'Long-term goal not found' ||
-        result.error === 'Milestone not found'
+        result.error === "Plan not found" ||
+        result.error === "Weekly goal not found" ||
+        result.error === "Long-term goal not found" ||
+        result.error === "Milestone not found"
           ? 404
-          : result.error.includes('Cannot add more than')
-          ? 400
-          : 500;
+          : result.error.includes("Cannot add more than")
+            ? 400
+            : 500;
 
       return new Response(JSON.stringify({ error: result.error }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in POST /api/v1/tasks:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in POST /api/v1/tasks:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -1720,10 +1721,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 **Plik**: `/src/pages/api/v1/tasks/daily.ts`
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { TaskService } from '../../../../lib/services/task.service';
-import { dailyTasksParamsSchema } from '../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import type { APIRoute } from "astro";
+import { TaskService } from "../../../../lib/services/task.service";
+import { dailyTasksParamsSchema } from "../../../../lib/validation/task.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
 
 export const prerender = false;
 
@@ -1734,9 +1735,9 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     // Parse query parameters
     const params = {
-      plan_id: url.searchParams.get('plan_id'),
-      week_number: url.searchParams.get('week_number'),
-      due_day: url.searchParams.get('due_day'),
+      plan_id: url.searchParams.get("plan_id"),
+      week_number: url.searchParams.get("week_number"),
+      due_day: url.searchParams.get("due_day"),
     };
 
     // Validate
@@ -1744,13 +1745,13 @@ export const GET: APIRoute = async ({ url, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1759,31 +1760,31 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const planStartDate = await taskService.getPlanStartDate(validation.data.plan_id);
 
     if (!planStartDate) {
-      return new Response(JSON.stringify({ error: 'Plan not found' }), {
+      return new Response(JSON.stringify({ error: "Plan not found" }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     // Call service
     const result = await taskService.getDailyTasks(validation.data, planStartDate);
 
-    if ('error' in result) {
+    if ("error" in result) {
       return new Response(JSON.stringify({ error: result.error }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in GET /api/v1/tasks/daily:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in GET /api/v1/tasks/daily:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -1794,13 +1795,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
 **Plik**: `/src/pages/api/v1/tasks/[id].ts`
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { TaskService } from '../../../../lib/services/task.service';
-import {
-  taskIdSchema,
-  updateTaskSchema,
-} from '../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
+import type { APIRoute } from "astro";
+import { TaskService } from "../../../../lib/services/task.service";
+import { taskIdSchema, updateTaskSchema } from "../../../../lib/validation/task.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
 
 export const prerender = false;
 
@@ -1815,13 +1813,13 @@ export const GET: APIRoute = async ({ params, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1829,23 +1827,23 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.getTaskById(validation.data.id);
 
-    if ('error' in result) {
-      const status = result.error === 'Task not found' ? 404 : 500;
+    if ("error" in result) {
+      const status = result.error === "Task not found" ? 404 : 500;
       return new Response(JSON.stringify({ error: result.error }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in GET /api/v1/tasks/:id:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in GET /api/v1/tasks/:id:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -1861,13 +1859,13 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     if (!idValidation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: idValidation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1877,13 +1875,13 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     if (!bodyValidation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: bodyValidation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1891,30 +1889,30 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.updateTask(idValidation.data.id, bodyValidation.data);
 
-    if ('error' in result) {
+    if ("error" in result) {
       const status =
-        result.error === 'Task not found' ||
-        result.error === 'Weekly goal not found' ||
-        result.error === 'Long-term goal not found' ||
-        result.error === 'Milestone not found'
+        result.error === "Task not found" ||
+        result.error === "Weekly goal not found" ||
+        result.error === "Long-term goal not found" ||
+        result.error === "Milestone not found"
           ? 404
           : 500;
 
       return new Response(JSON.stringify({ error: result.error }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in PATCH /api/v1/tasks/:id:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in PATCH /api/v1/tasks/:id:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -1930,13 +1928,13 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1944,23 +1942,23 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.deleteTask(validation.data.id);
 
-    if ('error' in result) {
-      const status = result.error === 'Task not found' ? 404 : 500;
+    if ("error" in result) {
+      const status = result.error === "Task not found" ? 404 : 500;
       return new Response(JSON.stringify({ error: result.error }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in DELETE /api/v1/tasks/:id:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in DELETE /api/v1/tasks/:id:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -1971,13 +1969,10 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 **Plik**: `/src/pages/api/v1/tasks/[id]/copy.ts`
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { TaskService } from '../../../../../lib/services/task.service';
-import {
-  taskIdSchema,
-  copyTaskSchema,
-} from '../../../../../lib/validation/task.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
+import type { APIRoute } from "astro";
+import { TaskService } from "../../../../../lib/services/task.service";
+import { taskIdSchema, copyTaskSchema } from "../../../../../lib/validation/task.validation";
+import { DEFAULT_USER_ID } from "../../../../../db/supabase.client";
 
 export const prerender = false;
 
@@ -1991,13 +1986,13 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     if (!idValidation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: idValidation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -2007,13 +2002,13 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     if (!bodyValidation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: bodyValidation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -2021,23 +2016,23 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.copyTask(idValidation.data.id, bodyValidation.data);
 
-    if ('error' in result) {
-      const status = result.error === 'Task not found' ? 404 : 500;
+    if ("error" in result) {
+      const status = result.error === "Task not found" ? 404 : 500;
       return new Response(JSON.stringify({ error: result.error }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in POST /api/v1/tasks/:id/copy:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in POST /api/v1/tasks/:id/copy:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
@@ -2052,56 +2047,56 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 **Plik**: `/src/lib/validation/task.validation.test.ts` (przykład)
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   listTasksSchema,
   dailyTasksParamsSchema,
   createTaskSchema,
   updateTaskSchema,
   copyTaskSchema,
-} from './task.validation';
+} from "./task.validation";
 
-describe('Task Validation Schemas', () => {
-  describe('listTasksSchema', () => {
-    it('should validate valid query params', () => {
+describe("Task Validation Schemas", () => {
+  describe("listTasksSchema", () => {
+    it("should validate valid query params", () => {
       const valid = {
-        plan_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        plan_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
         week_number: 5,
         due_day: 3,
-        priority: 'A',
+        priority: "A",
         limit: 20,
         offset: 0,
       };
       expect(listTasksSchema.parse(valid)).toEqual(expect.objectContaining(valid));
     });
 
-    it('should reject invalid UUID', () => {
-      const invalid = { plan_id: 'not-a-uuid' };
+    it("should reject invalid UUID", () => {
+      const invalid = { plan_id: "not-a-uuid" };
       expect(() => listTasksSchema.parse(invalid)).toThrow();
     });
 
-    it('should reject week_number out of range', () => {
-      const invalid = { plan_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', week_number: 13 };
+    it("should reject week_number out of range", () => {
+      const invalid = { plan_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", week_number: 13 };
       expect(() => listTasksSchema.parse(invalid)).toThrow();
     });
   });
 
-  describe('createTaskSchema', () => {
-    it('should validate valid create data', () => {
+  describe("createTaskSchema", () => {
+    it("should validate valid create data", () => {
       const valid = {
-        plan_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-        title: 'Test task',
-        priority: 'B',
-        status: 'todo',
-        task_type: 'weekly_sub',
+        plan_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+        title: "Test task",
+        priority: "B",
+        status: "todo",
+        task_type: "weekly_sub",
       };
       expect(createTaskSchema.parse(valid)).toEqual(expect.objectContaining(valid));
     });
 
-    it('should reject title exceeding max length', () => {
+    it("should reject title exceeding max length", () => {
       const invalid = {
-        plan_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-        title: 'a'.repeat(256),
+        plan_id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+        title: "a".repeat(256),
       };
       expect(() => createTaskSchema.parse(invalid)).toThrow();
     });
@@ -2113,8 +2108,8 @@ describe('Task Validation Schemas', () => {
 
 ```typescript
 // Example integration tests using Supabase test client
-import { describe, it, expect, beforeEach } from 'vitest';
-import { TaskService } from './task.service';
+import { describe, it, expect, beforeEach } from "vitest";
+import { TaskService } from "./task.service";
 // ... test setup with test database
 ```
 
@@ -2261,6 +2256,7 @@ Ten plan implementacji dostarcza:
 9. ✅ **Flexible hierarchies** - zadania mogą być powiązane z weekly goals, long-term goals, milestones lub dowolną kombinacją
 
 **Kluczowe zmiany w stosunku do poprzedniej wersji**:
+
 - Dodano pełną obsługę `long_term_goal_id` w zadaniach
 - Dodano pełną obsługę `milestone_id` w zadaniach
 - Zaktualizowano walidację dla nowych pól relacyjnych
@@ -2273,6 +2269,7 @@ Ten plan implementacji dostarcza:
   - Zaktualizowano limity dla planów (6 goals) i celów tygodniowych (3 weekly goals) w walidacji wejściowej
 
 **Kolejność implementacji**:
+
 1. task.validation.ts (walidacje)
 2. task.service.ts (logika biznesowa)
 3. API endpoints (4 pliki: index.ts, daily.ts, [id].ts, [id]/copy.ts)

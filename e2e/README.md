@@ -36,26 +36,31 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000
 ## Running Tests
 
 ### Run all tests
+
 ```bash
 npm run test:e2e
 ```
 
 ### Run tests in UI mode (recommended for development)
+
 ```bash
 npm run test:e2e:ui
 ```
 
 ### Run specific test file
+
 ```bash
 npx playwright test e2e/weekly-goals.spec.ts
 ```
 
 ### Run tests in headed mode (see browser)
+
 ```bash
 npx playwright test --headed
 ```
 
 ### Debug tests
+
 ```bash
 npx playwright test --debug
 ```
@@ -63,6 +68,7 @@ npx playwright test --debug
 ## Test Scenarios
 
 ### Login Tests (`login.spec.ts`)
+
 - Display login form
 - Show validation errors for empty fields
 - Show validation error for invalid email format
@@ -71,6 +77,7 @@ npx playwright test --debug
 - Verify form accessibility
 
 ### Weekly Goals Tests (`weekly-goals.spec.ts`)
+
 1. **Create weekly goal with task and ad-hoc task**:
    - Login using environment variables
    - Navigate to Week page via navigation menu
@@ -94,12 +101,14 @@ npx playwright test --debug
 The application uses `data-test-id` attributes for reliable element selection:
 
 ### Login Page
+
 - `login-form` - Login form container
 - `login-email-input` - Email input field
 - `login-password-input` - Password input field
 - `login-submit-button` - Sign in button
 
 ### Navigation Bar
+
 - `nav-link-plans` - Plans navigation link
 - `nav-link-dashboard` - Dashboard navigation link
 - `nav-link-goals` - Goals navigation link
@@ -109,6 +118,7 @@ The application uses `data-test-id` attributes for reliable element selection:
 - `nav-link-review` - Review navigation link
 
 ### Week Page
+
 - `add-weekly-goal-button` - Button to open create weekly goal dialog
 - `weekly-goal-title-{goalTitle}` - Weekly goal title element
 - `add-task-to-goal-{goalTitle}` - Button to add task to specific goal
@@ -116,6 +126,7 @@ The application uses `data-test-id` attributes for reliable element selection:
 - `add-adhoc-task-button` - Button to add ad-hoc task
 
 ### Create Weekly Goal Dialog
+
 - `create-weekly-goal-dialog` - Dialog container
 - `weekly-goal-title-input` - Goal title input field
 - `weekly-goal-longterm-select` - Long-term goal select dropdown
@@ -125,6 +136,7 @@ The application uses `data-test-id` attributes for reliable element selection:
 - `create-weekly-goal-cancel-button` - Cancel button
 
 ### Task Components
+
 - `inline-task-title-input` - Task title input field
 - `inline-task-submit-button` - Submit button (plus icon)
 - `task-item-{taskTitle}` - Task item element
@@ -140,8 +152,9 @@ When writing new tests:
 5. **Document scenarios**: Add clear comments explaining test steps
 
 ### Example:
+
 ```typescript
-test('should do something', async ({ page }) => {
+test("should do something", async ({ page }) => {
   // Initialize page objects
   const loginPage = new LoginPage(page);
   const weekPage = new WeekPage(page);
@@ -164,16 +177,19 @@ test('should do something', async ({ page }) => {
 ## Troubleshooting
 
 ### Tests are flaky
+
 - Increase timeouts in `playwright.config.ts`
 - Add explicit waits using `waitFor()` or `waitForTimeout()`
 - Check for race conditions in async operations
 
 ### Elements not found
+
 - Verify `data-test-id` attributes are present in the component
 - Check if elements are inside shadow DOM or iframes
 - Use Playwright Inspector to debug: `npx playwright test --debug`
 
 ### Login fails
+
 - Verify credentials in `.env.test`
 - Check if test user exists in the database
 - Ensure authentication endpoints are working
@@ -181,6 +197,7 @@ test('should do something', async ({ page }) => {
 ## CI/CD Integration
 
 The tests are configured to run in CI with the following settings:
+
 - Retries: 2 attempts on failure
 - Workers: 1 (sequential execution)
 - Reports: HTML, JSON, and list formats

@@ -4,7 +4,6 @@
  * Manages goal list display and creation
  */
 
-import { ArrowLeft } from "lucide-react";
 import { useGoals } from "./hooks/useGoals";
 import { GoalCard } from "./GoalCard";
 import { CreateGoalDialog } from "./CreateGoalDialog";

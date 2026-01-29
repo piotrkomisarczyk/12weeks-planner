@@ -61,7 +61,6 @@ const endDate = new Date(startDate);
 endDate.setDate(startDate.getDate() + 12 * 7 - 1);
 
 // Check if the requested week is valid based on plan dates
-const currentDate = new Date();
 const weekStartDate = new Date(startDate);
 weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
 ---

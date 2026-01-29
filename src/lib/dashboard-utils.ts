@@ -1,11 +1,4 @@
-import type {
-  PlanDashboardResponse,
-  HierarchyTreeNode,
-  NodeType,
-  DashboardFilterState,
-  PlanStatus,
-  TaskStatus,
-} from "@/types";
+import type { PlanDashboardResponse, HierarchyTreeNode, NodeType, DashboardFilterState } from "@/types";
 import { getDayName } from "@/lib/utils";
 
 /**

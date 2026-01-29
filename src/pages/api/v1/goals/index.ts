@@ -29,13 +29,7 @@ import type { APIRoute } from "astro";
 import { GoalService } from "../../../../lib/services/goal.service";
 import { CreateGoalBodySchema, GetGoalsQuerySchema } from "../../../../lib/validation/goal.validation";
 import { GetUnauthorizedResponse } from "../../../../lib/utils";
-import type {
-  ErrorResponse,
-  ValidationErrorResponse,
-  ItemResponse,
-  GoalDTO,
-  PaginatedResponse,
-} from "../../../../types";
+import type { ErrorResponse, ValidationErrorResponse, ItemResponse, GoalDTO } from "../../../../types";
 
 export const prerender = false;
 

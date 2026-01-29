@@ -20,14 +20,17 @@ These endpoints provide hierarchical access to data structures, allowing clients
 **URL Structure**: `/api/v1/goals/:goalId/weekly-goals`
 
 **URL Parameters**:
+
 - `goalId` (required, UUID): ID of the long-term goal
 
 **Query Parameters**: None
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (required for production, MVP uses default user)
 
 **Example Request**:
+
 ```
 GET /api/v1/goals/123e4567-e89b-12d3-a456-426614174000/weekly-goals
 ```
@@ -39,9 +42,11 @@ GET /api/v1/goals/123e4567-e89b-12d3-a456-426614174000/weekly-goals
 **URL Structure**: `/api/v1/goals/:goalId/tasks`
 
 **URL Parameters**:
+
 - `goalId` (required, UUID): ID of the long-term goal
 
 **Query Parameters**:
+
 - `status` (optional, TaskStatus enum): Filter by task status ('todo', 'in_progress', 'completed', 'cancelled', 'postponed')
 - `week_number` (optional, number): Filter by week number (1-12)
 - `include_milestone_tasks` (optional, boolean): Include tasks linked via milestones (default: true)
@@ -49,9 +54,11 @@ GET /api/v1/goals/123e4567-e89b-12d3-a456-426614174000/weekly-goals
 - `offset` (optional, number): Pagination offset (default: 0, min: 0)
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (required for production, MVP uses default user)
 
 **Example Request**:
+
 ```
 GET /api/v1/goals/123e4567-e89b-12d3-a456-426614174000/tasks?status=completed&week_number=3&include_milestone_tasks=true&limit=20&offset=0
 ```
@@ -79,7 +86,7 @@ export interface ListResponse<T> {
 
 // Error responses
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 
@@ -105,39 +112,41 @@ export interface TasksByGoalParams extends ListQueryParams {
 ### 3.3. Entity Structures
 
 **WeeklyGoalEntity** (from `weekly_goals` table):
+
 ```typescript
 {
-  id: string;                    // UUID
-  plan_id: string;              // UUID
-  long_term_goal_id: string | null;  // UUID - can be NULL
-  milestone_id: string | null;  // UUID - can be NULL
-  week_number: number;          // 1-12
-  title: string;                // Weekly goal title
-  description: string | null;   // Optional description
-  position: number;             // Ordering (default 1)
-  created_at: string;           // ISO timestamp
-  updated_at: string;           // ISO timestamp
+  id: string; // UUID
+  plan_id: string; // UUID
+  long_term_goal_id: string | null; // UUID - can be NULL
+  milestone_id: string | null; // UUID - can be NULL
+  week_number: number; // 1-12
+  title: string; // Weekly goal title
+  description: string | null; // Optional description
+  position: number; // Ordering (default 1)
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }
 ```
 
 **TaskEntity** (from `tasks` table):
+
 ```typescript
 {
-  id: string;                    // UUID
+  id: string; // UUID
   weekly_goal_id: string | null; // UUID - NULL for ad-hoc
-  plan_id: string;              // UUID
-  long_term_goal_id: string | null;  // UUID - optional
-  milestone_id: string | null;  // UUID - optional
-  title: string;                // Task title
-  description: string | null;   // Optional description
-  priority: 'A' | 'B' | 'C';   // Task priority
-  status: 'todo' | 'in_progress' | 'completed' | 'cancelled' | 'postponed';
-  task_type: 'weekly_main' | 'weekly_sub' | 'ad_hoc';
-  week_number: number | null;   // 1-12, NULL for ad-hoc
-  due_day: number | null;       // 1-7 (Monday-Sunday)
-  position: number;             // Ordering
-  created_at: string;           // ISO timestamp
-  updated_at: string;           // ISO timestamp
+  plan_id: string; // UUID
+  long_term_goal_id: string | null; // UUID - optional
+  milestone_id: string | null; // UUID - optional
+  title: string; // Task title
+  description: string | null; // Optional description
+  priority: "A" | "B" | "C"; // Task priority
+  status: "todo" | "in_progress" | "completed" | "cancelled" | "postponed";
+  task_type: "weekly_main" | "weekly_sub" | "ad_hoc";
+  week_number: number | null; // 1-12, NULL for ad-hoc
+  due_day: number | null; // 1-7 (Monday-Sunday)
+  position: number; // Ordering
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }
 ```
 
@@ -148,6 +157,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 ### 4.1. GET /api/v1/goals/:goalId/weekly-goals
 
 **Success Response (200 OK)**:
+
 ```json
 {
   "data": [
@@ -168,6 +178,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Invalid goal ID format
 - `401 Unauthorized`: Missing or invalid authentication token
 - `404 Not Found`: Goal not found or doesn't belong to user
@@ -176,6 +187,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 ### 4.2. GET /api/v1/goals/:goalId/tasks
 
 **Success Response (200 OK)**:
+
 ```json
 {
   "data": [
@@ -202,6 +214,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Invalid query parameters or goal ID format
 - `401 Unauthorized`: Missing or invalid authentication token
 - `404 Not Found`: Goal not found or doesn't belong to user
@@ -240,7 +253,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 7. Database (Supabase)
    - Query: SELECT wg.* FROM weekly_goals wg
            INNER JOIN long_term_goals ltg ON wg.long_term_goal_id = ltg.id
-           WHERE wg.long_term_goal_id = ? 
+           WHERE wg.long_term_goal_id = ?
            AND ltg.user_id = ?
            ORDER BY wg.week_number ASC, wg.position ASC
    ↓
@@ -272,14 +285,14 @@ export interface TasksByGoalParams extends ListQueryParams {
    ↓
 6. TaskService.getTasksByGoalId(goalId, userId, params)
    - Build complex Supabase query with two parts:
-   
+
    Part A: Direct tasks (long_term_goal_id = goalId)
    - Filter by long_term_goal_id = goalId
-   
+
    Part B: Indirect tasks (if include_milestone_tasks = true)
    - Get milestone IDs for this goal
    - Filter tasks by milestone_id IN (milestone_ids)
-   
+
    - Combine results (UNION or programmatic merge)
    - Apply optional filters: status, week_number
    - Apply pagination: limit, offset
@@ -287,24 +300,24 @@ export interface TasksByGoalParams extends ListQueryParams {
    - Count total results
    ↓
 7. Database (Supabase)
-   - Query milestones: SELECT id FROM milestones 
+   - Query milestones: SELECT id FROM milestones
                        WHERE long_term_goal_id = ?
-   
+
    - Query tasks (direct): SELECT t.* FROM tasks t
                           INNER JOIN long_term_goals ltg ON t.long_term_goal_id = ltg.id
                           WHERE t.long_term_goal_id = ?
                           AND ltg.user_id = ?
                           [AND status = ?]
                           [AND week_number = ?]
-   
-   - Query tasks (indirect, if enabled): 
+
+   - Query tasks (indirect, if enabled):
                           SELECT t.* FROM tasks t
                           INNER JOIN milestones m ON t.milestone_id = m.id
                           WHERE t.milestone_id IN (?)
                           AND m.long_term_goal_id = ?
                           [AND status = ?]
                           [AND week_number = ?]
-   
+
    - Merge and deduplicate results
    - Apply pagination and ordering
    ↓
@@ -335,7 +348,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 
 - **UUID Validation**: goalId must be validated as proper UUID before querying
 - **Enum Validation**: status parameter must match TaskStatus enum values
-- **Range Validation**: 
+- **Range Validation**:
   - week_number must be 1-12
   - limit must be 1-100
   - offset must be >= 0
@@ -370,6 +383,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 **Scenario**: Invalid URL parameters or query parameters
 
 **Example Causes**:
+
 - Invalid UUID format for goalId
 - Invalid status value (not in TaskStatus enum)
 - week_number outside range 1-12
@@ -378,6 +392,7 @@ export interface TasksByGoalParams extends ListQueryParams {
 - include_milestone_tasks is not a valid boolean
 
 **Response Format**:
+
 ```json
 {
   "error": "Validation failed",
@@ -392,19 +407,20 @@ export interface TasksByGoalParams extends ListQueryParams {
 ```
 
 **Implementation**:
+
 ```typescript
 const validationResult = schema.safeParse(input);
 if (!validationResult.success) {
-  const details = validationResult.error.issues.map(issue => ({
-    field: issue.path.join('.'),
+  const details = validationResult.error.issues.map((issue) => ({
+    field: issue.path.join("."),
     message: issue.message,
-    received: 'input' in issue ? issue.input : undefined
+    received: "input" in issue ? issue.input : undefined,
   }));
-  
-  return new Response(
-    JSON.stringify({ error: 'Validation failed', details }),
-    { status: 400, headers: { 'Content-Type': 'application/json' } }
-  );
+
+  return new Response(JSON.stringify({ error: "Validation failed", details }), {
+    status: 400,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -413,12 +429,14 @@ if (!validationResult.success) {
 **Scenario**: Missing or invalid authentication token
 
 **Example Causes**:
+
 - Authorization header missing
 - Token expired
 - Token invalid or malformed
 - User not found in database
 
 **Response Format**:
+
 ```json
 {
   "error": "Unauthorized",
@@ -427,14 +445,15 @@ if (!validationResult.success) {
 ```
 
 **Implementation**:
+
 ```typescript
 // In middleware or endpoint
-const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+const token = request.headers.get("Authorization")?.replace("Bearer ", "");
 if (!token) {
-  return new Response(
-    JSON.stringify({ error: 'Unauthorized', message: 'Authentication required' }),
-    { status: 401, headers: { 'Content-Type': 'application/json' } }
-  );
+  return new Response(JSON.stringify({ error: "Unauthorized", message: "Authentication required" }), {
+    status: 401,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -443,11 +462,13 @@ if (!token) {
 **Scenario**: Goal doesn't exist or doesn't belong to user
 
 **Example Causes**:
+
 - Goal not found
 - Goal exists but belongs to different user
 - Invalid UUID that doesn't match any records
 
 **Response Format**:
+
 ```json
 {
   "error": "Not found",
@@ -456,15 +477,16 @@ if (!token) {
 ```
 
 **Implementation**:
+
 ```typescript
 const goal = await goalService.getGoalById(goalId, userId);
 if (!goal) {
   return new Response(
-    JSON.stringify({ 
-      error: 'Not found', 
-      message: 'Goal not found' 
+    JSON.stringify({
+      error: "Not found",
+      message: "Goal not found",
     }),
-    { status: 404, headers: { 'Content-Type': 'application/json' } }
+    { status: 404, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
@@ -474,12 +496,14 @@ if (!goal) {
 **Scenario**: Unexpected errors or database failures
 
 **Example Causes**:
+
 - Database connection failure
 - Supabase query error
 - Unexpected exception in service layer
 - Complex query failures (e.g., milestone fetching for tasks endpoint)
 
 **Response Format**:
+
 ```json
 {
   "error": "Internal server error",
@@ -488,23 +512,24 @@ if (!goal) {
 ```
 
 **Implementation**:
+
 ```typescript
 try {
   // ... endpoint logic
 } catch (error) {
-  console.error('Error in GET /api/v1/goals/:goalId/[endpoint]:', {
+  console.error("Error in GET /api/v1/goals/:goalId/[endpoint]:", {
     error: error.message,
     userId: userId,
     goalId: goalId,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
-  
+
   return new Response(
     JSON.stringify({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred'
+      error: "Internal server error",
+      message: "An unexpected error occurred",
     }),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
+    { status: 500, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
@@ -512,6 +537,7 @@ try {
 ### 7.5. Error Logging Strategy
 
 **What to Log**:
+
 - Endpoint path and method
 - Error message and stack trace
 - User ID (if available)
@@ -520,20 +546,22 @@ try {
 - Timestamp
 
 **What NOT to Log**:
+
 - Sensitive user data
 - Authentication tokens
 - Full request bodies with potential PII
 - Database credentials or connection strings
 
 **Implementation Pattern**:
+
 ```typescript
-console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
+console.error("Error in GET /api/v1/goals/:goalId/tasks:", {
   error: error.message,
   stack: error.stack,
   userId: userId,
   goalId: goalId,
   params: { status, week_number, limit, offset },
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 });
 ```
 
@@ -544,6 +572,7 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 ### 8.1. Database Query Optimization
 
 **Indexes Required** (already defined in migrations):
+
 - `idx_weekly_goals_long_term_goal_id` ON `weekly_goals(long_term_goal_id)` - speeds up weekly goals filtering
 - `idx_weekly_goals_week_number` ON `weekly_goals(plan_id, week_number)` - speeds up ordering
 - `idx_tasks_long_term_goal_id` ON `tasks(long_term_goal_id)` - speeds up direct task filtering
@@ -552,6 +581,7 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 - `idx_tasks_status` ON `tasks(status)` - speeds up status filtering
 
 **Query Optimization**:
+
 - Use INNER JOIN to enforce user_id security at database level
 - Apply filters before ordering
 - Use pagination to limit result set size
@@ -590,12 +620,14 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 ### 8.3. Pagination Strategy
 
 **Implementation**:
+
 - Default limit: 50 (reasonable for UI display)
 - Maximum limit: 100 (prevents excessive data transfer)
 - Use offset-based pagination (simple, works well for small datasets)
 - For tasks endpoint, apply pagination AFTER merging results for consistency
 
 **Trade-offs**:
+
 - Offset-based pagination can be slow for large offsets
 - For MVP, offset pagination is sufficient (users typically have < 100 tasks per goal)
 - Consider cursor-based pagination for future optimization
@@ -603,11 +635,13 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 ### 8.4. Caching Considerations
 
 **Not Implemented in MVP**:
+
 - Data changes frequently (task status updates, progress updates)
 - Real-time updates needed for multi-device sync
 - Caching adds complexity
 
 **Future Optimization**:
+
 - Client-side caching with cache invalidation
 - Redis cache for frequently accessed goal hierarchies
 - ETags for conditional requests
@@ -615,6 +649,7 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 ### 8.5. N+1 Query Prevention
 
 **GET /api/v1/goals/:goalId/tasks with include_milestone_tasks=true**:
+
 - Risk: Query milestones, then query tasks for each milestone (N+1)
 - Solution: Batch fetch milestone IDs, then single query with IN clause
 - Implementation: Use `milestoneIds = await getMilestoneIds(goalId)`, then `tasks = await getTasksByMilestoneIds(milestoneIds)`
@@ -622,12 +657,14 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 ### 8.6. Response Size Optimization
 
 **Strategies**:
+
 - Pagination limits response size
 - Weekly goals typically have small payloads
 - Tasks have moderate payloads
 - No need for field filtering in MVP
 
 **Estimated Response Sizes**:
+
 - Single weekly goal: ~150-300 bytes
 - List of 20 weekly goals: ~3-6 KB
 - Single task: ~200-400 bytes
@@ -642,6 +679,7 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
 **File**: `/src/lib/validation/goal.validation.ts`
 
 **Tasks**:
+
 1. Check if `GoalIdParamsSchema` already exists (it should from previous implementation)
 2. Create `TasksByGoalQuerySchema`:
    - Validate `status` as optional TaskStatus enum
@@ -652,32 +690,41 @@ console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
    - Export inferred type `TasksByGoalQuery`
 
 **Example Implementation**:
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // Should already exist from previous implementation
 export const GoalIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid goal ID format' })
+  id: z.string().uuid({ message: "Invalid goal ID format" }),
 });
 
 // New schema for tasks by goal endpoint
 export const TasksByGoalQuerySchema = z.object({
-  status: z.enum(['todo', 'in_progress', 'completed', 'cancelled', 'postponed']).optional(),
-  week_number: z.string().optional()
-    .transform((val) => val ? parseInt(val, 10) : undefined)
+  status: z.enum(["todo", "in_progress", "completed", "cancelled", "postponed"]).optional(),
+  week_number: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : undefined))
     .pipe(z.number().int().min(1).max(12).optional()),
-  include_milestone_tasks: z.string().optional()
+  include_milestone_tasks: z
+    .string()
+    .optional()
     .transform((val) => {
       if (val === undefined || val === null) return true;
-      return val === 'true' || val === '1';
+      return val === "true" || val === "1";
     })
     .pipe(z.boolean()),
-  limit: z.string().optional()
-    .transform((val) => val ? val : '50')
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => (val ? val : "50"))
     .pipe(z.coerce.number().int().min(1).max(100)),
-  offset: z.string().optional()
-    .transform((val) => val ? val : '0')
-    .pipe(z.coerce.number().int().min(0))
+  offset: z
+    .string()
+    .optional()
+    .transform((val) => (val ? val : "0"))
+    .pipe(z.coerce.number().int().min(0)),
 });
 
 export type TasksByGoalQuery = z.infer<typeof TasksByGoalQuerySchema>;
@@ -688,6 +735,7 @@ export type TasksByGoalQuery = z.infer<typeof TasksByGoalQuerySchema>;
 **File**: `/src/lib/services/weekly-goal.service.ts`
 
 **Tasks**:
+
 1. Check if `WeeklyGoalService` exists, create if it doesn't
 2. Implement `getWeeklyGoalsByGoalId(goalId, userId)` method:
    - Accept `goalId` and `userId`
@@ -699,39 +747,39 @@ export type TasksByGoalQuery = z.infer<typeof TasksByGoalQuerySchema>;
    - Handle errors with descriptive messages
 
 **Example Implementation**:
+
 ```typescript
-import type { SupabaseClient } from '../../db/supabase.client';
-import type { WeeklyGoalDTO } from '../../types';
+import type { SupabaseClient } from "../../db/supabase.client";
+import type { WeeklyGoalDTO } from "../../types";
 
 export class WeeklyGoalService {
   constructor(private supabase: SupabaseClient) {}
 
-  async getWeeklyGoalsByGoalId(
-    goalId: string,
-    userId: string
-  ): Promise<WeeklyGoalDTO[]> {
+  async getWeeklyGoalsByGoalId(goalId: string, userId: string): Promise<WeeklyGoalDTO[]> {
     try {
       // Query with security check via join
       const { data, error } = await this.supabase
-        .from('weekly_goals')
-        .select(`
+        .from("weekly_goals")
+        .select(
+          `
           *,
           long_term_goals!inner(user_id)
-        `)
-        .eq('long_term_goal_id', goalId)
-        .eq('long_term_goals.user_id', userId)
-        .order('week_number', { ascending: true })
-        .order('position', { ascending: true });
+        `
+        )
+        .eq("long_term_goal_id", goalId)
+        .eq("long_term_goals.user_id", userId)
+        .order("week_number", { ascending: true })
+        .order("position", { ascending: true });
 
       if (error) {
-        console.error('Error fetching weekly goals by goal ID:', error);
-        throw new Error('Failed to fetch weekly goals');
+        console.error("Error fetching weekly goals by goal ID:", error);
+        throw new Error("Failed to fetch weekly goals");
       }
 
       // Remove the joined data from response
       return (data || []).map(({ long_term_goals, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
     } catch (error) {
-      console.error('Error in getWeeklyGoalsByGoalId:', error);
+      console.error("Error in getWeeklyGoalsByGoalId:", error);
       throw error;
     }
   }
@@ -743,6 +791,7 @@ export class WeeklyGoalService {
 **File**: `/src/lib/services/task.service.ts`
 
 **Tasks**:
+
 1. Check if `TaskService` exists, create if it doesn't
 2. Implement helper method `getMilestoneIdsByGoalId(goalId)`:
    - Query milestones table for milestone IDs where long_term_goal_id = goalId
@@ -762,25 +811,23 @@ export class WeeklyGoalService {
    - Handle errors with descriptive messages
 
 **Example Implementation**:
+
 ```typescript
-import type { SupabaseClient } from '../../db/supabase.client';
-import type { TaskDTO, TasksByGoalParams } from '../../types';
+import type { SupabaseClient } from "../../db/supabase.client";
+import type { TaskDTO, TasksByGoalParams } from "../../types";
 
 export class TaskService {
   constructor(private supabase: SupabaseClient) {}
 
   private async getMilestoneIdsByGoalId(goalId: string): Promise<string[]> {
-    const { data, error } = await this.supabase
-      .from('milestones')
-      .select('id')
-      .eq('long_term_goal_id', goalId);
+    const { data, error } = await this.supabase.from("milestones").select("id").eq("long_term_goal_id", goalId);
 
     if (error) {
-      console.error('Error fetching milestone IDs:', error);
-      throw new Error('Failed to fetch milestone IDs');
+      console.error("Error fetching milestone IDs:", error);
+      throw new Error("Failed to fetch milestone IDs");
     }
 
-    return (data || []).map(m => m.id);
+    return (data || []).map((m) => m.id);
   }
 
   async getTasksByGoalId(
@@ -791,27 +838,29 @@ export class TaskService {
     try {
       // Build base query for direct tasks
       let directQuery = this.supabase
-        .from('tasks')
-        .select(`
+        .from("tasks")
+        .select(
+          `
           *,
           long_term_goals!inner(user_id)
-        `)
-        .eq('long_term_goal_id', goalId)
-        .eq('long_term_goals.user_id', userId);
+        `
+        )
+        .eq("long_term_goal_id", goalId)
+        .eq("long_term_goals.user_id", userId);
 
       // Apply optional filters
       if (params.status) {
-        directQuery = directQuery.eq('status', params.status);
+        directQuery = directQuery.eq("status", params.status);
       }
       if (params.week_number !== undefined) {
-        directQuery = directQuery.eq('week_number', params.week_number);
+        directQuery = directQuery.eq("week_number", params.week_number);
       }
 
       const { data: directTasks, error: directError } = await directQuery;
 
       if (directError) {
-        console.error('Error fetching direct tasks:', directError);
-        throw new Error('Failed to fetch direct tasks');
+        console.error("Error fetching direct tasks:", directError);
+        throw new Error("Failed to fetch direct tasks");
       }
 
       let allTasks = directTasks || [];
@@ -822,33 +871,35 @@ export class TaskService {
 
         if (milestoneIds.length > 0) {
           let milestoneQuery = this.supabase
-            .from('tasks')
-            .select(`
+            .from("tasks")
+            .select(
+              `
               *,
               milestones!inner(long_term_goal_id, long_term_goals!inner(user_id))
-            `)
-            .in('milestone_id', milestoneIds)
-            .eq('milestones.long_term_goals.user_id', userId);
+            `
+            )
+            .in("milestone_id", milestoneIds)
+            .eq("milestones.long_term_goals.user_id", userId);
 
           // Apply same filters
           if (params.status) {
-            milestoneQuery = milestoneQuery.eq('status', params.status);
+            milestoneQuery = milestoneQuery.eq("status", params.status);
           }
           if (params.week_number !== undefined) {
-            milestoneQuery = milestoneQuery.eq('week_number', params.week_number);
+            milestoneQuery = milestoneQuery.eq("week_number", params.week_number);
           }
 
           const { data: milestoneTasks, error: milestoneError } = await milestoneQuery;
 
           if (milestoneError) {
-            console.error('Error fetching milestone tasks:', milestoneError);
-            throw new Error('Failed to fetch milestone tasks');
+            console.error("Error fetching milestone tasks:", milestoneError);
+            throw new Error("Failed to fetch milestone tasks");
           }
 
           // Merge and deduplicate
           const taskMap = new Map<string, TaskDTO>();
-          
-          [...allTasks, ...(milestoneTasks || [])].forEach(task => {
+
+          [...allTasks, ...(milestoneTasks || [])].forEach((task) => {
             // Remove joined data
             const { milestones, long_term_goals, ...cleanTask } = task as any;
             taskMap.set(cleanTask.id, cleanTask as TaskDTO);
@@ -878,10 +929,10 @@ export class TaskService {
 
       return {
         data: paginatedTasks,
-        count: totalCount
+        count: totalCount,
       };
     } catch (error) {
-      console.error('Error in getTasksByGoalId:', error);
+      console.error("Error in getTasksByGoalId:", error);
       throw error;
     }
   }
@@ -893,6 +944,7 @@ export class TaskService {
 **File**: `/src/pages/api/v1/goals/[goalId]/weekly-goals.ts`
 
 **Tasks**:
+
 1. Create directory structure: `/src/pages/api/v1/goals/[goalId]/`
 2. Add file header with JSDoc comments
 3. Import required types and services
@@ -912,23 +964,19 @@ export class TaskService {
    - Log errors to console
 
 **Example Implementation**:
+
 ```typescript
 /**
  * API Endpoint: /api/v1/goals/:goalId/weekly-goals
  * GET - Retrieves all weekly goals associated with a specific long-term goal
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../../lib/services/goal.service';
-import { WeeklyGoalService } from '../../../../lib/services/weekly-goal.service';
-import { GoalIdParamsSchema } from '../../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
-  ValidationErrorResponse, 
-  ListResponse, 
-  WeeklyGoalDTO 
-} from '../../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../../lib/services/goal.service";
+import { WeeklyGoalService } from "../../../../lib/services/weekly-goal.service";
+import { GoalIdParamsSchema } from "../../../../lib/validation/goal.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ListResponse, WeeklyGoalDTO } from "../../../../types";
 
 export const prerender = false;
 
@@ -941,16 +989,16 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const validationResult = GoalIdParamsSchema.safeParse({ id: params.goalId });
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { id: goalId } = validationResult.data;
@@ -960,10 +1008,10 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const goal = await goalService.getGoalById(goalId, userId);
 
     if (!goal) {
-      return new Response(
-        JSON.stringify({ error: 'Not found', message: 'Goal not found' } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Not found", message: "Goal not found" } as ErrorResponse), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Get weekly goals for this goal
@@ -971,29 +1019,26 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const weeklyGoals = await weeklyGoalService.getWeeklyGoalsByGoalId(goalId, userId);
 
     // Return success
-    return new Response(
-      JSON.stringify({ data: weeklyGoals } as ListResponse<WeeklyGoalDTO>),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify({ data: weeklyGoals } as ListResponse<WeeklyGoalDTO>), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/goals/:goalId/weekly-goals:', {
+    console.error("Error in GET /api/v1/goals/:goalId/weekly-goals:", {
       error: error.message,
       goalId: params.goalId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -1004,6 +1049,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
 **File**: `/src/pages/api/v1/goals/[goalId]/tasks.ts`
 
 **Tasks**:
+
 1. Same directory as previous endpoint: `/src/pages/api/v1/goals/[goalId]/`
 2. Add file header with JSDoc comments
 3. Import required types and services
@@ -1024,23 +1070,19 @@ export const GET: APIRoute = async ({ locals, params }) => {
    - Log errors to console with full context
 
 **Example Implementation**:
+
 ```typescript
 /**
  * API Endpoint: /api/v1/goals/:goalId/tasks
  * GET - Retrieves all tasks associated with a specific long-term goal
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../../lib/services/goal.service';
-import { TaskService } from '../../../../lib/services/task.service';
-import { GoalIdParamsSchema, TasksByGoalQuerySchema } from '../../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
-  ValidationErrorResponse, 
-  ListResponse, 
-  TaskDTO 
-} from '../../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../../lib/services/goal.service";
+import { TaskService } from "../../../../lib/services/task.service";
+import { GoalIdParamsSchema, TasksByGoalQuerySchema } from "../../../../lib/validation/goal.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ListResponse, TaskDTO } from "../../../../types";
 
 export const prerender = false;
 
@@ -1053,42 +1095,42 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
     const paramsValidation = GoalIdParamsSchema.safeParse({ id: params.goalId });
 
     if (!paramsValidation.success) {
-      const details = paramsValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = paramsValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { id: goalId } = paramsValidation.data;
 
     // Parse and validate query parameters
     const queryParams = {
-      status: url.searchParams.get('status'),
-      week_number: url.searchParams.get('week_number'),
-      include_milestone_tasks: url.searchParams.get('include_milestone_tasks'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset')
+      status: url.searchParams.get("status"),
+      week_number: url.searchParams.get("week_number"),
+      include_milestone_tasks: url.searchParams.get("include_milestone_tasks"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     const queryValidation = TasksByGoalQuerySchema.safeParse(queryParams);
 
     if (!queryValidation.success) {
-      const details = queryValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = queryValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Verify goal exists and belongs to user
@@ -1096,10 +1138,10 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
     const goal = await goalService.getGoalById(goalId, userId);
 
     if (!goal) {
-      return new Response(
-        JSON.stringify({ error: 'Not found', message: 'Goal not found' } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Not found", message: "Goal not found" } as ErrorResponse), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Get tasks for this goal
@@ -1108,37 +1150,37 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
 
     // Return success
     return new Response(
-      JSON.stringify({ 
-        data: result.data, 
-        count: result.count 
+      JSON.stringify({
+        data: result.data,
+        count: result.count,
       } as ListResponse<TaskDTO>),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
       }
     );
   } catch (error) {
-    console.error('Error in GET /api/v1/goals/:goalId/tasks:', {
+    console.error("Error in GET /api/v1/goals/:goalId/tasks:", {
       error: error.message,
       stack: error.stack,
       goalId: params.goalId,
       queryParams: {
-        status: url.searchParams.get('status'),
-        week_number: url.searchParams.get('week_number'),
-        include_milestone_tasks: url.searchParams.get('include_milestone_tasks')
+        status: url.searchParams.get("status"),
+        week_number: url.searchParams.get("week_number"),
+        include_milestone_tasks: url.searchParams.get("include_milestone_tasks"),
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -1147,6 +1189,7 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
 ### Step 6: Create Directory Structure
 
 **Tasks**:
+
 1. Create `/src/pages/api/v1/goals/[goalId]/` directory if it doesn't exist
 2. Place both endpoint files in this directory
 3. Ensure proper file naming according to Astro routing conventions:
@@ -1231,6 +1274,7 @@ GET http://localhost:4321/api/v1/goals/{{goalId}}/tasks?limit=150
 ### Step 8: Documentation
 
 **Tasks**:
+
 1. This implementation plan serves as primary documentation
 2. Update main API documentation (`docs/api/api-plan.md`) if needed
 3. Add JSDoc comments to service methods
@@ -1240,6 +1284,7 @@ GET http://localhost:4321/api/v1/goals/{{goalId}}/tasks?limit=150
 ### Step 9: Code Review Checklist
 
 **Before marking complete, verify**:
+
 - [ ] Both endpoints implemented and working
 - [ ] Validation schemas cover all edge cases
 - [ ] Service methods use INNER JOIN for security (user_id filtering)
@@ -1308,6 +1353,7 @@ GET http://localhost:4321/api/v1/goals/{{goalId}}/tasks?limit=150
 This implementation plan provides a comprehensive guide for implementing two GET endpoints that provide hierarchical access to weekly goals and tasks filtered by long-term goal.
 
 **Key implementation principles**:
+
 1. **Security First**: Verify goal ownership before returning associated data, use INNER JOIN for database-level security
 2. **Validation**: Use Zod schemas for all input validation with descriptive errors
 3. **Service Layer**: Business logic isolated in services for testability and reusability
@@ -1317,8 +1363,8 @@ This implementation plan provides a comprehensive guide for implementing two GET
 7. **Consistency**: Follow existing patterns from other goal endpoints
 
 **Special attention points**:
+
 - Tasks endpoint requires complex logic to merge direct and indirect (via milestones) associations
 - Proper deduplication needed when task has both long_term_goal_id AND milestone_id
 - Pagination must be applied after merging for consistent results
 - Security verification must happen at goal level before returning child resources
-

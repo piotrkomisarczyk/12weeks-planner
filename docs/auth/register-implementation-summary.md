@@ -11,6 +11,7 @@
 ## 📋 Zakres implementacji
 
 Przeprowadzono pełną integrację procesu rejestracji użytkownika zgodnie z:
+
 - ✅ Specyfikacją techniczną: `docs/auth/auth-spec.md`
 - ✅ Wymaganiami PRD: `docs/prd.md` (US-001)
 - ✅ Najlepszymi praktykami: `.cursor/rules/astro.mdc`, `.cursor/rules/react.mdc`
@@ -21,6 +22,7 @@ Przeprowadzono pełną integrację procesu rejestracji użytkownika zgodnie z:
 ## 🏗️ Architektura rozwiązania
 
 ### 1. Warstwa walidacji (Shared)
+
 ```
 src/lib/validation/auth.validation.ts
 ├── EmailSchema (email format)
@@ -30,11 +32,13 @@ src/lib/validation/auth.validation.ts
 ```
 
 **Zalety:**
+
 - DRY principle - jedna definicja walidacji dla frontend i backend
 - Type safety - TypeScript types generowane z Zod schemas
 - Łatwa konserwacja - zmiana w jednym miejscu
 
 ### 2. Warstwa API (Backend)
+
 ```
 src/pages/api/auth/register.ts
 ├── POST /api/auth/register
@@ -45,12 +49,14 @@ src/pages/api/auth/register.ts
 ```
 
 **Funkcjonalności:**
+
 - Server-side validation (bezpieczeństwo)
 - Integracja z Supabase Auth
 - Wysyłanie email weryfikacyjnego
 - Szczegółowe komunikaty błędów
 
 ### 3. Warstwa UI (Frontend)
+
 ```
 src/components/auth/RegisterForm.tsx
 ├── react-hook-form (state management)
@@ -61,12 +67,14 @@ src/components/auth/RegisterForm.tsx
 ```
 
 **Funkcjonalności:**
+
 - Real-time validation (onBlur)
 - Accessible form (ARIA labels)
 - Success/error states
 - Link do strony logowania
 
 ### 4. Warstwa routingu (Astro)
+
 ```
 src/pages/register.astro
 ├── SSR enabled (prerender: false)
@@ -75,6 +83,7 @@ src/pages/register.astro
 ```
 
 ### 5. Middleware (Auth Guard)
+
 ```
 src/middleware/index.ts
 ├── Session check (supabase.auth.getUser)
@@ -119,11 +128,13 @@ src/middleware/index.ts
 ### Error Paths
 
 **Walidacja client-side:**
+
 - Słabe hasło → Error message pod polem
 - Niezgodność haseł → Error message pod polem
 - Niepoprawny email → Error message pod polem
 
 **Walidacja server-side:**
+
 - Duplikat email → Toast: "An account with this email already exists"
 - Słabe hasło → Toast: "Password does not meet requirements"
 - Błąd sieci → Toast: "An unexpected error occurred"
@@ -133,6 +144,7 @@ src/middleware/index.ts
 ## 📦 Zależności
 
 ### Zainstalowane
+
 ```json
 {
   "react-hook-form": "^7.x",
@@ -141,6 +153,7 @@ src/middleware/index.ts
 ```
 
 ### Już obecne
+
 ```json
 {
   "zod": "^3.24.1",
@@ -153,14 +166,14 @@ src/middleware/index.ts
 
 ## 📝 Pliki zmodyfikowane
 
-| Plik | Status | Opis |
-|------|--------|------|
-| `src/lib/validation/auth.validation.ts` | 🆕 NOWY | Wspólne schematy walidacji |
-| `src/pages/api/auth/register.ts` | 🆕 NOWY | Endpoint API rejestracji |
-| `src/components/auth/RegisterForm.tsx` | 🔄 REFAKTORYZACJA | react-hook-form + zod |
-| `src/pages/register.astro` | ✏️ AKTUALIZACJA | Middleware check, SSR |
-| `src/middleware/index.ts` | ✏️ AKTUALIZACJA | Redirect na /plans |
-| `package.json` | ➕ DODANO | react-hook-form, @hookform/resolvers |
+| Plik                                    | Status            | Opis                                 |
+| --------------------------------------- | ----------------- | ------------------------------------ |
+| `src/lib/validation/auth.validation.ts` | 🆕 NOWY           | Wspólne schematy walidacji           |
+| `src/pages/api/auth/register.ts`        | 🆕 NOWY           | Endpoint API rejestracji             |
+| `src/components/auth/RegisterForm.tsx`  | 🔄 REFAKTORYZACJA | react-hook-form + zod                |
+| `src/pages/register.astro`              | ✏️ AKTUALIZACJA   | Middleware check, SSR                |
+| `src/middleware/index.ts`               | ✏️ AKTUALIZACJA   | Redirect na /plans                   |
+| `package.json`                          | ➕ DODANO         | react-hook-form, @hookform/resolvers |
 
 ---
 
@@ -168,35 +181,35 @@ src/middleware/index.ts
 
 ### US-001: Rejestracja nowego użytkownika
 
-| Kryterium | Status | Implementacja |
-|-----------|--------|---------------|
-| Formularz z email i hasłem (min. 8 znaków) | ✅ | RegisterForm + PasswordSchema |
-| Email weryfikacyjny po wysłaniu | ✅ | Supabase Auth signUp |
-| Przekierowanie po potwierdzeniu | ✅ | emailRedirectTo: /login → /plans |
-| Błąd dla nieunikalnego email | ✅ | Error handling w API |
-| Edge case: niepoprawny format email | ✅ | EmailSchema validation |
+| Kryterium                                  | Status | Implementacja                    |
+| ------------------------------------------ | ------ | -------------------------------- |
+| Formularz z email i hasłem (min. 8 znaków) | ✅     | RegisterForm + PasswordSchema    |
+| Email weryfikacyjny po wysłaniu            | ✅     | Supabase Auth signUp             |
+| Przekierowanie po potwierdzeniu            | ✅     | emailRedirectTo: /login → /plans |
+| Błąd dla nieunikalnego email               | ✅     | Error handling w API             |
+| Edge case: niepoprawny format email        | ✅     | EmailSchema validation           |
 
 ### auth-spec.md: Specyfikacja techniczna
 
-| Wymaganie | Status | Implementacja |
-|-----------|--------|---------------|
-| Wykorzystanie @supabase/ssr | ✅ | createServerSupabaseClient |
-| Walidacja z zod | ✅ | RegisterBodySchema (shared) |
-| Komponenty React z react-hook-form | ✅ | RegisterForm |
-| Stylowanie z Shadcn UI | ✅ | Card, Input, Button, Alert |
-| Middleware sprawdza sesję | ✅ | supabase.auth.getUser() |
-| Email weryfikacyjny | ✅ | emailRedirectTo config |
+| Wymaganie                          | Status | Implementacja               |
+| ---------------------------------- | ------ | --------------------------- |
+| Wykorzystanie @supabase/ssr        | ✅     | createServerSupabaseClient  |
+| Walidacja z zod                    | ✅     | RegisterBodySchema (shared) |
+| Komponenty React z react-hook-form | ✅     | RegisterForm                |
+| Stylowanie z Shadcn UI             | ✅     | Card, Input, Button, Alert  |
+| Middleware sprawdza sesję          | ✅     | supabase.auth.getUser()     |
+| Email weryfikacyjny                | ✅     | emailRedirectTo config      |
 
 ### Najlepsze praktyki
 
-| Praktyka | Status | Implementacja |
-|----------|--------|---------------|
-| DRY principle | ✅ | Wspólny schemat walidacji |
-| Type safety | ✅ | TypeScript + Zod inference |
-| Error handling | ✅ | Try-catch + szczegółowe komunikaty |
-| Accessibility | ✅ | ARIA labels, error messages |
-| Security | ✅ | Server-side validation |
-| User experience | ✅ | Real-time validation, success screen |
+| Praktyka        | Status | Implementacja                        |
+| --------------- | ------ | ------------------------------------ |
+| DRY principle   | ✅     | Wspólny schemat walidacji            |
+| Type safety     | ✅     | TypeScript + Zod inference           |
+| Error handling  | ✅     | Try-catch + szczegółowe komunikaty   |
+| Accessibility   | ✅     | ARIA labels, error messages          |
+| Security        | ✅     | Server-side validation               |
+| User experience | ✅     | Real-time validation, success screen |
 
 ---
 
@@ -204,20 +217,20 @@ src/middleware/index.ts
 
 ### Testy manualne (wykonane)
 
-| Test | Status | Rezultat |
-|------|--------|----------|
-| Rejestracja nowego użytkownika | ✅ | Formularz działa, email wysłany |
-| Walidacja hasła (słabe) | ✅ | Error message wyświetlony |
-| Niezgodność haseł | ✅ | Error message wyświetlony |
-| Duplikat email | ✅ | Toast error wyświetlony |
-| Przekierowanie zalogowanego | ✅ | Redirect na /plans |
-| Link "Back to login" | ✅ | Redirect na /login |
-| Brak błędów lintowania | ✅ | 0 errors, 0 warnings |
+| Test                           | Status | Rezultat                        |
+| ------------------------------ | ------ | ------------------------------- |
+| Rejestracja nowego użytkownika | ✅     | Formularz działa, email wysłany |
+| Walidacja hasła (słabe)        | ✅     | Error message wyświetlony       |
+| Niezgodność haseł              | ✅     | Error message wyświetlony       |
+| Duplikat email                 | ✅     | Toast error wyświetlony         |
+| Przekierowanie zalogowanego    | ✅     | Redirect na /plans              |
+| Link "Back to login"           | ✅     | Redirect na /login              |
+| Brak błędów lintowania         | ✅     | 0 errors, 0 warnings            |
 
 ### Testy do wykonania przez użytkownika
 
-| Test | Wymagania | Instrukcje |
-|------|-----------|-----------|
+| Test                    | Wymagania                    | Instrukcje                                                                          |
+| ----------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
 | Weryfikacja email (E2E) | Konfiguracja SMTP w Supabase | 1. Zarejestruj użytkownika<br>2. Sprawdź email<br>3. Kliknij link<br>4. Zaloguj się |
 
 ---
@@ -227,12 +240,14 @@ src/middleware/index.ts
 ### Wymagane ustawienia
 
 1. **Email Confirmation**
+
    ```
    Authentication → Settings → Email Auth
    ☑ Enable email confirmations
    ```
 
 2. **Redirect URLs**
+
    ```
    Authentication → URL Configuration
    Redirect URLs:
@@ -315,6 +330,7 @@ Przed wdrożeniem na produkcję:
 ## 📞 Kontakt i wsparcie
 
 W przypadku problemów:
+
 1. Sprawdź logi w terminalu (`npm run dev`)
 2. Sprawdź Network tab w DevTools
 3. Sprawdź logi Supabase (Authentication → Logs)

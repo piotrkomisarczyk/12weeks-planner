@@ -1,13 +1,16 @@
 # Plan implementacji widoku Podsumowania Tygodnia (Weekly Review)
 
 ## 1. Przegląd
+
 Widok służy do przeprowadzania cotygodniowej refleksji nad postępami w realizacji planu. Umożliwia użytkownikowi udzielenie odpowiedzi na trzy kluczowe pytania (co zadziałało, co nie, co poprawić) oraz zaktualizowanie paska postępu dla celów długoterminowych. Formularz wspiera automatyczny zapis (auto-save) oraz łatwą nawigację między tygodniami.
 
 ## 2. Routing widoku
+
 Widok będzie dostępny pod ścieżką:
 `/plans/[id]/review/[weekNumber]`
 
 Gdzie:
+
 - `id`: UUID planu
 - `weekNumber`: Numer tygodnia (1-12)
 
@@ -28,6 +31,7 @@ src/pages/plans/[id]/review/[weekNumber].astro (Page - SSR)
 ## 4. Szczegóły komponentów
 
 ### 1. `src/pages/plans/[id]/review/[weekNumber].astro`
+
 - **Opis**: Strona Astro odpowiedzialna za wstępne pobranie danych (SSR) i walidację parametrów URL.
 - **Główne zadania**:
   - Pobranie `id` i `weekNumber` z parametrów.
@@ -39,6 +43,7 @@ src/pages/plans/[id]/review/[weekNumber].astro (Page - SSR)
   - `GET /api/v1/goals?plan_id=[id]`
 
 ### 2. `WeeklyReviewContainer.tsx`
+
 - **Opis**: Główny kontener logiki biznesowej (Smart Component). Zarządza stanem formularza, auto-zapisem i komunikacją z API.
 - **Obsługiwane interakcje**:
   - Inicjalizacja stanu na podstawie propsów.
@@ -48,6 +53,7 @@ src/pages/plans/[id]/review/[weekNumber].astro (Page - SSR)
 - **Zarządzanie stanem**: Wykorzystuje hook `useWeeklyReview`.
 
 ### 3. `ReviewNavigation.tsx`
+
 - **Opis**: Komponent nawigacyjny pozwalający na zmianę tygodnia.
 - **Główne elementy**:
   - Przycisk "Previous Summary".
@@ -59,6 +65,7 @@ src/pages/plans/[id]/review/[weekNumber].astro (Page - SSR)
   - `onWeekChange`: (week: number) => void (lub bezpośrednia nawigacja `<a>`)
 
 ### 4. `ReflectionForm.tsx`
+
 - **Opis**: Formularz z trzema polami tekstowymi do refleksji.
 - **Główne elementy**:
   - 3x `Textarea` (z Shadcn/ui) dla: "Co się udało?", "Co się nie udało?", "Co poprawić?".
@@ -70,6 +77,7 @@ src/pages/plans/[id]/review/[weekNumber].astro (Page - SSR)
   - `isSaving`: boolean
 
 ### 5. `GoalProgressList.tsx` & `GoalProgressItem.tsx`
+
 - **Opis**: Lista celów długoterminowych z możliwością edycji ich postępu.
 - **Główne elementy**:
   - `Slider` (Shadcn/ui): zakres 0-100, krok 5.
@@ -81,6 +89,7 @@ src/pages/plans/[id]/review/[weekNumber].astro (Page - SSR)
   - `onProgressUpdate`: (goalId: string, progress: number) => void
 
 ### 6. `ReviewCompletionStatus.tsx`
+
 - **Opis**: Sekcja wyświetlająca status ukończenia recenzji i przycisk do finalizacji.
 - **Główne elementy**:
   - Checkbox lub Switch `is_completed`.
@@ -95,7 +104,7 @@ Należy rozszerzyć `src/types.ts`:
 
 ```typescript
 // ViewModel dla Recenzji (rozszerza DTO o stan UI)
-export interface WeeklyReviewViewModel extends Omit<WeeklyReviewDTO, 'id'> {
+export interface WeeklyReviewViewModel extends Omit<WeeklyReviewDTO, "id"> {
   id: string | null; // Null jeśli recenzja jeszcze nie istnieje w bazie
   isSaving: boolean;
   lastSavedAt: Date | null;
@@ -112,11 +121,13 @@ export interface GoalReviewViewModel extends GoalDTO {
 Utworzyć hook `src/hooks/useWeeklyReview.ts`:
 
 ### Stan
+
 - `review`: WeeklyReviewViewModel
 - `goals`: GoalReviewViewModel[]
 - `error`: string | null
 
 ### Funkcje
+
 1.  **`updateReflection(field, value)`**:
     - Aktualizuje stan lokalny natychmiast.
     - Uruchamia `debouncedSave` (np. 1000ms).
@@ -132,20 +143,23 @@ Utworzyć hook `src/hooks/useWeeklyReview.ts`:
 ## 7. Integracja API
 
 ### Endpointy
+
 1.  **Pobieranie (SSR/Client)**:
     - Recenzja: `GET /api/v1/weekly-reviews/week/[week]?plan_id=[uuid]`
     - Cele: `GET /api/v1/goals?plan_id=[uuid]`
 2.  **Tworzenie/Aktualizacja Recenzji**:
     - Utworzenie: `POST /api/v1/weekly-reviews`
-        - Payload: `{ plan_id, week_number, ...fields }`
+      - Payload: `{ plan_id, week_number, ...fields }`
     - Aktualizacja: `PATCH /api/v1/weekly-reviews/[id]`
-        - Payload: `{ [field]: value }`
+      - Payload: `{ [field]: value }`
 3.  **Aktualizacja Celów**:
     - `PATCH /api/v1/goals/[id]`
-        - Payload: `{ progress_percentage: number }`
+      - Payload: `{ progress_percentage: number }`
 
 ### Obsługa "Lazy Creation"
+
 Ponieważ formularz jest dostępny zawsze, a rekord w bazie może nie istnieć:
+
 - Jeśli API `GET` zwróci 404 (lub `null`), frontend inicjalizuje pusty formularz.
 - Pierwsza edycja dowolnego pola tekstowego wyzwala `POST`.
 - Kolejne edycje wyzwalają `PATCH`.
@@ -167,20 +181,20 @@ Ponieważ formularz jest dostępny zawsze, a rekord w bazie może nie istnieć:
 
 - **Numer tygodnia**: Musi być w zakresie 1-12 (weryfikacja w `Astro.params`).
 - **Postęp celu**:
-    - Min: 0, Max: 100.
-    - Krok: 5 (wymuszony przez atrybuty Slidera/Inputa).
+  - Min: 0, Max: 100.
+  - Krok: 5 (wymuszony przez atrybuty Slidera/Inputa).
 - **Kompletność**: Recenzja może być oznaczona jako kompletna nawet przy pustych polach (wg PRD brak ścisłej walidacji wymaganych pól tekstowych, ale warto dodać ostrzeżenie wizualne).
 
 ## 10. Obsługa błędów
 
 - **Błąd zapisu (Auto-save)**:
-    - Wyświetlenie `toast` z informacją "Failed to save changes".
-    - Opcjonalnie: przycisk "Retry" lub czerwona obwódka pola.
+  - Wyświetlenie `toast` z informacją "Failed to save changes".
+  - Opcjonalnie: przycisk "Retry" lub czerwona obwódka pola.
 - **Błąd zapisu celu**:
-    - Przywrócenie poprzedniej wartości suwaka.
-    - Wyświetlenie `toast` z błędem.
+  - Przywrócenie poprzedniej wartości suwaka.
+  - Wyświetlenie `toast` z błędem.
 - **Brak Planu/Recenzji**:
-    - Toast z informacją o braku planu/recenzji oraz przekierowanie do dashboardu.
+  - Toast z informacją o braku planu/recenzji oraz przekierowanie do dashboardu.
 
 ## 11. Kroki implementacji
 

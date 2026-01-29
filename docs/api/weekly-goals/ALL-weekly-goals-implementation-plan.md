@@ -5,6 +5,7 @@
 Ten dokument opisuje implementację pięciu endpointów REST API dla zarządzania celami tygodniowymi (weekly goals) w aplikacji 12 Weeks Planner.
 
 ### Funkcjonalności:
+
 - **Lista celów tygodniowych** - Pobieranie celów z filtrami (plan, tydzień, cel długoterminowy, kamień milowy)
 - **Szczegóły celu tygodniowego** - Pobieranie pojedynczego celu z podzadaniami
 - **Tworzenie celu tygodniowego** - Dodawanie nowych celów do planera
@@ -12,6 +13,7 @@ Ten dokument opisuje implementację pięciu endpointów REST API dla zarządzani
 - **Usuwanie celu tygodniowego** - Usuwanie celów z kaskadowym usunięciem podzadań
 
 ### Powiązania z bazą danych:
+
 - Cele tygodniowe należą do `plans` (wymagana relacja)
 - Opcjonalnie powiązane z `long_term_goals` (nullable)
 - Opcjonalnie powiązane z `milestones` (nullable)
@@ -19,12 +21,15 @@ Ten dokument opisuje implementację pięciu endpointów REST API dla zarządzani
 - Ograniczenia: week_number musi być w zakresie 1-12, maksymalnie 3 cele na tydzień
 
 ### Hierarchia powiązań:
+
 Weekly goal może być powiązany z:
+
 1. Tylko planem (podstawowa konfiguracja)
 2. Planem + celem długoterminowym
 3. Planem + celem długoterminowym + kamieniem milowym (z wybranego celu długoterminowego) (pełna hierarchia)
 
 **Walidacja hierarchii:**
+
 - Jeśli podano `milestone_id`, milestone musi należeć do goala w tym samym planie
 - Jeśli podano `long_term_goal_id`, goal musi należeć do tego samego planu
 - Milestone musi być zdefiniowany w ramach wybranego celu długoterminowego w tym samym planie
@@ -40,6 +45,7 @@ Weekly goal może być powiązany z:
 **Struktura URL:** `/api/v1/weekly-goals?plan_id={uuid}&week_number={1-12}&long_term_goal_id={uuid}&milestone_id={uuid}&limit={50}&offset={0}`
 
 **Parametry Query:**
+
 - **Wymagane:**
   - `plan_id` (string, UUID) - Identyfikator planera
 
@@ -61,6 +67,7 @@ Weekly goal może być powiązany z:
 **Struktura URL:** `/api/v1/weekly-goals/{uuid}`
 
 **Parametry URL:**
+
 - **Wymagane:**
   - `id` (string, UUID) - Identyfikator celu tygodniowego
 
@@ -75,6 +82,7 @@ Weekly goal może być powiązany z:
 **Struktura URL:** `/api/v1/weekly-goals`
 
 **Request Body (JSON):**
+
 ```json
 {
   "plan_id": "uuid",
@@ -88,6 +96,7 @@ Weekly goal może być powiązany z:
 ```
 
 **Pola:**
+
 - **Wymagane:**
   - `plan_id` (string, UUID) - ID planera
   - `week_number` (integer, 1-12) - Numer tygodnia
@@ -108,10 +117,12 @@ Weekly goal może być powiązany z:
 **Struktura URL:** `/api/v1/weekly-goals/{uuid}`
 
 **Parametry URL:**
+
 - **Wymagane:**
   - `id` (string, UUID) - Identyfikator celu tygodniowego
 
 **Request Body (JSON):**
+
 ```json
 {
   "title": "Complete authentication and authorization",
@@ -121,6 +132,7 @@ Weekly goal może być powiązany z:
 ```
 
 **Pola (wszystkie opcjonalne, min. 1 wymagane):**
+
 - `long_term_goal_id` (string | null, UUID) - Zmiana powiązania z celem długoterminowym
 - `milestone_id` (string | null, UUID) - Zmiana powiązania z kamieniem milowym
 - `title` (string, 1-255 chars) - Nowy tytuł
@@ -138,6 +150,7 @@ Weekly goal może być powiązany z:
 **Struktura URL:** `/api/v1/weekly-goals/{uuid}`
 
 **Parametry URL:**
+
 - **Wymagane:**
   - `id` (string, UUID) - Identyfikator celu tygodniowego
 
@@ -155,18 +168,18 @@ export type WeeklyGoalDTO = WeeklyGoalEntity;
 
 // DTO dla celu z podzadaniami (GET /api/v1/weekly-goals/:id)
 export interface WeeklyGoalWithSubtasksDTO extends WeeklyGoalDTO {
-  subtasks: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status'>[];
+  subtasks: Pick<TaskDTO, "id" | "title" | "priority" | "status">[];
 }
 
 // Command dla tworzenia (POST /api/v1/weekly-goals)
 export type CreateWeeklyGoalCommand = Pick<
   WeeklyGoalInsert,
-  'plan_id' | 'long_term_goal_id' | 'milestone_id' | 'week_number' | 'title' | 'description' | 'position'
+  "plan_id" | "long_term_goal_id" | "milestone_id" | "week_number" | "title" | "description" | "position"
 >;
 
 // Command dla aktualizacji (PATCH /api/v1/weekly-goals/:id)
 export type UpdateWeeklyGoalCommand = Partial<
-  Pick<WeeklyGoalUpdate, 'long_term_goal_id' | 'milestone_id' | 'title' | 'description' | 'position'>
+  Pick<WeeklyGoalUpdate, "long_term_goal_id" | "milestone_id" | "title" | "description" | "position">
 >;
 
 // Query parameters dla listy
@@ -191,7 +204,7 @@ export interface ItemResponse<T> {
 ### 3.2. Validation Schemas (do utworzenia w `src/lib/validation/weekly-goal.validation.ts`)
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // POST body validation
 export const CreateWeeklyGoalBodySchema = z.object({
@@ -201,21 +214,23 @@ export const CreateWeeklyGoalBodySchema = z.object({
   week_number: z.number().int().min(1).max(12),
   title: z.string().trim().min(1).max(255),
   description: z.string().trim().nullable().optional(),
-  position: z.number().int().min(1).default(1)
+  position: z.number().int().min(1).default(1),
 });
 
 // PATCH body validation
-export const UpdateWeeklyGoalBodySchema = z.object({
-  long_term_goal_id: z.string().uuid().nullable().optional(),
-  milestone_id: z.string().uuid().nullable().optional(),
-  title: z.string().trim().min(1).max(255).optional(),
-  description: z.string().nullable().optional(),
-  position: z.number().int().min(1).optional()
-}).strict();
+export const UpdateWeeklyGoalBodySchema = z
+  .object({
+    long_term_goal_id: z.string().uuid().nullable().optional(),
+    milestone_id: z.string().uuid().nullable().optional(),
+    title: z.string().trim().min(1).max(255).optional(),
+    description: z.string().nullable().optional(),
+    position: z.number().int().min(1).optional(),
+  })
+  .strict();
 
 // URL params validation
 export const WeeklyGoalIdParamsSchema = z.object({
-  id: z.string().uuid()
+  id: z.string().uuid(),
 });
 
 // Query params validation
@@ -225,7 +240,7 @@ export const WeeklyGoalListQuerySchema = z.object({
   long_term_goal_id: z.string().uuid().optional(),
   milestone_id: z.string().uuid().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0)
+  offset: z.coerce.number().int().min(0).default(0),
 });
 ```
 
@@ -236,6 +251,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 4.1. GET /api/v1/weekly-goals
 
 **200 OK:**
+
 ```json
 {
   "data": [
@@ -257,6 +273,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **400 Bad Request:**
+
 ```json
 {
   "error": "Validation failed",
@@ -274,6 +291,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 4.2. GET /api/v1/weekly-goals/:id
 
 **200 OK:**
+
 ```json
 {
   "data": {
@@ -300,6 +318,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **404 Not Found:**
+
 ```json
 {
   "error": "Weekly goal not found",
@@ -312,6 +331,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 4.3. POST /api/v1/weekly-goals
 
 **201 Created:**
+
 ```json
 {
   "data": {
@@ -330,6 +350,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **404 Not Found (Plan):**
+
 ```json
 {
   "error": "Plan not found",
@@ -338,6 +359,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **404 Not Found (Long-term Goal):**
+
 ```json
 {
   "error": "Long-term goal not found",
@@ -346,6 +368,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **404 Not Found (Milestone):**
+
 ```json
 {
   "error": "Milestone not found",
@@ -354,6 +377,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **400 Bad Request (Milestone-Goal mismatch):**
+
 ```json
 {
   "error": "Validation failed",
@@ -366,6 +390,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 4.4. PATCH /api/v1/weekly-goals/:id
 
 **200 OK:**
+
 ```json
 {
   "data": {
@@ -384,6 +409,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ```
 
 **400 Bad Request (No fields):**
+
 ```json
 {
   "error": "Validation failed",
@@ -396,6 +422,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 4.5. DELETE /api/v1/weekly-goals/:id
 
 **200 OK:**
+
 ```json
 {
   "message": "Weekly goal deleted successfully"
@@ -556,11 +583,13 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 6.1. Autentykacja i Autoryzacja (MVP)
 
 **Obecna implementacja:**
+
 - Używa `DEFAULT_USER_ID` z `supabase.client.ts`
 - Brak weryfikacji JWT token
 - RLS policies wyłączone w bazie danych
 
 **Weryfikacja własności:**
+
 - Wszystkie operacje weryfikują własność przez `plan_id → user_id`
 - Service layer sprawdza czy plan należy do użytkownika przed operacjami
 - Zapytania używają JOIN z tabelą `plans` i filtrują po `user_id`
@@ -568,6 +597,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 ### 6.2. Walidacja danych wejściowych
 
 **Zod schemas zapewniają:**
+
 - Walidacja typów (UUID, integer, string)
 - Walidacja zakresów (week_number: 1-12, title: 1-255 chars)
 - Walidacja wymaganych pól
@@ -575,6 +605,7 @@ export const WeeklyGoalListQuerySchema = z.object({
 - Odrzucenie nieznanych pól (.strict() w PATCH)
 
 **Dodatkowa walidacja w service layer:**
+
 - Weryfikacja istnienia powiązanych encji (plan, long_term_goal, milestone)
 - Weryfikacja własności przez relacje FK
 - **Weryfikacja hierarchii milestone → goal → plan**
@@ -583,28 +614,30 @@ export const WeeklyGoalListQuerySchema = z.object({
 
 **Problem bezpieczeństwa:**
 Użytkownik może próbować podać `milestone_id` należący do:
+
 1. Innego użytkownika (poprzez goal innego użytkownika)
 2. Goala, który nie należy do tego samego planu co weekly goal
 
 **Rozwiązanie:**
+
 ```typescript
 // W WeeklyGoalService.createWeeklyGoal() i updateWeeklyGoal()
 if (milestone_id) {
   // 1. Pobierz milestone z bazy
   const milestone = await getMilestoneById(milestone_id);
   if (!milestone) {
-    throw new Error('Milestone not found');
+    throw new Error("Milestone not found");
   }
-  
+
   // 2. Pobierz long_term_goal należący do milestone
   const goal = await getGoalById(milestone.long_term_goal_id);
   if (!goal) {
-    throw new Error('Milestone has invalid goal reference');
+    throw new Error("Milestone has invalid goal reference");
   }
-  
+
   // 3. Sprawdź czy goal należy do tego samego planu
   if (goal.plan_id !== weeklyGoal.plan_id) {
-    throw new Error('Milestone does not belong to plan');
+    throw new Error("Milestone does not belong to plan");
   }
 }
 ```
@@ -612,27 +645,33 @@ if (milestone_id) {
 ### 6.4. Zapobieganie atakom
 
 **SQL Injection:**
+
 - Supabase client używa parametryzowanych zapytań
 - Zod walidacja zapewnia poprawne typy
 
 **XSS:**
+
 - Brak renderowania HTML po stronie serwera
 - Client-side odpowiedzialny za sanityzację przy wyświetlaniu
 
 **Mass Assignment:**
+
 - Używamy Pick<> types aby ograniczyć modyfikowalne pola
 - Strict schema w PATCH odrzuca nieznane pola
 
 **Unauthorized Access:**
+
 - Weryfikacja łańcucha własności: milestone → goal → plan → user
 - Weryfikacja przed każdą operacją CREATE/UPDATE/DELETE
 
 ### 6.5. Rate Limiting
 
 **Obecna implementacja:**
+
 - Brak rate limiting w MVP
 
 **Przyszła implementacja:**
+
 - Rate limiting na poziomie Astro middleware
 - Limity per endpoint (np. 100 req/min dla GET, 20 req/min dla POST)
 
@@ -642,20 +681,20 @@ if (milestone_id) {
 
 ### 7.1. Scenariusze błędów
 
-| Kod | Scenariusz | Response Body | Trigger |
-|-----|-----------|---------------|---------|
-| **400** | Niepoprawny JSON | `{ error: "Invalid JSON" }` | Błąd parsowania request.json() |
-| **400** | Walidacja query params | `{ error: "Validation failed", details: [...] }` | Zod validation error w query |
-| **400** | Walidacja body | `{ error: "Validation failed", details: [...] }` | Zod validation error w body |
-| **400** | Brak pól w PATCH | `{ error: "Validation failed", message: "At least one field..." }` | Puste PATCH body |
-| **400** | Milestone-Plan mismatch | `{ error: "Validation failed", message: "Milestone does not belong to plan" }` | Milestone należy do goala z innego planu |
-| **400** | Limit celów tygodniowych | `{ error: "Validation failed", message: "Cannot add more than 3 weekly goals per week" }` | Przekroczenie limitu 3 celów na tydzień |
-| **404** | Plan nie istnieje | `{ error: "Plan not found" }` | Service nie znalazł planu |
-| **404** | Goal nie istnieje | `{ error: "Long-term goal not found" }` | Service nie znalazł goal |
-| **404** | Milestone nie istnieje | `{ error: "Milestone not found" }` | Service nie znalazł milestone |
-| **404** | Weekly goal nie istnieje | `{ error: "Weekly goal not found" }` | Service nie znalazł weekly goal |
-| **500** | Błąd bazy danych | `{ error: "Internal server error" }` | Database connection error |
-| **500** | Nieoczekiwany błąd | `{ error: "Internal server error" }` | Unhandled exception |
+| Kod     | Scenariusz               | Response Body                                                                             | Trigger                                  |
+| ------- | ------------------------ | ----------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **400** | Niepoprawny JSON         | `{ error: "Invalid JSON" }`                                                               | Błąd parsowania request.json()           |
+| **400** | Walidacja query params   | `{ error: "Validation failed", details: [...] }`                                          | Zod validation error w query             |
+| **400** | Walidacja body           | `{ error: "Validation failed", details: [...] }`                                          | Zod validation error w body              |
+| **400** | Brak pól w PATCH         | `{ error: "Validation failed", message: "At least one field..." }`                        | Puste PATCH body                         |
+| **400** | Milestone-Plan mismatch  | `{ error: "Validation failed", message: "Milestone does not belong to plan" }`            | Milestone należy do goala z innego planu |
+| **400** | Limit celów tygodniowych | `{ error: "Validation failed", message: "Cannot add more than 3 weekly goals per week" }` | Przekroczenie limitu 3 celów na tydzień  |
+| **404** | Plan nie istnieje        | `{ error: "Plan not found" }`                                                             | Service nie znalazł planu                |
+| **404** | Goal nie istnieje        | `{ error: "Long-term goal not found" }`                                                   | Service nie znalazł goal                 |
+| **404** | Milestone nie istnieje   | `{ error: "Milestone not found" }`                                                        | Service nie znalazł milestone            |
+| **404** | Weekly goal nie istnieje | `{ error: "Weekly goal not found" }`                                                      | Service nie znalazł weekly goal          |
+| **500** | Błąd bazy danych         | `{ error: "Internal server error" }`                                                      | Database connection error                |
+| **500** | Nieoczekiwany błąd       | `{ error: "Internal server error" }`                                                      | Unhandled exception                      |
 
 ### 7.2. Error Handling Pattern
 
@@ -666,36 +705,36 @@ export const GET: APIRoute = async ({ locals, request }) => {
   try {
     // Step 1: Authentication
     const userId = DEFAULT_USER_ID;
-    
+
     // Step 2: Parse and validate input
     // ... validation ...
-    
+
     // Step 3: Call service
     try {
       const result = await service.method();
       return new Response(JSON.stringify({ data: result }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
     } catch (serviceError) {
       // Handle specific service errors (404, 400)
       if (serviceError instanceof Error) {
-        if (serviceError.message.includes('not found')) {
+        if (serviceError.message.includes("not found")) {
           return new Response(
-            JSON.stringify({ 
+            JSON.stringify({
               error: serviceError.message,
-              message: 'Resource does not exist or does not belong to user'
+              message: "Resource does not exist or does not belong to user",
             }),
-            { status: 404, headers: { 'Content-Type': 'application/json' } }
+            { status: 404, headers: { "Content-Type": "application/json" } }
           );
         }
-        if (serviceError.message.includes('does not belong')) {
+        if (serviceError.message.includes("does not belong")) {
           return new Response(
-            JSON.stringify({ 
-              error: 'Validation failed',
-              message: serviceError.message
+            JSON.stringify({
+              error: "Validation failed",
+              message: serviceError.message,
             }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } }
+            { status: 400, headers: { "Content-Type": "application/json" } }
           );
         }
       }
@@ -703,11 +742,11 @@ export const GET: APIRoute = async ({ locals, request }) => {
     }
   } catch (error) {
     // Global error handler
-    console.error('Error in route:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error("Error in route:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
 ```
@@ -715,10 +754,12 @@ export const GET: APIRoute = async ({ locals, request }) => {
 ### 7.3. Logging Strategy
 
 **Development/MVP:**
+
 - `console.error()` dla wszystkich błędów
 - Zawiera endpoint path, error message, stack trace
 
 **Production (future):**
+
 - Structured logging (JSON format)
 - Log aggregation service (e.g., Sentry, LogRocket)
 - Nie logować sensitive data (tokens, passwords)
@@ -730,12 +771,14 @@ export const GET: APIRoute = async ({ locals, request }) => {
 ### 8.1. Database Queries Optimization
 
 **Indeksy (już istniejące w bazie):**
+
 - `idx_weekly_goals_plan_id` ON (plan_id) - dla filtrowania po planie
 - `idx_weekly_goals_week_number` ON (plan_id, week_number) - dla filtrowania po tygodniu
 - `idx_weekly_goals_long_term_goal_id` ON (long_term_goal_id) - dla filtrowania po goal
 - `idx_weekly_goals_milestone_id` ON (milestone_id) - dla filtrowania po milestone
 
 **Query Optimization:**
+
 - Użycie `.single()` zamiast `.limit(1)` gdzie możliwe
 - Użycie `.maybeSingle()` dla optional results (zamiast sprawdzania array length)
 - SELECT tylko potrzebnych kolumn dla subtasks (id, title, priority, status)
@@ -744,64 +787,75 @@ export const GET: APIRoute = async ({ locals, request }) => {
 ### 8.2. Pagination
 
 **GET /api/v1/weekly-goals:**
+
 - Default limit: 50 (rozsądna wartość dla 12-tygodniowego planera)
 - Max limit: 100
 - Offset-based pagination (wystarczające dla MVP)
 - Consider cursor-based pagination dla większych datasets w przyszłości
 
 **Expected dataset sizes:**
+
 - Max 36 weekly goals per plan (3 per week)
 - Pagination bardziej przydatna dla subtasks (max 15 na cel tygodniowy)
 
 ### 8.3. N+1 Query Problem
 
 **Problem:**
+
 - GET /api/v1/weekly-goals/:id musi pobrać weekly goal + subtasks
 - Weryfikacja milestone wymaga dodatkowych zapytań (milestone → goal → plan)
 
 **Rozwiązanie dla subtasks:**
+
 ```typescript
 // Option 1: Two queries (current approach - acceptable dla MVP)
-const weeklyGoal = await supabase.from('weekly_goals').select().eq('id', id).single();
-const subtasks = await supabase.from('tasks').select().eq('weekly_goal_id', id);
+const weeklyGoal = await supabase.from("weekly_goals").select().eq("id", id).single();
+const subtasks = await supabase.from("tasks").select().eq("weekly_goal_id", id);
 
 // Option 2: Single query with nested select (better performance)
 const { data } = await supabase
-  .from('weekly_goals')
-  .select(`
+  .from("weekly_goals")
+  .select(
+    `
     *,
     tasks!inner(id, title, priority, status)
-  `)
-  .eq('id', id)
-  .eq('tasks.task_type', 'weekly_sub');
+  `
+  )
+  .eq("id", id)
+  .eq("tasks.task_type", "weekly_sub");
 ```
 
 **Rozwiązanie dla milestone validation:**
+
 ```typescript
 // Optymalizacja: Single query z JOINs
 const { data } = await supabase
-  .from('milestones')
-  .select(`
+  .from("milestones")
+  .select(
+    `
     id,
     long_term_goal_id,
     long_term_goals!inner(id, plan_id)
-  `)
-  .eq('id', milestone_id)
+  `
+  )
+  .eq("id", milestone_id)
   .single();
 
 // Teraz mamy milestone + goal + plan_id w jednym zapytaniu
 if (data.long_term_goals.plan_id !== weeklyGoal.plan_id) {
-  throw new Error('Milestone does not belong to plan');
+  throw new Error("Milestone does not belong to plan");
 }
 ```
 
 ### 8.4. Caching Strategy
 
 **MVP (brak cachingu):**
+
 - Direct database queries
 - Acceptable dla małych datasets
 
 **Future optimization:**
+
 - Cache active plan ID dla użytkownika (Redis)
 - Cache weekly goals dla bieżącego tygodnia
 - Cache milestone-goal-plan relationships (rzadko się zmieniają)
@@ -811,11 +865,13 @@ if (data.long_term_goals.plan_id !== weeklyGoal.plan_id) {
 ### 8.5. Response Size
 
 **Minimalizacja rozmiaru:**
+
 - Subtasks zawierają tylko 4 pola (id, title, priority, status)
 - Brak zagnieżdżonych relacji w list endpoint
 - Pagination limituje rozmiar response
 
 **Estimated sizes:**
+
 - Single weekly goal: ~600 bytes (z milestone_id)
 - List of 50 weekly goals: ~30 KB
 - Weekly goal with 10 subtasks: ~1.8 KB
@@ -829,6 +885,7 @@ if (data.long_term_goals.plan_id !== weeklyGoal.plan_id) {
 **Plik:** `src/lib/validation/weekly-goal.validation.ts`
 
 **Zawartość:**
+
 - Import Zod
 - `CreateWeeklyGoalBodySchema` z pełną walidacją (zawiera milestone_id)
 - `UpdateWeeklyGoalBodySchema` z opcjonalnymi polami (zawiera milestone_id)
@@ -842,50 +899,44 @@ if (data.long_term_goals.plan_id !== weeklyGoal.plan_id) {
 **Pełna implementacja:**
 
 ```typescript
-import { z } from 'zod';
-import type { CreateWeeklyGoalCommand, UpdateWeeklyGoalCommand } from '../types';
+import { z } from "zod";
+import type { CreateWeeklyGoalCommand, UpdateWeeklyGoalCommand } from "../types";
 
 // POST body validation
 export const CreateWeeklyGoalBodySchema = z.object({
-  plan_id: z.string().uuid({ message: 'Invalid plan_id format' }),
-  long_term_goal_id: z.string().uuid({ message: 'Invalid long_term_goal_id format' })
-    .nullable()
-    .optional(),
-  milestone_id: z.string().uuid({ message: 'Invalid milestone_id format' })
-    .nullable()
-    .optional(),
-  week_number: z.number().int().min(1).max(12, { message: 'Week number must be between 1 and 12' }),
-  title: z.string().trim().min(1, { message: 'Title is required' }).max(255),
+  plan_id: z.string().uuid({ message: "Invalid plan_id format" }),
+  long_term_goal_id: z.string().uuid({ message: "Invalid long_term_goal_id format" }).nullable().optional(),
+  milestone_id: z.string().uuid({ message: "Invalid milestone_id format" }).nullable().optional(),
+  week_number: z.number().int().min(1).max(12, { message: "Week number must be between 1 and 12" }),
+  title: z.string().trim().min(1, { message: "Title is required" }).max(255),
   description: z.string().trim().nullable().optional(),
-  position: z.number().int().min(1).default(1)
+  position: z.number().int().min(1).default(1),
 });
 
 // PATCH body validation
-export const UpdateWeeklyGoalBodySchema = z.object({
-  long_term_goal_id: z.string().uuid({ message: 'Invalid long_term_goal_id format' })
-    .nullable()
-    .optional(),
-  milestone_id: z.string().uuid({ message: 'Invalid milestone_id format' })
-    .nullable()
-    .optional(),
-  title: z.string().trim().min(1, { message: 'Title cannot be empty' }).max(255).optional(),
-  description: z.string().nullable().optional(),
-  position: z.number().int().min(1).optional()
-}).strict();
+export const UpdateWeeklyGoalBodySchema = z
+  .object({
+    long_term_goal_id: z.string().uuid({ message: "Invalid long_term_goal_id format" }).nullable().optional(),
+    milestone_id: z.string().uuid({ message: "Invalid milestone_id format" }).nullable().optional(),
+    title: z.string().trim().min(1, { message: "Title cannot be empty" }).max(255).optional(),
+    description: z.string().nullable().optional(),
+    position: z.number().int().min(1).optional(),
+  })
+  .strict();
 
 // URL params validation
 export const WeeklyGoalIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid weekly goal ID format' })
+  id: z.string().uuid({ message: "Invalid weekly goal ID format" }),
 });
 
 // Query params validation
 export const WeeklyGoalListQuerySchema = z.object({
-  plan_id: z.string().uuid({ message: 'Invalid plan_id format' }),
+  plan_id: z.string().uuid({ message: "Invalid plan_id format" }),
   week_number: z.coerce.number().int().min(1).max(12).optional(),
-  long_term_goal_id: z.string().uuid({ message: 'Invalid long_term_goal_id format' }).optional(),
-  milestone_id: z.string().uuid({ message: 'Invalid milestone_id format' }).optional(),
+  long_term_goal_id: z.string().uuid({ message: "Invalid long_term_goal_id format" }).optional(),
+  milestone_id: z.string().uuid({ message: "Invalid milestone_id format" }).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0)
+  offset: z.coerce.number().int().min(0).default(0),
 });
 
 // Type exports
@@ -901,7 +952,7 @@ export type WeeklyGoalListQuery = z.infer<typeof WeeklyGoalListQuerySchema>;
 export function validateUpdateWeeklyGoalCommand(data: UpdateWeeklyGoalCommand): void {
   const hasFields = Object.keys(data).length > 0;
   if (!hasFields) {
-    throw new Error('At least one field must be provided for update');
+    throw new Error("At least one field must be provided for update");
   }
 }
 ```
@@ -984,6 +1035,7 @@ export function validateUpdateWeeklyGoalCommand(data: UpdateWeeklyGoalCommand): 
 **Wzorować się na:** `src/lib/services/goal.service.ts` i `src/lib/services/milestone.service.ts`
 
 **Dependencies:**
+
 - Import PlanService for plan verification
 - Import GoalService for long_term_goal verification
 - Import MilestoneService for milestone operations
@@ -992,36 +1044,35 @@ export function validateUpdateWeeklyGoalCommand(data: UpdateWeeklyGoalCommand): 
 **Przykładowa implementacja kluczowych fragmentów:**
 
 ```typescript
-import { supabaseClient } from '../../db/supabase.client';
-import type { 
-  WeeklyGoalDTO, 
+import { supabaseClient } from "../../db/supabase.client";
+import type {
+  WeeklyGoalDTO,
   WeeklyGoalWithSubtasksDTO,
-  CreateWeeklyGoalCommand, 
+  CreateWeeklyGoalCommand,
   UpdateWeeklyGoalCommand,
-  WeeklyGoalListParams 
-} from '../../types';
-import { PlanService } from './plan.service';
-import { GoalService } from './goal.service';
-import { MilestoneService } from './milestone.service';
+  WeeklyGoalListParams,
+} from "../../types";
+import { PlanService } from "./plan.service";
+import { GoalService } from "./goal.service";
+import { MilestoneService } from "./milestone.service";
 
 export class WeeklyGoalService {
   /**
    * Validates that milestone belongs to a goal in the specified plan
    * @throws Error if validation fails
    */
-  private async validateMilestoneInPlan(
-    milestoneId: string, 
-    planId: string
-  ): Promise<void> {
+  private async validateMilestoneInPlan(milestoneId: string, planId: string): Promise<void> {
     // Query milestone with its goal's plan_id
     const { data, error } = await supabaseClient
-      .from('milestones')
-      .select(`
+      .from("milestones")
+      .select(
+        `
         id,
         long_term_goal_id,
         long_term_goals!inner(id, plan_id)
-      `)
-      .eq('id', milestoneId)
+      `
+      )
+      .eq("id", milestoneId)
       .maybeSingle();
 
     if (error) {
@@ -1029,7 +1080,7 @@ export class WeeklyGoalService {
     }
 
     if (!data) {
-      throw new Error('Milestone not found');
+      throw new Error("Milestone not found");
     }
 
     // Type assertion since Supabase doesn't infer nested types perfectly
@@ -1040,31 +1091,28 @@ export class WeeklyGoalService {
     };
 
     if (milestone.long_term_goals.plan_id !== planId) {
-      throw new Error('Milestone does not belong to a goal in the specified plan');
+      throw new Error("Milestone does not belong to a goal in the specified plan");
     }
   }
 
   /**
    * Creates a new weekly goal
    */
-  async createWeeklyGoal(
-    userId: string,
-    data: CreateWeeklyGoalCommand
-  ): Promise<WeeklyGoalDTO> {
+  async createWeeklyGoal(userId: string, data: CreateWeeklyGoalCommand): Promise<WeeklyGoalDTO> {
     // 1. Verify plan exists and belongs to user
     const plan = await PlanService.getPlanById(data.plan_id, userId);
     if (!plan) {
-      throw new Error('Plan not found');
+      throw new Error("Plan not found");
     }
 
     // 2. Verify long_term_goal if provided
     if (data.long_term_goal_id) {
       const goal = await GoalService.getGoalById(data.long_term_goal_id, userId);
       if (!goal) {
-        throw new Error('Long-term goal not found');
+        throw new Error("Long-term goal not found");
       }
       if (goal.plan_id !== data.plan_id) {
-        throw new Error('Long-term goal does not belong to the specified plan');
+        throw new Error("Long-term goal does not belong to the specified plan");
       }
     }
 
@@ -1074,11 +1122,7 @@ export class WeeklyGoalService {
     }
 
     // 4. Insert weekly goal
-    const { data: weeklyGoal, error } = await supabaseClient
-      .from('weekly_goals')
-      .insert(data)
-      .select()
-      .single();
+    const { data: weeklyGoal, error } = await supabaseClient.from("weekly_goals").insert(data).select().single();
 
     if (error) {
       throw new Error(`Failed to create weekly goal: ${error.message}`);
@@ -1090,11 +1134,7 @@ export class WeeklyGoalService {
   /**
    * Updates an existing weekly goal
    */
-  async updateWeeklyGoal(
-    id: string,
-    userId: string,
-    data: UpdateWeeklyGoalCommand
-  ): Promise<WeeklyGoalDTO | null> {
+  async updateWeeklyGoal(id: string, userId: string, data: UpdateWeeklyGoalCommand): Promise<WeeklyGoalDTO | null> {
     // 1. Verify weekly goal exists and get current data
     const existingGoal = await this.getWeeklyGoalById(id, userId);
     if (!existingGoal) {
@@ -1105,10 +1145,10 @@ export class WeeklyGoalService {
     if (data.long_term_goal_id !== undefined && data.long_term_goal_id !== null) {
       const goal = await GoalService.getGoalById(data.long_term_goal_id, userId);
       if (!goal) {
-        throw new Error('Long-term goal not found');
+        throw new Error("Long-term goal not found");
       }
       if (goal.plan_id !== existingGoal.plan_id) {
-        throw new Error('Long-term goal does not belong to the same plan');
+        throw new Error("Long-term goal does not belong to the same plan");
       }
     }
 
@@ -1119,9 +1159,9 @@ export class WeeklyGoalService {
 
     // 4. Update weekly goal
     const { data: updatedGoal, error } = await supabaseClient
-      .from('weekly_goals')
+      .from("weekly_goals")
       .update(data)
-      .eq('id', id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -1135,38 +1175,30 @@ export class WeeklyGoalService {
   /**
    * Lists weekly goals with optional filters
    */
-  async listWeeklyGoals(
-    params: WeeklyGoalListParams,
-    userId: string
-  ): Promise<WeeklyGoalDTO[]> {
+  async listWeeklyGoals(params: WeeklyGoalListParams, userId: string): Promise<WeeklyGoalDTO[]> {
     // 1. Verify plan
     const plan = await PlanService.getPlanById(params.plan_id, userId);
     if (!plan) {
-      throw new Error('Plan not found');
+      throw new Error("Plan not found");
     }
 
     // 2. Build query
-    let query = supabaseClient
-      .from('weekly_goals')
-      .select('*')
-      .eq('plan_id', params.plan_id);
+    let query = supabaseClient.from("weekly_goals").select("*").eq("plan_id", params.plan_id);
 
     // Apply filters
     if (params.week_number !== undefined) {
-      query = query.eq('week_number', params.week_number);
+      query = query.eq("week_number", params.week_number);
     }
     if (params.long_term_goal_id) {
-      query = query.eq('long_term_goal_id', params.long_term_goal_id);
+      query = query.eq("long_term_goal_id", params.long_term_goal_id);
     }
     if (params.milestone_id) {
-      query = query.eq('milestone_id', params.milestone_id);
+      query = query.eq("milestone_id", params.milestone_id);
     }
 
     // Pagination and ordering
     const { limit = 50, offset = 0 } = params;
-    query = query
-      .order('position', { ascending: true })
-      .range(offset, offset + limit - 1);
+    query = query.order("position", { ascending: true }).range(offset, offset + limit - 1);
 
     const { data, error } = await query;
 
@@ -1190,6 +1222,7 @@ export class WeeklyGoalService {
 **Handler:** `export const GET: APIRoute`
 
 **Implementacja:**
+
 1. Extract DEFAULT_USER_ID
 2. Parse query parameters z URL
 3. Validate z WeeklyGoalListQuerySchema.safeParse()
@@ -1200,32 +1233,33 @@ export class WeeklyGoalService {
 8. Global error handler (500)
 
 **Headers:**
+
 - `Content-Type: application/json`
 - `export const prerender = false`
 
 **Przykładowa implementacja:**
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
-import { WeeklyGoalService } from '../../../lib/services/weekly-goal.service';
-import { WeeklyGoalListQuerySchema } from '../../../lib/validation/weekly-goal.validation';
+import type { APIRoute } from "astro";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import { WeeklyGoalService } from "../../../lib/services/weekly-goal.service";
+import { WeeklyGoalListQuerySchema } from "../../../lib/validation/weekly-goal.validation";
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
   try {
     const userId = DEFAULT_USER_ID;
-    
+
     // Parse query parameters
     const url = new URL(request.url);
     const rawParams = {
-      plan_id: url.searchParams.get('plan_id'),
-      week_number: url.searchParams.get('week_number'),
-      long_term_goal_id: url.searchParams.get('long_term_goal_id'),
-      milestone_id: url.searchParams.get('milestone_id'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset')
+      plan_id: url.searchParams.get("plan_id"),
+      week_number: url.searchParams.get("week_number"),
+      long_term_goal_id: url.searchParams.get("long_term_goal_id"),
+      milestone_id: url.searchParams.get("milestone_id"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     // Validate query parameters
@@ -1233,13 +1267,13 @@ export const GET: APIRoute = async ({ request }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details: validation.error.issues.map(issue => ({
-            field: issue.path.join('.'),
-            message: issue.message
-          }))
+          error: "Validation failed",
+          details: validation.error.issues.map((issue) => ({
+            field: issue.path.join("."),
+            message: issue.message,
+          })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -1247,27 +1281,27 @@ export const GET: APIRoute = async ({ request }) => {
     const weeklyGoalService = new WeeklyGoalService();
     const data = await weeklyGoalService.listWeeklyGoals(validation.data, userId);
 
-    return new Response(
-      JSON.stringify({ data, count: data.length }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ data, count: data.length }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error('GET /api/v1/weekly-goals error:', error);
-    
-    if (error instanceof Error && error.message === 'Plan not found') {
+    console.error("GET /api/v1/weekly-goals error:", error);
+
+    if (error instanceof Error && error.message === "Plan not found") {
       return new Response(
-        JSON.stringify({ 
-          error: 'Plan not found',
-          message: 'Plan does not exist or does not belong to user'
+        JSON.stringify({
+          error: "Plan not found",
+          message: "Plan does not exist or does not belong to user",
         }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
 ```
@@ -1281,6 +1315,7 @@ export const GET: APIRoute = async ({ request }) => {
 **Handler:** `export const POST: APIRoute`
 
 **Implementacja:**
+
 1. Extract DEFAULT_USER_ID
 2. Parse request body (try-catch dla JSON parse errors)
 3. Validate z CreateWeeklyGoalBodySchema.safeParse()
@@ -1303,6 +1338,7 @@ export const GET: APIRoute = async ({ request }) => {
 **Handler:** `export const GET: APIRoute`
 
 **Implementacja:**
+
 1. Extract DEFAULT_USER_ID
 2. Extract :id z params
 3. Validate z WeeklyGoalIdParamsSchema.safeParse()
@@ -1321,6 +1357,7 @@ export const GET: APIRoute = async ({ request }) => {
 **Handler:** `export const PATCH: APIRoute`
 
 **Implementacja:**
+
 1. Extract DEFAULT_USER_ID
 2. Extract :id z params
 3. Validate :id z WeeklyGoalIdParamsSchema
@@ -1345,6 +1382,7 @@ export const GET: APIRoute = async ({ request }) => {
 **Handler:** `export const DELETE: APIRoute`
 
 **Implementacja:**
+
 1. Extract DEFAULT_USER_ID
 2. Extract :id z params
 3. Validate z WeeklyGoalIdParamsSchema
@@ -1354,6 +1392,7 @@ export const GET: APIRoute = async ({ request }) => {
 7. Global error handler (500)
 
 **Response body:**
+
 ```json
 {
   "message": "Weekly goal deleted successfully"
@@ -1367,6 +1406,7 @@ export const GET: APIRoute = async ({ request }) => {
 **Plik:** `api-tests/weekly-goals-tests.http`
 
 **Zawartość:**
+
 - Zmienne środowiskowe (BASE_URL, PLAN_ID, GOAL_ID, MILESTONE_ID)
 - Test GET /api/v1/weekly-goals (z różnymi filtrami including milestone_id)
 - Test GET /api/v1/weekly-goals/:id
@@ -1443,11 +1483,12 @@ Content-Type: application/json
 **Problem:** Czy long_term_goal musi należeć do tego samego planu co weekly goal?
 
 **Rozwiązanie:** TAK - dodać weryfikację w createWeeklyGoal i updateWeeklyGoal:
+
 ```typescript
 if (data.long_term_goal_id) {
   const goal = await goalService.getGoalById(data.long_term_goal_id, userId);
   if (!goal || goal.plan_id !== data.plan_id) {
-    throw new Error('Long-term goal not found or does not belong to plan');
+    throw new Error("Long-term goal not found or does not belong to plan");
   }
 }
 ```
@@ -1457,22 +1498,24 @@ if (data.long_term_goal_id) {
 **Problem:** Czy milestone musi należeć do goala w tym samym planie co weekly goal?
 
 **Rozwiązanie:** TAK - kluczowa weryfikacja bezpieczeństwa:
+
 ```typescript
 if (data.milestone_id) {
   // Pobierz milestone z jego goalem
   const milestone = await getMilestoneWithGoal(data.milestone_id);
   if (!milestone) {
-    throw new Error('Milestone not found');
+    throw new Error("Milestone not found");
   }
-  
+
   // Sprawdź czy goal milestone'a należy do tego samego planu
   if (milestone.long_term_goals.plan_id !== weeklyGoal.plan_id) {
-    throw new Error('Milestone does not belong to a goal in the specified plan');
+    throw new Error("Milestone does not belong to a goal in the specified plan");
   }
 }
 ```
 
 **Dlaczego to jest ważne:**
+
 - Zapobiega linkowaniu milestone'ów z innych planów użytkownika
 - Zapobiega linkowaniu milestone'ów z planów innych użytkowników
 - Utrzymuje spójność hierarchii: plan → goal → milestone → weekly_goal
@@ -1482,16 +1525,18 @@ if (data.milestone_id) {
 **Problem:** Czy weekly goal może mieć milestone z innego goala niż podany long_term_goal_id?
 
 **Rozwiązanie:** TAK - to jest dozwolone zgodnie z API specification:
+
 - Weekly goal może mieć `long_term_goal_id = goalA` i `milestone_id` z goalB
 - Oba goale muszą należeć do tego samego planu
 - Daje to elastyczność w organizacji pracy
 
 **Przykład użycia:**
+
 ```json
 {
   "plan_id": "plan-1",
-  "long_term_goal_id": "goal-A",  // "Launch MVP"
-  "milestone_id": "milestone-B1",  // z "goal-B" (Infrastructure)
+  "long_term_goal_id": "goal-A", // "Launch MVP"
+  "milestone_id": "milestone-B1", // z "goal-B" (Infrastructure)
   "title": "Setup CI/CD for MVP launch"
 }
 ```
@@ -1506,7 +1551,8 @@ if (data.milestone_id) {
 
 **Problem:** Czy fetching subtasks dla GET :id może być wolny?
 
-**Rozwiązanie:** 
+**Rozwiązanie:**
+
 - Max 15 subtasks per weekly goal (constraint)
 - Index na weekly_goal_id już istnieje
 - SELECT tylko 4 kolumny
@@ -1517,6 +1563,7 @@ if (data.milestone_id) {
 **Problem:** Czy użytkownik może dodać więcej niż jeden cel na tydzień?
 
 **Rozwiązanie:** TAK, ale z ograniczeniem:
+
 - System pozwala na maksymalnie 3 cele tygodniowe na ten sam tydzień w ramach jednego planu.
 - Limit jest wymuszany przez trigger bazodanowy `check_weekly_goal_count`.
 - Warto dodać walidację w service layer, aby zwrócić czytelny błąd 400 zamiast generycznego błędu bazy danych.
@@ -1526,11 +1573,9 @@ if (data.milestone_id) {
 **Problem:** Czy zwracać total count w response?
 
 **Rozwiązanie:** Opcjonalnie - dodać `count` field w ListResponse:
+
 ```typescript
-const { data, count } = await supabase
-  .from('weekly_goals')
-  .select('*', { count: 'exact' })
-  .eq('plan_id', planId);
+const { data, count } = await supabase.from("weekly_goals").select("*", { count: "exact" }).eq("plan_id", planId);
 
 return { data, count };
 ```
@@ -1539,7 +1584,8 @@ return { data, count };
 
 **Problem:** Co się stanie jeśli powiązana encja zostanie usunięta?
 
-**Rozwiązanie:** 
+**Rozwiązanie:**
+
 - **Plan deleted:** Database CASCADE automatycznie usuwa wszystkie weekly goals
 - **Goal deleted:** Database ON DELETE SET NULL ustawia long_term_goal_id na NULL
 - **Milestone deleted:** Database ON DELETE SET NULL ustawia milestone_id na NULL
@@ -1550,6 +1596,7 @@ return { data, count };
 **Problem:** Weryfikacja milestone wymaga dodatkowego JOIN query - czy to nie będzie wolne?
 
 **Rozwiązanie:**
+
 - Query optymalizacja: Single query z JOIN (milestones → long_term_goals)
 - Index na milestones.long_term_goal_id już istnieje
 - Index na long_term_goals.plan_id już istnieje
@@ -1622,6 +1669,7 @@ return { data, count };
 ## 13. Referencje
 
 ### Pliki do konsultacji podczas implementacji:
+
 - `src/lib/services/goal.service.ts` - wzorzec service layer
 - `src/lib/services/milestone.service.ts` - wzorzec milestone operations
 - `src/lib/validation/goal.validation.ts` - wzorzec validation schemas
@@ -1634,6 +1682,7 @@ return { data, count };
 - `docs/api/api-plan.md` - pełna specyfikacja API (zawiera milestone_id)
 
 ### Kluczowe koncepty:
+
 - Używamy DEFAULT_USER_ID (RLS disabled dla MVP)
 - Zawsze weryfikujemy własność przez plan_id → user_id
 - **Weryfikujemy hierarchię milestone → goal → plan dla bezpieczeństwa**
@@ -1645,10 +1694,10 @@ return { data, count };
 - **milestone_id i long_term_goal_id są niezależne** (mogą być z różnych goalów w tym samym planie)
 
 ### Kluczowe różnice z pierwotnym planem:
+
 1. **Dodano milestone_id** do wszystkich DTOs, Commands i Query Params
 2. **Dodano weryfikację hierarchii** milestone → goal → plan
 3. **Dodano filtrowanie** po milestone_id w GET list
 4. **Dodano nowe error scenariusze** (milestone not found, milestone wrong plan)
 5. **Dodano helper method** validateMilestoneInPlan w service layer
 6. **Rozszerzono testy** o przypadki z milestone_id
-

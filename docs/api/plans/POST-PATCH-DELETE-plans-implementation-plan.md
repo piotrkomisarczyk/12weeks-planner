@@ -24,6 +24,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 **Struktura URL:** `/api/v1/plans`
 
 **Parametry:**
+
 - **Wymagane (Request Body):**
   - `name` (string): Nazwa planera, 1-255 znaków
   - `start_date` (string): Data rozpoczęcia w formacie ISO 8601 (YYYY-MM-DD), musi być poniedziałkiem
@@ -31,6 +32,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 - **Opcjonalne:** Brak
 
 **Request Body:**
+
 ```json
 {
   "name": "Planner_2025-01-06",
@@ -39,6 +41,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 ```
 
 **Uwagi:**
+
 - `start_date` musi być poniedziałkiem - walidacja wykonywana przez trigger bazodanowy
 - `user_id` jest automatycznie przypisywany na podstawie tokenu uwierzytelnienia
 - `status` domyślnie ustawiony na `'ready'`
@@ -57,6 +60,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 **Struktura URL:** `/api/v1/plans/:id`
 
 **Parametry:**
+
 - **Wymagane (URL Path):**
   - `id` (UUID): Identyfikator planera do aktualizacji
 
@@ -66,6 +70,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
   - **Przynajmniej jedno z pól musi być podane**
 
 **Request Body (przykłady):**
+
 ```json
 // Aktualizacja tylko nazwy
 {
@@ -85,6 +90,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 ```
 
 **Uwagi:**
+
 - Tylko właściciel planera może go zaktualizować
 - Pole `updated_at` jest automatycznie aktualizowane przez trigger bazodanowy
 - Nazwa i status mogą być aktualizowane niezależnie
@@ -103,6 +109,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 **Struktura URL:** `/api/v1/plans/:id`
 
 **Parametry:**
+
 - **Wymagane (URL Path):**
   - `id` (UUID): Identyfikator planera do usunięcia
 
@@ -111,6 +118,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 **Request Body:** Brak (empty body)
 
 **Uwagi:**
+
 - Tylko właściciel planera może go usunąć
 - To jest operacja **hard delete** - trwale usuwa planer i **wszystkie powiązane dane**
 - Kaskadowe usuwanie obejmuje:
@@ -135,6 +143,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 **Struktura URL:** `/api/v1/plans/:id/archive`
 
 **Parametry:**
+
 - **Wymagane (URL Path):**
   - `id` (UUID): Identyfikator planera do archiwizacji
 
@@ -143,6 +152,7 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 **Request Body:** Brak (empty body)
 
 **Uwagi:**
+
 - Tylko właściciel planera może go zarchiwizować
 - Archiwizacja zmienia `status` z 'active' lub 'completed' na 'archived'
 - Wszystkie powiązane dane (cele, zadania, etc.) pozostają w bazie danych
@@ -158,8 +168,8 @@ Wszystkie endpointy wymagają uwierzytelnienia użytkownika i stosują walidacj�
 
 ```typescript
 // Request Command Models
-export type CreatePlanCommand = Pick<PlanInsert, 'name' | 'start_date'>;
-export type UpdatePlanCommand = Pick<PlanUpdate, 'name' | 'status'>;
+export type CreatePlanCommand = Pick<PlanInsert, "name" | "start_date">;
+export type UpdatePlanCommand = Pick<PlanUpdate, "name" | "status">;
 
 // Response DTOs
 export type PlanDTO = PlanEntity;
@@ -179,7 +189,7 @@ export interface SuccessResponse {
 
 // Error Response Types
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 
@@ -205,18 +215,23 @@ export interface ValidationErrorDetail {
  * Validates plan creation data
  */
 export const CreatePlanBodySchema = z.object({
-  name: z.string()
-    .min(1, { message: 'Name is required' })
-    .max(255, { message: 'Name must not exceed 255 characters' })
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must not exceed 255 characters" })
     .trim(),
-  start_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Start date must be in YYYY-MM-DD format' })
-    .refine((date) => {
-      // Additional validation: check if date is valid
-      const parsed = new Date(date);
-      return !isNaN(parsed.getTime());
-    }, { message: 'Invalid date' })
-    // Note: Monday validation is handled by database trigger
+  start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Start date must be in YYYY-MM-DD format" })
+    .refine(
+      (date) => {
+        // Additional validation: check if date is valid
+        const parsed = new Date(date);
+        return !isNaN(parsed.getTime());
+      },
+      { message: "Invalid date" }
+    ),
+  // Note: Monday validation is handled by database trigger
 });
 
 export type CreatePlanBody = z.infer<typeof CreatePlanBodySchema>;
@@ -225,20 +240,23 @@ export type CreatePlanBody = z.infer<typeof CreatePlanBodySchema>;
  * Request body schema for PATCH /api/v1/plans/:id
  * Validates plan update data (both fields optional, but at least one required)
  */
-export const UpdatePlanBodySchema = z.object({
-  name: z.string()
-    .min(1, { message: 'Name must not be empty' })
-    .max(255, { message: 'Name must not exceed 255 characters' })
-    .trim()
-    .optional(),
-  status: z.enum(['ready', 'active', 'completed', 'archived'], {
-    errorMap: () => ({ message: 'Status must be one of: ready, active, completed, archived' })
+export const UpdatePlanBodySchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { message: "Name must not be empty" })
+      .max(255, { message: "Name must not exceed 255 characters" })
+      .trim()
+      .optional(),
+    status: z
+      .enum(["ready", "active", "completed", "archived"], {
+        errorMap: () => ({ message: "Status must be one of: ready, active, completed, archived" }),
+      })
+      .optional(),
   })
-    .optional()
-}).refine(
-  (data) => data.name !== undefined || data.status !== undefined,
-  { message: 'At least one field (name or status) must be provided' }
-);
+  .refine((data) => data.name !== undefined || data.status !== undefined, {
+    message: "At least one field (name or status) must be provided",
+  });
 
 export type UpdatePlanBody = z.infer<typeof UpdatePlanBodySchema>;
 
@@ -247,7 +265,7 @@ export type UpdatePlanBody = z.infer<typeof UpdatePlanBodySchema>;
  * Validates UUID format
  */
 export const PlanIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid plan ID format' })
+  id: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
@@ -260,6 +278,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ### 4.1. POST /api/v1/plans
 
 **Success Response (201 Created):**
+
 ```json
 {
   "data": {
@@ -275,6 +294,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Error Responses:**
+
 - **400 Bad Request** - Validation failed, missing required fields, start_date not Monday
 - **401 Unauthorized** - Missing or invalid authentication token
 - **500 Internal Server Error** - Database error or unexpected server error
@@ -284,6 +304,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ### 4.2. PATCH /api/v1/plans/:id
 
 **Success Response (200 OK):**
+
 ```json
 {
   "data": {
@@ -299,6 +320,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Error Responses:**
+
 - **400 Bad Request** - Invalid data (validation failed, invalid UUID, invalid status value, missing both name and status)
 - **401 Unauthorized** - Missing or invalid authentication token
 - **404 Not Found** - Plan not found or doesn't belong to user
@@ -309,6 +331,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ### 4.3. DELETE /api/v1/plans/:id
 
 **Success Response (200 OK):**
+
 ```json
 {
   "message": "Plan deleted successfully"
@@ -316,6 +339,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Error Responses:**
+
 - **400 Bad Request** - Invalid UUID format
 - **401 Unauthorized** - Missing or invalid authentication token
 - **404 Not Found** - Plan not found or doesn't belong to user
@@ -326,6 +350,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ### 4.4. POST /api/v1/plans/:id/archive
 
 **Success Response (200 OK):**
+
 ```json
 {
   "data": {
@@ -337,6 +362,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Error Responses:**
+
 - **400 Bad Request** - Invalid UUID format
 - **401 Unauthorized** - Missing or invalid authentication token
 - **404 Not Found** - Plan not found or doesn't belong to user
@@ -375,6 +401,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Database Interaction:**
+
 - Table: `plans`
 - Operation: INSERT
 - Constraints checked:
@@ -426,6 +453,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Database Interaction:**
+
 - Table: `plans`
 - Operation: UPDATE
 - WHERE clause: `id = :planId AND user_id = :userId`
@@ -476,6 +504,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Database Interaction:**
+
 - Table: `plans`
 - Operation: DELETE
 - WHERE clause: `id = :planId AND user_id = :userId`
@@ -522,6 +551,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```
 
 **Database Interaction:**
+
 - Table: `plans`
 - Operation: UPDATE
 - WHERE clause: `id = :planId AND user_id = :userId`
@@ -538,14 +568,16 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ### 6.1. Uwierzytelnianie (Authentication)
 
 **MVP Implementation:**
+
 - Używamy `DEFAULT_USER_ID` z `src/db/supabase.client.ts` dla wszystkich żądań
 - W przyszłości: JWT token z Supabase Auth w header `Authorization: Bearer <token>`
 - Weryfikacja tokenu będzie odbywała się w Astro middleware (`src/middleware/index.ts`)
 
 **Kod MVP:**
+
 ```typescript
 // For MVP - using default user
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 
 export const POST: APIRoute = async ({ locals }) => {
   const userId = DEFAULT_USER_ID;
@@ -554,18 +586,22 @@ export const POST: APIRoute = async ({ locals }) => {
 ```
 
 **Przyszła implementacja (po MVP):**
+
 ```typescript
 export const POST: APIRoute = async ({ locals }) => {
   // Get user from Supabase session
-  const { data: { user }, error } = await locals.supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error,
+  } = await locals.supabase.auth.getUser();
+
   if (error || !user) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized', message: 'Invalid or missing authentication token' }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Unauthorized", message: "Invalid or missing authentication token" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-  
+
   const userId = user.id;
   // ... rest of implementation
 };
@@ -580,13 +616,14 @@ export const POST: APIRoute = async ({ locals }) => {
 Dla endpointów PATCH i POST (archive), które modyfikują istniejące zasoby:
 
 1. **Query filtration:** Zawsze filtruj zapytania przez `user_id`:
+
    ```typescript
    // W service layer
    const { data, error } = await this.supabase
-     .from('plans')
-     .select('*')
-     .eq('id', planId)
-     .eq('user_id', userId)  // ✓ Ensures user owns the plan
+     .from("plans")
+     .select("*")
+     .eq("id", planId)
+     .eq("user_id", userId) // ✓ Ensures user owns the plan
      .single();
    ```
 
@@ -605,24 +642,31 @@ Dla endpointów PATCH i POST (archive), które modyfikują istniejące zasoby:
 3. **Database constraints:** Dodatkowe sprawdzenia (np. trigger dla start_date)
 
 **Ochrona przed atakami:**
+
 - **SQL Injection:** Supabase używa parameterized queries - zabezpieczone automatycznie
 - **XSS:** Walidacja typu string, trim() usuwa białe znaki
 - **Length attacks:** Max 255 znaków dla `name`
 - **Type confusion:** Zod wymusza poprawne typy danych
 
 **Przykład walidacji:**
+
 ```typescript
 const CreatePlanBodySchema = z.object({
-  name: z.string()
-    .min(1, { message: 'Name is required' })
-    .max(255, { message: 'Name must not exceed 255 characters' })
-    .trim(),  // Remove whitespace
-  start_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Start date must be in YYYY-MM-DD format' })
-    .refine((date) => {
-      const parsed = new Date(date);
-      return !isNaN(parsed.getTime());
-    }, { message: 'Invalid date' })
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must not exceed 255 characters" })
+    .trim(), // Remove whitespace
+  start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Start date must be in YYYY-MM-DD format" })
+    .refine(
+      (date) => {
+        const parsed = new Date(date);
+        return !isNaN(parsed.getTime());
+      },
+      { message: "Invalid date" }
+    ),
 });
 ```
 
@@ -631,15 +675,18 @@ const CreatePlanBodySchema = z.object({
 ### 6.4. Ochrona przed nadużyciami
 
 **Rate Limiting (przyszła implementacja):**
+
 - Limit: 100 żądań / 15 minut na użytkownika dla POST endpoints
 - Implementacja: Middleware w Astro lub na poziomie reverse proxy (nginx)
 - Response: 429 Too Many Requests z header `Retry-After`
 
 **Content-Type validation:**
+
 - Akceptuj tylko `Content-Type: application/json`
 - Odrzuć inne typy zawartości z 415 Unsupported Media Type
 
 **CORS Headers:**
+
 - Ustaw odpowiednie CORS headers w production
 - Ogranicz dozwolone origins do własnej domeny
 
@@ -684,27 +731,29 @@ const CreatePlanBodySchema = z.object({
 
 #### POST /api/v1/plans
 
-| Scenariusz błędu | Kod HTTP | Response Body | Przykład |
-|-----------------|----------|---------------|----------|
-| Brak pola `name` | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name is required"}]}` |
-| `name` > 255 znaków | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name must not exceed 255 characters"}]}` |
-| Brak pola `start_date` | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"start_date","message":"Required"}]}` |
-| Nieprawidłowy format daty | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"start_date","message":"Start date must be in YYYY-MM-DD format"}]}` |
-| `start_date` nie jest poniedziałkiem | 400 | ErrorResponse | `{"error":"Constraint violation","message":"Start date must be a Monday"}` |
-| Brak uwierzytelnienia (przyszłość) | 401 | ErrorResponse | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}` |
-| Błąd bazy danych | 500 | ErrorResponse | `{"error":"Internal server error","message":"An unexpected error occurred"}` |
+| Scenariusz błędu                     | Kod HTTP | Response Body           | Przykład                                                                                                               |
+| ------------------------------------ | -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Brak pola `name`                     | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name is required"}]}`                              |
+| `name` > 255 znaków                  | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name must not exceed 255 characters"}]}`           |
+| Brak pola `start_date`               | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"start_date","message":"Required"}]}`                                |
+| Nieprawidłowy format daty            | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"start_date","message":"Start date must be in YYYY-MM-DD format"}]}` |
+| `start_date` nie jest poniedziałkiem | 400      | ErrorResponse           | `{"error":"Constraint violation","message":"Start date must be a Monday"}`                                             |
+| Brak uwierzytelnienia (przyszłość)   | 401      | ErrorResponse           | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}`                                         |
+| Błąd bazy danych                     | 500      | ErrorResponse           | `{"error":"Internal server error","message":"An unexpected error occurred"}`                                           |
 
 **Przykład kodu:**
+
 ```typescript
 // Handle database constraint errors
-if (error.code === '23514') {  // CHECK constraint violation
-  if (error.message.includes('start_date')) {
+if (error.code === "23514") {
+  // CHECK constraint violation
+  if (error.message.includes("start_date")) {
     return new Response(
       JSON.stringify({
-        error: 'Constraint violation',
-        message: 'Start date must be a Monday'
+        error: "Constraint violation",
+        message: "Start date must be a Monday",
       } as ErrorResponse),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 }
@@ -714,18 +763,19 @@ if (error.code === '23514') {  // CHECK constraint violation
 
 #### PATCH /api/v1/plans/:id
 
-| Scenariusz błędu | Kod HTTP | Response Body | Przykład |
-|-----------------|----------|---------------|----------|
-| Nieprawidłowy format UUID | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"id","message":"Invalid plan ID format"}]}` |
-| Brak pola `name` i `status` w body | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"message":"At least one field (name or status) must be provided"}]}` |
-| Puste pole `name` | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name must not be empty"}]}` |
-| `name` > 255 znaków | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name must not exceed 255 characters"}]}` |
-| Nieprawidłowa wartość `status` | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"status","message":"Status must be one of: ready, active, completed, archived"}]}` |
-| Brak uwierzytelnienia (przyszłość) | 401 | ErrorResponse | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}` |
-| Plan nie istnieje LUB nie należy do użytkownika | 404 | ErrorResponse | `{"error":"Not found","message":"Plan not found"}` |
-| Błąd bazy danych | 500 | ErrorResponse | `{"error":"Internal server error","message":"An unexpected error occurred"}` |
+| Scenariusz błędu                                | Kod HTTP | Response Body           | Przykład                                                                                                                             |
+| ----------------------------------------------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Nieprawidłowy format UUID                       | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"id","message":"Invalid plan ID format"}]}`                                        |
+| Brak pola `name` i `status` w body              | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"message":"At least one field (name or status) must be provided"}]}`                       |
+| Puste pole `name`                               | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name must not be empty"}]}`                                      |
+| `name` > 255 znaków                             | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"name","message":"Name must not exceed 255 characters"}]}`                         |
+| Nieprawidłowa wartość `status`                  | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"status","message":"Status must be one of: ready, active, completed, archived"}]}` |
+| Brak uwierzytelnienia (przyszłość)              | 401      | ErrorResponse           | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}`                                                       |
+| Plan nie istnieje LUB nie należy do użytkownika | 404      | ErrorResponse           | `{"error":"Not found","message":"Plan not found"}`                                                                                   |
+| Błąd bazy danych                                | 500      | ErrorResponse           | `{"error":"Internal server error","message":"An unexpected error occurred"}`                                                         |
 
 **Przykład kodu:**
+
 ```typescript
 // Check if plan was found and belongs to user
 const plan = await planService.updatePlan(planId, userId, validatedData);
@@ -733,10 +783,10 @@ const plan = await planService.updatePlan(planId, userId, validatedData);
 if (!plan) {
   return new Response(
     JSON.stringify({
-      error: 'Not found',
-      message: 'Plan not found'
+      error: "Not found",
+      message: "Plan not found",
     } as ErrorResponse),
-    { status: 404, headers: { 'Content-Type': 'application/json' } }
+    { status: 404, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
@@ -745,14 +795,15 @@ if (!plan) {
 
 #### DELETE /api/v1/plans/:id
 
-| Scenariusz błędu | Kod HTTP | Response Body | Przykład |
-|-----------------|----------|---------------|----------|
-| Nieprawidłowy format UUID | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"id","message":"Invalid plan ID format"}]}` |
-| Brak uwierzytelnienia (przyszłość) | 401 | ErrorResponse | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}` |
-| Plan nie istnieje LUB nie należy do użytkownika | 404 | ErrorResponse | `{"error":"Not found","message":"Plan not found"}` |
-| Błąd bazy danych | 500 | ErrorResponse | `{"error":"Internal server error","message":"An unexpected error occurred"}` |
+| Scenariusz błędu                                | Kod HTTP | Response Body           | Przykład                                                                                      |
+| ----------------------------------------------- | -------- | ----------------------- | --------------------------------------------------------------------------------------------- |
+| Nieprawidłowy format UUID                       | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"id","message":"Invalid plan ID format"}]}` |
+| Brak uwierzytelnienia (przyszłość)              | 401      | ErrorResponse           | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}`                |
+| Plan nie istnieje LUB nie należy do użytkownika | 404      | ErrorResponse           | `{"error":"Not found","message":"Plan not found"}`                                            |
+| Błąd bazy danych                                | 500      | ErrorResponse           | `{"error":"Internal server error","message":"An unexpected error occurred"}`                  |
 
 **Przykład kodu:**
+
 ```typescript
 // Check if plan was found and belongs to user
 const success = await planService.deletePlan(planId, userId);
@@ -760,10 +811,10 @@ const success = await planService.deletePlan(planId, userId);
 if (!success) {
   return new Response(
     JSON.stringify({
-      error: 'Not found',
-      message: 'Plan not found'
+      error: "Not found",
+      message: "Plan not found",
     } as ErrorResponse),
-    { status: 404, headers: { 'Content-Type': 'application/json' } }
+    { status: 404, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
@@ -772,41 +823,43 @@ if (!success) {
 
 #### POST /api/v1/plans/:id/archive
 
-| Scenariusz błędu | Kod HTTP | Response Body | Przykład |
-|-----------------|----------|---------------|----------|
-| Nieprawidłowy format UUID | 400 | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"id","message":"Invalid plan ID format"}]}` |
-| Brak uwierzytelnienia (przyszłość) | 401 | ErrorResponse | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}` |
-| Plan nie istnieje LUB nie należy do użytkownika | 404 | ErrorResponse | `{"error":"Not found","message":"Plan not found"}` |
-| Błąd bazy danych | 500 | ErrorResponse | `{"error":"Internal server error","message":"An unexpected error occurred"}` |
+| Scenariusz błędu                                | Kod HTTP | Response Body           | Przykład                                                                                      |
+| ----------------------------------------------- | -------- | ----------------------- | --------------------------------------------------------------------------------------------- |
+| Nieprawidłowy format UUID                       | 400      | ValidationErrorResponse | `{"error":"Validation failed","details":[{"field":"id","message":"Invalid plan ID format"}]}` |
+| Brak uwierzytelnienia (przyszłość)              | 401      | ErrorResponse           | `{"error":"Unauthorized","message":"Invalid or missing authentication token"}`                |
+| Plan nie istnieje LUB nie należy do użytkownika | 404      | ErrorResponse           | `{"error":"Not found","message":"Plan not found"}`                                            |
+| Błąd bazy danych                                | 500      | ErrorResponse           | `{"error":"Internal server error","message":"An unexpected error occurred"}`                  |
 
 ---
 
 ### 7.3. Logowanie błędów
 
 **Server-side logging:**
+
 ```typescript
 try {
   // ... endpoint logic
 } catch (error) {
   // Log full error details server-side
-  console.error('Error in POST /api/v1/plans:', error);
-  
+  console.error("Error in POST /api/v1/plans:", error);
+
   // Log additional context
-  console.error('User ID:', userId);
-  console.error('Request data:', JSON.stringify(requestData));
-  
+  console.error("User ID:", userId);
+  console.error("Request data:", JSON.stringify(requestData));
+
   // Return generic error to client (don't expose internals)
   return new Response(
     JSON.stringify({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred'
+      error: "Internal server error",
+      message: "An unexpected error occurred",
     } as ErrorResponse),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
+    { status: 500, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
 
 **Przyszłe ulepszenia:**
+
 - Integracja z systemem monitorowania (np. Sentry)
 - Structured logging (np. Winston, Pino)
 - Error tracking dashboard
@@ -819,16 +872,19 @@ try {
 ### 8.1. Optymalizacje zapytań bazodanowych
 
 **Single-record operations:**
+
 - CREATE: O(1) - pojedyncza operacja INSERT
 - UPDATE: O(1) - UPDATE z WHERE id = ... (primary key lookup)
 - ARCHIVE: O(1) - UPDATE z WHERE id = ... (primary key lookup)
 
 **Indeksy wykorzystywane:**
+
 - `plans.id` (PRIMARY KEY) - bardzo szybkie wyszukiwanie
 - `plans.user_id` (idx_plans_user_id) - filtrowanie po właścicielu
 - `plans.status` (idx_plans_status) - przyszłe filtry
 
 **Connection pooling:**
+
 - Supabase automatycznie zarządza connection pooling
 - Nie ma potrzeby ręcznej konfiguracji dla MVP
 
@@ -837,11 +893,13 @@ try {
 ### 8.2. Walidacja i serializacja
 
 **Koszty walidacji Zod:**
+
 - Zod.parse(): ~0.1-0.5ms dla prostych schematów
 - Nakład minimalny w porównaniu do I/O bazy danych
 - Bezpieczeństwo > koszt wydajności
 
 **JSON serialization:**
+
 - Native JSON.stringify() jest wystarczająco szybki
 - Unikaj głęboko zagnieżdżonych obiektów (nie dotyczy tych endpointów)
 
@@ -850,10 +908,12 @@ try {
 ### 8.3. Caching strategies (przyszła implementacja)
 
 **Nie implementować na MVP:**
+
 - Planery są często modyfikowane - cache invalidation complexity
 - Pojedyncze operacje są już bardzo szybkie
 
 **Przyszłe możliwości:**
+
 - Cache user's active plan (GET /api/v1/plans/active)
 - Cache plan lists z TTL 5 minut
 - Invalidate cache po CREATE/UPDATE/ARCHIVE
@@ -863,6 +923,7 @@ try {
 ### 8.4. Rate limiting i throttling
 
 **Strategie ochrony:**
+
 - Limit 100 req/15min per user dla POST/PATCH endpoints
 - Implementacja na poziomie middleware lub reverse proxy
 - Użycie Redis dla distributed rate limiting (przyszłość)
@@ -882,16 +943,21 @@ try {
  * Request body schema for POST /api/v1/plans
  */
 export const CreatePlanBodySchema = z.object({
-  name: z.string()
-    .min(1, { message: 'Name is required' })
-    .max(255, { message: 'Name must not exceed 255 characters' })
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must not exceed 255 characters" })
     .trim(),
-  start_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Start date must be in YYYY-MM-DD format' })
-    .refine((date) => {
-      const parsed = new Date(date);
-      return !isNaN(parsed.getTime());
-    }, { message: 'Invalid date' })
+  start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Start date must be in YYYY-MM-DD format" })
+    .refine(
+      (date) => {
+        const parsed = new Date(date);
+        return !isNaN(parsed.getTime());
+      },
+      { message: "Invalid date" }
+    ),
 });
 
 export type CreatePlanBody = z.infer<typeof CreatePlanBodySchema>;
@@ -900,10 +966,11 @@ export type CreatePlanBody = z.infer<typeof CreatePlanBodySchema>;
  * Request body schema for PATCH /api/v1/plans/:id
  */
 export const UpdatePlanBodySchema = z.object({
-  name: z.string()
-    .min(1, { message: 'Name is required' })
-    .max(255, { message: 'Name must not exceed 255 characters' })
-    .trim()
+  name: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must not exceed 255 characters" })
+    .trim(),
 });
 
 export type UpdatePlanBody = z.infer<typeof UpdatePlanBodySchema>;
@@ -912,7 +979,7 @@ export type UpdatePlanBody = z.infer<typeof UpdatePlanBodySchema>;
  * URL parameter schema for :id endpoints
  */
 export const PlanIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid plan ID format' })
+  id: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
@@ -933,7 +1000,7 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 ```typescript
 /**
  * Tworzy nowy 12-tygodniowy planer
- * 
+ *
  * @param userId - ID użytkownika (z tokenu JWT)
  * @param data - Dane planera (name, start_date)
  * @returns Promise z utworzonym planerem
@@ -975,29 +1042,29 @@ async createPlan(
 
 #### 2.2. updatePlan()
 
-```typescript
+````typescript
 /**
  * Aktualizuje istniejący planer (nazwa i/lub status)
  * Weryfikuje, że planer należy do użytkownika
- * 
+ *
  * @param planId - UUID planera
  * @param userId - ID użytkownika (z tokenu JWT)
  * @param data - Dane do aktualizacji (name and/or status)
  * @returns Promise z zaktualizowanym planerem lub null jeśli nie istnieje
  * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
- * 
+ *
  * @example
  * ```typescript
  * // Update name only
  * const plan = await planService.updatePlan(planId, userId, {
  *   name: 'Updated Q1 2025 Goals'
  * });
- * 
+ *
  * // Activate plan
  * const plan = await planService.updatePlan(planId, userId, {
  *   status: 'active'
  * });
- * 
+ *
  * // Update both
  * const plan = await planService.updatePlan(planId, userId, {
  *   name: 'My Active Plan',
@@ -1012,22 +1079,22 @@ async updatePlan(
 ): Promise<PlanDTO | null> {
   // First verify plan exists and belongs to user
   const existingPlan = await this.getPlanById(planId, userId);
-  
+
   if (!existingPlan) {
     return null;
   }
 
   // Prepare update data with provided fields only
   const updateData: PlanUpdate = {};
-  
+
   if (data.name !== undefined) {
     updateData.name = data.name;
   }
-  
+
   if (data.status !== undefined) {
     updateData.status = data.status;
   }
-  
+
   // updated_at is automatically set by database trigger
 
   // Execute update
@@ -1049,7 +1116,7 @@ async updatePlan(
 
   return plan;
 }
-```
+````
 
 #### 2.3. archivePlan()
 
@@ -1057,7 +1124,7 @@ async updatePlan(
 /**
  * Archiwizuje planer (zmiana statusu na 'archived')
  * Weryfikuje, że planer należy do użytkownika
- * 
+ *
  * @param planId - UUID planera
  * @param userId - ID użytkownika (z tokenu JWT)
  * @returns Promise z zarchiwizowanym planerem lub null jeśli nie istnieje
@@ -1069,7 +1136,7 @@ async archivePlan(
 ): Promise<PlanDTO | null> {
   // First verify plan exists and belongs to user
   const existingPlan = await this.getPlanById(planId, userId);
-  
+
   if (!existingPlan) {
     return null;
   }
@@ -1094,16 +1161,16 @@ async archivePlan(
 
 #### 2.4. deletePlan()
 
-```typescript
+````typescript
 /**
  * Trwale usuwa planer i wszystkie powiązane dane (hard delete)
  * Weryfikuje, że planer należy do użytkownika
- * 
+ *
  * @param planId - UUID planera
  * @param userId - ID użytkownika (z tokenu JWT)
  * @returns Promise z true jeśli usunięto lub null jeśli plan nie istnieje
  * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
- * 
+ *
  * @example
  * ```typescript
  * const success = await planService.deletePlan(planId, userId);
@@ -1118,7 +1185,7 @@ async deletePlan(
 ): Promise<boolean> {
   // First verify plan exists and belongs to user
   const existingPlan = await this.getPlanById(planId, userId);
-  
+
   if (!existingPlan) {
     return false;
   }
@@ -1140,7 +1207,7 @@ async deletePlan(
 
   return true;
 }
-```
+````
 
 **Test:** Napisz unit testy dla każdej metody z mockami Supabase client.
 
@@ -1169,12 +1236,12 @@ export const POST: APIRoute = async ({ locals, request }) => {
     } catch {
       return new Response(
         JSON.stringify({
-          error: 'Invalid JSON',
-          message: 'Request body must be valid JSON'
+          error: "Invalid JSON",
+          message: "Request body must be valid JSON",
         } as ErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -1183,74 +1250,71 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const validationResult = CreatePlanBodySchema.safeParse(body);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 4: Call service to create plan
     const planService = new PlanService(locals.supabase);
-    
+
     try {
       const plan = await planService.createPlan(userId, validationResult.data);
 
       // Step 5: Return successful response
-      return new Response(
-        JSON.stringify({ data: plan } as ItemResponse<PlanDTO>),
-        {
-          status: 201,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff'
-          }
-        }
-      );
+      return new Response(JSON.stringify({ data: plan } as ItemResponse<PlanDTO>), {
+        status: 201,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
     } catch (serviceError) {
       // Handle specific service errors
-      const errorMessage = serviceError instanceof Error ? serviceError.message : 'Unknown error';
-      
+      const errorMessage = serviceError instanceof Error ? serviceError.message : "Unknown error";
+
       // Check for constraint violations (e.g., start_date not Monday)
-      if (errorMessage.includes('Monday')) {
+      if (errorMessage.includes("Monday")) {
         return new Response(
           JSON.stringify({
-            error: 'Constraint violation',
-            message: errorMessage
+            error: "Constraint violation",
+            message: errorMessage,
           } as ErrorResponse),
           {
             status: 400,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { "Content-Type": "application/json" },
           }
         );
       }
-      
+
       // Re-throw for general error handler
       throw serviceError;
     }
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error('Error in POST /api/v1/plans:', error);
-    
+    console.error("Error in POST /api/v1/plans:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1258,14 +1322,14 @@ export const POST: APIRoute = async ({ locals, request }) => {
 ```
 
 **Dodaj import na początku pliku:**
+
 ```typescript
-import { 
-  CreatePlanBodySchema 
-} from '../../../lib/validation/plan.validation';
-import type { ItemResponse } from '../../../types';
+import { CreatePlanBodySchema } from "../../../lib/validation/plan.validation";
+import type { ItemResponse } from "../../../types";
 ```
 
-**Test:** 
+**Test:**
+
 - Testuj z prawidłowymi danymi (201 Created)
 - Testuj z nieprawidłową datą (400)
 - Testuj z datą nie-poniedziałek (400)
@@ -1282,28 +1346,19 @@ import type { ItemResponse } from '../../../types';
 ```typescript
 /**
  * API Endpoint: /api/v1/plans/:id
- * 
+ *
  * GET - Retrieves a single plan by ID
  * PATCH - Updates a plan's name and/or status
  * DELETE - Permanently deletes a plan (hard delete)
- * 
+ *
  * Authentication required for all methods.
  */
 
-import type { APIRoute } from 'astro';
-import { PlanService } from '../../../../lib/services/plan.service';
-import {
-  PlanIdParamsSchema,
-  UpdatePlanBodySchema
-} from '../../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import type {
-  ErrorResponse,
-  ValidationErrorResponse,
-  ItemResponse,
-  SuccessResponse,
-  PlanDTO
-} from '../../../../types';
+import type { APIRoute } from "astro";
+import { PlanService } from "../../../../lib/services/plan.service";
+import { PlanIdParamsSchema, UpdatePlanBodySchema } from "../../../../lib/validation/plan.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ItemResponse, SuccessResponse, PlanDTO } from "../../../../types";
 
 export const prerender = false;
 
@@ -1320,67 +1375,61 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const paramValidation = PlanIdParamsSchema.safeParse(params);
 
     if (!paramValidation.success) {
-      const details = paramValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = paramValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 3: Call service to fetch plan
     const planService = new PlanService(locals.supabase);
-    const plan = await planService.getPlanById(
-      paramValidation.data.id,
-      userId
-    );
+    const plan = await planService.getPlanById(paramValidation.data.id, userId);
 
     // Step 4: Handle not found
     if (!plan) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'Plan not found'
+          error: "Not found",
+          message: "Plan not found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 5: Return successful response
-    return new Response(
-      JSON.stringify({ data: plan } as ItemResponse<PlanDTO>),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify({ data: plan } as ItemResponse<PlanDTO>), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/plans/:id:', error);
-    
+    console.error("Error in GET /api/v1/plans/:id:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1399,20 +1448,20 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
     const paramValidation = PlanIdParamsSchema.safeParse(params);
 
     if (!paramValidation.success) {
-      const details = paramValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = paramValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -1424,12 +1473,12 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
     } catch {
       return new Response(
         JSON.stringify({
-          error: 'Invalid JSON',
-          message: 'Request body must be valid JSON'
+          error: "Invalid JSON",
+          message: "Request body must be valid JSON",
         } as ErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -1438,68 +1487,61 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
     const bodyValidation = UpdatePlanBodySchema.safeParse(body);
 
     if (!bodyValidation.success) {
-      const details = bodyValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = bodyValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 5: Call service to update plan
     const planService = new PlanService(locals.supabase);
-    const plan = await planService.updatePlan(
-      paramValidation.data.id,
-      userId,
-      bodyValidation.data
-    );
+    const plan = await planService.updatePlan(paramValidation.data.id, userId, bodyValidation.data);
 
     // Step 6: Handle not found
     if (!plan) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'Plan not found'
+          error: "Not found",
+          message: "Plan not found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 7: Return successful response
-    return new Response(
-      JSON.stringify({ data: plan } as ItemResponse<PlanDTO>),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify({ data: plan } as ItemResponse<PlanDTO>), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in PATCH /api/v1/plans/:id:', error);
-    
+    console.error("Error in PATCH /api/v1/plans/:id:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1518,41 +1560,38 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
     const paramValidation = PlanIdParamsSchema.safeParse(params);
 
     if (!paramValidation.success) {
-      const details = paramValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = paramValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 3: Call service to delete plan
     const planService = new PlanService(locals.supabase);
-    const success = await planService.deletePlan(
-      paramValidation.data.id,
-      userId
-    );
+    const success = await planService.deletePlan(paramValidation.data.id, userId);
 
     // Step 4: Handle not found
     if (!success) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'Plan not found'
+          error: "Not found",
+          message: "Plan not found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -1560,27 +1599,27 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
     // Step 5: Return successful response
     return new Response(
       JSON.stringify({
-        message: 'Plan deleted successfully'
+        message: "Plan deleted successfully",
       } as SuccessResponse),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
       }
     );
   } catch (error) {
-    console.error('Error in DELETE /api/v1/plans/:id:', error);
-    
+    console.error("Error in DELETE /api/v1/plans/:id:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1588,6 +1627,7 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
 ```
 
 **Test:**
+
 - GET: Testuj z prawidłowym UUID (200)
 - GET: Testuj z nieprawidłowym UUID (400)
 - GET: Testuj z nieistniejącym planem (404)
@@ -1612,6 +1652,7 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
 **Zadanie:** Utwórz nowy plik z handlerem POST dla archiwizacji
 
 **Struktura katalogów:**
+
 ```
 src/pages/api/v1/plans/
 ├── [id].ts          # GET, PATCH
@@ -1624,22 +1665,18 @@ src/pages/api/v1/plans/
 ```typescript
 /**
  * API Endpoint: POST /api/v1/plans/:id/archive
- * 
+ *
  * Archives a plan (sets status to 'archived').
  * This is a soft delete - all related data remains in the database.
- * 
+ *
  * Authentication required.
  */
 
-import type { APIRoute } from 'astro';
-import { PlanService } from '../../../../../lib/services/plan.service';
-import { PlanIdParamsSchema } from '../../../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import type {
-  ErrorResponse,
-  ValidationErrorResponse,
-  SuccessResponse
-} from '../../../../../types';
+import type { APIRoute } from "astro";
+import { PlanService } from "../../../../../lib/services/plan.service";
+import { PlanIdParamsSchema } from "../../../../../lib/validation/plan.validation";
+import { DEFAULT_USER_ID } from "../../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, SuccessResponse } from "../../../../../types";
 
 export const prerender = false;
 
@@ -1656,41 +1693,38 @@ export const POST: APIRoute = async ({ locals, params }) => {
     const paramValidation = PlanIdParamsSchema.safeParse(params);
 
     if (!paramValidation.success) {
-      const details = paramValidation.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = paramValidation.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 3: Call service to archive plan
     const planService = new PlanService(locals.supabase);
-    const plan = await planService.archivePlan(
-      paramValidation.data.id,
-      userId
-    );
+    const plan = await planService.archivePlan(paramValidation.data.id, userId);
 
     // Step 4: Handle not found
     if (!plan) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'Plan not found'
+          error: "Not found",
+          message: "Plan not found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -1700,29 +1734,29 @@ export const POST: APIRoute = async ({ locals, params }) => {
       JSON.stringify({
         data: {
           id: plan.id,
-          status: plan.status
+          status: plan.status,
         },
-        message: 'Plan archived successfully'
+        message: "Plan archived successfully",
       } as SuccessResponse),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
       }
     );
   } catch (error) {
-    console.error('Error in POST /api/v1/plans/:id/archive:', error);
-    
+    console.error("Error in POST /api/v1/plans/:id/archive:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1730,6 +1764,7 @@ export const POST: APIRoute = async ({ locals, params }) => {
 ```
 
 **Test:**
+
 - POST: Testuj archiwizację istniejącego planu (200)
 - POST: Testuj z nieprawidłowym UUID (400)
 - POST: Testuj z nieistniejącym planem (404)
@@ -1741,6 +1776,7 @@ export const POST: APIRoute = async ({ locals, params }) => {
 ### Krok 6: Testowanie integracyjne
 
 **Narzędzia:**
+
 - REST client (np. Thunder Client, Postman, curl)
 - Supabase Studio do weryfikacji danych w bazie
 
@@ -1914,6 +1950,7 @@ curl -X DELETE http://localhost:4321/api/v1/plans/00000000-0000-0000-0000-000000
 - [ ] TypeScript nie wyświetla błędów kompilacji
 
 **Uruchom:**
+
 ```bash
 # Check TypeScript errors
 npm run build
@@ -1954,34 +1991,40 @@ npm run dev
 Po zaimplementowaniu wszystkich kroków będziesz mieć:
 
 ✅ **4 w pełni funkcjonalne endpointy:**
+
 - POST /api/v1/plans - tworzenie planera (status domyślnie 'ready')
 - PATCH /api/v1/plans/:id - aktualizacja nazwy i/lub statusu (w tym aktywacja)
 - DELETE /api/v1/plans/:id - trwałe usunięcie planera (hard delete)
 - POST /api/v1/plans/:id/archive - archiwizacja (soft delete)
 
 ✅ **Kompletną warstewkę aplikacji:**
+
 - Validation layer (Zod schemas)
 - Service layer (business logic)
 - API routes (HTTP handlers)
 
 ✅ **Bezpieczeństwo:**
+
 - Walidacja danych wejściowych (Zod)
 - Weryfikacja właściciela zasobu (user_id filtering)
 - Przyjazne komunikaty błędów
 - Kaskadowe usuwanie danych przy DELETE
 
 ✅ **Funkcje biznesowe:**
+
 - Domyślny status 'ready' dla nowych planerów
 - Aktywacja planera przez PATCH (zmiana statusu na 'active')
 - **Single active plan trigger:** Automatyczne ustawienie innych aktywnych planerów na 'ready' przy aktywacji
 - Rozróżnienie między hard delete (DELETE) a soft delete (Archive)
 
 ✅ **Wydajność:**
+
 - Optymalne zapytania bazodanowe
 - Wykorzystanie indeksów
 - Minimalna liczba round-trips do DB
 
 ✅ **Dokumentację:**
+
 - Ten implementation plan
 - Komentarze w kodzie
 - Type definitions
@@ -2019,14 +2062,14 @@ Po zaimplementowaniu wszystkich kroków będziesz mieć:
 **Dokument stworzony:** 2025-01-26  
 **Ostatnia aktualizacja:** 2025-10-29  
 **Wersja:** 2.0  
-**Autor:** AI Architecture Assistant  
+**Autor:** AI Architecture Assistant
 
 **Historia zmian:**
-- **v2.0 (2025-10-29):** 
+
+- **v2.0 (2025-10-29):**
   - Dodano endpoint DELETE dla hard delete
   - Zaktualizowano PATCH do obsługi aktualizacji statusu
   - Zmieniono domyślny status z 'active' na 'ready'
   - Dodano obsługę single active plan trigger
   - Rozszerzono dokumentację o nowy status 'ready'
 - **v1.0 (2025-01-26):** Pierwsza wersja dokumentu
-

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { PlanDTO, CreatePlanCommand, PlanStatus, ListResponse, ItemResponse } from "@/types";
+import type { PlanDTO, CreatePlanCommand, PlanStatus, ListResponse } from "@/types";
 
 interface UsePlansState {
   plans: PlanDTO[];

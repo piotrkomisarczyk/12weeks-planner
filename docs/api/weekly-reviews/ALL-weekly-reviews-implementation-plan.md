@@ -3,11 +3,13 @@
 ## 1. Przegląd punktów końcowych
 
 Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowaniami (weekly reviews) w systemie 12-weeks planner. Weekly reviews pozwalają użytkownikom refleksyjnie ocenić każdy tydzień, odpowiadając na 3 kluczowe pytania:
+
 - Co się udało? (what_worked)
 - Co się nie udało? (what_did_not_work)
 - Co mogę poprawić? (what_to_improve)
 
 **Endpointy:**
+
 1. `GET /api/v1/weekly-reviews` - Lista przeglądów z filtrami
 2. `GET /api/v1/weekly-reviews/week/:weekNumber` - Przegląd dla konkretnego tygodnia
 3. `GET /api/v1/weekly-reviews/:id` - Konkretny przegląd po ID
@@ -17,6 +19,7 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 7. `DELETE /api/v1/weekly-reviews/:id` - Usunięcie przeglądu
 
 **Kluczowe cechy:**
+
 - Auto-save support dla text fields (mogą być puste podczas tworzenia)
 - Unique constraint: jeden review na plan_id + week_number
 - is_completed flag do oznaczania wypełnionych przeglądów
@@ -33,6 +36,7 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Pobiera listę weekly reviews z opcjonalnymi filtrami
 
 **Query Parameters:**
+
 - `plan_id` (required): UUID - ID planera
 - `week_number` (optional): integer 1-12 - filtrowanie po tygodniu
 - `is_completed` (optional): boolean - filtrowanie po statusie ukończenia
@@ -40,6 +44,7 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 - `offset` (optional): integer >= 0, default: 0
 
 **Response 200 OK:**
+
 ```json
 {
   "data": [WeeklyReviewDTO[]],
@@ -56,12 +61,15 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Pobiera review dla konkretnego tygodnia w planerze
 
 **URL Parameters:**
+
 - `weekNumber` (required): integer 1-12 - numer tygodnia
 
 **Query Parameters:**
+
 - `plan_id` (required): UUID - ID planera
 
 **Response 200 OK:**
+
 ```json
 {
   "data": WeeklyReviewDTO
@@ -79,9 +87,11 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Pobiera konkretny review po ID
 
 **URL Parameters:**
+
 - `id` (required): UUID - ID weekly review
 
 **Response 200 OK:**
+
 ```json
 {
   "data": WeeklyReviewDTO
@@ -97,6 +107,7 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Tworzy nowy weekly review
 
 **Request Body:**
+
 ```json
 {
   "plan_id": "uuid",
@@ -108,12 +119,14 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 ```
 
 **Validation:**
+
 - `plan_id`: Required, valid UUID
 - `week_number`: Required, integer 1-12
 - Text fields: Optional (auto-save support)
 - Unique constraint: plan_id + week_number
 
 **Response 201 Created:**
+
 ```json
 {
   "data": WeeklyReviewDTO
@@ -131,9 +144,11 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Aktualizuje review (partial update, auto-save)
 
 **URL Parameters:**
+
 - `id` (required): UUID - ID weekly review
 
 **Request Body (wszystkie pola opcjonalne):**
+
 ```json
 {
   "what_worked": "string",
@@ -144,10 +159,12 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 ```
 
 **Validation:**
+
 - Wszystkie pola opcjonalne
 - Przynajmniej jedno pole musi być podane
 
 **Response 200 OK:**
+
 ```json
 {
   "data": WeeklyReviewDTO
@@ -163,11 +180,13 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Oznacza review jako ukończony
 
 **URL Parameters:**
+
 - `id` (required): UUID - ID weekly review
 
 **Request Body:** Brak
 
 **Response 200 OK:**
+
 ```json
 {
   "data": {
@@ -187,9 +206,11 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Opis:** Usuwa weekly review
 
 **URL Parameters:**
+
 - `id` (required): UUID - ID weekly review
 
 **Response 200 OK:**
+
 ```json
 {
   "message": "Weekly review deleted successfully"
@@ -203,6 +224,7 @@ Implementacja 7 endpointów REST API do zarządzania cotygodniowymi podsumowania
 **Z src/types.ts:**
 
 ### DTOs:
+
 ```typescript
 // Weekly Review DTO - mapuje do weekly_reviews table
 type WeeklyReviewDTO = {
@@ -215,10 +237,11 @@ type WeeklyReviewDTO = {
   is_completed: boolean;
   created_at: string;
   updated_at: string;
-}
+};
 ```
 
 ### Command Models:
+
 ```typescript
 // Create Command
 type CreateWeeklyReviewCommand = {
@@ -227,7 +250,7 @@ type CreateWeeklyReviewCommand = {
   what_worked?: string | null;
   what_did_not_work?: string | null;
   what_to_improve?: string | null;
-}
+};
 
 // Update Command
 type UpdateWeeklyReviewCommand = {
@@ -235,10 +258,11 @@ type UpdateWeeklyReviewCommand = {
   what_did_not_work?: string | null;
   what_to_improve?: string | null;
   is_completed?: boolean;
-}
+};
 ```
 
 ### Query Params:
+
 ```typescript
 type WeeklyReviewListParams = {
   plan_id: string;
@@ -246,38 +270,39 @@ type WeeklyReviewListParams = {
   is_completed?: boolean;
   limit?: number;
   offset?: number;
-}
+};
 
 type WeeklyReviewByWeekParams = {
   plan_id: string;
-}
+};
 ```
 
 ### Response Types:
+
 ```typescript
 type ListResponse<T> = {
   data: T[];
   count?: number;
-}
+};
 
 type ItemResponse<T> = {
   data: T;
-}
+};
 
 type SuccessResponse = {
-  data?: { id: string; [key: string]: unknown; };
+  data?: { id: string; [key: string]: unknown };
   message: string;
-}
+};
 
 type ErrorResponse = {
   error: string;
   message?: string;
-}
+};
 
 type ValidationErrorResponse = {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
-}
+};
 ```
 
 ---
@@ -390,17 +415,22 @@ type ValidationErrorResponse = {
 ### 5.1 Uwierzytelnianie
 
 **MVP (Current):**
+
 - Używa `DEFAULT_USER_ID` jako placeholder
 - Brak JWT token verification
 - Wszystkie requesty traktowane jako authenticated user
 
 **Production (Future):**
+
 ```typescript
 // TODO: Replace DEFAULT_USER_ID with:
-const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-const { data: { user }, error } = await supabase.auth.getUser(token);
+const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser(token);
 if (error || !user) {
-  return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 }
 const userId = user.id;
 ```
@@ -408,11 +438,13 @@ const userId = user.id;
 ### 5.2 Autoryzacja
 
 **Row Level Security (RLS):**
+
 - Polityki w DB: `weekly_reviews` table (zdefiniowane w db-plan.md)
 - Weryfikacja: `weekly_reviews → plans → auth.users`
 - Każda operacja sprawdza ownership przez relację
 
 **Service Layer:**
+
 - Explicit ownership verification przed operacjami
 - `PlanService.getPlanById(planId, userId)` - weryfikuje plan należy do usera
 - Zwraca null jeśli brak dostępu
@@ -420,28 +452,31 @@ const userId = user.id;
 ### 5.3 Walidacja danych wejściowych
 
 **Zod Schemas:**
+
 ```typescript
 // UUID validation
-z.string().uuid({ message: 'Invalid UUID format' })
+z.string().uuid({ message: "Invalid UUID format" });
 
 // Week number validation
 z.number()
   .int()
-  .min(1, { message: 'Week number must be at least 1' })
-  .max(12, { message: 'Week number must not exceed 12' })
+  .min(1, { message: "Week number must be at least 1" })
+  .max(12, { message: "Week number must not exceed 12" });
 
 // Text fields - optional, nullable
-z.string().trim().nullable().optional()
+z.string().trim().nullable().optional();
 
 // Boolean
-z.boolean().optional()
+z.boolean().optional();
 ```
 
 **Sanitization:**
+
 - `.trim()` na wszystkich text inputs
 - Usuwanie whitespace przed zapisem do DB
 
 **Injection Prevention:**
+
 - Supabase query builder (parametryzowane zapytania)
 - Brak raw SQL w application layer
 - Prepared statements przez Supabase SDK
@@ -451,6 +486,7 @@ z.boolean().optional()
 **MVP:** Nie zaimplementowane
 
 **Future:**
+
 - Middleware level rate limiting
 - Rate limit per user: 100 requests/min
 - Rate limit per IP: 1000 requests/hour
@@ -460,6 +496,7 @@ z.boolean().optional()
 ### 5.5 CORS & Security Headers
 
 **Headers:**
+
 ```typescript
 {
   'Content-Type': 'application/json',
@@ -476,13 +513,16 @@ z.boolean().optional()
 ### 6.1 Kody statusu i scenariusze
 
 **200 OK:**
+
 - Successful GET, PATCH, DELETE operations
 - Successful POST /complete
 
 **201 Created:**
+
 - Successful POST /api/v1/weekly-reviews
 
 **400 Bad Request:**
+
 - Invalid JSON in request body
 - Zod validation errors (invalid UUID, week_number out of range)
 - Missing required fields
@@ -490,22 +530,26 @@ z.boolean().optional()
 - Text fields too long (if limits added)
 
 **401 Unauthorized (Future):**
+
 - Missing JWT token
 - Invalid/expired JWT token
 - Not implemented in MVP (uses DEFAULT_USER_ID)
 
 **404 Not Found:**
+
 - Weekly review nie istnieje dla danego ID
 - Weekly review nie należy do użytkownika
 - Plan nie istnieje lub nie należy do użytkownika
 - Review nie istnieje dla plan_id + week_number (GET by week)
 
 **409 Conflict:**
+
 - Review już istnieje dla plan_id + week_number combination
 - Database unique constraint violation
 - Handled przez PostgreSQL constraint
 
 **500 Internal Server Error:**
+
 - Unexpected errors w application logic
 - Database connection failures
 - Supabase query failures
@@ -514,6 +558,7 @@ z.boolean().optional()
 ### 6.2 Error Response Formats
 
 **Validation Error (400):**
+
 ```json
 {
   "error": "Validation failed",
@@ -528,6 +573,7 @@ z.boolean().optional()
 ```
 
 **Generic Error (400, 404, 500):**
+
 ```json
 {
   "error": "Weekly review not found",
@@ -536,6 +582,7 @@ z.boolean().optional()
 ```
 
 **Conflict Error (409):**
+
 ```json
 {
   "error": "Conflict",
@@ -564,11 +611,13 @@ try {
 ```
 
 **Error Logging:**
+
 - `console.error()` dla wszystkich błędów
 - Include: endpoint name, error message, stack trace
 - Format: `Error in [METHOD /path]:`, error object
 
 **Client Error Messages:**
+
 - User-friendly messages
 - No sensitive information leaked
 - No stack traces w production
@@ -580,6 +629,7 @@ try {
 ### 7.1 Database Indexes
 
 **Existing (from db-plan.md):**
+
 ```sql
 -- Primary index
 idx_weekly_reviews_plan_id ON (plan_id)
@@ -592,6 +642,7 @@ idx_weekly_reviews_is_completed ON (is_completed)
 ```
 
 **Query Performance:**
+
 - GET list by plan_id: O(log n) - index on plan_id
 - GET by plan_id + week_number: O(1) - composite index
 - Filter by is_completed: O(log n) - partial index
@@ -599,11 +650,13 @@ idx_weekly_reviews_is_completed ON (is_completed)
 ### 7.2 Pagination
 
 **Implementation:**
+
 - Default limit: 50
 - Max limit: 100 (prevents large result sets)
 - Offset-based pagination (simple, acceptable for MVP)
 
 **Future Optimization:**
+
 - Cursor-based pagination dla large datasets
 - `cursor` param zamiast `offset`
 - Better performance dla deep pagination
@@ -611,11 +664,13 @@ idx_weekly_reviews_is_completed ON (is_completed)
 ### 7.3 Query Optimization
 
 **N+1 Prevention:**
+
 - Single query dla list (bez nested queries)
 - WeeklyReviewDTO nie zawiera nested objects
 - No joins required (flat structure)
 
 **Connection Pooling:**
+
 - Handled przez Supabase SDK
 - Connection reuse przez middleware
 
@@ -624,6 +679,7 @@ idx_weekly_reviews_is_completed ON (is_completed)
 **Not implemented in MVP**
 
 **Future:**
+
 - Cache weekly reviews per plan (Redis)
 - TTL: 5 minutes
 - Invalidation: on PATCH, POST complete, DELETE
@@ -634,11 +690,13 @@ idx_weekly_reviews_is_completed ON (is_completed)
 **Issue:** Frequent PATCH requests podczas pisania
 
 **Mitigation:**
+
 - Client-side debouncing (500ms)
 - Optimistic UI updates
 - Background save (non-blocking)
 
 **Database:**
+
 - `updated_at` trigger auto-updates (low overhead)
 - Indexed queries (fast updates)
 
@@ -651,6 +709,7 @@ idx_weekly_reviews_is_completed ON (is_completed)
 **Plik:** `src/lib/validation/weekly-review.validation.ts`
 
 **Zadania:**
+
 1. Zdefiniuj `CreateWeeklyReviewBodySchema`:
    - `plan_id`: UUID, required
    - `week_number`: integer 1-12, required
@@ -685,6 +744,7 @@ idx_weekly_reviews_is_completed ON (is_completed)
 **Klasa:** `WeeklyReviewService`
 
 **Constructor:**
+
 ```typescript
 constructor(private supabase: SupabaseClient) {}
 ```
@@ -692,6 +752,7 @@ constructor(private supabase: SupabaseClient) {}
 **Metody:**
 
 #### 2.1 `createWeeklyReview(userId, data)`
+
 - Verify plan exists: `PlanService.getPlanById()`
 - Check unique constraint (try-catch for DB error)
 - Insert into `weekly_reviews` table
@@ -699,18 +760,21 @@ constructor(private supabase: SupabaseClient) {}
 - Throw errors: plan not found, conflict
 
 #### 2.2 `getWeeklyReviewById(id, userId)`
+
 - Query with join to plans (verify user_id)
 - `.maybeSingle()`
 - Remove nested plans data
 - Return WeeklyReviewDTO | null
 
 #### 2.3 `getWeeklyReviewByWeek(planId, weekNumber, userId)`
+
 - Verify plan exists & belongs to user
 - Query by plan_id + week_number
 - `.maybeSingle()`
 - Return WeeklyReviewDTO | null
 
 #### 2.4 `listWeeklyReviews(params, userId)`
+
 - Verify plan exists & belongs to user
 - Build query with filters (week_number, is_completed)
 - Apply pagination (limit, offset)
@@ -718,6 +782,7 @@ constructor(private supabase: SupabaseClient) {}
 - Return WeeklyReviewDTO[]
 
 #### 2.5 `updateWeeklyReview(id, userId, data)`
+
 - Verify review exists & belongs to user
 - Prepare partial update data
 - Execute update with `.eq('id', id)`
@@ -725,12 +790,14 @@ constructor(private supabase: SupabaseClient) {}
 - Handle not found
 
 #### 2.6 `markAsComplete(id, userId)`
+
 - Verify review exists & belongs to user
 - Update `is_completed = true`
 - Return success boolean
 - Handle not found
 
 #### 2.7 `deleteWeeklyReview(id, userId)`
+
 - Verify review exists & belongs to user
 - Execute delete
 - Return success boolean
@@ -739,17 +806,18 @@ constructor(private supabase: SupabaseClient) {}
 **Wzór:** `src/lib/services/weekly-goal.service.ts`
 
 **Imports:**
+
 ```typescript
-import type { SupabaseClient } from '../../db/supabase.client';
+import type { SupabaseClient } from "../../db/supabase.client";
 import type {
   WeeklyReviewDTO,
   CreateWeeklyReviewCommand,
   UpdateWeeklyReviewCommand,
   WeeklyReviewListParams,
   WeeklyReviewInsert,
-  WeeklyReviewUpdate
-} from '../../types';
-import { PlanService } from './plan.service';
+  WeeklyReviewUpdate,
+} from "../../types";
+import { PlanService } from "./plan.service";
 ```
 
 ---
@@ -759,6 +827,7 @@ import { PlanService } from './plan.service';
 **Plik:** `src/pages/api/v1/weekly-reviews/index.ts`
 
 **Exports:**
+
 ```typescript
 export const prerender = false;
 export const GET: APIRoute = async ({ locals, request }) => { ... }
@@ -766,6 +835,7 @@ export const POST: APIRoute = async ({ locals, request }) => { ... }
 ```
 
 #### GET Handler:
+
 1. Get userId (DEFAULT_USER_ID for MVP)
 2. Parse query params from URL
 3. Validate with `WeeklyReviewListQuerySchema.safeParse()`
@@ -777,6 +847,7 @@ export const POST: APIRoute = async ({ locals, request }) => { ... }
 7. Return 200 with `ListResponse<WeeklyReviewDTO>`
 
 #### POST Handler:
+
 1. Get userId (DEFAULT_USER_ID)
 2. Parse request body (try-catch for invalid JSON)
 3. Validate with `CreateWeeklyReviewBodySchema.safeParse()`
@@ -791,21 +862,22 @@ export const POST: APIRoute = async ({ locals, request }) => { ... }
 **Wzór:** `src/pages/api/v1/weekly-goals/index.ts`
 
 **Imports:**
+
 ```typescript
-import type { APIRoute } from 'astro';
-import { WeeklyReviewService } from '../../../../lib/services/weekly-review.service';
-import { 
+import type { APIRoute } from "astro";
+import { WeeklyReviewService } from "../../../../lib/services/weekly-review.service";
+import {
   WeeklyReviewListQuerySchema,
-  CreateWeeklyReviewBodySchema 
-} from '../../../../lib/validation/weekly-review.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
+  CreateWeeklyReviewBodySchema,
+} from "../../../../lib/validation/weekly-review.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import type {
+  ErrorResponse,
   ValidationErrorResponse,
   ListResponse,
   ItemResponse,
-  WeeklyReviewDTO
-} from '../../../../types';
+  WeeklyReviewDTO,
+} from "../../../../types";
 ```
 
 ---
@@ -815,6 +887,7 @@ import type {
 **Plik:** `src/pages/api/v1/weekly-reviews/[id].ts`
 
 **Exports:**
+
 ```typescript
 export const prerender = false;
 export const GET: APIRoute = async ({ params, locals }) => { ... }
@@ -823,6 +896,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => { ... }
 ```
 
 #### GET Handler:
+
 1. Get userId
 2. Validate `id` param with `WeeklyReviewIdParamsSchema`
 3. Handle validation errors → 400
@@ -831,6 +905,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => { ... }
 6. Return 200 with `ItemResponse<WeeklyReviewDTO>`
 
 #### PATCH Handler:
+
 1. Get userId
 2. Validate `id` param
 3. Parse request body (try-catch)
@@ -841,6 +916,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => { ... }
 8. Return 200 with `ItemResponse<WeeklyReviewDTO>`
 
 #### DELETE Handler:
+
 1. Get userId
 2. Validate `id` param
 3. Call `weeklyReviewService.deleteWeeklyReview()`
@@ -856,6 +932,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => { ... }
 **Plik:** `src/pages/api/v1/weekly-reviews/[id]/complete.ts`
 
 **Struktura:**
+
 ```
 src/pages/api/v1/weekly-reviews/
   [id]/
@@ -863,18 +940,21 @@ src/pages/api/v1/weekly-reviews/
 ```
 
 **Export:**
+
 ```typescript
 export const prerender = false;
 export const POST: APIRoute = async ({ params, locals }) => { ... }
 ```
 
 **POST Handler:**
+
 1. Get userId (DEFAULT_USER_ID)
 2. Validate `id` param with `WeeklyReviewIdParamsSchema`
 3. Handle validation errors → 400
 4. Call `weeklyReviewService.markAsComplete(id, userId)`
 5. If false (not found) → 404
 6. Return 200 with:
+
 ```json
 {
   "data": { "id": id, "is_completed": true },
@@ -883,16 +963,18 @@ export const POST: APIRoute = async ({ params, locals }) => { ... }
 ```
 
 **Imports:**
+
 ```typescript
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
-import { WeeklyReviewService } from '../../../../../lib/services/weekly-review.service';
-import { WeeklyReviewIdParamsSchema } from '../../../../../lib/validation/weekly-review.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import type { ErrorResponse, ValidationErrorResponse, SuccessResponse } from '../../../../../types';
+import type { APIRoute } from "astro";
+import { z } from "zod";
+import { WeeklyReviewService } from "../../../../../lib/services/weekly-review.service";
+import { WeeklyReviewIdParamsSchema } from "../../../../../lib/validation/weekly-review.validation";
+import { DEFAULT_USER_ID } from "../../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, SuccessResponse } from "../../../../../types";
 ```
 
 **Error Handling:**
+
 - Try-catch wrapper
 - console.error for unexpected errors
 - Return 500 for unhandled exceptions
@@ -904,6 +986,7 @@ import type { ErrorResponse, ValidationErrorResponse, SuccessResponse } from '..
 **Plik:** `src/pages/api/v1/weekly-reviews/week/[weekNumber].ts`
 
 **Struktura:**
+
 ```
 src/pages/api/v1/weekly-reviews/
   week/
@@ -911,12 +994,14 @@ src/pages/api/v1/weekly-reviews/
 ```
 
 **Export:**
+
 ```typescript
 export const prerender = false;
 export const GET: APIRoute = async ({ params, request, locals }) => { ... }
 ```
 
 **GET Handler:**
+
 1. Get userId (DEFAULT_USER_ID)
 2. Parse `weekNumber` from params
 3. Parse `plan_id` from query string
@@ -931,20 +1016,16 @@ export const GET: APIRoute = async ({ params, request, locals }) => { ... }
 10. Return 200 with `ItemResponse<WeeklyReviewDTO>`
 
 **Imports:**
+
 ```typescript
-import type { APIRoute } from 'astro';
-import { WeeklyReviewService } from '../../../../../lib/services/weekly-review.service';
-import { 
+import type { APIRoute } from "astro";
+import { WeeklyReviewService } from "../../../../../lib/services/weekly-review.service";
+import {
   WeeklyReviewByWeekParamsSchema,
-  WeeklyReviewByWeekQuerySchema 
-} from '../../../../../lib/validation/weekly-review.validation';
-import { DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
-  ValidationErrorResponse,
-  ItemResponse,
-  WeeklyReviewDTO
-} from '../../../../../types';
+  WeeklyReviewByWeekQuerySchema,
+} from "../../../../../lib/validation/weekly-review.validation";
+import { DEFAULT_USER_ID } from "../../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ItemResponse, WeeklyReviewDTO } from "../../../../../types";
 ```
 
 ---
@@ -1047,6 +1128,7 @@ GET http://localhost:4321/api/v1/weekly-reviews/week/10?plan_id={{planId}}
 ```
 
 **Test Scenarios:**
+
 - Happy path: create, read, update, complete, delete
 - Validation errors: invalid UUIDs, out of range, missing fields
 - Not found errors: non-existent IDs, wrong user
@@ -1094,6 +1176,7 @@ GET http://localhost:4321/api/v1/weekly-reviews/week/10?plan_id={{planId}}
 ## 9. Podsumowanie implementacji
 
 **Pliki do utworzenia:**
+
 1. `src/lib/validation/weekly-review.validation.ts` - 7 schemas
 2. `src/lib/services/weekly-review.service.ts` - 7 methods
 3. `src/pages/api/v1/weekly-reviews/index.ts` - GET, POST
@@ -1103,6 +1186,7 @@ GET http://localhost:4321/api/v1/weekly-reviews/week/10?plan_id={{planId}}
 7. `api-tests/weekly-reviews-tests.http` - test cases
 
 **Szacowany czas implementacji:**
+
 - Krok 1 (Validation): 1-2h
 - Krok 2 (Service): 2-3h
 - Krok 3-6 (Endpoints): 3-4h
@@ -1111,10 +1195,12 @@ GET http://localhost:4321/api/v1/weekly-reviews/week/10?plan_id={{planId}}
 - **Total: 8-12h**
 
 **Zależności:**
+
 - Istniejące: PlanService, SupabaseClient, types.ts
 - Database: weekly_reviews table, RLS policies, triggers (już istniejące)
 
 **Następne kroki po implementacji:**
+
 1. Integration testing z frontend
 2. Performance testing (load test)
 3. Security audit
@@ -1139,4 +1225,3 @@ GET http://localhost:4321/api/v1/weekly-reviews/week/10?plan_id={{planId}}
 - [ ] Documentation updated
 
 **Po zakończeniu wszystkich kroków, weekly reviews API będzie w pełni funkcjonalne i gotowe do integracji z frontendem.**
-

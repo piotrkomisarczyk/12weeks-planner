@@ -83,7 +83,6 @@ export function GoalCard({
   // Compute flags from plan status
   const planStatus = planContext.status as PlanStatus;
   const isReadOnly = isPlanReadOnly(planStatus);
-  const isReady = isPlanReady(planStatus);
   const canChangeProgress = canChangeGoalProgress(planStatus);
   const isDisabled = isReadOnly || isDeleting;
 
@@ -192,8 +191,8 @@ export function GoalCard({
                   <DialogHeader>
                     <DialogTitle>Delete Goal</DialogTitle>
                     <DialogDescription>
-                      Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones.
-                      This action cannot be undone.
+                      Are you sure you want to delete &quot;{goal.title}&quot;? This will also delete all associated
+                      milestones. This action cannot be undone.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>

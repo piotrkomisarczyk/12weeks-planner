@@ -3,9 +3,11 @@
 ## 1. Przegląd punktów końcowych
 
 ### GET /api/v1/plans/active
+
 Zwraca aktualnie aktywny planer dla zalogowanego użytkownika. Jeden użytkownik może mieć tylko jeden aktywny planer w danym czasie (status='active'). Endpoint ten jest używany do szybkiego dostępu do głównego, roboczego planera użytkownika bez znajomości jego ID.
 
 ### GET /api/v1/plans/:id
+
 Zwraca konkretny planer na podstawie jego identyfikatora UUID. Endpoint weryfikuje, czy planer należy do zalogowanego użytkownika, zapobiegając nieautoryzowanemu dostępowi do planerów innych użytkowników.
 
 ---
@@ -19,14 +21,16 @@ Zwraca konkretny planer na podstawie jego identyfikatora UUID. Endpoint weryfiku
 **Struktura URL:** `/api/v1/plans/active`
 
 **Parametry:**
+
 - Wymagane: brak
 - Opcjonalne: brak
-- Headers: 
+- Headers:
   - Authorization: Bearer token (w przyszłości - obecnie używamy DEFAULT_USER_ID)
 
 **Request Body:** N/A (GET request)
 
 **Przykładowe żądanie:**
+
 ```bash
 GET /api/v1/plans/active HTTP/1.1
 Host: api.example.com
@@ -40,6 +44,7 @@ Authorization: Bearer <jwt_token>
 **Struktura URL:** `/api/v1/plans/:id`
 
 **Parametry:**
+
 - Wymagane:
   - `id` (UUID) - identyfikator planera w formacie UUID v4
 - Opcjonalne: brak
@@ -49,6 +54,7 @@ Authorization: Bearer <jwt_token>
 **Request Body:** N/A (GET request)
 
 **Przykładowe żądanie:**
+
 ```bash
 GET /api/v1/plans/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d HTTP/1.1
 Host: api.example.com
@@ -80,7 +86,7 @@ export interface ErrorResponse {
 
 // ValidationErrorResponse - dla błędów walidacji (linia 446-449)
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 
@@ -96,17 +102,17 @@ export interface ValidationErrorDetail {
 
 ```typescript
 // PlanEntity z database.types.ts (linia 19)
-export type PlanEntity = Database['public']['Tables']['plans']['Row'];
+export type PlanEntity = Database["public"]["Tables"]["plans"]["Row"];
 
 // Struktura PlanEntity:
 {
-  id: string;                    // UUID
-  user_id: string;               // UUID
-  name: string;                  // TEXT
-  start_date: string;            // DATE (ISO format)
-  status: 'ready' | 'active' | 'completed' | 'archived';
-  created_at: string;            // TIMESTAMPTZ (ISO format)
-  updated_at: string;            // TIMESTAMPTZ (ISO format)
+  id: string; // UUID
+  user_id: string; // UUID
+  name: string; // TEXT
+  start_date: string; // DATE (ISO format)
+  status: "ready" | "active" | "completed" | "archived";
+  created_at: string; // TIMESTAMPTZ (ISO format)
+  updated_at: string; // TIMESTAMPTZ (ISO format)
 }
 ```
 
@@ -117,7 +123,7 @@ Nowe typy do dodania w `src/lib/validation/plan.validation.ts`:
 ```typescript
 // Walidacja parametru :id dla GET /api/v1/plans/:id
 export const GetPlanByIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid plan ID format' })
+  id: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
@@ -130,6 +136,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ### GET /api/v1/plans/active
 
 **Sukces (200 OK):**
+
 ```json
 {
   "data": {
@@ -145,6 +152,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ```
 
 **Nie znaleziono (404 Not Found):**
+
 ```json
 {
   "error": "Not found",
@@ -153,6 +161,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ```
 
 **Nieautoryzowany (401 Unauthorized):**
+
 ```json
 {
   "error": "Unauthorized",
@@ -161,6 +170,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ```
 
 **Błąd serwera (500 Internal Server Error):**
+
 ```json
 {
   "error": "Internal server error",
@@ -171,6 +181,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ### GET /api/v1/plans/:id
 
 **Sukces (200 OK):**
+
 ```json
 {
   "data": {
@@ -186,6 +197,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ```
 
 **Nieprawidłowy UUID (400 Bad Request):**
+
 ```json
 {
   "error": "Validation failed",
@@ -200,15 +212,18 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ```
 
 **Nie znaleziono (404 Not Found):**
+
 ```json
 {
   "error": "Not found",
   "message": "Plan not found"
 }
 ```
-*Uwaga: Ta sama odpowiedź zwracana jest zarówno gdy plan nie istnieje, jak i gdy należy do innego użytkownika (ze względów bezpieczeństwa).*
+
+_Uwaga: Ta sama odpowiedź zwracana jest zarówno gdy plan nie istnieje, jak i gdy należy do innego użytkownika (ze względów bezpieczeństwa)._
 
 **Nieautoryzowany (401 Unauthorized):**
+
 ```json
 {
   "error": "Unauthorized",
@@ -217,6 +232,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ```
 
 **Błąd serwera (500 Internal Server Error):**
+
 ```json
 {
   "error": "Internal server error",
@@ -369,28 +385,33 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ### 6.1. Uwierzytelnianie (Authentication)
 
 **Aktualny stan (MVP/Development):**
+
 - Używamy stałej `DEFAULT_USER_ID` zdefiniowanej w `src/db/supabase.client.ts`
 - Middleware w `src/middleware/index.ts` dodaje klienta Supabase do `context.locals`
 - Uproszczone podejście umożliwia szybkie testowanie manualne bez konfiguracji JWT
 
 **Przyszła implementacja (Production):**
+
 - Wyciągnąć JWT token z nagłówka `Authorization: Bearer <token>`
 - Zweryfikować token przez `locals.supabase.auth.getUser()`
 - Wyciągnąć `user_id` z zweryfikowanego tokena
 - Zwrócić 401 Unauthorized jeśli token jest nieprawidłowy lub brakuje
 
 **Zgodność z regułami backendu:**
+
 - Używamy `locals.supabase` zamiast importowania `supabaseClient` bezpośrednio
 - Typ `SupabaseClient` z `src/db/supabase.client.ts`, nie z `@supabase/supabase-js`
 
 ### 6.2. Autoryzacja (Authorization)
 
 **Kluczowe zabezpieczenie:**
+
 - **ZAWSZE** filtrować zapytania po `user_id` w metodach serwisu
 - Dla `GET /api/v1/plans/:id` - zapobiegamy dostępowi do planerów innych użytkowników
 - Nie ujawniać w odpowiedzi czy planer nie istnieje czy należy do innego użytkownika (zawsze 404)
 
 **Row Level Security (RLS):**
+
 - Database posiada polityki RLS (zdefiniowane w migracji `20251016120300_create_rls_policies.sql`)
 - Polityki są obecnie wyłączone dla MVP (`20251016120600_disable_all_policies.sql`)
 - Po implementacji prawdziwej autentykacji - włączyć RLS jako dodatkową warstwę bezpieczeństwa
@@ -398,6 +419,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ### 6.3. Walidacja danych wejściowych
 
 **GET /api/v1/plans/:id:**
+
 - Walidacja formatu UUID zapobiega SQL injection
 - Użycie Zod schema: `z.string().uuid()`
 - Nieprawidłowy format → 400 Bad Request
@@ -405,6 +427,7 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ### 6.4. Nagłówki bezpieczeństwa
 
 Dodać do wszystkich odpowiedzi:
+
 ```typescript
 {
   'Content-Type': 'application/json',
@@ -414,13 +437,13 @@ Dodać do wszystkich odpowiedzi:
 
 ### 6.5. Potencjalne zagrożenia
 
-| Zagrożenie | Mitygacja |
-|------------|-----------|
+| Zagrożenie                                       | Mitygacja                                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------------------------- |
 | **Enumeracja zasobów** (odgadywanie ID planerów) | Zawsze weryfikuj user_id; nie ujawniaj czy zasób istnieje dla innego użytkownika |
-| **SQL Injection** | Użycie Supabase client (parametryzowane zapytania) + walidacja UUID przez Zod |
-| **Ujawnienie informacji** | Jednolite komunikaty błędów (404 dla not found / unauthorized) |
-| **Brak rate limiting** | Do implementacji w przyszłości (np. przez middleware) |
-| **CORS issues** | Skonfigurować odpowiednie nagłówki CORS w Astro config |
+| **SQL Injection**                                | Użycie Supabase client (parametryzowane zapytania) + walidacja UUID przez Zod    |
+| **Ujawnienie informacji**                        | Jednolite komunikaty błędów (404 dla not found / unauthorized)                   |
+| **Brak rate limiting**                           | Do implementacji w przyszłości (np. przez middleware)                            |
+| **CORS issues**                                  | Skonfigurować odpowiednie nagłówki CORS w Astro config                           |
 
 ---
 
@@ -431,14 +454,14 @@ Dodać do wszystkich odpowiedzi:
 ```
 1. Walidacja parametrów (Zod)
    ↓ niepowodzenie → 400 Bad Request
-   
+
 2. Autoryzacja użytkownika
    ↓ niepowodzenie → 401 Unauthorized
-   
+
 3. Wywołanie serwisu
    ↓ zasób nie znaleziony → 404 Not Found
    ↓ błąd bazy danych → 500 Internal Server Error
-   
+
 4. Nieoczekiwane błędy
    ↓ → 500 Internal Server Error
 ```
@@ -447,29 +470,30 @@ Dodać do wszystkich odpowiedzi:
 
 #### GET /api/v1/plans/active
 
-| Scenariusz | Kod HTTP | Response Body | Logowanie |
-|------------|----------|---------------|-----------|
-| Brak aktywnego planera | 404 | `{"error": "Not found", "message": "No active plan found"}` | Nie |
-| Brak/nieprawidłowy token | 401 | `{"error": "Unauthorized", "message": "..."}` | Nie |
-| Błąd bazy danych | 500 | `{"error": "Internal server error", "message": "..."}` | Tak (console.error) |
-| Nieoczekiwany wyjątek | 500 | `{"error": "Internal server error", "message": "..."}` | Tak (console.error) |
-| Sukces - znaleziono plan | 200 | `{"data": {...}}` | Nie |
+| Scenariusz               | Kod HTTP | Response Body                                               | Logowanie           |
+| ------------------------ | -------- | ----------------------------------------------------------- | ------------------- |
+| Brak aktywnego planera   | 404      | `{"error": "Not found", "message": "No active plan found"}` | Nie                 |
+| Brak/nieprawidłowy token | 401      | `{"error": "Unauthorized", "message": "..."}`               | Nie                 |
+| Błąd bazy danych         | 500      | `{"error": "Internal server error", "message": "..."}`      | Tak (console.error) |
+| Nieoczekiwany wyjątek    | 500      | `{"error": "Internal server error", "message": "..."}`      | Tak (console.error) |
+| Sukces - znaleziono plan | 200      | `{"data": {...}}`                                           | Nie                 |
 
 #### GET /api/v1/plans/:id
 
-| Scenariusz | Kod HTTP | Response Body | Logowanie |
-|------------|----------|---------------|-----------|
-| Nieprawidłowy format UUID | 400 | `{"error": "Validation failed", "details": [...]}` | Nie |
-| Planer nie istnieje | 404 | `{"error": "Not found", "message": "Plan not found"}` | Nie |
-| Planer należy do innego użytkownika | 404 | `{"error": "Not found", "message": "Plan not found"}` | Nie |
-| Brak/nieprawidłowy token | 401 | `{"error": "Unauthorized", "message": "..."}` | Nie |
-| Błąd bazy danych | 500 | `{"error": "Internal server error", "message": "..."}` | Tak (console.error) |
-| Nieoczekiwany wyjątek | 500 | `{"error": "Internal server error", "message": "..."}` | Tak (console.error) |
-| Sukces - znaleziono plan | 200 | `{"data": {...}}` | Nie |
+| Scenariusz                          | Kod HTTP | Response Body                                          | Logowanie           |
+| ----------------------------------- | -------- | ------------------------------------------------------ | ------------------- |
+| Nieprawidłowy format UUID           | 400      | `{"error": "Validation failed", "details": [...]}`     | Nie                 |
+| Planer nie istnieje                 | 404      | `{"error": "Not found", "message": "Plan not found"}`  | Nie                 |
+| Planer należy do innego użytkownika | 404      | `{"error": "Not found", "message": "Plan not found"}`  | Nie                 |
+| Brak/nieprawidłowy token            | 401      | `{"error": "Unauthorized", "message": "..."}`          | Nie                 |
+| Błąd bazy danych                    | 500      | `{"error": "Internal server error", "message": "..."}` | Tak (console.error) |
+| Nieoczekiwany wyjątek               | 500      | `{"error": "Internal server error", "message": "..."}` | Tak (console.error) |
+| Sukces - znaleziono plan            | 200      | `{"data": {...}}`                                      | Nie                 |
 
 ### 7.3. Format błędów
 
 **Błędy walidacji (400):**
+
 ```typescript
 {
   error: "Validation failed",
@@ -484,6 +508,7 @@ Dodać do wszystkich odpowiedzi:
 ```
 
 **Proste błędy (404, 401, 500):**
+
 ```typescript
 {
   error: "Not found" | "Unauthorized" | "Internal server error",
@@ -494,21 +519,24 @@ Dodać do wszystkich odpowiedzi:
 ### 7.4. Strategia logowania
 
 **Co logować:**
+
 - Błędy bazy danych (z pełnym komunikatem error.message)
 - Nieoczekiwane wyjątki (z pełnym stack trace)
 - Kontekst: nazwa endpointa, userId (jeśli dostępny)
 
 **Czego nie logować:**
+
 - Błędów walidacji (to błędy klienta)
 - 404 Not Found (normalna sytuacja)
 - Danych wrażliwych (hasła, tokeny)
 
 **Przykład:**
+
 ```typescript
-console.error('Error in GET /api/v1/plans/active:', {
+console.error("Error in GET /api/v1/plans/active:", {
   userId,
   error: error.message,
-  stack: error.stack
+  stack: error.stack,
 });
 ```
 
@@ -519,15 +547,18 @@ console.error('Error in GET /api/v1/plans/active:', {
 ### 8.1. Optymalizacje zapytań do bazy danych
 
 **Indeksy (już zdefiniowane w migracji):**
+
 - `idx_plans_user_id` - przyspiesza filtrowanie po user_id
 - `idx_plans_status` - przyspiesza filtrowanie po status='active'
 
 **Zapytania:**
+
 - Użycie `LIMIT 1` dla obu endpointów (zwracamy pojedynczy zasób)
 - Filtrowanie po indeksowanych kolumnach (user_id, status, id)
 - Brak joinów - zwracamy tylko dane z tabeli plans
 
 **Przykład wydajnego zapytania dla getActivePlan:**
+
 ```sql
 SELECT * FROM plans
 WHERE user_id = $1 AND status = 'active'
@@ -538,17 +569,20 @@ LIMIT 1;
 ### 8.2. Caching (przyszłe wdrożenie)
 
 **Potencjalne strategie:**
+
 - Redis cache dla często pobieranych aktywnych planerów
 - Cache-Control headers dla GET requests
 - Invalidacja cache'u po UPDATE/DELETE planera
 
 **Przykładowy TTL:**
+
 - GET /api/v1/plans/active - 5 minut (często odczytywany)
 - GET /api/v1/plans/:id - 10 minut (rzadziej modyfikowany)
 
 ### 8.3. Monitoring
 
 **Metryki do śledzenia:**
+
 - Czas odpowiedzi (target: < 100ms)
 - Rate limit per user (do implementacji)
 - Liczba 404 (jeśli wysoka - może wskazywać problem)
@@ -556,18 +590,19 @@ LIMIT 1;
 
 ### 8.4. Potencjalne wąskie gardła
 
-| Wąskie gardło | Prawdopodobieństwo | Mitygacja |
-|---------------|-------------------|-----------|
-| Wolne zapytania DB | Niskie (proste SELECT z indeksami) | Monitoring query performance |
-| Duża liczba jednoczesnych requestów | Średnie | Connection pooling (Supabase), rate limiting |
-| Brak cache'owania | Średnie | Implementacja Redis cache |
-| Network latency do Supabase | Niskie | Wybór regionu bliskiego użytkownikom |
+| Wąskie gardło                       | Prawdopodobieństwo                 | Mitygacja                                    |
+| ----------------------------------- | ---------------------------------- | -------------------------------------------- |
+| Wolne zapytania DB                  | Niskie (proste SELECT z indeksami) | Monitoring query performance                 |
+| Duża liczba jednoczesnych requestów | Średnie                            | Connection pooling (Supabase), rate limiting |
+| Brak cache'owania                   | Średnie                            | Implementacja Redis cache                    |
+| Network latency do Supabase         | Niskie                             | Wybór regionu bliskiego użytkownikom         |
 
 ---
 
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Rozszerzenie walidacji
+
 **Plik:** `src/lib/validation/plan.validation.ts`
 
 Dodać nowy schema dla walidacji parametru :id:
@@ -578,7 +613,7 @@ Dodać nowy schema dla walidacji parametru :id:
  * Validates UUID format for plan ID parameter
  */
 export const GetPlanByIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid plan ID format' })
+  id: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
@@ -587,18 +622,19 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 ---
 
 ### Krok 2: Rozszerzenie PlanService
+
 **Plik:** `src/lib/services/plan.service.ts`
 
 Dodać dwie nowe metody do klasy `PlanService`:
 
-```typescript
+````typescript
 /**
  * Pobiera aktywny planer dla danego użytkownika
- * 
+ *
  * @param userId - ID użytkownika (z tokenu JWT)
  * @returns Promise z aktywnym planerem lub null jeśli nie istnieje
  * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
- * 
+ *
  * @example
  * ```typescript
  * const activePlan = await planService.getActivePlan(userId);
@@ -628,12 +664,12 @@ async getActivePlan(userId: string): Promise<PlanDTO | null> {
 /**
  * Pobiera konkretny planer po ID
  * Weryfikuje, że planer należy do danego użytkownika
- * 
+ *
  * @param planId - UUID planera
  * @param userId - ID użytkownika (z tokenu JWT)
  * @returns Promise z planerem lub null jeśli nie istnieje/nie należy do użytkownika
  * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
- * 
+ *
  * @example
  * ```typescript
  * const plan = await planService.getPlanById(planId, userId);
@@ -659,9 +695,10 @@ async getPlanById(planId: string, userId: string): Promise<PlanDTO | null> {
   // Return null if not found (either doesn't exist or belongs to another user)
   return data;
 }
-```
+````
 
 **Uwagi implementacyjne:**
+
 - Użycie `.maybeSingle()` zamiast `.single()` - nie rzuca błędu gdy brak wyników, zwraca null
 - `.maybeSingle()` jest bezpieczniejsze niż `.single()` który rzuca błąd PGRST116 przy braku danych
 - Zawsze filtrujemy po `user_id` dla bezpieczeństwa
@@ -671,15 +708,16 @@ async getPlanById(planId: string, userId: string): Promise<PlanDTO | null> {
 ---
 
 ### Krok 3: Stworzenie route handlera dla GET /api/v1/plans/active
+
 **Plik:** `src/pages/api/v1/plans/active.ts` (nowy plik)
 
 ```typescript
 /**
  * API Endpoint: GET /api/v1/plans/active
- * 
+ *
  * Returns the currently active plan for the authenticated user.
  * A user can have only one active plan at a time (status='active').
- * 
+ *
  * Responses:
  * - 200: Success with active plan data
  * - 401: Unauthorized (missing or invalid token)
@@ -687,10 +725,10 @@ async getPlanById(planId: string, userId: string): Promise<PlanDTO | null> {
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { PlanService } from '../../../lib/services/plan.service';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
-import type { ErrorResponse, ItemResponse, PlanDTO } from '../../../types';
+import type { APIRoute } from "astro";
+import { PlanService } from "../../../lib/services/plan.service";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import type { ErrorResponse, ItemResponse, PlanDTO } from "../../../types";
 
 export const prerender = false;
 
@@ -710,12 +748,12 @@ export const GET: APIRoute = async ({ locals }) => {
     if (!activePlan) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'No active plan found'
+          error: "Not found",
+          message: "No active plan found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -723,28 +761,28 @@ export const GET: APIRoute = async ({ locals }) => {
     // Step 5: Return successful response
     return new Response(
       JSON.stringify({
-        data: activePlan
+        data: activePlan,
       } as ItemResponse<PlanDTO>),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
       }
     );
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error('Error in GET /api/v1/plans/active:', error);
-    
+    console.error("Error in GET /api/v1/plans/active:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -754,18 +792,19 @@ export const GET: APIRoute = async ({ locals }) => {
 ---
 
 ### Krok 4: Stworzenie route handlera dla GET /api/v1/plans/:id
+
 **Plik:** `src/pages/api/v1/plans/[id].ts` (nowy plik)
 
 ```typescript
 /**
  * API Endpoint: GET /api/v1/plans/:id
- * 
+ *
  * Returns a specific plan by ID.
  * Verifies that the plan belongs to the authenticated user.
- * 
+ *
  * URL Parameters:
  * - id: UUID of the plan
- * 
+ *
  * Responses:
  * - 200: Success with plan data
  * - 400: Invalid UUID format
@@ -774,16 +813,11 @@ export const GET: APIRoute = async ({ locals }) => {
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { PlanService } from '../../../lib/services/plan.service';
-import { GetPlanByIdParamsSchema } from '../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
-  ItemResponse, 
-  PlanDTO,
-  ValidationErrorResponse 
-} from '../../../types';
+import type { APIRoute } from "astro";
+import { PlanService } from "../../../lib/services/plan.service";
+import { GetPlanByIdParamsSchema } from "../../../lib/validation/plan.validation";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import type { ErrorResponse, ItemResponse, PlanDTO, ValidationErrorResponse } from "../../../types";
 
 export const prerender = false;
 
@@ -797,20 +831,20 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const validationResult = GetPlanByIdParamsSchema.safeParse(params);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: params.id
+        received: params.id,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -826,12 +860,12 @@ export const GET: APIRoute = async ({ params, locals }) => {
     if (!plan) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'Plan not found'
+          error: "Not found",
+          message: "Plan not found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -839,31 +873,31 @@ export const GET: APIRoute = async ({ params, locals }) => {
     // Step 5: Return successful response
     return new Response(
       JSON.stringify({
-        data: plan
+        data: plan,
       } as ItemResponse<PlanDTO>),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
       }
     );
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error('Error in GET /api/v1/plans/:id:', {
+    console.error("Error in GET /api/v1/plans/:id:", {
       planId: params.id,
-      error
+      error,
     });
-    
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -875,17 +909,20 @@ export const GET: APIRoute = async ({ params, locals }) => {
 ### Krok 5: Testowanie manualne
 
 **Przygotowanie:**
+
 1. Upewnij się, że lokalna instancja Supabase jest uruchomiona
 2. Sprawdź czy `DEFAULT_USER_ID` ma jakieś dane w tabeli `plans`
 3. Uruchom dev server: `npm run dev`
 
 **Test Case 1: GET /api/v1/plans/active - Success**
+
 ```bash
 curl -X GET http://localhost:4321/api/v1/plans/active
 # Expected: 200 OK with active plan data
 ```
 
 **Test Case 2: GET /api/v1/plans/active - Not Found**
+
 ```bash
 # Zmień wszystkie plany użytkownika na status='archived'
 curl -X GET http://localhost:4321/api/v1/plans/active
@@ -893,6 +930,7 @@ curl -X GET http://localhost:4321/api/v1/plans/active
 ```
 
 **Test Case 3: GET /api/v1/plans/:id - Success**
+
 ```bash
 # Użyj prawdziwego UUID planera z bazy
 curl -X GET http://localhost:4321/api/v1/plans/{valid-uuid}
@@ -900,12 +938,14 @@ curl -X GET http://localhost:4321/api/v1/plans/{valid-uuid}
 ```
 
 **Test Case 4: GET /api/v1/plans/:id - Invalid UUID**
+
 ```bash
 curl -X GET http://localhost:4321/api/v1/plans/not-a-uuid
 # Expected: 400 Bad Request with validation error
 ```
 
 **Test Case 5: GET /api/v1/plans/:id - Not Found**
+
 ```bash
 # Użyj poprawnego UUID, ale nieistniejącego
 curl -X GET http://localhost:4321/api/v1/plans/00000000-0000-0000-0000-000000000000
@@ -913,6 +953,7 @@ curl -X GET http://localhost:4321/api/v1/plans/00000000-0000-0000-0000-000000000
 ```
 
 **Test Case 6: GET /api/v1/plans/:id - Different User**
+
 ```bash
 # Użyj UUID planera należącego do innego użytkownika
 # (symulacja - zmień DEFAULT_USER_ID lub stwórz plan dla innego użytkownika)
@@ -929,17 +970,17 @@ curl -X GET http://localhost:4321/api/v1/plans/{other-user-plan-uuid}
 ```typescript
 // Pobranie aktywnego planera
 async function fetchActivePlan() {
-  const response = await fetch('/api/v1/plans/active');
-  
+  const response = await fetch("/api/v1/plans/active");
+
   if (response.status === 404) {
     // No active plan - redirect to create plan page
     return null;
   }
-  
+
   if (!response.ok) {
-    throw new Error('Failed to fetch active plan');
+    throw new Error("Failed to fetch active plan");
   }
-  
+
   const { data } = await response.json();
   return data;
 }
@@ -947,16 +988,16 @@ async function fetchActivePlan() {
 // Pobranie konkretnego planera
 async function fetchPlanById(planId: string) {
   const response = await fetch(`/api/v1/plans/${planId}`);
-  
+
   if (response.status === 404) {
     // Plan not found or unauthorized
     return null;
   }
-  
+
   if (!response.ok) {
-    throw new Error('Failed to fetch plan');
+    throw new Error("Failed to fetch plan");
   }
-  
+
   const { data } = await response.json();
   return data;
 }
@@ -969,6 +1010,7 @@ async function fetchPlanById(planId: string) {
 **Plik:** `docs/api/api-plan.md`
 
 Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
+
 - Struktura response używa `ItemResponse<PlanDTO>`
 - Komunikaty błędów są dokładnie takie jak w implementacji
 - Przykłady zawierają prawdziwe dane
@@ -978,22 +1020,26 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 ### Krok 8: Future improvements (dla następnych iteracji)
 
 **Uwierzytelnianie:**
+
 - [ ] Implementacja JWT token verification (przez locals.supabase.auth.getUser())
 - [ ] Wyciąganie userId z zweryfikowanego tokenu
 - [ ] Obsługa 401 Unauthorized dla brakujących/nieprawidłowych tokenów
 - [x] MVP: Używanie DEFAULT_USER_ID dla szybkich testów
 
 **Optymalizacja:**
+
 - [ ] Dodanie Redis cache dla getActivePlan
 - [ ] Implementacja Cache-Control headers
 - [ ] Monitoring czasu odpowiedzi
 
 **Bezpieczeństwo:**
+
 - [ ] Włączenie Row Level Security policies
 - [ ] Rate limiting per user/IP
 - [ ] CORS configuration
 
 **Testy:**
+
 - [ ] Unit testy dla PlanService methods
 - [ ] Integration testy dla endpoints
 - [ ] E2E testy z prawdziwą bazą
@@ -1020,11 +1066,13 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 ### Problem: 500 Error przy każdym wywołaniu GET /api/v1/plans/active
 
 **Możliwe przyczyny:**
+
 1. Supabase nie jest uruchomiony lokalnie
 2. Błędne zmienne środowiskowe (SUPABASE_URL, SUPABASE_KEY)
 3. Middleware nie dodaje supabase do locals
 
 **Rozwiązanie:**
+
 - Sprawdź logi w konsoli (console.error)
 - Zweryfikuj połączenie z Supabase
 - Sprawdź czy middleware jest prawidłowo skonfigurowany
@@ -1032,11 +1080,13 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 ### Problem: Zawsze 404 dla GET /api/v1/plans/active mimo że mam aktywny plan
 
 **Możliwe przyczyny:**
+
 1. Plan należy do innego użytkownika (inny user_id)
 2. Status planera nie jest 'active'
 3. Token JWT należy do innego użytkownika niż oczekiwany
 
 **Rozwiązanie:**
+
 - Sprawdź w bazie: `SELECT * FROM plans WHERE user_id = 'DEFAULT_USER_ID' AND status = 'active';`
 - Zweryfikuj wartość `DEFAULT_USER_ID` w `src/db/supabase.client.ts`
 - Sprawdź czy userId w handlerze jest poprawny (dodaj console.log)
@@ -1045,11 +1095,13 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 ### Problem: 400 Bad Request dla poprawnego UUID
 
 **Możliwe przyczyny:**
+
 1. UUID zawiera dodatkowe białe znaki
 2. UUID jest w innym formacie niż v4
 3. Problemy z routingiem Astro
 
 **Rozwiązanie:**
+
 - Sprawdź czy params.id jest prawidłowo ekstraktowany
 - Dodaj console.log przed walidacją aby sprawdzić wartość
 - Upewnij się że nazwa pliku to dokładnie `[id].ts`
@@ -1059,10 +1111,10 @@ Upewnić się, że sekcje 3.2.2 i 3.2.3 są zgodne z implementacją:
 ## Podsumowanie
 
 Ten plan implementacji dostarcza kompletny przewodnik do wdrożenia dwóch nowych endpointów GET dla zasobu plans:
+
 - `GET /api/v1/plans/active` - szybki dostęp do aktywnego planera użytkownika
 - `GET /api/v1/plans/:id` - dostęp do konkretnego planera z weryfikacją własności
 
 Implementacja zachowuje spójność z istniejącym kodem, wykorzystuje te same wzorce (service layer, validation, error handling) i przygotowuje grunt pod przyszłe rozszerzenia (prawdziwa autentykacja, caching, RLS).
 
 Kluczowe aspekty bezpieczeństwa (filtrowanie po user_id, jednolite komunikaty błędów 404) są wbudowane od początku, co zapewnia że aplikacja jest secure-by-default.
-

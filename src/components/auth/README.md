@@ -5,9 +5,11 @@ This directory contains all authentication-related React components for the 12 W
 ## Components
 
 ### LoginForm
+
 User login form with email and password fields.
 
 **Features:**
+
 - Email and password validation
 - "Forgot password?" link
 - "Sign up" link for new users
@@ -15,18 +17,21 @@ User login form with email and password fields.
 - Error handling
 
 **Usage:**
-```tsx
-import { LoginForm } from '@/components/auth';
 
-<LoginForm client:load />
+```tsx
+import { LoginForm } from "@/components/auth";
+
+<LoginForm client:load />;
 ```
 
 ---
 
 ### RegisterForm
+
 User registration form with email, password, and password confirmation.
 
 **Features:**
+
 - Strong password validation (8+ chars, uppercase, lowercase, numbers)
 - Password confirmation matching
 - Success screen with email verification instructions
@@ -35,18 +40,21 @@ User registration form with email, password, and password confirmation.
 - Error handling
 
 **Usage:**
-```tsx
-import { RegisterForm } from '@/components/auth';
 
-<RegisterForm client:load />
+```tsx
+import { RegisterForm } from "@/components/auth";
+
+<RegisterForm client:load />;
 ```
 
 ---
 
 ### ForgotPasswordForm
+
 Password reset request form with email field.
 
 **Features:**
+
 - Email validation
 - Success screen with instructions
 - Option to resend email
@@ -55,21 +63,25 @@ Password reset request form with email field.
 - Error handling
 
 **Usage:**
-```tsx
-import { ForgotPasswordForm } from '@/components/auth';
 
-<ForgotPasswordForm client:load />
+```tsx
+import { ForgotPasswordForm } from "@/components/auth";
+
+<ForgotPasswordForm client:load />;
 ```
 
 ---
 
 ### UpdatePasswordForm
+
 Password update form for both password reset flow and logged-in users.
 
 **Props:**
+
 - `isLoggedIn` (boolean, default: false): Determines UI text and redirect behavior
 
 **Features:**
+
 - Strong password validation
 - Password confirmation matching
 - Dual mode (reset vs. change)
@@ -78,6 +90,7 @@ Password update form for both password reset flow and logged-in users.
 - Error handling
 
 **Usage:**
+
 ```tsx
 import { UpdatePasswordForm } from '@/components/auth';
 
@@ -93,16 +106,19 @@ import { UpdatePasswordForm } from '@/components/auth';
 ## Validation Rules
 
 ### Email
+
 - Required field
 - Must match email format: `[text]@[domain].[tld]`
 
 ### Password (Registration & Update)
+
 - Minimum 8 characters
 - At least one uppercase letter (A-Z)
 - At least one lowercase letter (a-z)
 - At least one number (0-9)
 
 ### Password Confirmation
+
 - Must exactly match the password field
 
 ---
@@ -150,10 +166,10 @@ if (errors[field]) {
 All components use toast notifications for success/error messages:
 
 ```typescript
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
-toast.success('Login successful');
-toast.error('Invalid email or password');
+toast.success("Login successful");
+toast.error("Invalid email or password");
 ```
 
 ---
@@ -161,13 +177,15 @@ toast.error('Invalid email or password');
 ## Accessibility
 
 All forms include:
+
 - Proper label associations (`htmlFor` + `id`)
 - ARIA attributes (`aria-invalid`, `aria-describedby`)
-- Required field indicators (*)
+- Required field indicators (\*)
 - Keyboard navigation support
 - Focus management
 
 Example:
+
 ```tsx
 <Label htmlFor="email">
   Email <span className="text-destructive">*</span>
@@ -190,6 +208,7 @@ Example:
 ## Styling
 
 All components use:
+
 - Shadcn UI components (Card, Input, Label, Button, Alert)
 - Tailwind CSS for styling
 - Consistent spacing and layout
@@ -210,6 +229,7 @@ All components have placeholder logic marked with TODO comments:
 ```
 
 To integrate with Supabase:
+
 1. Import the browser client: `import { createClient } from '@/lib/supabase/client';`
 2. Replace the placeholder logic with actual Supabase calls
 3. Handle success and error cases
@@ -224,6 +244,7 @@ See `docs/auth-backend-integration-guide.md` for detailed instructions.
 To test the components:
 
 1. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -268,15 +289,18 @@ src/components/auth/
 ## Related Files
 
 ### Pages
+
 - `src/pages/login.astro` - Login page
 - `src/pages/register.astro` - Registration page
 - `src/pages/forgot-password.astro` - Forgot password page
 - `src/pages/update-password.astro` - Update password page
 
 ### Layout
+
 - `src/layouts/AuthLayout.astro` - Minimal layout for auth pages
 
 ### Documentation
+
 - `docs/auth-ui-implementation.md` - Detailed implementation docs
 - `docs/auth-ui-preview.md` - Visual preview of pages
 - `docs/auth-backend-integration-guide.md` - Backend integration guide
@@ -303,6 +327,7 @@ When adding new auth components:
 ## Support
 
 For questions or issues:
+
 1. Check the documentation in `docs/`
 2. Review the integration guide
 3. Check the flow diagrams

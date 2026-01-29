@@ -1,13 +1,16 @@
 # Plan implementacji widoku Day View
 
 ## 1. Przegląd
+
 Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `due_day` 1–7) prezentuje listę zadań przypisanych do danego dnia w trzech slotach: Most Important (1), Secondary (2) i Others (7). Umożliwia zmianę priorytetu, stanu, kolejności (drag-and-drop w obrębie slotu), kopiowanie/przenoszenie zadań między dniami/tygodniami oraz dodawanie nowych zadań przypisanych do dnia. Wszystkie etykiety w UI pozostają w języku angielskim (MVP).
 
 ## 2. Routing widoku
+
 - Ścieżka: `/plans/[planId]/week/[weekNumber]/day/[dayNumber]` (dayNumber = 1–7, Monday=1).
-- Nawigacja: przyciski `Previous day` / `Next day` oraz date picker przeliczający `dayNumber` na datę na podstawie `planStartDate` (US-016). 
+- Nawigacja: przyciski `Previous day` / `Next day` oraz date picker przeliczający `dayNumber` na datę na podstawie `planStartDate` (US-016).
 
 ## 3. Struktura komponentów
+
 - `DayPageContainer` (kontener danych/stanu, integracja API, DnD context)
   - `DayHeader` (nawigacja między dniami, date picker, numer tygodnia)
   - `PriorityColumns` (layout 3 kolumn)
@@ -15,16 +18,18 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
       - `TaskCard` (re-use `TaskItem` z wariantem day)
       - `InlineAddTask`
     - `DailyTaskSlot` (Secondary)
-      - `TaskCard`*
+      - `TaskCard`\*
       - `InlineAddTask`
     - `DailyTaskSlot` (Others)
-      - `TaskCard`*
+      - `TaskCard`\*
       - `InlineAddTask`
   - `ConfettiOverlay` (po ukończeniu wszystkich zadań dnia)
   - `GoalMilestonePicker` (re-use)
 
 ## 4. Szczegóły komponentów
+
 ### DayPageContainer
+
 - Opis: pobiera dane dnia (po `week_number` + `due_day`), zarządza stanem slotów, limitami, optimistic UI, DnD kontekstem; koordynuje akcje API (status/priority/due_day/position, copy/move).
 - Elementy: wrapper, `DndContext`, toast/error handling, loader/empty states.
 - Obsługiwane interakcje: drag-end w kolumnie, zmiana priorytetu, zmiana statusu, dodanie/usunięcie zadania, kopiowanie/przenoszenie, linkowanie goal/milestone, przypisanie do weekly goal.
@@ -33,6 +38,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Propsy: `planId: string`, `planName: string`, `planStartDate: Date`, `weekNumber: number`, `dayNumber: number`.
 
 ### DayHeader
+
 - Opis: nawigacja dni + prezentacja daty/tygodnia.
 - Elementy: tytuł `Day <dayNumber>` + wyświetlana data wyliczona z `planStartDate`, badge `Week <nr>`, przyciski Previous/Next, date picker przeliczający na `dayNumber`.
 - Interakcje: klik prev/next, wybór daty -> callback z nowym `dayNumber`.
@@ -41,6 +47,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Propsy: `dayNumber: number`, `weekNumber: number`, `computedDate: string`, `onNavigate(dayNumber: number): void`.
 
 ### DailyTaskSlot (PriorityColumn)
+
 - Opis: pojedyncza kolumna slotu (Most Important / Secondary / Others) z listą i DnD.
 - Elementy: nagłówek z limitem, `SortableContext`, lista `TaskCard`, przycisk `+ Add Task`.
 - Interakcje: drag-and-drop w kolumnie, dodanie zadania, automatyczny rerender po zmianie priorytetu.
@@ -49,6 +56,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Propsy: `slot: DaySlot`, `tasks: DayTaskViewModel[]`, `limit: number`, callbacki `onReorder`, `onAdd`.
 
 ### TaskCard (wariant TaskItem dla dnia)
+
 - Opis: re-use `TaskItem` z dodatkowymi badge: category > goal > milestone > weekly goal (zamiast day badge). Ukrywa badge dnia. Menu kontekstowe rozszerzone o kopiowanie/przenoszenie do innego dnia/tygodnia.
 - Elementy: status control (`TaskStatusControl`), tytuł (inline edit), priorytet (cyklicznie), drag handle, badge hierarchy, kontekstowe menu `...`.
 - Interakcje: status click/cycle; chevron pełny wybór 5 stanów; priority click (zmienia slot z walidacją limitów), drag handle reorder, link goal/milestone (re-use `GoalMilestonePicker`), assign/unassign weekly goal (respect task limit 10), copy/move.
@@ -57,20 +65,24 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Propsy: rozszerzenie istniejących z `TaskItem` o `slot: DaySlot`, `onChangeSlot`, `onCopy`, `onMoveToDay`, `hideDayBadge`.
 
 ### InlineAddTask / AddTaskButton
+
 - Opis: reuse istniejącego komponentu do szybkiego dodania; w Day view domyślnie ustawia `due_day = currentDayNumber`, `week_number = currentWeek`, `task_type` domyślnie `ad_hoc` lub `weekly_sub` jeśli przypięty do weekly goal z menu.
 - Walidacja: disabled gdy limit slotu osiągnięty.
 - Typy: input string.
 - Propsy: `onAdd(title: string)`, `onCancel()`.
 
 ### GoalMilestonePicker (reuse)
+
 - Opis: bez zmian, użyty do przypisywania zadań do celu/milestone.
 - Propsy: jak obecnie; używany z tytułami dostosowanymi do kontekstu dnia.
 
 ### ConfettiOverlay
+
 - Opis: wyświetla konfetti gdy wszystkie zadania dnia mają status `completed` lub sloty puste.
 - Propsy: `isDone: boolean`.
 
 ## 5. Typy
+
 - Nowe typy (TS):
   - `type DaySlot = 'most_important' | 'secondary' | 'additional';`
   - `interface DayTaskViewModel extends TaskViewModel { slot: DaySlot; }`
@@ -81,6 +93,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - ViewModel helper: `type SlotLimits = { most_important: 1; secondary: 2; additional: 7; };`
 
 ## 6. Zarządzanie stanem
+
 - Nowy hook `useDayPlan(planId, weekNumber, dayNumber, planStartDate)`:
   - Fetch równoległy: `/api/v1/tasks?plan_id=...&week_number=...&due_day=${dayNumber}` (pełne pola) + `/api/v1/plans/:id/goals` + `/api/v1/milestones` + `/api/v1/weekly-goals?plan_id=...&week_number=...`.
   - Mapper slotów: sortuj po `priority` (A>B>C) i `position`; rozkładaj na sloty wg limitów (A pierwszy do Most Important, reszta A do Secondary/Others; B maks 2 w Secondary; C w Others, chyba że wolne miejsca).
@@ -90,6 +103,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
   - DnD: kontekst ograniczony do pojedynczego slotu; cross-slot zmiana tylko przez update priorytetu (spójne z wymaganiem).
 
 ## 7. Integracja API
+
 - Pobranie:
   - GET `/api/v1/tasks?plan_id=<id>&week_number=<nr>&due_day=<dayNumber>` — pełne dane zadań dla dnia (preferowane zamiast `/tasks/daily`, bo potrzebne pola goal/milestone/weekly_goal_id/position).
   - GET `/api/v1/plans/:id/goals` — meta do badge/pickerów.
@@ -104,6 +118,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Request/response typy: korzystać z `TaskDTO`, `ItemResponse<T>`, `ListResponse<T>`, `APIErrorResponse`.
 
 ## 8. Interakcje użytkownika
+
 - Status click/cycle (todo → in_progress → completed); chevron pozwala na pełny wybór 5 stanów.
 - Priority click: cykliczna zmiana A/B/C; przenosi zadanie między slotami zgodnie z limitami (jeśli limit pełny, blok + toast).
 - Drag-and-drop: reorder w obrębie slotu; brak cross-slot DnD (spójność z regułą zmiany priorytetu).
@@ -118,6 +133,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Confetti: pokazuje się gdy wszystkie zadania dnia są `completed` lub brak zadań.
 
 ## 9. Warunki i walidacja
+
 - Limity slotów: Most Important max 1 (priority A), Secondary max 2 (A/B), Others max 7 (A/B/C). Sprawdzać przed zmianą priorytetu/dodaniem/przeniesieniem.
 - Range: `week_number` 1–12, `due_day` 1–7 (wymuszać w pickerach i ścieżce `dayNumber`).
 - Stany kopiowania/przenoszenia: blokuj dla `completed`/`cancelled` (edge multi-day).
@@ -131,6 +147,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
   - Co pewien czas (np. po dużej liczbie operacji) reindex (normalize) by utrzymać `weekOrder * 100 + dayRank` w granicach int.
 
 ## 10. Obsługa błędów
+
 - API error: toast z informacją, rollback optimistic update, opcja retry.
 - Limit exceeded (z triggerów): pokaż message z API lub własny komunikat; nie zmieniaj stanu lokalnego.
 - Brak danych meta (goals/milestones): pokaż „Not linked” badge i zablokuj linkowanie, dopóki fetch nie wróci.
@@ -138,6 +155,7 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 - Drag/drop failure: toast i refetch bieżącego dnia.
 
 ## 11. Kroki implementacji
+
 1. Utwórz typy w `src/types.ts`: `DaySlot`, `DayTaskViewModel`, `DayViewData`, `DayViewMeta`, `DayCopyMovePayload` (z `dayNumber`).
 2. Dodaj hook `useDayPlan` w `src/components/plans/day/hooks/useDayPlan.ts`: fetch równoległy, mapowanie slotów, limity, optimistic actions (status/priority/due_day/position/copy/move/link) z parametrami `planId`, `weekNumber`, `dayNumber`, `planStartDate`.
 3. Dodaj stronę/entry `src/pages/plans/[planId]/week/[weekNumber]/day/[dayNumber].astro` z klientowym `DayPageContainer`.
@@ -149,4 +167,3 @@ Nowy widok dnia `/plans/[id]/week/[nr]/day/[dayNumber]` (gdzie `dayNumber` = `du
 9. Dodaj Confetti overlay (np. re-use istniejący komponent lub prosty `react-confetti`).
 10. Testy manualne scenariuszy: limity slotów, zmiana priorytetu, reorder, copy/move, assign/unassign weekly goal, link/unlink goal/milestone, error handling.
 11. Dokumentacja: uzupełnij README/komentarze, upewnij się że etykiety są po angielsku.
-

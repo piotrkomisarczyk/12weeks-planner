@@ -3,6 +3,7 @@
 Poniższy diagram przedstawia architekturę interfejsu użytkownika dla modułu autentykacji, uwzględniając podział na renderowanie po stronie serwera (Astro SSR) oraz komponenty klienckie (React).
 
 <mermaid_diagram>
+
 ```mermaid
 flowchart LR
     %% Definicje stylów
@@ -14,7 +15,7 @@ flowchart LR
 
     subgraph "Astro Server-Side (SSR)"
         Middleware["Middleware\n(Ochrona Tras)"]:::logic
-        
+
         subgraph Layouts
             MainLayout["Layout Główny\n(Layout.astro)"]:::layout
             AuthLayout["Layout Autentykacji\n(AuthLayout.astro)"]:::layout
@@ -23,7 +24,7 @@ flowchart LR
         subgraph "Strony (Pages)"
             HomePage["Strona Główna\n(/index.astro)"]:::page
             Dashboard["Dashboard\n(/plans/[id])"]:::page
-            
+
             subgraph "Strony Autentykacji"
                 LoginPage["Logowanie\n(/login)"]:::page
                 RegisterPage["Rejestracja\n(/register)"]:::page
@@ -31,7 +32,7 @@ flowchart LR
                 UpdatePassPage["Zmiana Hasła\n(/update-password)"]:::page
             end
         end
-        
+
         API["API Callback\n(/auth/callback)"]:::logic
     end
 
@@ -47,7 +48,7 @@ flowchart LR
             UserMenu["Menu Użytkownika\n(UserMenu.tsx)"]:::component
             LogoutAction[[Akcja Wylogowania]]:::logic
         end
-        
+
         SupabaseClient["Klient Supabase\n(Browser Client)"]:::logic
     end
 
@@ -65,10 +66,10 @@ flowchart LR
     AuthLayout --> RegisterPage
     AuthLayout --> ForgotPassPage
     AuthLayout --> UpdatePassPage
-    
+
     MainLayout --> HomePage
     MainLayout --> Dashboard
-    
+
     %% Połączenia - Hydratacja Komponentów
     LoginPage --> LoginForm
     RegisterPage --> RegisterForm
@@ -81,7 +82,7 @@ flowchart LR
     RegisterForm -->|signUp| SupabaseClient
     ForgotPassForm -->|resetPasswordForEmail| SupabaseClient
     UpdatePassForm -->|updateUser| SupabaseClient
-    
+
     UserMenu --> LogoutAction
     LogoutAction -->|signOut| SupabaseClient
 
@@ -89,4 +90,5 @@ flowchart LR
     SupabaseClient <==> SupabaseAuth
     API <==> SupabaseAuth
 ```
+
 </mermaid_diagram>

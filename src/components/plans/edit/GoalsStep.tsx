@@ -46,36 +46,26 @@ export function GoalsStep({ goals, onAddGoal, onUpdateGoal, onDeleteGoal }: Goal
   };
 
   const handleGoalSubmit = async (data: CreateGoalCommand | UpdateGoalCommand) => {
-    try {
-      if (editingGoal) {
-        // Update existing goal
-        await onUpdateGoal(editingGoal.id, data as UpdateGoalCommand);
-      } else {
-        // Create new goal
-        await onAddGoal({
-          ...data,
-          plan_id: goals[0]?.plan_id || "", // Use plan_id from existing goals
-          position: goals.length + 1,
-        } as CreateGoalCommand);
-      }
-      setShowGoalDialog(false);
-      setEditingGoal(null);
-    } catch (error) {
-      // Error handling is done in the dialog
-      throw error;
+    if (editingGoal) {
+      // Update existing goal
+      await onUpdateGoal(editingGoal.id, data as UpdateGoalCommand);
+    } else {
+      // Create new goal
+      await onAddGoal({
+        ...data,
+        plan_id: goals[0]?.plan_id || "", // Use plan_id from existing goals
+        position: goals.length + 1,
+      } as CreateGoalCommand);
     }
+    setShowGoalDialog(false);
+    setEditingGoal(null);
   };
 
   const handleDeleteGoal = async () => {
     if (!deletingGoalId) return;
 
-    try {
-      await onDeleteGoal(deletingGoalId);
-      setDeletingGoalId(null);
-    } catch (error) {
-      // Error handling is done in the parent
-      throw error;
-    }
+    await onDeleteGoal(deletingGoalId);
+    setDeletingGoalId(null);
   };
 
   const getCategoryInfo = (category: GoalCategory | null) => {

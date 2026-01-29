@@ -1,9 +1,11 @@
 # Plan implementacji widoku Hierarchii Planu
 
 ## 1. Przegląd
+
 Widok Hierarchii (`HierarchyView`) to dedykowana strona prezentująca pełną strukturę planu w formacie drzewa "tylko do odczytu". Pozwala użytkownikowi na przeglądanie zależności między Celami Długoterminowymi, Kamieniami Milowymi, Celami Tygodniowymi i Zadaniami. Widok oferuje zaawansowane filtrowanie (ukrywanie zakończonych, widok wszystkich tygodni) oraz nawigację do odpowiednich widoków edycji (Cele, Tydzień, Dzień) po kliknięciu w element.
 
 ## 2. Routing widoku
+
 - **Ścieżka:** `/plans/[id]/hierarchy`
 - **Dostęp:** Wymaga zalogowania.
 - **Menu:** Dostępny z górnego menu nawigacyjnego (jako dodatkowa zakładka lub ikona).
@@ -29,6 +31,7 @@ src/pages/plans/[id]/hierarchy.astro (Page Shell)
 ## 4. Szczegóły komponentów
 
 ### 1. `HierarchyViewContainer`
+
 - **Opis:** Główny kontener zarządzający stanem widoku. Pobiera dane (lub przyjmuje je z propsów jeśli pobrane przez Astro) i wykorzystuje `hierarchy-builder` do przetworzenia płaskich danych w drzewo.
 - **Lokalizacja:** `src/components/plans/hierarchy/HierarchyViewContainer.tsx`
 - **Główne elementy:**
@@ -47,6 +50,7 @@ src/pages/plans/[id]/hierarchy.astro (Page Shell)
   - `expandedIds`: `Set<string>`
 
 ### 2. `HierarchyControls`
+
 - **Opis:** Pasek narzędziowy nad drzewem zawierający filtry.
 - **Główne elementy:**
   - `div` (flex row)
@@ -58,6 +62,7 @@ src/pages/plans/[id]/hierarchy.astro (Page Shell)
   - `Props`: `{ filters: HierarchyViewFilters, onFilterChange: (filters: HierarchyViewFilters) => void }`
 
 ### 3. `HierarchyTree`
+
 - **Opis:** Komponent prezentacyjny renderujący listę węzłów korzenia.
 - **Główne elementy:**
   - `div` lub `ul` z rolą `tree`.
@@ -67,6 +72,7 @@ src/pages/plans/[id]/hierarchy.astro (Page Shell)
   - `Props`: `{ nodes: HierarchyTreeNode[], level?: number, onToggle: (id: string) => void, expandedIds: Set<string> }`
 
 ### 4. `HierarchyNode` (Refaktoryzacja i rozbudowa istniejącego)
+
 - **Opis:** Pojedynczy wiersz w drzewie reprezentujący węzeł. Należy go przenieść z `src/components/plans/dashboard/` do `src/components/plans/hierarchy/` i rozbudować.
 - **Główne elementy:**
   - `div` (wiersz flex) z wcięciem zależnym od `level`.
@@ -87,21 +93,17 @@ src/pages/plans/[id]/hierarchy.astro (Page Shell)
 Należy zaktualizować `src/types.ts` o nowe typy pomocnicze oraz rozszerzyć istniejące.
 
 ### Rozszerzenie `NodeType`
+
 ```typescript
-export type NodeType = 
-  | 'plan' 
-  | 'goal' 
-  | 'milestone' 
-  | 'weekly_goal' 
-  | 'task' 
-  | 'ad_hoc_group';  // NOWE: dla grupowania zadań po dniach
+export type NodeType = "plan" | "goal" | "milestone" | "weekly_goal" | "task" | "ad_hoc_group"; // NOWE: dla grupowania zadań po dniach
 ```
 
 ### Nowe interfejsy
+
 ```typescript
 export interface HierarchyViewFilters {
   showCompleted: boolean; // Domyślnie false (ukryj zakończone)
-  showAllWeeks: boolean;  // Domyślnie false (tylko bieżący tydzień)
+  showAllWeeks: boolean; // Domyślnie false (tylko bieżący tydzień)
 }
 
 // HierarchyTreeNode jest już zdefiniowany w types.ts, ale upewnić się, że obsługuje nowe typy node'ów.
@@ -112,13 +114,14 @@ export interface HierarchyViewFilters {
 Stan jest zarządzany lokalnie w komponencie `HierarchyViewContainer` przy użyciu hooka `useState` (dla filtrów i rozwiniętych węzłów) oraz customowego hooka/funkcji memoizowanej do transformacji danych.
 
 ### Custom Logic: `buildHierarchyTree`
+
 Funkcja (utilities) w `src/lib/hierarchy-utils.ts`.
+
 - **Wejście:** `data: PlanDashboardDTO`, `filters: HierarchyViewFilters`.
 - **Wyjście:** `HierarchyTreeNode[]`.
 - **Działanie:**
   1. Filtruje elementy źródłowe (cele, zadania) zgodnie z filtrami `showCompleted` i `showAllWeeks` (z uwzględnieniem `plan.current_week`).
   2. Buduje strukturę drzewiastą obsługując 7 ścieżek powiązań zdefiniowanych w PRD (np. Goal -> Milestone -> WeeklyGoal -> Task).
-  
 
 ## 7. Integracja API
 
@@ -152,7 +155,7 @@ Funkcja (utilities) w `src/lib/hierarchy-utils.ts`.
   - Jeśli `showCompleted === false`:
     - Ukryj `goals` gdzie `progress_percentage === 100`.
     - Ukryj `milestones` gdzie `is_completed === true`.
-    - Ukryj `weekly_goals` (status determinowany przez podzadania - jeśli wszystkie completed?). *Uwaga: WeeklyGoal nie ma wprost flagi completed w DTO, trzeba wyliczyć lub założyć, że pokazujemy zawsze chyba że rodzic ukryty.*
+    - Ukryj `weekly_goals` (status determinowany przez podzadania - jeśli wszystkie completed?). _Uwaga: WeeklyGoal nie ma wprost flagi completed w DTO, trzeba wyliczyć lub założyć, że pokazujemy zawsze chyba że rodzic ukryty._
     - Ukryj `tasks` gdzie `status` to `completed` lub `cancelled`.
 
 ## 10. Obsługa błędów
@@ -164,7 +167,7 @@ Funkcja (utilities) w `src/lib/hierarchy-utils.ts`.
 
 1.  **Przygotowanie struktury:**
     - Utworzyć katalog `src/components/plans/hierarchy`.
-    - Przenieść tam komponenty hierarchii z `dashboard` (`HierarchyNode.tsx`, etc.) - *uwaga na refaktoryzację importów w istniejącym Dashboardzie*.
+    - Przenieść tam komponenty hierarchii z `dashboard` (`HierarchyNode.tsx`, etc.) - _uwaga na refaktoryzację importów w istniejącym Dashboardzie_.
 2.  **Implementacja Logiki (`hierarchy-utils.ts`):**
     - Napisać funkcję `buildHierarchyTree` obsługującą wszystkie przypadki zagnieżdżeń i grupowania. Jest to najbardziej skomplikowana część logiki biznesowej.
 3.  **Implementacja Komponentów Widoku:**

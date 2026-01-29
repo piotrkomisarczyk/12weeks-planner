@@ -13,11 +13,13 @@ Integracja login flow została zakończona zgodnie z wymaganiami z `auth-spec.md
 ### 1. Struktura Klientów Supabase (@supabase/ssr)
 
 #### `/src/lib/supabase/client.ts`
+
 - Browser client dla komponentów React (client-side)
 - Singleton pattern
 - Używa `PUBLIC_SUPABASE_URL` i `PUBLIC_SUPABASE_ANON_KEY`
 
 #### `/src/lib/supabase/server.ts`
+
 - Server client dla SSR (Astro pages/API)
 - Tworzy nową instancję per request
 - Zarządza cookies przez `getAll` i `setAll`
@@ -26,7 +28,9 @@ Integracja login flow została zakończona zgodnie z wymaganiami z `auth-spec.md
 ### 2. Middleware z Auth Guard
 
 #### `/src/middleware/index.ts`
+
 Implementuje:
+
 - ✅ Tworzenie Supabase server client per request
 - ✅ Pobieranie sesji użytkownika (`auth.getUser()`)
 - ✅ Przypisanie `user` do `Astro.locals`
@@ -35,12 +39,14 @@ Implementuje:
 - ✅ Przekierowanie niezalogowanych do `/login`
 
 **Public paths:**
+
 - `/login`, `/register`, `/forgot-password`, `/update-password`
 - `/api/auth/*` endpoints
 
 ### 3. API Endpoint
 
 #### `/src/pages/api/auth/login.ts`
+
 - ✅ POST endpoint z walidacją Zod
 - ✅ Wywołuje `supabase.auth.signInWithPassword()`
 - ✅ Zwraca szczegółowe błędy walidacji (400)
@@ -50,6 +56,7 @@ Implementuje:
 ### 4. Frontend - LoginForm
 
 #### `/src/components/auth/LoginForm.tsx`
+
 - ✅ Wywołuje `/api/auth/login` endpoint
 - ✅ Obsługuje błędy walidacji (wyświetla pod polami)
 - ✅ Obsługuje błędy autentykacji (toast)
@@ -59,13 +66,16 @@ Implementuje:
 ### 5. Strona Logowania
 
 #### `/src/pages/login.astro`
+
 - ✅ Usunięto zakomentowany kod
 - ✅ Ochrona przez middleware
 
 ### 6. Strona Główna z Smart Redirect
 
 #### `/src/pages/index.astro`
+
 Implementuje US-002:
+
 - ✅ Sprawdza czy użytkownik ma aktywny planner
 - ✅ Jeśli TAK → przekierowanie do `/plans/{id}` (dashboard)
 - ✅ Jeśli NIE → przekierowanie do `/plans` (lista planerów)
@@ -73,6 +83,7 @@ Implementuje US-002:
 ### 7. Zmienne Środowiskowe
 
 #### `.env.example`
+
 ```env
 # Server-side (private)
 SUPABASE_URL=###
@@ -84,6 +95,7 @@ PUBLIC_SUPABASE_ANON_KEY=###
 ```
 
 #### `src/env.d.ts`
+
 - ✅ Dodano `PUBLIC_SUPABASE_URL` i `PUBLIC_SUPABASE_ANON_KEY`
 - ✅ Rozszerzono `Astro.locals` o `user`
 
@@ -102,17 +114,18 @@ PUBLIC_SUPABASE_ANON_KEY=###
 
 ## Decyzje Architektoniczne
 
-| Pytanie | Wybrana Opcja | Uzasadnienie |
-|---------|---------------|--------------|
-| 1. Strategia Supabase Client | **A** - Całkowita separacja | Zgodne z @supabase/ssr best practices |
-| 2. Login Architecture | **B** - API endpoint | Lepsza kontrola, zgodne z cursor rules |
-| 3. Redirect Logic | **B** - W stronie głównej | SSR best practice, logika w jednym miejscu |
-| 4. Ochrona /login | **A** - W middleware | Automatyczna, zgodna z cursor rules |
-| 5. Obsługa błędów | **C** - Hybrydowa | Balans UX + security |
+| Pytanie                      | Wybrana Opcja               | Uzasadnienie                               |
+| ---------------------------- | --------------------------- | ------------------------------------------ |
+| 1. Strategia Supabase Client | **A** - Całkowita separacja | Zgodne z @supabase/ssr best practices      |
+| 2. Login Architecture        | **B** - API endpoint        | Lepsza kontrola, zgodne z cursor rules     |
+| 3. Redirect Logic            | **B** - W stronie głównej   | SSR best practice, logika w jednym miejscu |
+| 4. Ochrona /login            | **A** - W middleware        | Automatyczna, zgodna z cursor rules        |
+| 5. Obsługa błędów            | **C** - Hybrydowa           | Balans UX + security                       |
 
 ## Zgodność z Wymaganiami
 
 ### US-002: Logowanie użytkownika ✅
+
 - ✅ Formularz logowania z email i hasłem
 - ✅ Link do formularza rejestracji
 - ✅ Po sukcesie, przekierowanie do dashboardu (jeśli aktywny plan) lub listy planerów
@@ -121,6 +134,7 @@ PUBLIC_SUPABASE_ANON_KEY=###
 - ✅ Wymóg logowania dla wszystkich stron (middleware)
 
 ### auth-spec.md - Sekcja 3.2: Logowanie ✅
+
 - ✅ Formularz na `/login`
 - ✅ Wywołanie `signInWithPassword()`
 - ✅ Automatyczne ustawienie cookies
@@ -129,7 +143,9 @@ PUBLIC_SUPABASE_ANON_KEY=###
 ## Testowanie
 
 ### Wymagania przed testem:
+
 1. Ustawić zmienne środowiskowe w `.env`:
+
 ```bash
 cp .env.example .env
 # Wypełnić wartościami z Supabase Dashboard
@@ -140,35 +156,41 @@ cp .env.example .env
 ### Scenariusze testowe:
 
 #### Test 1: Udane logowanie z aktywnym plannerem
+
 1. Przejdź do `/login`
 2. Wprowadź prawidłowe dane
 3. Kliknij "Sign in"
 4. **Oczekiwany rezultat:** Przekierowanie do `/plans/{id}` (dashboard aktywnego plannera)
 
 #### Test 2: Udane logowanie bez aktywnego plannera
+
 1. Przejdź do `/login`
 2. Wprowadź dane użytkownika bez aktywnego plannera
 3. Kliknij "Sign in"
 4. **Oczekiwany rezultat:** Przekierowanie do `/plans` (lista planerów)
 
 #### Test 3: Błędne dane logowania
+
 1. Przejdź do `/login`
 2. Wprowadź nieprawidłowy email lub hasło
 3. Kliknij "Sign in"
 4. **Oczekiwany rezultat:** Toast z komunikatem "Invalid email or password"
 
 #### Test 4: Walidacja email
+
 1. Przejdź do `/login`
 2. Wprowadź nieprawidłowy format email (np. "test")
 3. Kliknij "Sign in"
 4. **Oczekiwany rezultat:** Błąd pod polem email
 
 #### Test 5: Przekierowanie zalogowanego użytkownika
+
 1. Zaloguj się
 2. Spróbuj przejść do `/login`
 3. **Oczekiwany rezultat:** Automatyczne przekierowanie do `/`
 
 #### Test 6: Ochrona tras
+
 1. Wyloguj się
 2. Spróbuj przejść do `/plans`
 3. **Oczekiwany rezultat:** Automatyczne przekierowanie do `/login`
@@ -176,6 +198,7 @@ cp .env.example .env
 ## Następne Kroki (Poza Scope)
 
 Następujące elementy NIE są częścią tego zadania:
+
 - ❌ Implementacja rejestracji (`/register`)
 - ❌ Implementacja reset hasła (`/forgot-password`, `/update-password`)
 - ✅ ~~Implementacja wylogowania~~ **COMPLETED**
@@ -184,14 +207,17 @@ Następujące elementy NIE są częścią tego zadania:
 ## Potencjalne Problemy i Rozwiązania
 
 ### Problem: "Cannot read property 'id' of null"
+
 **Przyczyna:** Middleware nie ustawił `locals.user`  
 **Rozwiązanie:** Sprawdź czy zmienne środowiskowe są poprawnie ustawione
 
 ### Problem: Przekierowanie loop
+
 **Przyczyna:** Middleware przekierowuje w nieskończoność  
 **Rozwiązanie:** Sprawdź czy ścieżka jest w `PUBLIC_PATHS`
 
 ### Problem: Cookies nie są ustawiane
+
 **Przyczyna:** Nieprawidłowa konfiguracja `cookieOptions`  
 **Rozwiązanie:** Sprawdź `secure: true` (wymaga HTTPS w production)
 

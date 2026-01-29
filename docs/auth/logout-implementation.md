@@ -15,16 +15,19 @@ Dodano pełną funkcjonalność wylogowania zgodnie z `@supabase/ssr` best pract
 **Endpoint:** `POST /api/auth/logout`
 
 **Funkcjonalność:**
+
 - Wywołuje `locals.supabase.auth.signOut()` (server client z middleware)
 - Czyści cookies sesji automatycznie (przez Supabase)
 - Zwraca odpowiednie kody statusu
 
 **Responses:**
+
 - `200` - Sukces, użytkownik wylogowany
 - `400` - Błąd Supabase (np. brak sesji)
 - `500` - Nieoczekiwany błąd serwera
 
 **Kod:**
+
 ```typescript
 export const POST: APIRoute = async ({ locals }) => {
   const { error } = await locals.supabase.auth.signOut();
@@ -35,6 +38,7 @@ export const POST: APIRoute = async ({ locals }) => {
 ### 2. Frontend - `UserMenu.tsx`
 
 **Zmiany:**
+
 - ❌ Usunięto import `supabaseClient` (stary singleton)
 - ✅ Dodano wywołanie API endpoint `/api/auth/logout`
 - ✅ Obsługa błędów przez toast notifications
@@ -42,6 +46,7 @@ export const POST: APIRoute = async ({ locals }) => {
 - ✅ Przekierowanie do `/login` po sukcesie
 
 **Flow:**
+
 ```
 User clicks "Log out"
   → Set loading state
@@ -91,21 +96,25 @@ User clicks "Log out"
 ## Zgodność z Best Practices
 
 ### ✅ Cursor Rules (supabase-auth.mdc)
+
 - Używa server client z `locals.supabase` (ustawiony przez middleware)
 - API endpoint zamiast bezpośredniego wywołania w komponencie
 - Proper error handling
 
 ### ✅ @supabase/ssr Pattern
+
 - Server-side logout przez `createServerClient`
 - Cookies zarządzane automatycznie przez Supabase
 - Nie używa starego singleton pattern
 
 ### ✅ Security
+
 - Logout wymaga aktywnej sesji (middleware sprawdza)
 - Cookies są czyszczone po stronie serwera
 - Proper HTTP status codes
 
 ### ✅ UX
+
 - Loading state podczas wylogowania
 - Toast notifications (success/error)
 - Disabled button podczas procesu
@@ -116,15 +125,18 @@ User clicks "Log out"
 ### Scenariusze testowe (dodane do MANUAL_TEST_CHECKLIST.md):
 
 #### Test 13: Logout Functionality
+
 - Zaloguj się
 - Kliknij avatar → "Log out"
 - **Oczekiwany rezultat:** Toast + Redirect do `/login` + Cookies cleared
 
 #### Test 14: Logout Loading State
+
 - Sprawdź czy przycisk pokazuje "Logging out..."
 - Sprawdź czy przycisk jest disabled
 
 #### Test 15: Logout Error Handling
+
 - Symuluj offline mode
 - Sprawdź czy błąd jest obsłużony (toast)
 
@@ -160,19 +172,20 @@ npm run dev
 
 ## Różnice vs Poprzednia Implementacja
 
-| Aspekt | Stara Implementacja | Nowa Implementacja |
-|--------|---------------------|-------------------|
-| Client | `supabaseClient` singleton | API endpoint |
-| Wywołanie | `supabaseClient.auth.signOut()` | `fetch('/api/auth/logout')` |
-| Cookies | Browser client | Server client (SSR) |
-| Zgodność | ❌ Nie zgodne z SSR | ✅ Zgodne z @supabase/ssr |
-| Bezpieczeństwo | ⚠️ Client-side only | ✅ Server-side |
+| Aspekt         | Stara Implementacja             | Nowa Implementacja          |
+| -------------- | ------------------------------- | --------------------------- |
+| Client         | `supabaseClient` singleton      | API endpoint                |
+| Wywołanie      | `supabaseClient.auth.signOut()` | `fetch('/api/auth/logout')` |
+| Cookies        | Browser client                  | Server client (SSR)         |
+| Zgodność       | ❌ Nie zgodne z SSR             | ✅ Zgodne z @supabase/ssr   |
+| Bezpieczeństwo | ⚠️ Client-side only             | ✅ Server-side              |
 
 ## Kluczowe Zmiany w Kodzie
 
 ### UserMenu.tsx - Przed:
+
 ```typescript
-import { supabaseClient } from '@/db/supabase.client';
+import { supabaseClient } from "@/db/supabase.client";
 
 const handleLogout = async () => {
   const { error } = await supabaseClient.auth.signOut();
@@ -181,12 +194,13 @@ const handleLogout = async () => {
 ```
 
 ### UserMenu.tsx - Po:
+
 ```typescript
 // Brak importu supabaseClient
 
 const handleLogout = async () => {
-  const response = await fetch('/api/auth/logout', {
-    method: 'POST',
+  const response = await fetch("/api/auth/logout", {
+    method: "POST",
   });
   // ...
 };
@@ -195,6 +209,7 @@ const handleLogout = async () => {
 ## Integracja z Middleware
 
 Middleware automatycznie:
+
 1. Tworzy Supabase server client per request
 2. Przypisuje do `locals.supabase`
 3. Endpoint `/api/auth/logout` używa tego klienta

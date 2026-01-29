@@ -7,6 +7,7 @@
 **Cel**: Pobranie listy wszystkich planerów (12-tygodniowych planów) należących do uwierzytelnionego użytkownika. Endpoint obsługuje filtrowanie po statusie oraz paginację wyników.
 
 **Wymagania funkcjonalne**:
+
 - Zwrócenie wszystkich planerów użytkownika
 - Możliwość filtrowania po statusie ('active', 'completed', 'archived')
 - Obsługa paginacji (limit, offset)
@@ -18,47 +19,55 @@
 ## 2. Szczegóły żądania
 
 ### HTTP Method
+
 `GET`
 
 ### Struktura URL
+
 ```
 /api/v1/plans
 ```
 
 ### Headers
+
 ```
 Authorization: Bearer <supabase_jwt_token>
 ```
 
 ### Query Parameters
 
-| Parametr | Typ | Wymagany | Domyślna wartość | Walidacja | Opis |
-|----------|-----|----------|------------------|-----------|------|
-| `status` | string | Nie | - | enum: 'ready', 'active', 'completed', 'archived' | Filtruje planery po statusie |
-| `limit` | number | Nie | 50 | min: 1, max: 100 | Liczba wyników na stronę |
-| `offset` | number | Nie | 0 | min: 0 | Przesunięcie dla paginacji |
+| Parametr | Typ    | Wymagany | Domyślna wartość | Walidacja                                        | Opis                         |
+| -------- | ------ | -------- | ---------------- | ------------------------------------------------ | ---------------------------- |
+| `status` | string | Nie      | -                | enum: 'ready', 'active', 'completed', 'archived' | Filtruje planery po statusie |
+| `limit`  | number | Nie      | 50               | min: 1, max: 100                                 | Liczba wyników na stronę     |
+| `offset` | number | Nie      | 0                | min: 0                                           | Przesunięcie dla paginacji   |
 
 ### Request Body
+
 Brak (endpoint GET nie przyjmuje body)
 
 ### Przykładowe żądania
 
 **Pobranie wszystkich aktywnych planerów (pierwsza strona)**:
+
 ```
 GET /api/v1/plans?status=active&limit=10&offset=0
 ```
 
 **Pobranie wszystkich gotowych planerów**:
+
 ```
 GET /api/v1/plans?status=ready
 ```
 
 **Pobranie wszystkich planerów (domyślna paginacja)**:
+
 ```
 GET /api/v1/plans
 ```
 
 **Pobranie drugiej strony wyników**:
+
 ```
 GET /api/v1/plans?limit=20&offset=20
 ```
@@ -70,24 +79,26 @@ GET /api/v1/plans?limit=20&offset=20
 ### DTOs (Data Transfer Objects)
 
 **PlanDTO** (z `src/types.ts`):
+
 ```typescript
 export type PlanDTO = PlanEntity;
 
 // Struktura:
 {
-  id: string;              // UUID
-  user_id: string;         // UUID
-  name: string;            // np. "Planner_2025-01-06"
-  start_date: string;      // ISO date format
-  status: PlanStatus;      // 'ready' | 'active' | 'completed' | 'archived'
-  created_at: string;      // ISO timestamp
-  updated_at: string;      // ISO timestamp
+  id: string; // UUID
+  user_id: string; // UUID
+  name: string; // np. "Planner_2025-01-06"
+  start_date: string; // ISO date format
+  status: PlanStatus; // 'ready' | 'active' | 'completed' | 'archived'
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }
 ```
 
 ### Query Parameter Types
 
 **PlanListParams** (z `src/types.ts`):
+
 ```typescript
 export interface PlanListParams extends ListQueryParams {
   status?: PlanStatus;
@@ -104,6 +115,7 @@ export interface ListQueryParams {
 ### Response Types
 
 **PaginatedResponse<PlanDTO>** (z `src/types.ts`):
+
 ```typescript
 export interface PaginatedResponse<T> {
   data: T[];
@@ -115,6 +127,7 @@ export interface PaginatedResponse<T> {
 ```
 
 Dla tego endpointu używamy uproszczonej wersji zgodnie ze specyfikacją:
+
 ```typescript
 {
   data: PlanDTO[];
@@ -127,6 +140,7 @@ Dla tego endpointu używamy uproszczonej wersji zgodnie ze specyfikacją:
 ### Error Types
 
 **ErrorResponse** (z `src/types.ts`):
+
 ```typescript
 export interface ErrorResponse {
   error: string;
@@ -134,7 +148,7 @@ export interface ErrorResponse {
 }
 
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 
@@ -154,6 +168,7 @@ export interface ValidationErrorDetail {
 **Content-Type**: `application/json`
 
 **Body**:
+
 ```json
 {
   "data": [
@@ -242,56 +257,66 @@ export interface ValidationErrorDetail {
 ### Szczegółowy opis kroków
 
 **Krok 1: Odbieranie żądania**
+
 - Astro odbiera żądanie GET na `/api/v1/plans`
 - Middleware dodaje instancję Supabase Client do `context.locals.supabase`
 
 **Krok 2: Uwierzytelnianie**
+
 - Middleware lub handler sprawdza obecność tokenu JWT w headerze `Authorization`
 - Wywołanie `supabase.auth.getUser()` w celu weryfikacji tokenu
 - Jeśli token jest nieprawidłowy/brakuje → zwrócenie 401
 
 **Krok 3: Walidacja parametrów**
+
 - Parser query parameters z `context.url.searchParams`
 - Walidacja przez schemat Zod
 - W przypadku niepowodzenia walidacji → zwrócenie 400 z szczegółami błędów
 
 **Krok 4: Wywołanie serwisu**
+
 - Handler wywołuje `PlanService.getPlans(userId, validatedParams)`
 - Przekazanie zwalidowanych parametrów i ID użytkownika
 
 **Krok 5: Zapytanie do bazy danych**
+
 - PlanService buduje zapytanie Supabase:
+
   ```typescript
   let query = supabase
-    .from('plans')
-    .select('*', { count: 'exact' })
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  
+    .from("plans")
+    .select("*", { count: "exact" })
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
   if (params.status) {
-    query = query.eq('status', params.status);
+    query = query.eq("status", params.status);
   }
-  
+
   query = query.range(params.offset, params.offset + params.limit - 1);
-  
+
   const { data, error, count } = await query;
   ```
 
 **Krok 6: Obsługa odpowiedzi z bazy**
+
 - Sprawdzenie czy wystąpił błąd
 - Transformacja danych (w tym przypadku dane są już w formacie PlanDTO)
 - Zwrócenie struktury z danymi i metadanymi paginacji
 
 **Krok 7: Formatowanie odpowiedzi**
+
 - Handler formatuje odpowiedź zgodnie ze specyfikacją
 - Ustawienie odpowiednich headerów (Content-Type, Cache-Control)
 
 **Krok 8: Zwrócenie odpowiedzi**
+
 - Klient otrzymuje odpowiedź JSON ze statusem 200
 
 ### Interakcje z zewnętrznymi systemami
 
 **Supabase Database (PostgreSQL)**:
+
 - Tabela: `plans`
 - Wykorzystywane indeksy:
   - `idx_plans_user_id` - dla filtrowania po user_id
@@ -299,6 +324,7 @@ export interface ValidationErrorDetail {
   - `idx_plans_start_date` - potencjalnie dla sortowania
 
 **Supabase Auth**:
+
 - Weryfikacja tokenu JWT
 - Pobranie user_id z tokenu
 
@@ -309,19 +335,24 @@ export interface ValidationErrorDetail {
 ### 1. Uwierzytelnianie
 
 **Mechanizm**: JWT token w headerze Authorization
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
 **Implementacja**:
+
 ```typescript
-const { data: { user }, error } = await supabase.auth.getUser();
+const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser();
 
 if (error || !user) {
-  return new Response(
-    JSON.stringify({ error: 'Unauthorized', message: 'Invalid or missing token' }),
-    { status: 401, headers: { 'Content-Type': 'application/json' } }
-  );
+  return new Response(JSON.stringify({ error: "Unauthorized", message: "Invalid or missing token" }), {
+    status: 401,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -330,31 +361,31 @@ if (error || !user) {
 **Zasada**: Użytkownik może widzieć TYLKO własne planery
 
 **Implementacja**:
+
 - Wszystkie zapytania do tabeli `plans` muszą zawierać filtr `WHERE user_id = <authenticated_user_id>`
 - Nigdy nie polegać na parametrach klienta do określenia user_id
 - Zawsze używać user_id z zweryfikowanego tokenu
 
 ```typescript
-const query = supabase
-  .from('plans')
-  .select('*')
-  .eq('user_id', user.id);  // ZAWSZE filtruj po user_id z tokenu
+const query = supabase.from("plans").select("*").eq("user_id", user.id); // ZAWSZE filtruj po user_id z tokenu
 ```
 
 ### 3. Walidacja danych wejściowych
 
 **Schemat Zod**:
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const GetPlansQuerySchema = z.object({
-  status: z.enum(['active', 'completed', 'archived']).optional(),
+  status: z.enum(["active", "completed", "archived"]).optional(),
   limit: z.coerce.number().int().positive().max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0)
+  offset: z.coerce.number().int().min(0).default(0),
 });
 ```
 
 **Zabezpieczenia**:
+
 - `limit` ograniczony do max 100 (zapobiega przeciążeniu serwera)
 - `offset` nie może być ujemny
 - `status` musi być jedną z dozwolonych wartości
@@ -371,6 +402,7 @@ const GetPlansQuerySchema = z.object({
 **MVP**: Nie implementujemy w pierwszej wersji
 
 **Przyszłość**: Rozważyć dodanie:
+
 - Rate limiting per user (np. 100 żądań/minutę)
 - Rate limiting per IP
 - Implementacja przez middleware Astro lub Supabase Edge Functions
@@ -378,6 +410,7 @@ const GetPlansQuerySchema = z.object({
 ### 6. CORS i Headers
 
 **Headers bezpieczeństwa**:
+
 ```typescript
 {
   'Content-Type': 'application/json',
@@ -399,68 +432,72 @@ const GetPlansQuerySchema = z.object({
 
 ### Katalog błędów
 
-| Kod | Scenariusz | Przyczyna | Odpowiedź | Akcja |
-|-----|-----------|-----------|-----------|-------|
-| 400 | Validation Error | Nieprawidłowe query parameters | `{ error: 'Validation failed', details: [...] }` | Poprawić parametry żądania |
-| 401 | Unauthorized | Brak tokenu JWT | `{ error: 'Unauthorized', message: 'Missing authentication token' }` | Zalogować się ponownie |
-| 401 | Unauthorized | Nieprawidłowy token JWT | `{ error: 'Unauthorized', message: 'Invalid authentication token' }` | Zalogować się ponownie |
-| 401 | Unauthorized | Token wygasł | `{ error: 'Unauthorized', message: 'Token expired' }` | Odświeżyć token |
-| 500 | Database Error | Błąd połączenia z bazą | `{ error: 'Internal server error', message: 'Database connection failed' }` | Spróbować ponownie, skontaktować się z supportem |
-| 500 | Unexpected Error | Nieoczekiwany błąd serwera | `{ error: 'Internal server error', message: 'An unexpected error occurred' }` | Spróbować ponownie, skontaktować się z supportem |
+| Kod | Scenariusz       | Przyczyna                      | Odpowiedź                                                                     | Akcja                                            |
+| --- | ---------------- | ------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------ |
+| 400 | Validation Error | Nieprawidłowe query parameters | `{ error: 'Validation failed', details: [...] }`                              | Poprawić parametry żądania                       |
+| 401 | Unauthorized     | Brak tokenu JWT                | `{ error: 'Unauthorized', message: 'Missing authentication token' }`          | Zalogować się ponownie                           |
+| 401 | Unauthorized     | Nieprawidłowy token JWT        | `{ error: 'Unauthorized', message: 'Invalid authentication token' }`          | Zalogować się ponownie                           |
+| 401 | Unauthorized     | Token wygasł                   | `{ error: 'Unauthorized', message: 'Token expired' }`                         | Odświeżyć token                                  |
+| 500 | Database Error   | Błąd połączenia z bazą         | `{ error: 'Internal server error', message: 'Database connection failed' }`   | Spróbować ponownie, skontaktować się z supportem |
+| 500 | Unexpected Error | Nieoczekiwany błąd serwera     | `{ error: 'Internal server error', message: 'An unexpected error occurred' }` | Spróbować ponownie, skontaktować się z supportem |
 
 ### Implementacja obsługi błędów
 
 **1. Try-Catch w Handler**:
+
 ```typescript
 try {
   // Główna logika
 } catch (error) {
-  console.error('Error in GET /api/v1/plans:', error);
+  console.error("Error in GET /api/v1/plans:", error);
   return new Response(
     JSON.stringify({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred'
+      error: "Internal server error",
+      message: "An unexpected error occurred",
     }),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
+    { status: 500, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
 
 **2. Walidacja Zod**:
+
 ```typescript
 const result = GetPlansQuerySchema.safeParse(queryParams);
 
 if (!result.success) {
-  const details = result.error.issues.map(issue => ({
-    field: issue.path.join('.'),
+  const details = result.error.issues.map((issue) => ({
+    field: issue.path.join("."),
     message: issue.message,
-    received: issue.received
+    received: issue.received,
   }));
-  
-  return new Response(
-    JSON.stringify({ error: 'Validation failed', details }),
-    { status: 400, headers: { 'Content-Type': 'application/json' } }
-  );
+
+  return new Response(JSON.stringify({ error: "Validation failed", details }), {
+    status: 400,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
 **3. Obsługa błędów Supabase**:
+
 ```typescript
 const { data, error, count } = await query;
 
 if (error) {
-  console.error('Supabase error:', error);
+  console.error("Supabase error:", error);
   return new Response(
     JSON.stringify({
-      error: 'Internal server error',
-      message: 'Database query failed'
+      error: "Internal server error",
+      message: "Database query failed",
     }),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
+    { status: 500, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
 
 **4. Early Returns dla Edge Cases**:
+
 ```typescript
 // Sprawdzenie uwierzytelnienia
 if (!user) {
@@ -483,16 +520,19 @@ return new Response(JSON.stringify(response), { status: 200 });
 ### Potencjalne wąskie gardła
 
 **1. Duża liczba planerów**:
+
 - Problem: Użytkownik z setkami planerów
 - Rozwiązanie: Paginacja z ograniczeniem max limit=100
 
 **2. Brak indeksów**:
+
 - Problem: Wolne zapytania przy dużej liczbie rekordów
 - Rozwiązanie: Wykorzystanie istniejących indeksów:
   - `idx_plans_user_id`
   - `idx_plans_status`
 
 **3. Brak cache'owania**:
+
 - Problem: Powtarzające się identyczne zapytania
 - Rozwiązanie MVP: Brak (dla uproszczenia)
 - Rozwiązanie przyszłość: Dodać Cache-Control headers
@@ -500,22 +540,26 @@ return new Response(JSON.stringify(response), { status: 200 });
 ### Strategie optymalizacji
 
 **1. Paginacja**:
+
 ```typescript
 // Użycie .range() dla efektywnej paginacji
 query = query.range(offset, offset + limit - 1);
 ```
 
 **2. Selective Field Loading** (opcjonalnie na przyszłość):
+
 ```typescript
 // Zamiast SELECT *
 .select('id, name, start_date, status, created_at, updated_at')
 ```
 
 **3. Proper Indexing**:
+
 - Upewnić się, że migracje zawierają wszystkie wymagane indeksy
 - Monitorować slow queries w Supabase Dashboard
 
 **4. Cache Headers** (przyszłość):
+
 ```typescript
 headers: {
   'Content-Type': 'application/json',
@@ -524,6 +568,7 @@ headers: {
 ```
 
 **5. Connection Pooling**:
+
 - Supabase automatycznie zarządza connection pooling
 - Brak dodatkowej konfiguracji w MVP
 
@@ -544,19 +589,21 @@ headers: {
 **Plik**: `src/lib/validation/plan.validation.ts`
 
 **Zawartość**:
+
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const GetPlansQuerySchema = z.object({
-  status: z.enum(['ready', 'active', 'completed', 'archived']).optional(),
+  status: z.enum(["ready", "active", "completed", "archived"]).optional(),
   limit: z.coerce.number().int().positive().max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0)
+  offset: z.coerce.number().int().min(0).default(0),
 });
 
 export type GetPlansQuery = z.infer<typeof GetPlansQuerySchema>;
 ```
 
 **Testy**:
+
 - Sprawdzić poprawną walidację prawidłowych parametrów (w tym status='ready')
 - Sprawdzić odrzucenie nieprawidłowych wartości (np. status='invalid')
 - Sprawdzić domyślne wartości (limit=50, offset=0)
@@ -569,22 +616,23 @@ export type GetPlansQuery = z.infer<typeof GetPlansQuerySchema>;
 **Plik**: `src/lib/services/plan.service.ts`
 
 **Zawartość**:
-```typescript
-import type { SupabaseClient } from '../db/supabase.client';
-import type { Database } from '../db/database.types';
-import type { PlanDTO, PlanListParams, PaginatedResponse } from '../types';
+
+````typescript
+import type { SupabaseClient } from "../db/supabase.client";
+import type { Database } from "../db/database.types";
+import type { PlanDTO, PlanListParams, PaginatedResponse } from "../types";
 
 export class PlanService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
    * Pobiera listę planerów dla danego użytkownika z opcjonalnym filtrowaniem i paginacją
-   * 
+   *
    * @param userId - ID użytkownika (z tokenu JWT)
    * @param params - Parametry zapytania (status, limit, offset)
    * @returns Promise z listą planerów i metadanymi paginacji
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const plans = await planService.getPlans(userId, {
@@ -594,20 +642,17 @@ export class PlanService {
    * });
    * ```
    */
-  async getPlans(
-    userId: string,
-    params: PlanListParams
-  ): Promise<PaginatedResponse<PlanDTO>> {
+  async getPlans(userId: string, params: PlanListParams): Promise<PaginatedResponse<PlanDTO>> {
     const { status, limit = 50, offset = 0 } = params;
 
     let query = this.supabase
-      .from('plans')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .from("plans")
+      .select("*", { count: "exact" })
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (status) {
-      query = query.eq('status', status);
+      query = query.eq("status", status);
     }
 
     query = query.range(offset, offset + limit - 1);
@@ -622,13 +667,14 @@ export class PlanService {
       data: data || [],
       count: count || 0,
       limit,
-      offset
+      offset,
     };
   }
 }
-```
+````
 
 **Testy**:
+
 - Sprawdzić filtrowanie po user_id
 - Sprawdzić filtrowanie po statusie
 - Sprawdzić paginację (limit, offset)
@@ -642,17 +688,18 @@ export class PlanService {
 **Plik**: `src/pages/api/v1/plans.ts`
 
 **Zawartość**:
+
 ```typescript
 /**
  * API Endpoint: GET /api/v1/plans
- * 
+ *
  * Returns all plans for the authenticated user with optional filtering and pagination.
- * 
+ *
  * Query Parameters:
  * - status: Filter by plan status (ready, active, completed, archived) - optional
  * - limit: Number of results per page (1-100, default: 50) - optional
  * - offset: Pagination offset (min: 0, default: 0) - optional
- * 
+ *
  * Responses:
  * - 200: Success with paginated list of plans
  * - 400: Invalid query parameters
@@ -660,11 +707,11 @@ export class PlanService {
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { PlanService } from '../../../lib/services/plan.service';
-import { GetPlansQuerySchema } from '../../../lib/validation/plan.validation';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
-import type { ErrorResponse, ValidationErrorResponse } from '../../../types';
+import type { APIRoute } from "astro";
+import { PlanService } from "../../../lib/services/plan.service";
+import { GetPlansQuerySchema } from "../../../lib/validation/plan.validation";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse } from "../../../types";
 
 export const prerender = false;
 
@@ -676,28 +723,28 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     // Step 2: Parse and validate query parameters
     const queryParams = {
-      status: url.searchParams.get('status'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset')
+      status: url.searchParams.get("status"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     const validationResult = GetPlansQuerySchema.safeParse(queryParams);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -707,27 +754,24 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const result = await planService.getPlans(userId, validationResult.data);
 
     // Step 4: Return successful response
-    return new Response(
-      JSON.stringify(result),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/plans:', error);
-    
+    console.error("Error in GET /api/v1/plans:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -735,6 +779,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
 ```
 
 **Testy**:
+
 - Sprawdzić odpowiedź 400 dla nieprawidłowych parametrów
 - Sprawdzić odpowiedź 200 z prawidłowymi danymi
 - Sprawdzić obsługę błędów serwera
@@ -779,15 +824,16 @@ export const GET: APIRoute = async ({ locals, url }) => {
 4. Dodać przykładowe requesty/responses do docs
 
 **Przykład JSDoc**:
-```typescript
+
+````typescript
 /**
  * Pobiera listę planerów dla danego użytkownika
- * 
+ *
  * @param userId - ID użytkownika (z tokenu JWT)
  * @param params - Parametry zapytania (status, limit, offset)
  * @returns Promise z listą planerów i metadanymi paginacji
  * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
- * 
+ *
  * @example
  * ```typescript
  * const plans = await planService.getPlans(userId, {
@@ -798,7 +844,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
  * ```
  */
 async getPlans(userId: string, params: PlanListParams): Promise<PaginatedResponse<PlanDTO>>
-```
+````
 
 ---
 
@@ -818,6 +864,7 @@ async getPlans(userId: string, params: PlanListParams): Promise<PaginatedRespons
 - [ ] Zmienne środowiskowe są skonfigurowane (SUPABASE_URL, SUPABASE_KEY)
 
 **Deployment**:
+
 1. Merge do main branch
 2. CI/CD pipeline uruchamia testy
 3. Deploy do środowiska staging
@@ -832,28 +879,34 @@ async getPlans(userId: string, params: PlanListParams): Promise<PaginatedRespons
 ### Rozszerzenia przyszłościowe
 
 **1. Sortowanie**:
+
 - Dodać parametr `sort` do sortowania po różnych polach
 - Przykład: `?sort=start_date:asc` lub `?sort=name:desc`
 
 **2. Wyszukiwanie**:
+
 - Dodać parametr `search` do wyszukiwania po nazwie planera
 - Przykład: `?search=Q1%202025`
 
 **3. Bulk operations**:
+
 - Endpoint do masowej aktualizacji statusów
 - Endpoint do eksportu wielu planerów
 
 **4. Cache'owanie**:
+
 - Implementacja Redis cache dla często pobieranych danych
 - Cache invalidation przy aktualizacji/usunięciu
 
 **5. Real-time updates**:
+
 - Supabase Realtime subscriptions dla live updates
 - WebSocket notifications przy zmianach
 
 ### Monitorowanie w produkcji
 
 **Metryki do śledzenia**:
+
 - Request rate (żądania/sekundę)
 - Response time (p50, p95, p99)
 - Error rate (błędy/wszystkie żądania)
@@ -861,7 +914,7 @@ async getPlans(userId: string, params: PlanListParams): Promise<PaginatedRespons
 - Database query performance
 
 **Alerty**:
+
 - Error rate > 5% → alert
 - Response time p95 > 1s → warning
 - Database connection failures → critical alert
-

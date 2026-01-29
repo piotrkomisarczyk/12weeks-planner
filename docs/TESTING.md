@@ -51,13 +51,13 @@ Unit tests are located next to the source files with `.test.ts` or `.spec.ts` ex
 **Example:**
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { cn } from './utils';
+import { describe, it, expect } from "vitest";
+import { cn } from "./utils";
 
-describe('utils', () => {
-  describe('cn', () => {
-    it('should merge class names correctly', () => {
-      expect(cn('px-2 py-1', 'px-3')).toBe('py-1 px-3');
+describe("utils", () => {
+  describe("cn", () => {
+    it("should merge class names correctly", () => {
+      expect(cn("px-2 py-1", "px-3")).toBe("py-1 px-3");
     });
   });
 });
@@ -112,7 +112,7 @@ E2E tests are located in the `e2e/` directory.
 
 ```typescript
 // e2e/pages/LoginPage.ts
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -126,7 +126,7 @@ export class LoginPage {
   }
 
   async goto() {
-    await this.page.goto('/login');
+    await this.page.goto("/login");
   }
 
   async login(email: string, password: string) {
@@ -140,10 +140,10 @@ export class LoginPage {
 
 ```typescript
 // e2e/login.spec.ts
-import { test, expect } from '@playwright/test';
-import { LoginPage } from './pages/LoginPage';
+import { test, expect } from "@playwright/test";
+import { LoginPage } from "./pages/LoginPage";
 
-test.describe('Login Page', () => {
+test.describe("Login Page", () => {
   let loginPage: LoginPage;
 
   test.beforeEach(async ({ page }) => {
@@ -151,7 +151,7 @@ test.describe('Login Page', () => {
     await loginPage.goto();
   });
 
-  test('should display login form', async ({ page }) => {
+  test("should display login form", async ({ page }) => {
     await expect(page).toHaveTitle(/12weeks/i);
     await expect(loginPage.emailInput).toBeVisible();
   });

@@ -87,55 +87,59 @@ For detailed testing documentation, see [docs/TESTING.md](docs/TESTING.md).
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/12weeks-planner.git
    cd 12weeks-planner
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Configuration**
-   
+
    Create a `.env` file in the project root and add your Supabase credentials:
+
    ```env
    PUBLIC_SUPABASE_URL=your_supabase_project_url
    PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
-   
+
    You can find these values in your Supabase project settings under API.
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    ```
 
 5. **Open your browser**
-   
+
    Navigate to `http://localhost:4321` (or the port shown in your terminal)
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Starts the Astro development server with hot module replacement |
-| `npm run build` | Creates an optimized production build |
-| `npm run preview` | Previews the production build locally |
-| `npm run astro` | Runs Astro CLI commands |
-| `npm run lint` | Checks code for linting errors |
-| `npm run lint:fix` | Automatically fixes linting errors where possible |
-| `npm run format` | Formats code using Prettier |
-| `npm test` | Runs all unit tests once |
-| `npm run test:watch` | Runs unit tests in watch mode (auto-rerun on changes) |
-| `npm run test:ui` | Opens Vitest UI for interactive test debugging |
-| `npm run test:coverage` | Runs unit tests with coverage report |
-| `npm run test:e2e` | Runs E2E tests with Playwright (headless) |
-| `npm run test:e2e:ui` | Opens Playwright UI for interactive E2E testing |
-| `npm run test:e2e:headed` | Runs E2E tests with browser visible |
-| `npm run test:e2e:debug` | Runs E2E tests in debug mode with Playwright Inspector |
-| `npm run test:e2e:codegen` | Opens Playwright codegen tool for recording tests |
+| Script                     | Description                                                     |
+| -------------------------- | --------------------------------------------------------------- |
+| `npm run dev`              | Starts the Astro development server with hot module replacement |
+| `npm run build`            | Creates an optimized production build                           |
+| `npm run preview`          | Previews the production build locally                           |
+| `npm run astro`            | Runs Astro CLI commands                                         |
+| `npm run lint`             | Checks code for linting errors                                  |
+| `npm run lint:fix`         | Automatically fixes linting errors where possible               |
+| `npm run format`           | Formats code using Prettier                                     |
+| `npm test`                 | Runs all unit tests once                                        |
+| `npm run test:watch`       | Runs unit tests in watch mode (auto-rerun on changes)           |
+| `npm run test:ui`          | Opens Vitest UI for interactive test debugging                  |
+| `npm run test:coverage`    | Runs unit tests with coverage report                            |
+| `npm run test:e2e`         | Runs E2E tests with Playwright (headless)                       |
+| `npm run test:e2e:ui`      | Opens Playwright UI for interactive E2E testing                 |
+| `npm run test:e2e:headed`  | Runs E2E tests with browser visible                             |
+| `npm run test:e2e:debug`   | Runs E2E tests in debug mode with Playwright Inspector          |
+| `npm run test:e2e:codegen` | Opens Playwright codegen tool for recording tests               |
 
 ### Development Workflow
 
@@ -160,22 +164,26 @@ Git hooks via Husky will automatically run linting on staged files before commit
 ### MVP Features Included
 
 ✅ **Authentication System**
+
 - User registration and login (email/password)
 - Password reset functionality
 - Secure session management
 
 ✅ **Planner Management**
+
 - Create 12-week planners starting from Monday of current week
 - Navigate between current and archived planners
 - Soft-delete archival system
 
 ✅ **Goal Management**
+
 - Create 1-5 goals per planner
 - Add justifications for each goal
 - Define up to 5 milestone tasks per goal with deadlines
 - Manual progress tracking (0-100%)
 
 ✅ **Task Management**
+
 - Weekly planning with main task and subtasks
 - Ad-hoc tasks unrelated to goals
 - A/B/C prioritization system
@@ -184,22 +192,26 @@ Git hooks via Husky will automatically run linting on staged files before commit
 - Multi-day task copying with state history
 
 ✅ **Daily Task View**
+
 - 1 most important task
 - 2 secondary tasks
 - 7 additional tasks
 - State management and task copying
 
 ✅ **Weekly Summaries**
+
 - Reflection questions (what worked, what didn't, what to improve)
 - Auto-save functionality
 - Goal progress updates
 
 ✅ **Dashboard & Navigation**
+
 - Hierarchical task tree view (expand/collapse)
 - Quick links to all views
 - Progress visualization
 
 ✅ **Interface**
+
 - Responsive desktop design
 - SVG icons with ARIA labels
 - Bilingual support (English/Polish)
@@ -213,7 +225,7 @@ Git hooks via Husky will automatically run linting on staged files before commit
 ❌ External integrations (calendar, notifications, reports)  
 ❌ Advanced security (2FA, audit logs)  
 ❌ Automated progress calculation  
-❌ Cross-planner ad-hoc task migration  
+❌ Cross-planner ad-hoc task migration
 
 ### Future Considerations
 
@@ -249,4 +261,3 @@ This project's license will be determined. Please check back later for licensing
 ---
 
 **Built with ❤️ using Astro, React, and Supabase**
-

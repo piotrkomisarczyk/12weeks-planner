@@ -31,13 +31,10 @@ PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 Create `src/lib/supabase/client.ts`:
 
 ```typescript
-import { createBrowserClient } from '@supabase/ssr';
+import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {
-  return createBrowserClient(
-    import.meta.env.PUBLIC_SUPABASE_URL!,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY!
-  );
+  return createBrowserClient(import.meta.env.PUBLIC_SUPABASE_URL!, import.meta.env.PUBLIC_SUPABASE_ANON_KEY!);
 }
 ```
 
@@ -46,27 +43,23 @@ export function createClient() {
 Create `src/lib/supabase/server.ts`:
 
 ```typescript
-import { createServerClient } from '@supabase/ssr';
-import type { AstroCookies } from 'astro';
+import { createServerClient } from "@supabase/ssr";
+import type { AstroCookies } from "astro";
 
 export function createClient(cookies: AstroCookies) {
-  return createServerClient(
-    import.meta.env.PUBLIC_SUPABASE_URL!,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(key: string) {
-          return cookies.get(key)?.value;
-        },
-        set(key: string, value: string, options: any) {
-          cookies.set(key, value, options);
-        },
-        remove(key: string, options: any) {
-          cookies.delete(key, options);
-        },
+  return createServerClient(import.meta.env.PUBLIC_SUPABASE_URL!, import.meta.env.PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: {
+      get(key: string) {
+        return cookies.get(key)?.value;
       },
-    }
-  );
+      set(key: string, value: string, options: any) {
+        cookies.set(key, value, options);
+      },
+      remove(key: string, options: any) {
+        cookies.delete(key, options);
+      },
+    },
+  });
 }
 ```
 
@@ -75,8 +68,8 @@ export function createClient(cookies: AstroCookies) {
 Update `src/middleware/index.ts`:
 
 ```typescript
-import { defineMiddleware } from 'astro:middleware';
-import { createClient } from '@/lib/supabase/server';
+import { defineMiddleware } from "astro:middleware";
+import { createClient } from "@/lib/supabase/server";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // Create Supabase client
@@ -90,23 +83,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.user = user;
 
   // Protected routes - require authentication
-  const protectedRoutes = ['/plans', '/dashboard', '/settings'];
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    context.url.pathname.startsWith(route)
-  );
+  const protectedRoutes = ["/plans", "/dashboard", "/settings"];
+  const isProtectedRoute = protectedRoutes.some((route) => context.url.pathname.startsWith(route));
 
   if (isProtectedRoute && !user) {
-    return context.redirect('/login');
+    return context.redirect("/login");
   }
 
   // Guest routes - redirect if already logged in
-  const guestRoutes = ['/login', '/register', '/forgot-password'];
-  const isGuestRoute = guestRoutes.some((route) =>
-    context.url.pathname === route
-  );
+  const guestRoutes = ["/login", "/register", "/forgot-password"];
+  const isGuestRoute = guestRoutes.some((route) => context.url.pathname === route);
 
   if (isGuestRoute && user) {
-    return context.redirect('/');
+    return context.redirect("/");
   }
 
   return next();
@@ -120,7 +109,7 @@ Update `src/env.d.ts` to include locals types:
 ```typescript
 /// <reference types="astro/client" />
 
-import type { SupabaseClient, User } from '@supabase/supabase-js';
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 declare namespace App {
   interface Locals {
@@ -157,11 +146,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       throw error;
     }
 
-    toast.success('Login successful');
-    window.location.href = '/';
+    toast.success("Login successful");
+    window.location.href = "/";
   } catch (error: any) {
-    console.error('Login error:', error);
-    toast.error(error.message || 'Invalid email or password. Please try again.');
+    console.error("Login error:", error);
+    toast.error(error.message || "Invalid email or password. Please try again.");
   } finally {
     setIsSubmitting(false);
   }
@@ -169,8 +158,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 ```
 
 Add import:
+
 ```typescript
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from "@/lib/supabase/client";
 ```
 
 ### 5.2 RegisterForm.tsx
@@ -202,10 +192,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     setShowSuccess(true);
-    toast.success('Registration successful! Please check your email to verify your account.');
+    toast.success("Registration successful! Please check your email to verify your account.");
   } catch (error: any) {
-    console.error('Registration error:', error);
-    toast.error(error.message || 'Registration failed. Please try again.');
+    console.error("Registration error:", error);
+    toast.error(error.message || "Registration failed. Please try again.");
   } finally {
     setIsSubmitting(false);
   }
@@ -213,8 +203,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 ```
 
 Add import:
+
 ```typescript
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from "@/lib/supabase/client";
 ```
 
 ### 5.3 ForgotPasswordForm.tsx
@@ -242,10 +233,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     setShowSuccess(true);
-    toast.success('Password reset email sent');
+    toast.success("Password reset email sent");
   } catch (error: any) {
-    console.error('Password reset error:', error);
-    toast.error(error.message || 'Failed to send reset email. Please try again.');
+    console.error("Password reset error:", error);
+    toast.error(error.message || "Failed to send reset email. Please try again.");
   } finally {
     setIsSubmitting(false);
   }
@@ -253,8 +244,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 ```
 
 Add import:
+
 ```typescript
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from "@/lib/supabase/client";
 ```
 
 ### 5.4 UpdatePasswordForm.tsx
@@ -281,17 +273,17 @@ const handleSubmit = async (e: React.FormEvent) => {
       throw error;
     }
 
-    toast.success('Password updated successfully');
+    toast.success("Password updated successfully");
 
     // Redirect based on context
     if (isLoggedIn) {
-      window.location.href = '/';
+      window.location.href = "/";
     } else {
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   } catch (error: any) {
-    console.error('Password update error:', error);
-    toast.error(error.message || 'Failed to update password. Please try again.');
+    console.error("Password update error:", error);
+    toast.error(error.message || "Failed to update password. Please try again.");
   } finally {
     setIsSubmitting(false);
   }
@@ -299,8 +291,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 ```
 
 Add import:
+
 ```typescript
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from "@/lib/supabase/client";
 ```
 
 ## Step 6: Create Auth Callback Endpoint
@@ -308,20 +301,20 @@ import { createClient } from '@/lib/supabase/client';
 Create `src/pages/auth/callback.ts`:
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { createClient } from '@/lib/supabase/server';
+import type { APIRoute } from "astro";
+import { createClient } from "@/lib/supabase/server";
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
-  const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') || '/';
+  const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next") || "/";
 
   if (code) {
     const supabase = createClient(cookies);
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
-      console.error('Auth callback error:', error);
-      return redirect('/login?error=auth_callback_failed');
+      console.error("Auth callback error:", error);
+      return redirect("/login?error=auth_callback_failed");
     }
   }
 
@@ -337,13 +330,13 @@ export const prerender = false;
 
 ```astro
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { Toaster } from "@/components/ui/sonner";
 
 const user = Astro.locals.user;
 if (user) {
-  return Astro.redirect('/');
+  return Astro.redirect("/");
 }
 ---
 
@@ -357,13 +350,13 @@ if (user) {
 
 ```astro
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { RegisterForm } from '@/components/auth/RegisterForm';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { Toaster } from "@/components/ui/sonner";
 
 const user = Astro.locals.user;
 if (user) {
-  return Astro.redirect('/');
+  return Astro.redirect("/");
 }
 ---
 
@@ -377,13 +370,13 @@ if (user) {
 
 ```astro
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
+import { Toaster } from "@/components/ui/sonner";
 
 const user = Astro.locals.user;
 if (user) {
-  return Astro.redirect('/');
+  return Astro.redirect("/");
 }
 ---
 
@@ -397,9 +390,9 @@ if (user) {
 
 ```astro
 ---
-import AuthLayout from '@/layouts/AuthLayout.astro';
-import { UpdatePasswordForm } from '@/components/auth/UpdatePasswordForm';
-import { Toaster } from '@/components/ui/sonner';
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { UpdatePasswordForm } from "@/components/auth/UpdatePasswordForm";
+import { Toaster } from "@/components/ui/sonner";
 
 const user = Astro.locals.user;
 const isLoggedIn = !!user;
@@ -419,14 +412,17 @@ In your Supabase dashboard:
 2. Configure the following templates:
 
 ### Confirm Signup
+
 - Subject: `Confirm your email`
 - Redirect URL: `{{ .SiteURL }}/auth/callback`
 
 ### Reset Password
+
 - Subject: `Reset your password`
 - Redirect URL: `{{ .SiteURL }}/auth/callback?next=/update-password`
 
 ### Magic Link
+
 - Subject: `Your magic link`
 - Redirect URL: `{{ .SiteURL }}/auth/callback`
 
@@ -455,6 +451,7 @@ const handleLogout = async () => {
 ## Step 10: Test the Integration
 
 ### 10.1 Registration Flow
+
 1. Navigate to `/register`
 2. Fill out the form with valid data
 3. Submit and check for success screen
@@ -463,12 +460,14 @@ const handleLogout = async () => {
 6. Verify redirect to dashboard
 
 ### 10.2 Login Flow
+
 1. Navigate to `/login`
 2. Enter valid credentials
 3. Submit and verify redirect to dashboard
 4. Check that session persists on page refresh
 
 ### 10.3 Password Reset Flow
+
 1. Navigate to `/forgot-password`
 2. Enter email address
 3. Check email for reset link
@@ -478,6 +477,7 @@ const handleLogout = async () => {
 7. Login with new password
 
 ### 10.4 Protected Routes
+
 1. Logout
 2. Try to access `/plans` directly
 3. Verify redirect to `/login`
@@ -485,6 +485,7 @@ const handleLogout = async () => {
 5. Verify redirect back to `/plans`
 
 ### 10.5 Guest Routes
+
 1. Login
 2. Try to access `/login` directly
 3. Verify redirect to `/`
@@ -568,25 +569,30 @@ CREATE POLICY "Users can update own metrics"
 ## Troubleshooting
 
 ### Issue: "Invalid API key"
+
 - Check environment variables are set correctly
 - Verify Supabase project URL and anon key
 
 ### Issue: "Email not confirmed"
+
 - Check Supabase email settings
 - Verify email templates are configured
 - Check spam folder
 
 ### Issue: "Session not persisting"
+
 - Verify cookies are being set correctly
 - Check middleware is creating server client properly
 - Verify cookie domain settings
 
 ### Issue: "PKCE flow failed"
+
 - Check callback URL is configured in Supabase
 - Verify redirect URLs in email templates
 - Check for CORS issues
 
 ### Issue: "RLS policy violation"
+
 - Verify policies are created correctly
 - Check `auth.uid()` is returning user ID
 - Test policies in Supabase SQL editor

@@ -7,6 +7,7 @@
 **Cel:** Utworzenie nowego długoterminowego celu (long-term goal) powiązanego z istniejącym 12-tygodniowym planerem.
 
 **Funkcjonalność:**
+
 - Użytkownik może utworzyć do 6 celów długoterminowych dla każdego planera
 - Cele służą do definiowania głównych priorytetów na 12 tygodni
 - Każdy cel może mieć przypisaną kategorię (praca, finanse, hobby, relacje, zdrowie, rozwój)
@@ -14,6 +15,7 @@
 - Cele mają określoną kolejność wyświetlania (position 1-6)
 
 **Powiązania z innymi zasobami:**
+
 - Cel należy do konkretnego planera (`plan_id`)
 - Cel może mieć powiązane kamienie milowe (milestones) - relacja 1:N
 - Cel może być powiązany z celami tygodniowymi (weekly_goals) - relacja 1:N
@@ -23,6 +25,7 @@
 ## 2. Szczegóły żądania
 
 ### 2.1. Metoda HTTP i URL
+
 - **Metoda:** `POST`
 - **Struktura URL:** `/api/v1/goals`
 - **Content-Type:** `application/json`
@@ -43,16 +46,17 @@
 ```
 
 #### Parametry wymagane:
+
 - **plan_id** (string, UUID)
   - Identyfikator planera, do którego należy cel
   - Musi wskazywać na istniejący plan należący do użytkownika
   - Walidacja: format UUID
-  
 - **title** (string)
   - Tytuł długoterminowego celu
   - Walidacja: wymagany, min 1 znak, max 255 znaków, trimmed
 
 #### Parametry opcjonalne:
+
 - **description** (string, nullable)
   - Uzasadnienie - dlaczego cel jest ważny
   - Walidacja: brak ograniczeń długości
@@ -74,6 +78,7 @@
   - Domyślnie: 1
 
 ### 2.3. Ograniczenia biznesowe
+
 - **Maksymalnie 6 celów na plan** - egzekwowane przez trigger bazodanowy `validate_max_goals_per_plan`
 - Plan musi istnieć i należeć do użytkownika
 
@@ -87,7 +92,7 @@
 // Już zdefiniowany w src/types.ts
 export type CreateGoalCommand = Pick<
   LongTermGoalInsert,
-  'plan_id' | 'title' | 'description' | 'category' | 'progress_percentage' | 'position'
+  "plan_id" | "title" | "description" | "category" | "progress_percentage" | "position"
 >;
 ```
 
@@ -107,7 +112,7 @@ export interface ItemResponse<T> {
 ```typescript
 // Już zdefiniowane w src/types.ts
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 
@@ -128,6 +133,7 @@ export interface ErrorResponse {
 ### 4.1. Sukces - 201 Created
 
 **Struktura odpowiedzi:**
+
 ```json
 {
   "data": {
@@ -145,6 +151,7 @@ export interface ErrorResponse {
 ```
 
 **Headers:**
+
 ```
 Content-Type: application/json
 X-Content-Type-Options: nosniff
@@ -153,6 +160,7 @@ X-Content-Type-Options: nosniff
 ### 4.2. Błąd walidacji - 400 Bad Request
 
 **Przykład 1: Brakujące wymagane pole**
+
 ```json
 {
   "error": "Validation failed",
@@ -166,6 +174,7 @@ X-Content-Type-Options: nosniff
 ```
 
 **Przykład 2: Nieprawidłowa kategoria**
+
 ```json
 {
   "error": "Validation failed",
@@ -180,6 +189,7 @@ X-Content-Type-Options: nosniff
 ```
 
 **Przykład 3: Progress poza zakresem**
+
 ```json
 {
   "error": "Validation failed",
@@ -193,6 +203,7 @@ X-Content-Type-Options: nosniff
 ```
 
 **Przykład 4: Przekroczony limit 6 celów**
+
 ```json
 {
   "error": "Constraint violation",
@@ -211,9 +222,10 @@ X-Content-Type-Options: nosniff
 
 ### 4.4. Brak autoryzacji - 401 Unauthorized
 
-**Uwaga:** W MVP używamy `DEFAULT_USER_ID`, więc ten błąd nie wystąpi. 
+**Uwaga:** W MVP używamy `DEFAULT_USER_ID`, więc ten błąd nie wystąpi.
 
 W przyszłości (po implementacji autentykacji):
+
 ```json
 {
   "error": "Unauthorized",
@@ -239,28 +251,28 @@ W przyszłości (po implementacji autentykacji):
 ```
 1. Client
    ↓ POST /api/v1/goals + JSON body
-   
+
 2. API Route Handler (/api/v1/goals.ts)
    ↓ Parse request body
    ↓ Validate with Zod schema
    ↓ Extract DEFAULT_USER_ID
-   
+
 3. GoalService.createGoal()
    ↓ Verify plan exists (getPlanById)
    ↓ Check plan belongs to user
    ↓ Insert goal into database
    ↓ Handle database constraints
-   
+
 4. Supabase (PostgreSQL)
    ↓ Execute INSERT INTO long_term_goals
    ↓ Trigger: validate_max_goals_per_plan (max 6)
    ↓ Trigger: update_updated_at_column
    ↓ Return inserted row
-   
+
 5. API Route Handler
    ↓ Format response (ItemResponse<GoalDTO>)
    ↓ Return 201 Created
-   
+
 6. Client
    ← Receive created goal data
 ```
@@ -268,13 +280,15 @@ W przyszłości (po implementacji autentykacji):
 ### 5.2. Interakcje z bazą danych
 
 #### Zapytanie 1: Weryfikacja istnienia planu (w GoalService)
+
 ```sql
-SELECT * FROM plans 
+SELECT * FROM plans
 WHERE id = $1 AND user_id = $2
 LIMIT 1;
 ```
 
 #### Zapytanie 2: Wstawienie nowego celu
+
 ```sql
 INSERT INTO long_term_goals (
   plan_id,
@@ -288,6 +302,7 @@ RETURNING *;
 ```
 
 #### Triggery aktywowane automatycznie:
+
 1. **validate_max_goals_per_plan** - sprawdza limit 6 celów na plan
 2. **update_updated_at_column** - ustawia `updated_at` na NOW()
 
@@ -304,28 +319,27 @@ RETURNING *;
 ### 6.1. Autentykacja
 
 **Aktualny stan (MVP):**
+
 - Używamy `DEFAULT_USER_ID` z `src/db/supabase.client.ts`
 - Brak weryfikacji tokenu JWT
 
 **Plan przyszłościowy:**
+
 ```typescript
 // TODO: Implement authentication
-const authHeader = request.headers.get('Authorization');
-if (!authHeader || !authHeader.startsWith('Bearer ')) {
-  return new Response(
-    JSON.stringify({ error: 'Unauthorized' }),
-    { status: 401 }
-  );
+const authHeader = request.headers.get("Authorization");
+if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 }
 
 const token = authHeader.substring(7);
-const { data: { user }, error } = await locals.supabase.auth.getUser(token);
+const {
+  data: { user },
+  error,
+} = await locals.supabase.auth.getUser(token);
 
 if (error || !user) {
-  return new Response(
-    JSON.stringify({ error: 'Invalid token' }),
-    { status: 401 }
-  );
+  return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
 }
 
 const userId = user.id;
@@ -334,6 +348,7 @@ const userId = user.id;
 ### 6.2. Autoryzacja
 
 **Weryfikacja własności planera:**
+
 - Service musi sprawdzić, czy `plan_id` należy do użytkownika
 - Zapobiega tworzeniu celów dla cudzych planerów
 
@@ -341,19 +356,21 @@ const userId = user.id;
 // W GoalService.createGoal()
 const plan = await this.getPlanById(data.plan_id, userId);
 if (!plan) {
-  throw new Error('Plan not found or does not belong to user');
+  throw new Error("Plan not found or does not belong to user");
 }
 ```
 
 ### 6.3. Walidacja danych wejściowych
 
 **Poziom 1: Walidacja formatu (Zod)**
+
 - UUID dla `plan_id`
 - String constraints dla `title`
 - Enum dla `category`
 - Range checking dla `progress_percentage` i `position`
 
 **Poziom 2: Walidacja biznesowa (Service + Database)**
+
 - Istnienie planera
 - Własność planera
 - Limit 6 celów (database trigger)
@@ -373,6 +390,7 @@ if (!plan) {
 **Aktualnie:** Brak rate limiting w MVP
 
 **Rekomendacja przyszłościowa:**
+
 - Implementacja middleware z rate limiting
 - Limit: np. 100 requests/godzinę per użytkownik
 - Response 429 Too Many Requests
@@ -386,51 +404,53 @@ if (!plan) {
 ```
 1. Parse Error (Invalid JSON)
    → 400 Bad Request
-   
+
 2. Validation Error (Zod)
    → 400 Bad Request + details
-   
+
 3. Business Logic Error (Service)
    → 404 Not Found (plan not exists)
    → 400 Bad Request (constraint violations)
-   
+
 4. Database Error
    → 400 Bad Request (constraint: max 5 goals)
    → 500 Internal Server Error (unexpected)
-   
+
 5. Unexpected Error
    → 500 Internal Server Error
 ```
 
 ### 7.2. Scenariusze błędów
 
-| Status | Kod błędu | Scenariusz | Przykład |
-|--------|-----------|------------|----------|
-| 400 | Invalid JSON | Body nie jest poprawnym JSON | `{ invalid json` |
-| 400 | Validation failed | Brak wymaganego pola | `title` nie podany |
-| 400 | Validation failed | Nieprawidłowy format UUID | `plan_id: "123"` |
-| 400 | Validation failed | Nieprawidłowa kategoria | `category: "unknown"` |
-| 400 | Validation failed | Progress poza zakresem | `progress_percentage: 150` |
-| 400 | Validation failed | Position poza zakresem | `position: 10` |
-| 400 | Validation failed | Title za długi | `title: "a".repeat(300)` |
-| 400 | Constraint violation | Maksymalnie 6 celów | Próba dodania 7. celu |
-| 404 | Plan not found | Plan nie istnieje | Nieistniejący UUID |
-| 404 | Plan not found | Plan należy do innego użytkownika | Cudzy plan |
-| 500 | Internal server error | Nieoczekiwany błąd bazy danych | Timeout, connection lost |
+| Status | Kod błędu             | Scenariusz                        | Przykład                   |
+| ------ | --------------------- | --------------------------------- | -------------------------- |
+| 400    | Invalid JSON          | Body nie jest poprawnym JSON      | `{ invalid json`           |
+| 400    | Validation failed     | Brak wymaganego pola              | `title` nie podany         |
+| 400    | Validation failed     | Nieprawidłowy format UUID         | `plan_id: "123"`           |
+| 400    | Validation failed     | Nieprawidłowa kategoria           | `category: "unknown"`      |
+| 400    | Validation failed     | Progress poza zakresem            | `progress_percentage: 150` |
+| 400    | Validation failed     | Position poza zakresem            | `position: 10`             |
+| 400    | Validation failed     | Title za długi                    | `title: "a".repeat(300)`   |
+| 400    | Constraint violation  | Maksymalnie 6 celów               | Próba dodania 7. celu      |
+| 404    | Plan not found        | Plan nie istnieje                 | Nieistniejący UUID         |
+| 404    | Plan not found        | Plan należy do innego użytkownika | Cudzy plan                 |
+| 500    | Internal server error | Nieoczekiwany błąd bazy danych    | Timeout, connection lost   |
 
 ### 7.3. Logowanie błędów
 
 **Console logging:**
+
 ```typescript
-console.error('Error in POST /api/v1/goals:', {
+console.error("Error in POST /api/v1/goals:", {
   error: error.message,
   userId,
   planId: data.plan_id,
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 });
 ```
 
 **Logi nie zawierają:**
+
 - Pełnych danych użytkownika (tylko ID)
 - Wrażliwych informacji
 - Stack traces w produkcji (tylko w development)
@@ -440,18 +460,14 @@ console.error('Error in POST /api/v1/goals:', {
 ```typescript
 // W GoalService.createGoal()
 try {
-  const { data: goal, error } = await this.supabase
-    .from('long_term_goals')
-    .insert(insertData)
-    .select()
-    .single();
+  const { data: goal, error } = await this.supabase.from("long_term_goals").insert(insertData).select().single();
 
   if (error) {
     // Constraint violation: max 6 goals per plan
-    if (error.code === '23514' || error.message.includes('max_goals')) {
-      throw new Error('Maximum 6 goals per plan exceeded');
+    if (error.code === "23514" || error.message.includes("max_goals")) {
+      throw new Error("Maximum 6 goals per plan exceeded");
     }
-    
+
     // Other database errors
     throw new Error(`Failed to create goal: ${error.message}`);
   }
@@ -481,14 +497,17 @@ try {
 ### 8.2. Optymalizacje
 
 **1. Index na plan_id w long_term_goals**
+
 - Już istnieje: `idx_long_term_goals_plan_id`
 - Przyspiesza weryfikację limitu 6 celów w triggerze
 
 **2. Single database transaction**
+
 - Weryfikacja planu + insert celu powinny być w jednej transakcji
 - Zapobiega race conditions
 
 **3. Connection pooling**
+
 - Supabase Client automatycznie używa connection pooling
 - Brak dodatkowej konfiguracji
 
@@ -507,11 +526,13 @@ try {
 ### 8.4. Skalowanie
 
 **Limit celów:**
+
 - Maksymalnie 6 celów na plan (constraint)
 - Przy 1000 użytkownikach i średnio 2 planach: ~10,000 celów
 - Tabela `long_term_goals` może obsłużyć miliony rekordów bez problemu
 
 **Concurrent requests:**
+
 - Supabase obsługuje tysiące równoczesnych połączeń
 - Database triggers są atomic - brak race conditions
 
@@ -520,50 +541,55 @@ try {
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie walidacji Zod
+
 **Plik:** `src/lib/validation/goal.validation.ts`
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Request body schema for POST /api/v1/goals
  * Validates goal creation data
  */
-export const CreateGoalBodySchema = z.object({
-  plan_id: z.string().uuid({ message: 'Invalid plan ID format' }),
-  
-  title: z.string()
-    .trim()
-    .min(1, { message: 'Title is required' })
-    .max(255, { message: 'Title must not exceed 255 characters' }),
-  
-  description: z.string().trim().nullish(),
-  
-  category: z.enum(
-    ['work', 'finance', 'hobby', 'relationships', 'health', 'development'],
-    {
-      errorMap: () => ({ 
-        message: 'Category must be one of: work, finance, hobby, relationships, health, development' 
+export const CreateGoalBodySchema = z
+  .object({
+    plan_id: z.string().uuid({ message: "Invalid plan ID format" }),
+
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: "Title is required" })
+      .max(255, { message: "Title must not exceed 255 characters" }),
+
+    description: z.string().trim().nullish(),
+
+    category: z
+      .enum(["work", "finance", "hobby", "relationships", "health", "development"], {
+        errorMap: () => ({
+          message: "Category must be one of: work, finance, hobby, relationships, health, development",
+        }),
       })
-    }
-  ).nullish(),
-  
-  progress_percentage: z.number()
-    .int({ message: 'Progress must be an integer' })
-    .min(0, { message: 'Progress must be at least 0' })
-    .max(100, { message: 'Progress must not exceed 100' })
-    .default(0),
-  
-  position: z.number()
-    .int({ message: 'Position must be an integer' })
-    .min(1, { message: 'Position must be at least 1' })
-    .max(6, { message: 'Position must not exceed 6' })
-    .default(1)
-}).transform((data) => ({
-  ...data,
-  description: data.description ?? null,
-  category: data.category ?? null
-}));
+      .nullish(),
+
+    progress_percentage: z
+      .number()
+      .int({ message: "Progress must be an integer" })
+      .min(0, { message: "Progress must be at least 0" })
+      .max(100, { message: "Progress must not exceed 100" })
+      .default(0),
+
+    position: z
+      .number()
+      .int({ message: "Position must be an integer" })
+      .min(1, { message: "Position must be at least 1" })
+      .max(6, { message: "Position must not exceed 6" })
+      .default(1),
+  })
+  .transform((data) => ({
+    ...data,
+    description: data.description ?? null,
+    category: data.category ?? null,
+  }));
 
 /**
  * Inferred TypeScript type from CreateGoalBodySchema
@@ -572,6 +598,7 @@ export type CreateGoalBody = z.infer<typeof CreateGoalBodySchema>;
 ```
 
 **Testy walidacji:**
+
 - Brakujące wymagane pola (plan_id, title)
 - Nieprawidłowy format UUID
 - Title za długi (>255 znaków)
@@ -582,23 +609,20 @@ export type CreateGoalBody = z.infer<typeof CreateGoalBodySchema>;
 ---
 
 ### Krok 2: Utworzenie GoalService
+
 **Plik:** `src/lib/services/goal.service.ts`
 
 ```typescript
-import type { SupabaseClient } from '../../db/supabase.client';
-import type { 
-  GoalDTO, 
-  CreateGoalCommand,
-  LongTermGoalInsert
-} from '../../types';
-import { PlanService } from './plan.service';
+import type { SupabaseClient } from "../../db/supabase.client";
+import type { GoalDTO, CreateGoalCommand, LongTermGoalInsert } from "../../types";
+import { PlanService } from "./plan.service";
 
 export class GoalService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
    * Tworzy nowy długoterminowy cel
-   * 
+   *
    * @param userId - ID użytkownika (z tokenu JWT)
    * @param data - Dane celu (plan_id, title, description, category, progress_percentage, position)
    * @returns Promise z utworzonym celem
@@ -606,16 +630,13 @@ export class GoalService {
    * @throws Error jeśli przekroczono limit 6 celów (constraint violation)
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
    */
-  async createGoal(
-    userId: string,
-    data: CreateGoalCommand
-  ): Promise<GoalDTO> {
+  async createGoal(userId: string, data: CreateGoalCommand): Promise<GoalDTO> {
     // Step 1: Verify plan exists and belongs to user
     const planService = new PlanService(this.supabase);
     const plan = await planService.getPlanById(data.plan_id, userId);
-    
+
     if (!plan) {
-      throw new Error('Plan not found or does not belong to user');
+      throw new Error("Plan not found or does not belong to user");
     }
 
     // Step 2: Prepare insert data
@@ -625,23 +646,19 @@ export class GoalService {
       description: data.description ?? null,
       category: data.category ?? null,
       progress_percentage: data.progress_percentage ?? 0,
-      position: data.position ?? 1
+      position: data.position ?? 1,
     };
 
     // Step 3: Execute insert
-    const { data: goal, error } = await this.supabase
-      .from('long_term_goals')
-      .insert(insertData)
-      .select()
-      .single();
+    const { data: goal, error } = await this.supabase.from("long_term_goals").insert(insertData).select().single();
 
     // Step 4: Handle database errors
     if (error) {
       // Check for constraint violations (max 6 goals per plan)
-      if (error.code === '23514' || error.message.includes('max_goals')) {
-        throw new Error('Maximum 6 goals per plan exceeded');
+      if (error.code === "23514" || error.message.includes("max_goals")) {
+        throw new Error("Maximum 6 goals per plan exceeded");
       }
-      
+
       // Other database errors
       throw new Error(`Failed to create goal: ${error.message}`);
     }
@@ -652,7 +669,7 @@ export class GoalService {
   /**
    * Pobiera cel po ID
    * Weryfikuje, że cel należy do użytkownika (przez plan_id)
-   * 
+   *
    * @param goalId - UUID celu
    * @param userId - ID użytkownika
    * @returns Promise z celem lub null jeśli nie istnieje/nie należy do użytkownika
@@ -660,13 +677,15 @@ export class GoalService {
   async getGoalById(goalId: string, userId: string): Promise<GoalDTO | null> {
     // Join with plans to verify user ownership
     const { data, error } = await this.supabase
-      .from('long_term_goals')
-      .select(`
+      .from("long_term_goals")
+      .select(
+        `
         *,
         plans!inner(user_id)
-      `)
-      .eq('id', goalId)
-      .eq('plans.user_id', userId)
+      `
+      )
+      .eq("id", goalId)
+      .eq("plans.user_id", userId)
       .maybeSingle();
 
     if (error) {
@@ -685,6 +704,7 @@ export class GoalService {
 ```
 
 **Testy service:**
+
 - Utworzenie celu dla istniejącego planu
 - Błąd 404 gdy plan nie istnieje
 - Błąd 404 gdy plan należy do innego użytkownika
@@ -694,14 +714,15 @@ export class GoalService {
 ---
 
 ### Krok 3: Utworzenie API Route Handler
+
 **Plik:** `src/pages/api/v1/goals.ts`
 
 ```typescript
 /**
  * API Endpoints: /api/v1/goals
- * 
+ *
  * POST - Creates a new long-term goal
- * 
+ *
  * POST Request Body:
  * - plan_id: UUID (required)
  * - title: string (required, 1-255 characters)
@@ -709,7 +730,7 @@ export class GoalService {
  * - category: enum (optional) - work, finance, hobby, relationships, health, development
  * - progress_percentage: integer (0-100, default: 0)
  * - position: integer (1-6, default: 1)
- * 
+ *
  * Responses:
  * - 201: Created
  * - 400: Validation error or constraint violation
@@ -717,16 +738,11 @@ export class GoalService {
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../lib/services/goal.service';
-import { CreateGoalBodySchema } from '../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
-  ValidationErrorResponse,
-  ItemResponse,
-  GoalDTO
-} from '../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../lib/services/goal.service";
+import { CreateGoalBodySchema } from "../../../lib/validation/goal.validation";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ItemResponse, GoalDTO } from "../../../types";
 
 export const prerender = false;
 
@@ -747,12 +763,12 @@ export const POST: APIRoute = async ({ locals, request }) => {
     } catch {
       return new Response(
         JSON.stringify({
-          error: 'Invalid JSON',
-          message: 'Request body must be valid JSON'
+          error: "Invalid JSON",
+          message: "Request body must be valid JSON",
         } as ErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -761,90 +777,85 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const validationResult = CreateGoalBodySchema.safeParse(body);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 4: Call service to create goal
     const goalService = new GoalService(locals.supabase);
-    
+
     try {
       const goal = await goalService.createGoal(userId, validationResult.data);
 
       // Step 5: Return successful response
-      return new Response(
-        JSON.stringify({ data: goal } as ItemResponse<GoalDTO>),
-        {
-          status: 201,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff'
-          }
-        }
-      );
+      return new Response(JSON.stringify({ data: goal } as ItemResponse<GoalDTO>), {
+        status: 201,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
     } catch (serviceError) {
       // Handle specific service errors
-      const errorMessage = serviceError instanceof Error 
-        ? serviceError.message 
-        : 'Unknown error';
-      
+      const errorMessage = serviceError instanceof Error ? serviceError.message : "Unknown error";
+
       // Plan not found or doesn't belong to user
-      if (errorMessage.includes('not found') || errorMessage.includes('does not belong')) {
+      if (errorMessage.includes("not found") || errorMessage.includes("does not belong")) {
         return new Response(
           JSON.stringify({
-            error: 'Plan not found',
-            message: 'Plan does not exist or does not belong to user'
+            error: "Plan not found",
+            message: "Plan does not exist or does not belong to user",
           } as ErrorResponse),
           {
             status: 404,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { "Content-Type": "application/json" },
           }
         );
       }
-      
+
       // Maximum 6 goals exceeded
-      if (errorMessage.includes('Maximum 6 goals')) {
+      if (errorMessage.includes("Maximum 6 goals")) {
         return new Response(
           JSON.stringify({
-            error: 'Constraint violation',
-            message: errorMessage
+            error: "Constraint violation",
+            message: errorMessage,
           } as ErrorResponse),
           {
             status: 400,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { "Content-Type": "application/json" },
           }
         );
       }
-      
+
       // Re-throw for general error handler
       throw serviceError;
     }
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error('Error in POST /api/v1/goals:', error);
-    
+    console.error("Error in POST /api/v1/goals:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -852,6 +863,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 ```
 
 **Testy endpoint:**
+
 - Utworzenie celu z minimalnymi danymi (plan_id, title)
 - Utworzenie celu ze wszystkimi opcjonalnymi polami
 - Błąd 400 dla nieprawidłowego JSON
@@ -864,6 +876,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 ---
 
 ### Krok 4: Utworzenie pliku testowego HTTP
+
 **Plik:** `api-tests/goals-tests.http`
 
 ```http
@@ -1082,6 +1095,7 @@ Content-Type: application/json
 ### Krok 5: Testowanie integracyjne
 
 **5.1. Przygotowanie środowiska testowego**
+
 ```bash
 # Start Supabase locally
 npx supabase start
@@ -1091,6 +1105,7 @@ npm run dev
 ```
 
 **5.2. Utworzenie testowego planu**
+
 ```http
 POST http://localhost:4321/api/v1/plans
 Content-Type: application/json
@@ -1104,6 +1119,7 @@ Content-Type: application/json
 Zapisz `id` z odpowiedzi jako `{{planId}}` do testów.
 
 **5.3. Wykonanie testów:**
+
 1. Testy pozytywne:
    - Utworzenie celu z minimalnymi danymi ✓
    - Utworzenie celu ze wszystkimi polami ✓
@@ -1132,28 +1148,31 @@ Zapisz `id` z odpowiedzi jako `{{planId}}` do testów.
 ### Krok 6: Weryfikacja w bazie danych
 
 **Sprawdzenie utworzonych celów:**
+
 ```sql
-SELECT * FROM long_term_goals 
-WHERE plan_id = '{{planId}}' 
+SELECT * FROM long_term_goals
+WHERE plan_id = '{{planId}}'
 ORDER BY position;
 ```
 
 **Sprawdzenie triggera (max 6 celów):**
+
 ```sql
-SELECT COUNT(*) as goal_count 
-FROM long_term_goals 
+SELECT COUNT(*) as goal_count
+FROM long_term_goals
 WHERE plan_id = '{{planId}}';
 -- Should be <= 6
 ```
 
 **Sprawdzenie timestamps:**
+
 ```sql
-SELECT 
-  id, 
-  title, 
-  created_at, 
-  updated_at 
-FROM long_term_goals 
+SELECT
+  id,
+  title,
+  created_at,
+  updated_at
+FROM long_term_goals
 WHERE plan_id = '{{planId}}';
 -- created_at and updated_at should be set automatically
 ```
@@ -1163,15 +1182,18 @@ WHERE plan_id = '{{planId}}';
 ### Krok 7: Dokumentacja i cleanup
 
 **7.1. Dodanie komentarzy JSDoc**
+
 - ✓ Komentarze w validation schema
 - ✓ Komentarze w service methods
 - ✓ Komentarze w API route handler
 
 **7.2. Aktualizacja dokumentacji API**
+
 - Dodanie przykładów do `docs/api/api-plan.md`
 - Aktualizacja statusu implementacji w `docs/api/api-plan-status.md`
 
 **7.3. Cleanup**
+
 - Usunięcie testowych danych z bazy
 - Przegląd kodu pod kątem redundancji
 - Formatowanie kodu (Prettier)
@@ -1181,12 +1203,14 @@ WHERE plan_id = '{{planId}}';
 ## 10. Checklist implementacji
 
 ### Validation
+
 - [ ] Utworzenie `src/lib/validation/goal.validation.ts`
 - [ ] Schema dla CreateGoalBodySchema
 - [ ] Testy walidacji wszystkich pól
 - [ ] Testy edge cases (nullish values, defaults)
 
 ### Service
+
 - [ ] Utworzenie `src/lib/services/goal.service.ts`
 - [ ] Metoda `createGoal(userId, data)`
 - [ ] Metoda `getGoalById(goalId, userId)` (helper)
@@ -1195,6 +1219,7 @@ WHERE plan_id = '{{planId}}';
 - [ ] Error handling
 
 ### API Route
+
 - [ ] Utworzenie `src/pages/api/v1/goals.ts`
 - [ ] POST handler
 - [ ] Parse request body
@@ -1205,6 +1230,7 @@ WHERE plan_id = '{{planId}}';
 - [ ] Status 201 dla sukcesu
 
 ### Testing
+
 - [ ] Utworzenie `api-tests/goals-tests.http`
 - [ ] Testy pozytywne (różne kombinacje pól)
 - [ ] Testy walidacji (wszystkie scenariusze błędów)
@@ -1213,12 +1239,14 @@ WHERE plan_id = '{{planId}}';
 - [ ] Weryfikacja w bazie danych
 
 ### Documentation
+
 - [ ] Komentarze JSDoc w validation
 - [ ] Komentarze JSDoc w service
 - [ ] Komentarze JSDoc w API route
 - [ ] Aktualizacja `docs/api/api-plan-status.md`
 
 ### Code Quality
+
 - [ ] Linting (ESLint)
 - [ ] Formatting (Prettier)
 - [ ] Type safety (TypeScript strict mode)
@@ -1230,30 +1258,36 @@ WHERE plan_id = '{{planId}}';
 ## 11. Przyszłe usprawnienia
 
 ### Autentykacja
+
 - [ ] Implementacja JWT token verification
 - [ ] Middleware dla autentykacji
 - [ ] Endpoint testing z różnymi użytkownikami
 
 ### Rate Limiting
+
 - [ ] Middleware dla rate limiting
 - [ ] Response 429 Too Many Requests
 - [ ] Per-user limits
 
 ### Caching
+
 - [ ] Cache verification planu (Redis/Memory)
 - [ ] Invalidacja cache po update planu
 
 ### Monitoring
+
 - [ ] Structured logging (Winston/Pino)
 - [ ] Error tracking (Sentry)
 - [ ] Performance monitoring (APM)
 
 ### Testy jednostkowe
+
 - [ ] Unit tests dla validation schemas
 - [ ] Unit tests dla service methods
 - [ ] Mock Supabase Client
 
 ### API Extensions
+
 - [ ] GET /api/v1/goals - lista celów
 - [ ] GET /api/v1/goals/:id - szczegóły celu
 - [ ] PATCH /api/v1/goals/:id - aktualizacja celu
@@ -1264,12 +1298,14 @@ WHERE plan_id = '{{planId}}';
 ## 12. Zależności i wymagania
 
 ### Wymagane pakiety (już zainstalowane)
+
 - `astro` (v5+)
 - `@supabase/supabase-js`
 - `zod`
 - `typescript`
 
 ### Baza danych
+
 - Supabase PostgreSQL
 - Tabela `long_term_goals` (już utworzona)
 - Tabela `plans` (już utworzona)
@@ -1277,6 +1313,7 @@ WHERE plan_id = '{{planId}}';
 - Trigger `update_updated_at_column` (już utworzony)
 
 ### Środowisko
+
 - Node.js 18+
 - Supabase project (local or cloud)
 - Environment variables:
@@ -1288,15 +1325,18 @@ WHERE plan_id = '{{planId}}';
 ## 13. Kontakt i wsparcie
 
 **Pytania implementacyjne:**
+
 - Sprawdź dokumentację w `docs/api/api-plan.md`
 - Przejrzyj istniejący kod w `src/pages/api/v1/plans.ts`
 - Przejrzyj service pattern w `src/lib/services/plan.service.ts`
 
 **Problemy z bazą danych:**
+
 - Sprawdź migracje w `supabase/migrations/`
 - Sprawdź schema w `docs/db-plan-tables-relations.md`
 
 **Problemy z walidacją:**
+
 - Przejrzyj przykłady w `src/lib/validation/plan.validation.ts`
 - Dokumentacja Zod: https://zod.dev
 
@@ -1304,9 +1344,10 @@ WHERE plan_id = '{{planId}}';
 
 ## 14. Podsumowanie
 
-Ten endpoint implementuje kluczową funkcjonalność tworzenia długoterminowych celów w aplikacji 12 Weeks Planner. 
+Ten endpoint implementuje kluczową funkcjonalność tworzenia długoterminowych celów w aplikacji 12 Weeks Planner.
 
 **Kluczowe aspekty:**
+
 - ✅ Walidacja danych wejściowych na 3 poziomach (format, typ, biznesowa)
 - ✅ Bezpieczna weryfikacja własności zasobów
 - ✅ Obsługa constraint bazodanowych (max 6 celów)
@@ -1315,10 +1356,10 @@ Ten endpoint implementuje kluczową funkcjonalność tworzenia długoterminowych
 - ✅ Kompletne pokrycie testami
 
 **Timeline:**
+
 - Implementacja: 2-3 godziny
 - Testing: 1 godzina
 - Documentation: 30 minut
 - **Łącznie: ~4 godziny**
 
 **Priorytet:** HIGH - blokuje implementację milestones i weekly goals
-

@@ -7,6 +7,7 @@ When users registered for a new account, they would click the email confirmation
 ## Root Cause
 
 The authentication callback handler (`/auth/callback`) was treating all PKCE code exchanges the same way, redirecting to `/update-password` regardless of whether the flow was:
+
 1. **Password reset** (forgot password flow)
 2. **Email confirmation** (registration flow)
 
@@ -19,15 +20,17 @@ Both flows use PKCE (Proof Key for Code Exchange) and result in a `code` paramet
 Modified the registration flow to include a `next=email-confirmed` query parameter in the email redirect URL:
 
 **File: `src/pages/api/auth/register.ts`**
+
 ```typescript
-emailRedirectTo: `${new URL(request.url).origin}/auth/callback?next=email-confirmed`
+emailRedirectTo: `${new URL(request.url).origin}/auth/callback?next=email-confirmed`;
 ```
 
 The forgot-password flow continues to use the callback URL without the `next` parameter:
 
 **File: `src/pages/api/auth/forgot-password.ts`**
+
 ```typescript
-redirectTo: `${origin}/auth/callback`
+redirectTo: `${origin}/auth/callback`;
 ```
 
 ### 2. Updated Callback Handler
@@ -35,18 +38,21 @@ redirectTo: `${origin}/auth/callback`
 Modified the callback handler to check for the `next` parameter and route accordingly:
 
 **File: `src/pages/auth/callback.ts`**
+
 - If `next=email-confirmed` is present → redirect to `/email-confirmed`
 - Otherwise (password reset flow) → redirect to `/update-password`
 
 ### 3. Created Email Confirmation Page
 
 **File: `src/pages/email-confirmed.astro`**
+
 - New page that displays a success message after email verification
 - Shows a countdown timer (3 seconds)
 - Automatically redirects to `/plans`
 - Provides a button for immediate navigation
 
 **File: `src/components/auth/EmailConfirmedMessage.tsx`**
+
 - React component that renders the confirmation UI
 - Includes success icon, message, countdown, and action button
 - Handles automatic redirect after 3 seconds
@@ -54,6 +60,7 @@ Modified the callback handler to check for the `next` parameter and route accord
 ## Updated Authentication Flows
 
 ### Registration Flow (Fixed)
+
 1. User fills out registration form at `/register`
 2. User submits form → POST to `/api/auth/register`
 3. Supabase creates account and sends confirmation email
@@ -66,6 +73,7 @@ Modified the callback handler to check for the `next` parameter and route accord
 10. After 3 seconds → automatic redirect to `/plans`
 
 ### Password Reset Flow (Unchanged)
+
 1. User clicks "Forgot password" at `/forgot-password`
 2. User enters email → POST to `/api/auth/forgot-password`
 3. Supabase sends password reset email
@@ -102,6 +110,7 @@ Modified the callback handler to check for the `next` parameter and route accord
 ### Why PKCE is Used for Both Flows
 
 Supabase uses PKCE (Proof Key for Code Exchange) for secure authentication flows. When a user clicks an email link:
+
 1. Supabase validates the token
 2. Redirects to the specified `redirect_to` URL with a `code` parameter
 3. The application exchanges the code for a session using `exchangeCodeForSession()`

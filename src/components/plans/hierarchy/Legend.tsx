@@ -10,7 +10,7 @@ import {
   CircleX,
   CircleArrowRight,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type { NodeType } from "@/types";
 
 const NODE_TYPES: Record<NodeType, { icon: React.ComponentType<{ className?: string }>; label: string }> = {

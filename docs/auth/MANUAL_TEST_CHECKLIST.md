@@ -10,11 +10,13 @@
 ## Environment Setup
 
 1. Copy `.env.example` to `.env`:
+
 ```bash
 cp .env.example .env
 ```
 
 2. Fill in Supabase credentials from your Supabase Dashboard:
+
 ```env
 # Server-side (private) - from Supabase Settings > API
 SUPABASE_URL=https://your-project.supabase.co
@@ -35,11 +37,14 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ## Test Scenarios
 
 ### ✅ Test 1: Access Login Page (Unauthenticated)
+
 **Steps:**
+
 1. Open browser in incognito/private mode
 2. Navigate to `http://localhost:3000/login`
 
 **Expected Result:**
+
 - Login form is displayed
 - No errors in console
 - Form has email and password fields
@@ -51,13 +56,16 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ---
 
 ### ✅ Test 2: Email Validation
+
 **Steps:**
+
 1. Go to `/login`
 2. Enter invalid email: `test` (no @ symbol)
 3. Enter password: `anything`
 4. Click "Sign in"
 
 **Expected Result:**
+
 - Error message under email field: "Please enter a valid email address"
 - Form does not submit
 - No API call made
@@ -67,12 +75,15 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ---
 
 ### ✅ Test 3: Required Fields Validation
+
 **Steps:**
+
 1. Go to `/login`
 2. Leave email empty
 3. Click "Sign in"
 
 **Expected Result:**
+
 - Error message under email field: "Email is required"
 - Form does not submit
 
@@ -81,13 +92,16 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ---
 
 ### ✅ Test 4: Failed Login - Invalid Credentials
+
 **Steps:**
+
 1. Go to `/login`
 2. Enter email: `test@example.com`
 3. Enter wrong password: `wrongpassword`
 4. Click "Sign in"
 
 **Expected Result:**
+
 - Toast notification appears: "Invalid email or password. Please try again."
 - User stays on login page
 - Button returns to "Sign in" state (not loading)
@@ -98,15 +112,18 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ---
 
 ### ✅ Test 5: Successful Login - User WITH Active Planner
+
 **Pre-requisite:** Test user has an active planner in database
 
 **Steps:**
+
 1. Go to `/login`
 2. Enter email: `test@example.com`
 3. Enter correct password: `test1234`
 4. Click "Sign in"
 
 **Expected Result:**
+
 - Toast notification: "Login successful"
 - Redirect to `/plans/{planner-id}` (dashboard of active planner)
 - User is authenticated (check cookies in DevTools)
@@ -116,18 +133,22 @@ PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 **Status:** [ ] PASS / [x] FAIL
 NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
+
 ---
 
 ### ✅ Test 6: Successful Login - User WITHOUT Active Planner
+
 **Pre-requisite:** Test user has NO active planner in database
 
 **Steps:**
+
 1. Go to `/login`
 2. Enter email: `test@example.com`
 3. Enter correct password: `test1234`
 4. Click "Sign in"
 
 **Expected Result:**
+
 - Toast notification: "Login successful"
 - Redirect to `/plans` (planners list page)
 - User is authenticated
@@ -137,13 +158,16 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 7: Redirect Authenticated User from Login
+
 **Pre-requisite:** User is already logged in
 
 **Steps:**
+
 1. Login successfully (Test 5 or 6)
 2. Manually navigate to `/login` in address bar
 
 **Expected Result:**
+
 - Immediate redirect to `/` (home page)
 - Then redirect based on active planner status
 - User never sees login form
@@ -153,11 +177,14 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 8: Protected Route Access (Unauthenticated)
+
 **Steps:**
+
 1. Logout or use incognito mode
 2. Try to access `/plans`
 
 **Expected Result:**
+
 - Immediate redirect to `/login`
 - User cannot access protected page
 
@@ -166,32 +193,36 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 9: Session Persistence
+
 **Steps:**
+
 1. Login successfully
 2. Close browser tab
 3. Open new tab
 4. Navigate to `http://localhost:3000`
 
 **Expected Result:**
+
 - User is still authenticated
 - Redirect works based on active planner
 - No need to login again
 
-**Status:** [ ] PASS / [x] FAIL 
+**Status:** [ ] PASS / [x] FAIL
 NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
-
-
 
 ---
 
 ### ✅ Test 10: Loading State
+
 **Steps:**
+
 1. Go to `/login`
 2. Enter valid credentials
 3. Click "Sign in"
 4. Observe button during API call
 
 **Expected Result:**
+
 - Button text changes to "Signing in..."
 - Button is disabled during submission
 - Cannot submit form multiple times
@@ -201,12 +232,15 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 11: Error Clearing on Input
+
 **Steps:**
+
 1. Go to `/login`
 2. Leave email empty and submit (trigger error)
 3. Start typing in email field
 
 **Expected Result:**
+
 - Error message under email field disappears as soon as user starts typing
 - Good UX - immediate feedback
 
@@ -215,13 +249,16 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 12: Network Error Handling
+
 **Steps:**
+
 1. Go to `/login`
 2. Open DevTools > Network tab
 3. Enable "Offline" mode
 4. Enter valid credentials and submit
 
 **Expected Result:**
+
 - Toast notification: "An unexpected error occurred. Please try again."
 - Button returns to normal state
 - User can retry
@@ -231,14 +268,17 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 13: Logout Functionality
+
 **Pre-requisite:** User is logged in
 
 **Steps:**
+
 1. Login successfully
 2. Click on user avatar in top-right corner
 3. Click "Log out" from dropdown menu
 
 **Expected Result:**
+
 - Toast notification: "Logged out successfully"
 - Redirect to `/login`
 - User is no longer authenticated
@@ -251,14 +291,17 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 14: Logout Loading State
+
 **Pre-requisite:** User is logged in
 
 **Steps:**
+
 1. Open user menu
 2. Click "Log out"
 3. Observe button text during API call
 
 **Expected Result:**
+
 - Button text changes to "Logging out..."
 - Button is disabled during logout
 - Cannot click logout multiple times
@@ -268,13 +311,16 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ---
 
 ### ✅ Test 15: Logout Error Handling
+
 **Steps:**
+
 1. Login successfully
 2. Open DevTools > Network tab
 3. Enable "Offline" mode
 4. Click "Log out"
 
 **Expected Result:**
+
 - Toast notification: "Failed to log out" with error description
 - User remains logged in
 - Can retry logout
@@ -286,6 +332,7 @@ NOTE: REDIRECTS TO PLANS NOT THE ACTIVE PLAN
 ## Browser Compatibility
 
 Test in multiple browsers:
+
 - [x] Chrome/Chromium
 - [ ] Firefox
 - [ ] Safari (macOS)
@@ -320,13 +367,13 @@ Test in multiple browsers:
 ## Summary
 
 **Total Tests:** 15  
-**Passed:** ___  
-**Failed:** ___  
-**Blocked:** ___  
+**Passed:** **_  
+**Failed:** _**  
+**Blocked:** \_\_\_
 
-**Tested By:** _______________  
-**Date:** _______________  
-**Environment:** Development / Staging / Production  
+**Tested By:** ******\_\_\_******  
+**Date:** ******\_\_\_******  
+**Environment:** Development / Staging / Production
 
 ## Notes
 
@@ -353,15 +400,20 @@ npm run build
 ## Troubleshooting
 
 ### Issue: "Cannot connect to Supabase"
+
 **Solution:** Check environment variables are set correctly
 
 ### Issue: "User not found" even with correct credentials
+
 **Solution:** Verify user exists in Supabase Dashboard and email is confirmed
 
 ### Issue: Redirect loop
+
 **Solution:** Check middleware PUBLIC_PATHS configuration
 
 ### Issue: Cookies not persisting
-**Solution:** 
+
+**Solution:**
+
 - In development: Check `secure: true` might need to be `false` for localhost
 - In production: Ensure HTTPS is enabled

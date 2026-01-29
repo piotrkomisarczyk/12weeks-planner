@@ -1,14 +1,17 @@
 # Forgot Password Integration - Implementation Summary
 
 ## Overview
+
 Implementacja funkcjonalności "Forgot Password" dla aplikacji 12 Weeks Planner, zgodna z specyfikacją auth-spec.md i wymaganiami US-003 z PRD.
 
 ## Zaimplementowane Komponenty
 
 ### 1. API Endpoint: `/api/auth/forgot-password`
+
 **Plik:** `src/pages/api/auth/forgot-password.ts`
 
 **Funkcjonalność:**
+
 - Przyjmuje email użytkownika w formacie JSON
 - Waliduje format email przy użyciu Zod
 - Wywołuje `supabase.auth.resetPasswordForEmail()` z redirectTo: `${origin}/update-password`
@@ -16,6 +19,7 @@ Implementacja funkcjonalności "Forgot Password" dla aplikacji 12 Weeks Planner,
 - Obsługuje błędy walidacji (400) i błędy serwera (500)
 
 **Przykład request:**
+
 ```json
 POST /api/auth/forgot-password
 {
@@ -24,6 +28,7 @@ POST /api/auth/forgot-password
 ```
 
 **Przykład response:**
+
 ```json
 {
   "success": true,
@@ -32,17 +37,21 @@ POST /api/auth/forgot-password
 ```
 
 ### 2. Strona Forgot Password: `/forgot-password`
+
 **Plik:** `src/pages/forgot-password.astro`
 
 **Zmiany:**
+
 - Usunięto TODO komentarz
 - Dodano komentarz wyjaśniający, że middleware obsługuje przekierowanie zalogowanych użytkowników
 - Strona dostępna TYLKO dla niezalogowanych użytkowników
 
 ### 3. Komponent React: `ForgotPasswordForm`
+
 **Plik:** `src/components/auth/ForgotPasswordForm.tsx`
 
 **Zaimplementowane funkcje:**
+
 - Formularz z polem email
 - Walidacja email po stronie klienta (format, wymagalność)
 - Wywołanie API endpoint `/api/auth/forgot-password`
@@ -52,6 +61,7 @@ POST /api/auth/forgot-password
 - Toast notifications dla sukcesu i błędów
 
 **Flow użytkownika:**
+
 1. Użytkownik wpisuje email
 2. Kliknięcie "Send reset link" wywołuje API
 3. Wyświetlenie ekranu sukcesu z ikoną emaila
@@ -59,9 +69,11 @@ POST /api/auth/forgot-password
 5. Opcje: "Send another email" lub "Back to login"
 
 ### 4. Strona Update Password: `/update-password`
+
 **Plik:** `src/pages/update-password.astro`
 
 **Zmiany:**
+
 - Implementacja logiki wykrywania czy użytkownik jest zalogowany
 - Przekazanie flagi `isLoggedIn` do komponentu `UpdatePasswordForm`
 - Obsługa dwóch scenariuszy:
@@ -69,9 +81,11 @@ POST /api/auth/forgot-password
   - Zmiana hasła dla zalogowanego użytkownika
 
 ### 5. Komponent React: `UpdatePasswordForm`
+
 **Plik:** `src/components/auth/UpdatePasswordForm.tsx`
 
 **Zaimplementowane funkcje:**
+
 - **Walidacja tokenu resetującego:** Sprawdzenie czy użytkownik ma ważną sesję (dla flow reset hasła)
 - **Obsługa wygasłego linku:** Wyświetlenie komunikatu "Your reset password link has expired" i przekierowanie na `/forgot-password`
 - **Walidacja hasła:**
@@ -90,9 +104,11 @@ POST /api/auth/forgot-password
   - Disabled button podczas submitu
 
 ### 6. Middleware Update
+
 **Plik:** `src/middleware/index.ts`
 
 **Zmiany:**
+
 - Dodano `/api/auth/forgot-password` do PUBLIC_PATHS
 - Usunięto `/api/auth/reset-password` (nieużywane)
 - Utworzono nową tablicę `AUTH_ONLY_PAGES` dla stron dostępnych tylko dla niezalogowanych:
@@ -134,6 +150,7 @@ POST /api/auth/forgot-password
 ## Bezpieczeństwo
 
 ### Implementowane Zabezpieczenia:
+
 1. **Brak enumeracji emaili:** API zawsze zwraca sukces, niezależnie czy email istnieje
 2. **Walidacja tokenu:** Sprawdzenie ważności tokenu przed wyświetleniem formularza
 3. **Wygasanie linku:** Supabase domyślnie ustawia wygaśnięcie na 1 godzinę (zgodnie z US-003)
@@ -146,6 +163,7 @@ POST /api/auth/forgot-password
 ### Wymagane ustawienia w Supabase Dashboard:
 
 1. **Authentication → URL Configuration → Redirect URLs:**
+
    ```
    http://localhost:4321/update-password
    http://localhost:4321/auth/callback
@@ -162,25 +180,28 @@ POST /api/auth/forgot-password
 ## Zgodność z Wymaganiami
 
 ### US-003: Reset hasła
+
 ✅ Link "Forgot password" na stronie logowania  
 ✅ Wysłanie email z linkiem resetu  
 ✅ Nowy formularz hasła po kliknięciu linku (potwierdzenie nowego hasła)  
 ✅ Po sukcesie, przekierowanie do logowania  
 ✅ Wygaśnięcie linku resetu po 1 godzinie  
-✅ Możliwość rozpoczęcia procedury zmiany hasła z UserMenu dla zalogowanego użytkownika  
+✅ Możliwość rozpoczęcia procedury zmiany hasła z UserMenu dla zalogowanego użytkownika
 
 ### auth-spec.md: Odzyskiwanie Hasła
+
 ✅ Użytkownik podaje email na `/forgot-password`  
 ✅ Frontend wywołuje `supabase.auth.resetPasswordForEmail()` z `redirectTo: '/update-password'`  
 ✅ Użytkownik otrzymuje email z linkiem  
 ✅ Kliknięcie przenosi na `/auth/callback` i przekierowuje na `/update-password`  
-✅ Użytkownik ustawia nowe hasło (`supabase.auth.updateUser`)  
+✅ Użytkownik ustawia nowe hasło (`supabase.auth.updateUser`)
 
 ### Najlepsze praktyki (Cursor Rules)
+
 ✅ **Astro:** Użyto SSR, API endpoint z walidacją Zod, middleware  
 ✅ **React:** Functional components, hooks (useState, useCallback, useEffect)  
 ✅ **Backend:** Early returns, error handling, walidacja na początku funkcji  
-✅ **Supabase Auth:** Użyto `@supabase/ssr`, server client w API, browser client w React  
+✅ **Supabase Auth:** Użyto `@supabase/ssr`, server client w API, browser client w React
 
 ## Pliki Zmodyfikowane
 
@@ -196,6 +217,7 @@ POST /api/auth/forgot-password
 ### Testy manualne do wykonania:
 
 #### Test 1: Reset hasła - Happy Path
+
 1. Przejdź na `/login`
 2. Kliknij "Forgot password"
 3. Wpisz istniejący email
@@ -208,22 +230,26 @@ POST /api/auth/forgot-password
 10. Zaloguj się nowym hasłem
 
 #### Test 2: Nieistniejący email
+
 1. Przejdź na `/forgot-password`
 2. Wpisz nieistniejący email
 3. Sprawdź czy wyświetla się ekran sukcesu (nie błąd!)
 4. Sprawdź że email nie został wysłany
 
 #### Test 3: Wygasły link
+
 1. Użyj starego linku resetującego (>1h)
 2. Sprawdź komunikat "Your reset password link has expired"
 3. Sprawdź przekierowanie na `/forgot-password`
 
 #### Test 4: Zalogowany użytkownik próbuje dostać się na /forgot-password
+
 1. Zaloguj się
 2. Wpisz w przeglądarce `/forgot-password`
 3. Sprawdź przekierowanie na `/plans`
 
 #### Test 5: Zmiana hasła dla zalogowanego użytkownika
+
 1. Zaloguj się
 2. Przejdź na `/update-password` (np. z UserMenu)
 3. Wpisz nowe hasło
@@ -231,6 +257,7 @@ POST /api/auth/forgot-password
 5. Sprawdź że użytkownik pozostaje zalogowany
 
 #### Test 6: Walidacja hasła
+
 1. Przejdź na `/update-password` (z linku reset)
 2. Próbuj wpisać słabe hasła:
    - Mniej niż 8 znaków
@@ -286,6 +313,7 @@ curl -X POST http://localhost:4321/api/auth/forgot-password \
 ## Podsumowanie
 
 Implementacja funkcjonalności "Forgot Password" została zakończona zgodnie z wymaganiami:
+
 - ✅ API endpoint z walidacją i bezpiecznymi praktykami
 - ✅ Integracja z Supabase Auth
 - ✅ Obsługa dwóch scenariuszy (reset + zmiana hasła)

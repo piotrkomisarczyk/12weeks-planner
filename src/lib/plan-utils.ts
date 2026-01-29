@@ -1,4 +1,4 @@
-import type { PlanDTO, PlanStatus } from "@/types";
+import type { PlanDTO } from "@/types";
 
 /**
  * PlanViewModel extends PlanDTO with computed fields for frontend display

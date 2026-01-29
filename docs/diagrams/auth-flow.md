@@ -134,22 +134,22 @@ flowchart TD
     B --> C[Create Supabase client]
     C --> D[Get user session]
     D --> E{Session exists?}
-    
+
     E -->|Yes| F{Is protected route?}
     E -->|No| G{Is guest route?}
-    
+
     F -->|Yes| H[Allow access]
     F -->|No| I{Is guest route?}
-    
+
     I -->|Yes| J[Redirect to /]
     I -->|No| H
-    
+
     G -->|Yes| K[Redirect to /login]
     G -->|No| H
-    
+
     H --> L[Attach user to locals]
     L --> M[Continue to page]
-    
+
     J --> N[User sees dashboard]
     K --> O[User sees login]
 ```
@@ -166,20 +166,20 @@ sequenceDiagram
     Browser->>Supabase: signInWithPassword()
     Supabase-->>Browser: Access Token + Refresh Token
     Browser->>Browser: Store in cookies
-    
+
     Note over Browser,Server: Subsequent Requests
     Browser->>Server: Request with cookies
     Server->>Server: Read tokens from cookies
     Server->>Supabase: Validate access token
     Supabase-->>Server: Valid/Invalid
-    
+
     Note over Browser,Server: Token Refresh
     Server->>Supabase: Access token expired?
     Supabase-->>Server: Yes
     Server->>Supabase: Use refresh token
     Supabase-->>Server: New access token
     Server->>Browser: Update cookies
-    
+
     Note over Browser,Server: Session Expiry
     Server->>Supabase: Refresh token expired?
     Supabase-->>Server: Yes
@@ -192,20 +192,20 @@ sequenceDiagram
 flowchart TD
     A[User registers] --> B[Supabase sends email]
     B --> C{Email delivered?}
-    
+
     C -->|Yes| D[User receives email]
     C -->|No| E[Check spam folder]
-    
+
     D --> F[User clicks link]
     E --> F
-    
+
     F --> G[Navigate to /auth/callback]
     G --> H[Exchange code for session]
     H --> I{Code valid?}
-    
+
     I -->|Yes| J[Establish session]
     I -->|No| K[Show error]
-    
+
     J --> L[Redirect to dashboard]
     K --> M[Redirect to login]
 ```
@@ -218,21 +218,21 @@ flowchart TD
     Register --> VerifyEmail[Verify email]
     VerifyEmail --> Login[Login at /login]
     Login --> Dashboard[Access Dashboard]
-    
+
     Dashboard --> UsePlanner[Use Planner]
     UsePlanner --> Logout[Logout]
     Logout --> End1([Session Ended])
-    
+
     Start2([Existing User]) --> Login2[Login at /login]
     Login2 --> Dashboard2[Access Dashboard]
     Dashboard2 --> UsePlanner2[Use Planner]
-    
+
     UsePlanner2 --> ChangePassword{Change Password?}
     ChangePassword -->|Yes| UpdatePassword[Update Password]
     UpdatePassword --> UsePlanner2
     ChangePassword -->|No| Logout2[Logout]
     Logout2 --> End2([Session Ended])
-    
+
     Start3([Forgot Password]) --> ForgotPassword[Request Reset]
     ForgotPassword --> ResetEmail[Check Email]
     ResetEmail --> ResetPassword[Set New Password]
@@ -245,23 +245,23 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[User submits form] --> B{Form valid?}
-    
+
     B -->|No| C[Show validation errors]
     C --> D[User corrects errors]
     D --> A
-    
+
     B -->|Yes| E[Submit to Supabase]
     E --> F{Supabase success?}
-    
+
     F -->|Yes| G[Show success message]
     G --> H[Redirect or update UI]
-    
+
     F -->|No| I{Error type?}
-    
+
     I -->|Auth Error| J[Show auth error toast]
     I -->|Network Error| K[Show network error toast]
     I -->|Unknown Error| L[Show generic error toast]
-    
+
     J --> M[User can retry]
     K --> M
     L --> M
@@ -277,27 +277,27 @@ flowchart LR
         A2[/register]
         A3[/forgot-password]
     end
-    
+
     subgraph Semi-Protected Routes
         B1[/update-password]
     end
-    
+
     subgraph Protected Routes
         C1[/plans]
         C2[/dashboard]
         C3[/settings]
     end
-    
+
     User{User Status}
-    
+
     User -->|Not Logged In| Public Routes
     User -->|Not Logged In| B1
     User -->|Not Logged In| X[Redirect to /login]
-    
+
     User -->|Logged In| Y[Redirect to /]
     User -->|Logged In| B1
     User -->|Logged In| Protected Routes
-    
+
     X -.->|Blocks access to| Protected Routes
     Y -.->|Blocks access to| Public Routes
 ```
@@ -307,29 +307,29 @@ flowchart LR
 ```mermaid
 stateDiagram-v2
     [*] --> Anonymous
-    
+
     Anonymous --> Registering: Click Register
     Registering --> EmailVerification: Submit Form
     EmailVerification --> Anonymous: Verification Failed
     EmailVerification --> LoggingIn: Click Email Link
-    
+
     Anonymous --> LoggingIn: Click Login
     LoggingIn --> Authenticated: Success
     LoggingIn --> Anonymous: Failed
-    
+
     Anonymous --> PasswordReset: Click Forgot Password
     PasswordReset --> EmailSent: Submit Email
     EmailSent --> UpdatingPassword: Click Email Link
     UpdatingPassword --> LoggingIn: Password Updated
     UpdatingPassword --> EmailSent: Failed
-    
+
     Authenticated --> UsingApp: Access Dashboard
     UsingApp --> ChangingPassword: Click Change Password
     ChangingPassword --> Authenticated: Password Updated
     ChangingPassword --> UsingApp: Cancel
-    
+
     Authenticated --> Anonymous: Logout
-    
+
     UsingApp --> [*]: Session Expired
 ```
 
@@ -338,18 +338,21 @@ stateDiagram-v2
 ## Legend
 
 ### Sequence Diagrams
+
 - **Participant**: Actor or system component
 - **Arrow (->)**: Synchronous call
 - **Dashed Arrow (-->>)**: Response
 - **Note**: Additional context
 
 ### Flowcharts
+
 - **Rectangle**: Process/Action
 - **Diamond**: Decision point
 - **Rounded Rectangle**: Start/End
 - **Dashed Arrow**: Conditional flow
 
 ### State Diagrams
+
 - **State**: Current user state
 - **Transition**: Action that changes state
 - **[*]**: Initial/Final state
@@ -359,6 +362,7 @@ stateDiagram-v2
 ## Usage Notes
 
 These diagrams illustrate:
+
 1. **User flows**: How users interact with the system
 2. **System flows**: How components communicate
 3. **Error handling**: What happens when things go wrong
@@ -366,6 +370,7 @@ These diagrams illustrate:
 5. **Session management**: How sessions are maintained
 
 Use these diagrams to:
+
 - Understand the authentication system
 - Debug issues
 - Plan new features

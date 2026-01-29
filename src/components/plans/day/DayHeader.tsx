@@ -25,15 +25,7 @@ interface DayHeaderProps {
   onNavigate: (dayNumber: number) => void;
 }
 
-export function DayHeader({
-  planName,
-  planId,
-  dayNumber,
-  weekNumber,
-  computedDate,
-  planStartDate,
-  onNavigate,
-}: DayHeaderProps) {
+export function DayHeader({ planId, dayNumber, weekNumber, computedDate, planStartDate, onNavigate }: DayHeaderProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const currentDate = parseDateString(computedDate);

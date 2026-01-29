@@ -1,10 +1,13 @@
 # Konfiguracja Email Provider w Supabase
 
 ## Problem
+
 Po rejestracji użytkownika email weryfikacyjny nie dociera na skrzynkę pocztową.
 
 ## Przyczyna
+
 Supabase domyślnie używa wbudowanego email providera, który ma ograniczenia:
+
 - Maksymalnie 3-4 emaile na godzinę
 - Może być blokowany przez filtry spamu
 - Nie jest zalecany do użytku produkcyjnego
@@ -15,7 +18,9 @@ Supabase domyślnie używa wbudowanego email providera, który ma ograniczenia:
 ### Opcja 1: Konfiguracja Custom SMTP (Zalecane dla produkcji)
 
 #### 1.1. Wybierz Email Provider
+
 Popularne opcje:
+
 - **SendGrid** (darmowy plan: 100 emaili/dzień)
 - **Mailgun** (darmowy plan: 5000 emaili/miesiąc)
 - **AWS SES** (bardzo tani, wymaga weryfikacji)
@@ -48,6 +53,7 @@ Sender: noreply@yourdomain.com
 ```
 
 **Kroki dla SendGrid:**
+
 1. Zarejestruj się na https://sendgrid.com
 2. Zweryfikuj swój email
 3. Przejdź do **Settings** → **API Keys**

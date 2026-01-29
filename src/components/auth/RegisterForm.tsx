@@ -73,12 +73,12 @@ export function RegisterForm() {
           </div>
           <h2 className="mb-2 text-xl font-bold">Check your email</h2>
           <p className="text-muted-foreground mb-6 text-sm">
-            We've sent a verification link to <strong>{registeredEmail}</strong>. Please check your inbox and click the
-            link to verify your account.
+            We&apos;ve sent a verification link to <strong>{registeredEmail}</strong>. Please check your inbox and click
+            the link to verify your account.
           </p>
           <Alert>
             <AlertDescription>
-              Didn't receive the email?{" "}
+              Didn&apos;t receive the email?{" "}
               <span>
                 Check your spam folder or{" "}
                 <button type="button" className="text-primary hover:underline" onClick={() => setShowSuccess(false)}>

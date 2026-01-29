@@ -21,9 +21,11 @@ These endpoints are read-only operations that provide additional data insights a
 ### 2.1 GET /api/v1/tasks/:taskId/history
 
 #### Purpose
+
 Retrieve the complete status change history for a task. History is automatically created by the database trigger `log_task_status_change()` whenever a task status changes.
 
 #### Request Details
+
 - **HTTP Method**: GET
 - **URL Structure**: `/api/v1/tasks/:taskId/history`
 - **Path Parameters**:
@@ -35,6 +37,7 @@ Retrieve the complete status change history for a task. History is automatically
 #### Response Structure
 
 **Success Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -64,6 +67,7 @@ Retrieve the complete status change history for a task. History is automatically
 ```
 
 **Error Responses**:
+
 - `401 Unauthorized`: Missing or invalid authentication token
 - `404 Not Found`: Task not found or doesn't belong to the user
 - `500 Internal Server Error`: Database error
@@ -73,9 +77,11 @@ Retrieve the complete status change history for a task. History is automatically
 ### 2.2 GET /api/v1/users/metrics
 
 #### Purpose
+
 Retrieve success metrics for the authenticated user. Metrics are automatically updated by database triggers when users create plans or complete goals.
 
 #### Request Details
+
 - **HTTP Method**: GET
 - **URL Structure**: `/api/v1/users/metrics`
 - **Path Parameters**: None
@@ -86,6 +92,7 @@ Retrieve success metrics for the authenticated user. Metrics are automatically u
 #### Response Structure
 
 **Success Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -102,6 +109,7 @@ Retrieve success metrics for the authenticated user. Metrics are automatically u
 ```
 
 **Error Responses**:
+
 - `401 Unauthorized`: Missing or invalid authentication token
 - `404 Not Found`: Metrics not found (user has no activity yet)
 - `500 Internal Server Error`: Database error
@@ -111,9 +119,11 @@ Retrieve success metrics for the authenticated user. Metrics are automatically u
 ### 2.3 GET /api/v1/export
 
 #### Purpose
+
 Export all user data in JSON format for GDPR compliance. This endpoint returns complete user data including all plans, goals, milestones, weekly goals, tasks, task history, weekly reviews, and metrics.
 
 #### Request Details
+
 - **HTTP Method**: GET
 - **URL Structure**: `/api/v1/export`
 - **Path Parameters**: None
@@ -124,6 +134,7 @@ Export all user data in JSON format for GDPR compliance. This endpoint returns c
 #### Response Structure
 
 **Success Response** `200 OK`:
+
 ```json
 {
   "user_id": "uuid",
@@ -140,6 +151,7 @@ Export all user data in JSON format for GDPR compliance. This endpoint returns c
 ```
 
 **Error Responses**:
+
 - `401 Unauthorized`: Missing or invalid authentication token
 - `500 Internal Server Error`: Database error or query timeout
 
@@ -150,6 +162,7 @@ Export all user data in JSON format for GDPR compliance. This endpoint returns c
 ### 3.1 Existing Types from `src/types.ts`
 
 #### For Task History Endpoint
+
 ```typescript
 // Response types
 type TaskHistoryDTO = TaskHistoryEntity;
@@ -166,6 +179,7 @@ interface ErrorResponse {
 ```
 
 #### For User Metrics Endpoint
+
 ```typescript
 // Response types
 type UserMetricsDTO = UserMetricsEntity;
@@ -181,6 +195,7 @@ interface ErrorResponse {
 ```
 
 #### For Export Endpoint
+
 ```typescript
 // Response types
 interface ExportDataDTO {
@@ -204,7 +219,9 @@ interface ErrorResponse {
 ```
 
 ### 3.2 Database Entity Types
+
 All DTOs map directly to database entities defined in `database.types.ts`:
+
 - `TaskHistoryEntity` from `task_history` table
 - `UserMetricsEntity` from `user_metrics` table
 - Various entity types for export (PlanEntity, LongTermGoalEntity, etc.)
@@ -292,6 +309,7 @@ Return ExportDataDTO
 ## 5. Security Considerations
 
 ### 5.1 Authentication
+
 - **All endpoints require authentication** via JWT token in the Authorization header
 - Middleware (`src/middleware/index.ts`) must verify token before allowing access
 - Extract user_id from `context.locals.supabase.auth.getUser()`
@@ -299,16 +317,19 @@ Return ExportDataDTO
 ### 5.2 Authorization (Row-Level Security)
 
 #### Task History Endpoint
+
 - RLS policy: `Users can view own task history`
 - Verification chain: task_history → tasks → plans → user_id
 - User can only access history for their own tasks
 
 #### User Metrics Endpoint
+
 - RLS policy: `Users can view own metrics`
 - Direct user_id check: `user_metrics.user_id = auth.uid()`
 - Simplest authorization model
 
 #### Export Endpoint
+
 - Multiple RLS policies apply to each table
 - All queries filtered by user_id through RLS
 - Most sensitive endpoint - returns all user data
@@ -316,15 +337,18 @@ Return ExportDataDTO
 ### 5.3 Input Validation
 
 #### Task History Endpoint
+
 - Validate `taskId` is a valid UUID format
 - Use Zod schema for path parameter validation
 - Return 400 Bad Request for invalid UUID format
 
 #### User Metrics & Export Endpoints
+
 - No input validation required (no parameters)
 - Only authentication verification needed
 
 ### 5.4 Data Exposure Prevention
+
 - Never expose other users' data
 - RLS policies provide defense-in-depth
 - Always use authenticated Supabase client from context.locals
@@ -336,33 +360,34 @@ Return ExportDataDTO
 
 ### 6.1 Task History Endpoint
 
-| Error Scenario | Status Code | Response |
-|---------------|-------------|----------|
-| Missing/invalid auth token | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| Invalid UUID format | 400 | `{ "error": "Validation failed", "details": [...] }` |
-| Task not found or not owned by user | 404 | `{ "error": "Not found", "message": "Task not found" }` |
-| Database connection error | 500 | `{ "error": "Internal server error", "message": "Database error" }` |
-| Supabase query error | 500 | `{ "error": "Internal server error", "message": "Failed to fetch task history" }` |
+| Error Scenario                      | Status Code | Response                                                                          |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| Missing/invalid auth token          | 401         | `{ "error": "Unauthorized", "message": "Authentication required" }`               |
+| Invalid UUID format                 | 400         | `{ "error": "Validation failed", "details": [...] }`                              |
+| Task not found or not owned by user | 404         | `{ "error": "Not found", "message": "Task not found" }`                           |
+| Database connection error           | 500         | `{ "error": "Internal server error", "message": "Database error" }`               |
+| Supabase query error                | 500         | `{ "error": "Internal server error", "message": "Failed to fetch task history" }` |
 
 ### 6.2 User Metrics Endpoint
 
-| Error Scenario | Status Code | Response |
-|---------------|-------------|----------|
-| Missing/invalid auth token | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| Metrics not found (new user) | 404 | `{ "error": "Not found", "message": "User metrics not found" }` |
-| Database connection error | 500 | `{ "error": "Internal server error", "message": "Database error" }` |
-| Supabase query error | 500 | `{ "error": "Internal server error", "message": "Failed to fetch user metrics" }` |
+| Error Scenario               | Status Code | Response                                                                          |
+| ---------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| Missing/invalid auth token   | 401         | `{ "error": "Unauthorized", "message": "Authentication required" }`               |
+| Metrics not found (new user) | 404         | `{ "error": "Not found", "message": "User metrics not found" }`                   |
+| Database connection error    | 500         | `{ "error": "Internal server error", "message": "Database error" }`               |
+| Supabase query error         | 500         | `{ "error": "Internal server error", "message": "Failed to fetch user metrics" }` |
 
 ### 6.3 Export Endpoint
 
-| Error Scenario | Status Code | Response |
-|---------------|-------------|----------|
-| Missing/invalid auth token | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| Database connection error | 500 | `{ "error": "Internal server error", "message": "Database error" }` |
-| Query timeout (large dataset) | 500 | `{ "error": "Internal server error", "message": "Export timeout - please try again" }` |
-| Partial query failure | 500 | `{ "error": "Internal server error", "message": "Failed to export complete data" }` |
+| Error Scenario                | Status Code | Response                                                                               |
+| ----------------------------- | ----------- | -------------------------------------------------------------------------------------- |
+| Missing/invalid auth token    | 401         | `{ "error": "Unauthorized", "message": "Authentication required" }`                    |
+| Database connection error     | 500         | `{ "error": "Internal server error", "message": "Database error" }`                    |
+| Query timeout (large dataset) | 500         | `{ "error": "Internal server error", "message": "Export timeout - please try again" }` |
+| Partial query failure         | 500         | `{ "error": "Internal server error", "message": "Failed to export complete data" }`    |
 
 ### 6.4 Error Handling Best Practices
+
 1. **Early returns**: Check authentication first, then validation, then business logic
 2. **Consistent error format**: Use ErrorResponse type for all errors
 3. **Error logging**: Log all 500 errors with full error details for debugging
@@ -374,24 +399,27 @@ Return ExportDataDTO
 ## 7. Performance Considerations
 
 ### 7.1 Task History Endpoint
+
 - **Expected load**: Low to medium (occasional history views)
-- **Query optimization**: 
+- **Query optimization**:
   - Use indexed `task_id` column in task_history table
   - ORDER BY changed_at (indexed via `idx_task_history_changed_at`)
 - **Typical response time**: < 100ms
 - **Pagination**: Not needed initially (history is typically small < 50 entries)
 
 ### 7.2 User Metrics Endpoint
+
 - **Expected load**: Medium (dashboard display, frequent access)
-- **Query optimization**: 
+- **Query optimization**:
   - Direct lookup by user_id (indexed via `idx_user_metrics_user_id`)
   - Single row response (very fast)
 - **Typical response time**: < 50ms
 - **Caching**: Consider client-side caching (5 minutes) or CDN caching
 
 ### 7.3 Export Endpoint
+
 - **Expected load**: Very low (GDPR requests, infrequent)
-- **Query optimization**: 
+- **Query optimization**:
   - Use parallel queries for independent tables
   - Consider query timeout (30 seconds max)
   - RLS policies add overhead but necessary for security
@@ -404,6 +432,7 @@ Return ExportDataDTO
   - Consider separate read replica for export queries
 
 ### 7.4 Database Optimization
+
 - All necessary indexes already exist (see db-plan.md section 3)
 - RLS policies add ~10-20ms overhead per query
 - Consider adding monitoring for slow queries (> 1s)
@@ -415,6 +444,7 @@ Return ExportDataDTO
 ### 8.1 Phase 1: Service Layer Implementation
 
 #### Step 1: Extend Task Service
+
 **File**: `src/lib/services/task.service.ts`
 
 Add method to fetch task history:
@@ -426,16 +456,13 @@ Add method to fetch task history:
  * @param supabase - Authenticated Supabase client
  * @returns Array of task history entries
  */
-export async function getTaskHistory(
-  taskId: string,
-  supabase: SupabaseClient
-): Promise<TaskHistoryDTO[]> {
+export async function getTaskHistory(taskId: string, supabase: SupabaseClient): Promise<TaskHistoryDTO[]> {
   // Query task_history table
   const { data, error } = await supabase
-    .from('task_history')
-    .select('*')
-    .eq('task_id', taskId)
-    .order('changed_at', { ascending: true });
+    .from("task_history")
+    .select("*")
+    .eq("task_id", taskId)
+    .order("changed_at", { ascending: true });
 
   if (error) {
     throw new Error(`Failed to fetch task history: ${error.message}`);
@@ -446,11 +473,12 @@ export async function getTaskHistory(
 ```
 
 #### Step 2: Create User Service
+
 **File**: `src/lib/services/user.service.ts` (NEW FILE)
 
 ```typescript
-import type { SupabaseClient } from '../db/supabase.client';
-import type { UserMetricsDTO } from '../types';
+import type { SupabaseClient } from "../db/supabase.client";
+import type { UserMetricsDTO } from "../types";
 
 /**
  * Get metrics for the authenticated user
@@ -458,18 +486,11 @@ import type { UserMetricsDTO } from '../types';
  * @param supabase - Authenticated Supabase client
  * @returns User metrics or null if not found
  */
-export async function getUserMetrics(
-  userId: string,
-  supabase: SupabaseClient
-): Promise<UserMetricsDTO | null> {
-  const { data, error } = await supabase
-    .from('user_metrics')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
+export async function getUserMetrics(userId: string, supabase: SupabaseClient): Promise<UserMetricsDTO | null> {
+  const { data, error } = await supabase.from("user_metrics").select("*").eq("user_id", userId).single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === "PGRST116") {
       // No rows returned - user has no metrics yet
       return null;
     }
@@ -481,11 +502,12 @@ export async function getUserMetrics(
 ```
 
 #### Step 3: Create Export Service
+
 **File**: `src/lib/services/export.service.ts` (NEW FILE)
 
 ```typescript
-import type { SupabaseClient } from '../db/supabase.client';
-import type { ExportDataDTO } from '../types';
+import type { SupabaseClient } from "../db/supabase.client";
+import type { ExportDataDTO } from "../types";
 
 /**
  * Export all user data (GDPR compliance)
@@ -493,10 +515,7 @@ import type { ExportDataDTO } from '../types';
  * @param supabase - Authenticated Supabase client
  * @returns Complete user data export
  */
-export async function exportUserData(
-  userId: string,
-  supabase: SupabaseClient
-): Promise<ExportDataDTO> {
+export async function exportUserData(userId: string, supabase: SupabaseClient): Promise<ExportDataDTO> {
   // Execute all queries in parallel for performance
   const [
     plansResult,
@@ -508,14 +527,14 @@ export async function exportUserData(
     weeklyReviewsResult,
     metricsResult,
   ] = await Promise.all([
-    supabase.from('plans').select('*').eq('user_id', userId),
-    supabase.from('long_term_goals').select('*, plan:plans!inner(user_id)').eq('plan.user_id', userId),
-    supabase.from('milestones').select('*, goal:long_term_goals!inner(plan:plans!inner(user_id))'),
-    supabase.from('weekly_goals').select('*, plan:plans!inner(user_id)').eq('plan.user_id', userId),
-    supabase.from('tasks').select('*, plan:plans!inner(user_id)').eq('plan.user_id', userId),
-    supabase.from('task_history').select('*, task:tasks!inner(plan:plans!inner(user_id))'),
-    supabase.from('weekly_reviews').select('*, plan:plans!inner(user_id)').eq('plan.user_id', userId),
-    supabase.from('user_metrics').select('*').eq('user_id', userId).single(),
+    supabase.from("plans").select("*").eq("user_id", userId),
+    supabase.from("long_term_goals").select("*, plan:plans!inner(user_id)").eq("plan.user_id", userId),
+    supabase.from("milestones").select("*, goal:long_term_goals!inner(plan:plans!inner(user_id))"),
+    supabase.from("weekly_goals").select("*, plan:plans!inner(user_id)").eq("plan.user_id", userId),
+    supabase.from("tasks").select("*, plan:plans!inner(user_id)").eq("plan.user_id", userId),
+    supabase.from("task_history").select("*, task:tasks!inner(plan:plans!inner(user_id))"),
+    supabase.from("weekly_reviews").select("*, plan:plans!inner(user_id)").eq("plan.user_id", userId),
+    supabase.from("user_metrics").select("*").eq("user_id", userId).single(),
   ]);
 
   // Check for errors in any query
@@ -527,7 +546,7 @@ export async function exportUserData(
     tasksResult.error,
     taskHistoryResult.error,
     weeklyReviewsResult.error,
-    metricsResult.error && metricsResult.error.code !== 'PGRST116', // Ignore "no rows" for metrics
+    metricsResult.error && metricsResult.error.code !== "PGRST116", // Ignore "no rows" for metrics
   ].filter(Boolean);
 
   if (errors.length > 0) {
@@ -555,14 +574,15 @@ export async function exportUserData(
 ### 8.2 Phase 2: Validation Layer
 
 #### Step 4: Create Validation Schema for Task History
+
 **File**: `src/lib/validation/task.validation.ts` (add to existing file)
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // Add to existing task validation schemas
 export const taskIdParamSchema = z.object({
-  taskId: z.string().uuid({ message: 'Invalid task ID format' }),
+  taskId: z.string().uuid({ message: "Invalid task ID format" }),
 });
 ```
 
@@ -573,13 +593,14 @@ No validation schemas needed for user metrics and export endpoints (no parameter
 ### 8.3 Phase 3: API Route Implementation
 
 #### Step 5: Implement Task History Route
+
 **File**: `src/pages/api/v1/tasks/[taskId]/history.ts` (NEW FILE)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { getTaskHistory } from '../../../../../lib/services/task.service';
-import { taskIdParamSchema } from '../../../../../lib/validation/task.validation';
-import type { ListResponse, TaskHistoryDTO, ErrorResponse } from '../../../../../types';
+import type { APIRoute } from "astro";
+import { getTaskHistory } from "../../../../../lib/services/task.service";
+import { taskIdParamSchema } from "../../../../../lib/validation/task.validation";
+import type { ListResponse, TaskHistoryDTO, ErrorResponse } from "../../../../../types";
 
 export const prerender = false;
 
@@ -587,15 +608,18 @@ export const GET: APIRoute = async ({ params, locals }) => {
   try {
     // 1. Authentication check (handled by middleware)
     const supabase = locals.supabase;
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return new Response(
         JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Authentication required',
+          error: "Unauthorized",
+          message: "Authentication required",
         } as ErrorResponse),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -604,32 +628,28 @@ export const GET: APIRoute = async ({ params, locals }) => {
     if (!validationResult.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validationResult.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const { taskId } = validationResult.data;
 
     // 3. Verify task exists and belongs to user
-    const { data: task, error: taskError } = await supabase
-      .from('tasks')
-      .select('id')
-      .eq('id', taskId)
-      .single();
+    const { data: task, error: taskError } = await supabase.from("tasks").select("id").eq("id", taskId).single();
 
     if (taskError || !task) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'Task not found',
+          error: "Not found",
+          message: "Task not found",
         } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -643,28 +663,29 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error fetching task history:', error);
+    console.error("Error fetching task history:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'Failed to fetch task history',
+        error: "Internal server error",
+        message: "Failed to fetch task history",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
 ```
 
 #### Step 6: Implement User Metrics Route
+
 **File**: `src/pages/api/v1/users/metrics.ts` (NEW FILE)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { getUserMetrics } from '../../../../lib/services/user.service';
-import type { ItemResponse, UserMetricsDTO, ErrorResponse } from '../../../../types';
+import type { APIRoute } from "astro";
+import { getUserMetrics } from "../../../../lib/services/user.service";
+import type { ItemResponse, UserMetricsDTO, ErrorResponse } from "../../../../types";
 
 export const prerender = false;
 
@@ -672,15 +693,18 @@ export const GET: APIRoute = async ({ locals }) => {
   try {
     // 1. Authentication check
     const supabase = locals.supabase;
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return new Response(
         JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Authentication required',
+          error: "Unauthorized",
+          message: "Authentication required",
         } as ErrorResponse),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -690,10 +714,10 @@ export const GET: APIRoute = async ({ locals }) => {
     if (!metrics) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'User metrics not found',
+          error: "Not found",
+          message: "User metrics not found",
         } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -704,28 +728,29 @@ export const GET: APIRoute = async ({ locals }) => {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error fetching user metrics:', error);
+    console.error("Error fetching user metrics:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'Failed to fetch user metrics',
+        error: "Internal server error",
+        message: "Failed to fetch user metrics",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
 ```
 
 #### Step 7: Implement Export Route
+
 **File**: `src/pages/api/v1/export.ts` (NEW FILE)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { exportUserData } from '../../../lib/services/export.service';
-import type { ExportDataDTO, ErrorResponse } from '../../../types';
+import type { APIRoute } from "astro";
+import { exportUserData } from "../../../lib/services/export.service";
+import type { ExportDataDTO, ErrorResponse } from "../../../types";
 
 export const prerender = false;
 
@@ -733,15 +758,18 @@ export const GET: APIRoute = async ({ locals }) => {
   try {
     // 1. Authentication check
     const supabase = locals.supabase;
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return new Response(
         JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Authentication required',
+          error: "Unauthorized",
+          message: "Authentication required",
         } as ErrorResponse),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -752,18 +780,18 @@ export const GET: APIRoute = async ({ locals }) => {
     return new Response(JSON.stringify(exportData), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="user-data-export-${user.id}-${Date.now()}.json"`,
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename="user-data-export-${user.id}-${Date.now()}.json"`,
       },
     });
   } catch (error) {
-    console.error('Error exporting user data:', error);
+    console.error("Error exporting user data:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'Failed to export user data',
+        error: "Internal server error",
+        message: "Failed to export user data",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -774,6 +802,7 @@ export const GET: APIRoute = async ({ locals }) => {
 ### 8.4 Phase 4: Testing
 
 #### Step 8: Create API Tests
+
 **File**: `api-tests/others-tests.http` (NEW FILE)
 
 ```http
@@ -825,6 +854,7 @@ GET {{baseUrl}}/export
 ```
 
 #### Step 9: Manual Testing Checklist
+
 - [ ] Test task history for task with multiple status changes
 - [ ] Test task history for task with no status changes (only initial creation)
 - [ ] Test task history for non-existent task (should return 404)
@@ -842,11 +872,13 @@ GET {{baseUrl}}/export
 ### 8.5 Phase 5: Documentation and Deployment
 
 #### Step 10: Update API Documentation
+
 - Verify all response examples match actual implementation
 - Add any additional error cases discovered during testing
 - Update main API documentation index if needed
 
 #### Step 11: Monitor and Optimize
+
 - Add application logging for all endpoints
 - Monitor response times in production
 - Implement rate limiting for export endpoint
@@ -859,35 +891,35 @@ GET {{baseUrl}}/export
 
 ### 9.1 Task History Endpoint
 
-| Test Case | Input | Expected Output |
-|-----------|-------|-----------------|
-| Valid task with history | Valid taskId, authenticated user | 200 OK with history array |
-| Valid task, no history | Valid taskId, new task | 200 OK with empty array |
-| Invalid UUID format | Invalid taskId | 400 Bad Request |
-| Non-existent task | Valid UUID, task doesn't exist | 404 Not Found |
-| Task belongs to other user | Valid taskId, different user | 404 Not Found (RLS) |
-| No authentication | No auth token | 401 Unauthorized |
-| Database error | Valid request, DB down | 500 Internal Server Error |
+| Test Case                  | Input                            | Expected Output           |
+| -------------------------- | -------------------------------- | ------------------------- |
+| Valid task with history    | Valid taskId, authenticated user | 200 OK with history array |
+| Valid task, no history     | Valid taskId, new task           | 200 OK with empty array   |
+| Invalid UUID format        | Invalid taskId                   | 400 Bad Request           |
+| Non-existent task          | Valid UUID, task doesn't exist   | 404 Not Found             |
+| Task belongs to other user | Valid taskId, different user     | 404 Not Found (RLS)       |
+| No authentication          | No auth token                    | 401 Unauthorized          |
+| Database error             | Valid request, DB down           | 500 Internal Server Error |
 
 ### 9.2 User Metrics Endpoint
 
-| Test Case | Input | Expected Output |
-|-----------|-------|-----------------|
-| User with metrics | Authenticated user with activity | 200 OK with metrics object |
-| New user, no metrics | Authenticated new user | 404 Not Found |
-| No authentication | No auth token | 401 Unauthorized |
-| Database error | Valid request, DB down | 500 Internal Server Error |
+| Test Case            | Input                            | Expected Output            |
+| -------------------- | -------------------------------- | -------------------------- |
+| User with metrics    | Authenticated user with activity | 200 OK with metrics object |
+| New user, no metrics | Authenticated new user           | 404 Not Found              |
+| No authentication    | No auth token                    | 401 Unauthorized           |
+| Database error       | Valid request, DB down           | 500 Internal Server Error  |
 
 ### 9.3 Export Endpoint
 
-| Test Case | Input | Expected Output |
-|-----------|-------|-----------------|
-| User with data | Authenticated user with plans | 200 OK with complete export |
-| New user, no data | Authenticated new user | 200 OK with empty arrays |
-| Large dataset | User with many plans/tasks | 200 OK (might be slow) |
-| No authentication | No auth token | 401 Unauthorized |
-| Database error | Valid request, DB down | 500 Internal Server Error |
-| Query timeout | Very large dataset | 500 Internal Server Error |
+| Test Case         | Input                         | Expected Output             |
+| ----------------- | ----------------------------- | --------------------------- |
+| User with data    | Authenticated user with plans | 200 OK with complete export |
+| New user, no data | Authenticated new user        | 200 OK with empty arrays    |
+| Large dataset     | User with many plans/tasks    | 200 OK (might be slow)      |
+| No authentication | No auth token                 | 401 Unauthorized            |
+| Database error    | Valid request, DB down        | 500 Internal Server Error   |
+| Query timeout     | Very large dataset            | 500 Internal Server Error   |
 
 ---
 
@@ -912,18 +944,21 @@ GET {{baseUrl}}/export
 ## 11. Future Enhancements
 
 ### Task History
+
 - Add filtering by status type
 - Add date range filtering
 - Add pagination for very long histories
 - Consider adding analytics (average time in each status)
 
 ### User Metrics
+
 - Add weekly/monthly engagement metrics
 - Add streak tracking (consecutive weeks of activity)
 - Add goal completion rate calculations
 - Consider adding charts/visualizations endpoint
 
 ### Export
+
 - Add CSV export format option
 - Add export scheduling (weekly/monthly automated exports)
 - Add selective export (choose which data to include)
@@ -939,4 +974,3 @@ GET {{baseUrl}}/export
 - Type Definitions: `src/types.ts`
 - RLS Policies: `supabase/migrations/20251016120300_create_rls_policies.sql`
 - Database Triggers: `supabase/migrations/20251016120500_create_triggers.sql`
-

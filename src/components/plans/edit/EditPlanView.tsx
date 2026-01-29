@@ -29,7 +29,6 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
     addGoal,
     updateGoal,
     deleteGoal,
-    nextStep,
     prevStep,
     finish,
     setFormErrors,

@@ -43,7 +43,7 @@ import type {
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS, PRIORITY_COLORS, DAY_NAMES } from "@/types";
 import { getDisabledTooltip } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MoreVertical, Flag, Calendar, MoveRight, MoveLeft, Target, Trash2, Clock, ArrowUp } from "lucide-react";
+import { MoreVertical, Flag, Calendar, MoveLeft, Target, Trash2, Clock, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GoalMilestonePicker } from "./GoalMilestonePicker";
 
@@ -104,7 +104,9 @@ export function TaskItem({
     isOpen: false,
     title: "",
     description: "",
-    onConfirm: () => {},
+    onConfirm: () => {
+      // Placeholder function, will be replaced when dialog is opened
+    },
   });
   const inputRef = useRef<HTMLInputElement>(null);
 

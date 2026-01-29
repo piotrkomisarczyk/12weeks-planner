@@ -5,18 +5,22 @@
 This document defines the REST API for the 12 Weeks Planner application. The API follows REST principles and is designed to work with Supabase as the backend service, leveraging Row-Level Security (RLS) for authorization and PostgreSQL triggers for business logic enforcement.
 
 ### Technology Stack
+
 - **Backend**: Supabase (PostgreSQL + Auth + Realtime)
 - **API Framework**: Astro API Routes (SSR endpoints)
 - **Authentication**: Supabase Auth (JWT tokens)
 - **Database**: PostgreSQL with RLS policies
 
 ### Base URL
+
 ```
 /api/v1
 ```
 
 ### Authentication
+
 All endpoints (except auth-related ones) require a valid JWT token from Supabase Auth in the Authorization header:
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -25,16 +29,16 @@ Authorization: Bearer <jwt_token>
 
 ## 2. Resources
 
-| Resource | Database Table | Description |
-|----------|---------------|-------------|
-| Plans | `plans` | 12-week planners |
-| Goals | `long_term_goals` | Long-term goals (1-6 per plan) |
-| Milestones | `milestones` | Goal milestones (up to 5 per goal) |
-| Weekly Goals | `weekly_goals` | Main weekly tasks |
-| Tasks | `tasks` | Weekly subtasks and ad-hoc tasks |
-| Task History | `task_history` | Task status change log |
-| Weekly Reviews | `weekly_reviews` | Weekly reflections (3 questions) |
-| User Metrics | `user_metrics` | User success tracking |
+| Resource       | Database Table    | Description                        |
+| -------------- | ----------------- | ---------------------------------- |
+| Plans          | `plans`           | 12-week planners                   |
+| Goals          | `long_term_goals` | Long-term goals (1-6 per plan)     |
+| Milestones     | `milestones`      | Goal milestones (up to 5 per goal) |
+| Weekly Goals   | `weekly_goals`    | Main weekly tasks                  |
+| Tasks          | `tasks`           | Weekly subtasks and ad-hoc tasks   |
+| Task History   | `task_history`    | Task status change log             |
+| Weekly Reviews | `weekly_reviews`  | Weekly reflections (3 questions)   |
+| User Metrics   | `user_metrics`    | User success tracking              |
 
 ---
 
@@ -61,11 +65,13 @@ Authentication is handled entirely by Supabase Auth SDK on the client side. No c
 Get all plans for the authenticated user.
 
 **Query Parameters:**
+
 - `status` (optional): Filter by status (`ready`, `active`, `completed`, `archived`)
 - `limit` (optional): Number of results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -86,6 +92,7 @@ Get all plans for the authenticated user.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -97,6 +104,7 @@ Get all plans for the authenticated user.
 Get the currently active plan for the authenticated user.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -112,6 +120,7 @@ Get the currently active plan for the authenticated user.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: No active plan exists
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -124,6 +133,7 @@ Get the currently active plan for the authenticated user.
 Get a specific plan by ID.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -139,6 +149,7 @@ Get a specific plan by ID.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Plan not found or doesn't belong to user
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -151,6 +162,7 @@ Get a specific plan by ID.
 Create a new 12-week planner.
 
 **Request Body**:
+
 ```json
 {
   "name": "Planner_2025-01-06",
@@ -159,10 +171,12 @@ Create a new 12-week planner.
 ```
 
 **Validation:**
+
 - `name`: Required, max 255 characters
 - `start_date`: Required, must be a Monday (validated by database trigger)
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -178,11 +192,13 @@ Create a new 12-week planner.
 ```
 
 **Notes:**
+
 - New plans are created with status `ready` by default
 - To activate a plan, use the PATCH endpoint to set status to `active`
 - When a plan is set to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger)
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid start_date (not Monday), missing required fields
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -195,6 +211,7 @@ Create a new 12-week planner.
 Update plan details, including activation. Name and status can be updated independently.
 
 **Request Body**:
+
 ```json
 {
   "name": "My Q1 2025 Plan",
@@ -203,6 +220,7 @@ Update plan details, including activation. Name and status can be updated indepe
 ```
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -218,11 +236,13 @@ Update plan details, including activation. Name and status can be updated indepe
 ```
 
 **Notes:**
+
 - When setting `status` to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger)
 - Only one plan can be `active` at a time per user
 - Valid status transitions: `ready` ↔ `active`, any status → `completed`, any status → `archived`
 
 **Error Responses:**
+
 - `404 Not Found`: Plan not found or doesn't belong to user
 - `400 Bad Request`: Invalid data or invalid status value
 - `401 Unauthorized`: Missing or invalid auth token
@@ -236,6 +256,7 @@ Update plan details, including activation. Name and status can be updated indepe
 Permanently delete a plan and all associated data (hard delete). This operation is irreversible and will cascade delete all goals, milestones, weekly goals, tasks, task history, and weekly reviews.
 
 **Response** `200 OK`:
+
 ```json
 {
   "message": "Plan deleted successfully"
@@ -243,12 +264,14 @@ Permanently delete a plan and all associated data (hard delete). This operation 
 ```
 
 **Notes:**
+
 - This is a hard delete operation that permanently removes the plan and all associated data
 - All related entities (goals, milestones, tasks, etc.) are automatically deleted via cascade
 - Consider using the Archive Plan endpoint instead for a recoverable soft delete
 - User metrics (total_plans_created) are not decremented when a plan is deleted
 
 **Error Responses:**
+
 - `404 Not Found`: Plan not found or doesn't belong to user
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -261,6 +284,7 @@ Permanently delete a plan and all associated data (hard delete). This operation 
 Archive a plan (soft delete). This sets the plan status to 'archived' without permanently deleting it.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -272,11 +296,13 @@ Archive a plan (soft delete). This sets the plan status to 'archived' without pe
 ```
 
 **Notes:**
+
 - This is a soft delete operation - the plan and all its data remain in the database
 - Archived plans can be viewed but typically not edited
 - To permanently delete a plan, use the DELETE endpoint instead
 
 **Error Responses:**
+
 - `404 Not Found`: Plan not found or doesn't belong to user
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -289,6 +315,7 @@ Archive a plan (soft delete). This sets the plan status to 'archived' without pe
 Get comprehensive data for a plan to populate the Dashboard and Hierarchy views. This endpoint returns a normalized structure (flat arrays) of all plan entities, optimized for client-side tree construction and filtering.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -355,14 +382,17 @@ Get comprehensive data for a plan to populate the Dashboard and Hierarchy views.
 ```
 
 **Business Logic & Filtering:**
+
 1.  **Normalized Response**: Returns flat arrays for all entities. This allows the frontend to reconstruct the complex hierarchy (Goal -> Milestone -> WeeklyGoal -> Task, etc.) defined in the UI requirements without the API imposing a fixed nesting structure.
 2.  Always return all data for selected plan
 
 **Notes:**
+
 - This endpoint is designed to reduce the number of HTTP requests ("waterfall") when loading the main plan view.
 - Provides all necessary Foreign Keys (`long_term_goal_id`, `milestone_id`, `weekly_goal_id`) in the `tasks` and `weekly_goals` arrays to allow precise mapping in the Hierarchy Tree.
 
 **Error Responses:**
+
 - `404 Not Found`: Plan not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -377,11 +407,13 @@ Get comprehensive data for a plan to populate the Dashboard and Hierarchy views.
 Get goals, optionally filtered by plan.
 
 **Query Parameters:**
+
 - `plan_id` (optional): Filter by plan ID
 - `limit` (optional): Number of results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -402,6 +434,7 @@ Get goals, optionally filtered by plan.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -413,6 +446,7 @@ Get goals, optionally filtered by plan.
 Get all goals for a specific plan.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -432,6 +466,7 @@ Get all goals for a specific plan.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Plan not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -444,6 +479,7 @@ Get all goals for a specific plan.
 Get a specific goal with its milestones.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -471,6 +507,7 @@ Get a specific goal with its milestones.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -483,6 +520,7 @@ Get a specific goal with its milestones.
 Create a new long-term goal.
 
 **Request Body**:
+
 ```json
 {
   "plan_id": "uuid",
@@ -495,6 +533,7 @@ Create a new long-term goal.
 ```
 
 **Validation:**
+
 - `plan_id`: Required, must be valid UUID
 - `title`: Required, max 255 characters
 - `description`: Optional
@@ -504,6 +543,7 @@ Create a new long-term goal.
 - Maximum 6 goals per plan (enforced by database trigger)
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -521,6 +561,7 @@ Create a new long-term goal.
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid data, category not in enum, progress out of range, or maximum goals exceeded
 - `404 Not Found`: Plan not found
 - `401 Unauthorized`: Missing or invalid auth token
@@ -534,6 +575,7 @@ Create a new long-term goal.
 Update goal details.
 
 **Request Body**:
+
 ```json
 {
   "title": "Launch MVP v1.0",
@@ -542,9 +584,11 @@ Update goal details.
 ```
 
 **Validation:**
+
 - Same as create, all fields optional
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -562,6 +606,7 @@ Update goal details.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Goal not found
 - `400 Bad Request`: Invalid data
 - `401 Unauthorized`: Missing or invalid auth token
@@ -575,6 +620,7 @@ Update goal details.
 Delete a goal (cascades to milestones).
 
 **Response** `200 OK`:
+
 ```json
 {
   "message": "Goal deleted successfully"
@@ -582,11 +628,13 @@ Delete a goal (cascades to milestones).
 ```
 
 **Notes:**
+
 - Deleting a goal cascades to all associated milestones (hard delete)
 - Sets `long_term_goal_id = NULL` in associated weekly_goals and tasks (handled by database)
 - Associated weekly goals and tasks remain but lose their goal reference
 
 **Error Responses:**
+
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -599,6 +647,7 @@ Delete a goal (cascades to milestones).
 Get all weekly goals associated with a specific long-term goal.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -619,6 +668,7 @@ Get all weekly goals associated with a specific long-term goal.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -631,6 +681,7 @@ Get all weekly goals associated with a specific long-term goal.
 Get all tasks associated with a specific long-term goal (both direct and indirect associations).
 
 **Query Parameters:**
+
 - `status` (optional): Filter by task status
 - `week_number` (optional): Filter by week (1-12)
 - `include_milestone_tasks` (optional): Include tasks linked via milestones (default: true)
@@ -638,6 +689,7 @@ Get all tasks associated with a specific long-term goal (both direct and indirec
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -664,11 +716,13 @@ Get all tasks associated with a specific long-term goal (both direct and indirec
 ```
 
 **Notes:**
+
 - Returns tasks with `long_term_goal_id` matching the goal
 - If `include_milestone_tasks` is true (default), also returns tasks linked to milestones of this goal
 - Useful for getting a complete view of all work related to a specific goal
 
 **Error Responses:**
+
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -683,12 +737,14 @@ Get all tasks associated with a specific long-term goal (both direct and indirec
 Get milestones, optionally filtered by goal.
 
 **Query Parameters:**
+
 - `long_term_goal_id` (optional): Filter by goal ID
 - `is_completed` (optional): Filter by completion status (true/false)
 - `limit` (optional): Number of results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -709,6 +765,7 @@ Get milestones, optionally filtered by goal.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -720,6 +777,7 @@ Get milestones, optionally filtered by goal.
 Get all milestones for a specific goal.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -739,6 +797,7 @@ Get all milestones for a specific goal.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -751,6 +810,7 @@ Get all milestones for a specific goal.
 Get a specific milestone.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -768,6 +828,7 @@ Get a specific milestone.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -780,6 +841,7 @@ Get a specific milestone.
 Create a new milestone for a goal.
 
 **Request Body**:
+
 ```json
 {
   "long_term_goal_id": "uuid",
@@ -791,6 +853,7 @@ Create a new milestone for a goal.
 ```
 
 **Validation:**
+
 - `long_term_goal_id`: Required, must be valid UUID
 - `title`: Required, max 255 characters
 - `description`: Optional
@@ -800,6 +863,7 @@ Create a new milestone for a goal.
 - Maximum 5 milestones per goal (enforced by database trigger)
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -817,6 +881,7 @@ Create a new milestone for a goal.
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid data or maximum milestones exceeded
 - `404 Not Found`: Goal not found
 - `401 Unauthorized`: Missing or invalid auth token
@@ -830,6 +895,7 @@ Create a new milestone for a goal.
 Update milestone details.
 
 **Request Body**:
+
 ```json
 {
   "is_completed": true
@@ -837,9 +903,11 @@ Update milestone details.
 ```
 
 **Validation:**
+
 - Same as create, all fields optional
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -857,6 +925,7 @@ Update milestone details.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Milestone not found
 - `400 Bad Request`: Invalid data
 - `401 Unauthorized`: Missing or invalid auth token
@@ -870,6 +939,7 @@ Update milestone details.
 Delete a milestone.
 
 **Response** `200 OK`:
+
 ```json
 {
   "message": "Milestone deleted successfully"
@@ -877,10 +947,12 @@ Delete a milestone.
 ```
 
 **Notes:**
+
 - Deleting a milestone sets `milestone_id = NULL` in associated weekly_goals and tasks (handled by database)
 - This is a soft disconnect - associated entities remain but lose their milestone reference
 
 **Error Responses:**
+
 - `404 Not Found`: Milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -893,6 +965,7 @@ Delete a milestone.
 Get all weekly goals associated with a specific milestone.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -913,6 +986,7 @@ Get all weekly goals associated with a specific milestone.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -925,12 +999,14 @@ Get all weekly goals associated with a specific milestone.
 Get all tasks associated with a specific milestone.
 
 **Query Parameters:**
+
 - `status` (optional): Filter by task status
 - `week_number` (optional): Filter by week (1-12)
 - `limit` (optional): Number of results (default: 50)
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -957,6 +1033,7 @@ Get all tasks associated with a specific milestone.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -971,6 +1048,7 @@ Get all tasks associated with a specific milestone.
 Get weekly goals with optional filters.
 
 **Query Parameters:**
+
 - `plan_id` (required): Plan ID
 - `week_number` (optional): Filter by week (1-12)
 - `long_term_goal_id` (optional): Filter by associated long-term goal
@@ -979,6 +1057,7 @@ Get weekly goals with optional filters.
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -1000,6 +1079,7 @@ Get weekly goals with optional filters.
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required plan_id
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1012,6 +1092,7 @@ Get weekly goals with optional filters.
 Get a specific weekly goal with its subtasks.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1038,6 +1119,7 @@ Get a specific weekly goal with its subtasks.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Weekly goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1050,6 +1132,7 @@ Get a specific weekly goal with its subtasks.
 Create a new weekly goal.
 
 **Request Body**:
+
 ```json
 {
   "plan_id": "uuid",
@@ -1063,6 +1146,7 @@ Create a new weekly goal.
 ```
 
 **Validation:**
+
 - `plan_id`: Required, must be valid UUID
 - `long_term_goal_id`: Optional (can be null for unlinked weekly goals)
 - `milestone_id`: Optional (can be null, represents link to a specific milestone)
@@ -1072,6 +1156,7 @@ Create a new weekly goal.
 - `position`: Default 1
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -1090,10 +1175,12 @@ Create a new weekly goal.
 ```
 
 **Notes:**
+
 - A weekly goal can be linked to a long-term goal, a milestone, both, or neither
 - If milestone_id is provided, it should ideally belong to a goal in the same plan (recommended validation at application level)
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid data, week_number out of range
 - `404 Not Found`: Plan, goal, or milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1107,6 +1194,7 @@ Create a new weekly goal.
 Update weekly goal details.
 
 **Request Body**:
+
 ```json
 {
   "title": "Complete authentication and authorization",
@@ -1116,9 +1204,11 @@ Update weekly goal details.
 ```
 
 **Validation:**
+
 - Same as create, all fields optional
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1137,10 +1227,12 @@ Update weekly goal details.
 ```
 
 **Notes:**
+
 - Can update long_term_goal_id and milestone_id independently to change or remove associations
 - Set to null to remove the association
 
 **Error Responses:**
+
 - `404 Not Found`: Weekly goal not found
 - `400 Bad Request`: Invalid data
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1154,6 +1246,7 @@ Update weekly goal details.
 Delete a weekly goal (cascades to subtasks).
 
 **Response** `200 OK`:
+
 ```json
 {
   "message": "Weekly goal deleted successfully"
@@ -1161,6 +1254,7 @@ Delete a weekly goal (cascades to subtasks).
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Weekly goal not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1175,6 +1269,7 @@ Delete a weekly goal (cascades to subtasks).
 Get tasks with rich filtering options.
 
 **Query Parameters:**
+
 - `plan_id` (required): Plan ID
 - `week_number` (optional): Filter by week (1-12)
 - `due_day` (optional): Filter by day (1-7, Monday=1)
@@ -1188,6 +1283,7 @@ Get tasks with rich filtering options.
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -1214,11 +1310,13 @@ Get tasks with rich filtering options.
 ```
 
 **Notes:**
+
 - Tasks can be linked to weekly goals, long-term goals, milestones, or any combination
 - Filtering by long_term_goal_id returns all tasks directly or indirectly associated with that goal
 - Filtering by milestone_id returns all tasks associated with that specific milestone
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required plan_id
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1231,11 +1329,13 @@ Get tasks with rich filtering options.
 Get tasks for a specific day with categorization (most important (A), secondary (B), additional (C)).
 
 **Query Parameters:**
+
 - `plan_id` (required): Plan ID
 - `week_number` (required): Week number (1-12)
 - `due_day` (required): Day of week (1-7, Monday=1)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1280,12 +1380,14 @@ Get tasks for a specific day with categorization (most important (A), secondary 
 ```
 
 **Notes:**
+
 - Returns tasks grouped by priority category for better daily planning
 - Includes relationship fields (long_term_goal_id, milestone_id) for context
 - Most important and secondary tasks typically have goal/milestone associations
 - Additional tasks may include ad-hoc items without associations
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required parameters
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1298,6 +1400,7 @@ Get tasks for a specific day with categorization (most important (A), secondary 
 Get a specific task with its history.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1341,6 +1444,7 @@ Get a specific task with its history.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Task not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1353,6 +1457,7 @@ Get a specific task with its history.
 Create a new task.
 
 **Request Body**:
+
 ```json
 {
   "plan_id": "uuid",
@@ -1371,6 +1476,7 @@ Create a new task.
 ```
 
 **Validation:**
+
 - `plan_id`: Required, must be valid UUID
 - `weekly_goal_id`: Optional (null for ad-hoc tasks)
 - `long_term_goal_id`: Optional (null for tasks not directly linked to a goal)
@@ -1388,6 +1494,7 @@ Create a new task.
 - Maximum 10 tasks per day (same week number and due day) (enforced by database trigger)
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -1411,11 +1518,13 @@ Create a new task.
 ```
 
 **Notes:**
+
 - Tasks support flexible hierarchies: can be linked to weekly goals, long-term goals, milestones, or any combination
 - For hierarchical organization: goal → milestone → task OR goal → task
 - Ad-hoc tasks typically have no associations (all foreign keys null)
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid data, enum values, ranges, or maximum tasks exceeded
 - `404 Not Found`: Plan, weekly goal, long-term goal, or milestone not found
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1429,6 +1538,7 @@ Create a new task.
 Update task details. Status changes are automatically logged to task_history by database trigger.
 
 **Request Body**:
+
 ```json
 {
   "status": "completed",
@@ -1438,9 +1548,11 @@ Update task details. Status changes are automatically logged to task_history by 
 ```
 
 **Validation:**
+
 - Same as create, all fields optional
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1464,10 +1576,12 @@ Update task details. Status changes are automatically logged to task_history by 
 ```
 
 **Notes:**
+
 - Can update long_term_goal_id and milestone_id to change task associations
 - Set to null to remove associations
 
 **Error Responses:**
+
 - `404 Not Found`: Task not found
 - `400 Bad Request`: Invalid data
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1481,6 +1595,7 @@ Update task details. Status changes are automatically logged to task_history by 
 Copy a task to another day/week with history preservation.
 
 **Request Body**:
+
 ```json
 {
   "week_number": 4,
@@ -1489,10 +1604,12 @@ Copy a task to another day/week with history preservation.
 ```
 
 **Validation:**
+
 - `week_number`: Optional, range 1-12 (if null, copies to unassigned)
 - `due_day`: Optional, range 1-7 (if null, copies without specific day)
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -1517,11 +1634,13 @@ Copy a task to another day/week with history preservation.
 ```
 
 **Notes:**
+
 - Copied task retains all associations (weekly_goal_id, long_term_goal_id, milestone_id)
 - Status is reset to 'todo' for the new copy
 - Original task remains unchanged
 
 **Error Responses:**
+
 - `404 Not Found`: Task not found
 - `400 Bad Request`: Invalid week_number or due_day
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1535,6 +1654,7 @@ Copy a task to another day/week with history preservation.
 Delete a task (cascades to task_history).
 
 **Response** `200 OK`:
+
 ```json
 {
   "message": "Task deleted successfully"
@@ -1542,6 +1662,7 @@ Delete a task (cascades to task_history).
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Task not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1556,6 +1677,7 @@ Delete a task (cascades to task_history).
 Get status change history for a task. History is automatically created by database trigger.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -1585,6 +1707,7 @@ Get status change history for a task. History is automatically created by databa
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Task not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1599,6 +1722,7 @@ Get status change history for a task. History is automatically created by databa
 Get weekly reviews for a plan.
 
 **Query Parameters:**
+
 - `plan_id` (required): Plan ID
 - `week_number` (optional): Filter by week (1-12)
 - `is_completed` (optional): Filter by completion status
@@ -1606,6 +1730,7 @@ Get weekly reviews for a plan.
 - `offset` (optional): Pagination offset (default: 0)
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": [
@@ -1626,6 +1751,7 @@ Get weekly reviews for a plan.
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Missing required plan_id
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1638,9 +1764,11 @@ Get weekly reviews for a plan.
 Get review for a specific week in a plan.
 
 **Query Parameters:**
+
 - `plan_id` (required): Plan ID
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1658,6 +1786,7 @@ Get review for a specific week in a plan.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Review not found for this week
 - `400 Bad Request`: Missing required plan_id
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1671,6 +1800,7 @@ Get review for a specific week in a plan.
 Get a specific weekly review.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1688,6 +1818,7 @@ Get a specific weekly review.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Review not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1700,6 +1831,7 @@ Get a specific weekly review.
 Create a new weekly review.
 
 **Request Body**:
+
 ```json
 {
   "plan_id": "uuid",
@@ -1711,6 +1843,7 @@ Create a new weekly review.
 ```
 
 **Validation:**
+
 - `plan_id`: Required, must be valid UUID
 - `week_number`: Required, range 1-12
 - `what_worked`: Optional (for auto-save)
@@ -1719,6 +1852,7 @@ Create a new weekly review.
 - `is_completed`: Default false
 
 **Response** `201 Created`:
+
 ```json
 {
   "data": {
@@ -1736,6 +1870,7 @@ Create a new weekly review.
 ```
 
 **Error Responses:**
+
 - `400 Bad Request`: Invalid data, week_number out of range
 - `404 Not Found`: Plan not found
 - `409 Conflict`: Review already exists for this week
@@ -1750,6 +1885,7 @@ Create a new weekly review.
 Update weekly review. Supports auto-save with partial updates.
 
 **Request Body**:
+
 ```json
 {
   "what_worked": "Early morning work sessions were very productive"
@@ -1757,9 +1893,11 @@ Update weekly review. Supports auto-save with partial updates.
 ```
 
 **Validation:**
+
 - Same as create, all fields optional
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1777,6 +1915,7 @@ Update weekly review. Supports auto-save with partial updates.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Review not found
 - `400 Bad Request`: Invalid data
 - `401 Unauthorized`: Missing or invalid auth token
@@ -1790,6 +1929,7 @@ Update weekly review. Supports auto-save with partial updates.
 Mark a weekly review as completed.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1801,6 +1941,7 @@ Mark a weekly review as completed.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Review not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1813,6 +1954,7 @@ Mark a weekly review as completed.
 Delete a weekly review.
 
 **Response** `200 OK`:
+
 ```json
 {
   "message": "Weekly review deleted successfully"
@@ -1820,6 +1962,7 @@ Delete a weekly review.
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Review not found
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1834,6 +1977,7 @@ Delete a weekly review.
 Get success metrics for the authenticated user. Metrics are automatically updated by database triggers.
 
 **Response** `200 OK`:
+
 ```json
 {
   "data": {
@@ -1850,6 +1994,7 @@ Get success metrics for the authenticated user. Metrics are automatically update
 ```
 
 **Error Responses:**
+
 - `404 Not Found`: Metrics not found (user has no activity yet)
 - `401 Unauthorized`: Missing or invalid auth token
 
@@ -1864,6 +2009,7 @@ Get success metrics for the authenticated user. Metrics are automatically update
 Export all user data in JSON format (GDPR compliance).
 
 **Response** `200 OK`:
+
 ```json
 {
   "user_id": "uuid",
@@ -1880,6 +2026,7 @@ Export all user data in JSON format (GDPR compliance).
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized`: Missing or invalid auth token
 
 ---
@@ -1893,24 +2040,23 @@ Export all user data in JSON format (GDPR compliance).
 The application uses Supabase Auth for user authentication. All authentication operations are handled client-side using the Supabase JavaScript client:
 
 ```typescript
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-)
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 // Sign up
-await supabase.auth.signUp({ email, password })
+await supabase.auth.signUp({ email, password });
 
 // Sign in
-await supabase.auth.signInWithPassword({ email, password })
+await supabase.auth.signInWithPassword({ email, password });
 
 // Get session
-const { data: { session } } = await supabase.auth.getSession()
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 
 // Sign out
-await supabase.auth.signOut()
+await supabase.auth.signOut();
 ```
 
 ### 4.2 API Authentication
@@ -1925,15 +2071,18 @@ The token is validated using Supabase's server-side libraries:
 
 ```typescript
 // In Astro API route
-const authHeader = request.headers.get('Authorization')
-const token = authHeader?.replace('Bearer ', '')
+const authHeader = request.headers.get("Authorization");
+const token = authHeader?.replace("Bearer ", "");
 
-const { data: { user }, error } = await supabase.auth.getUser(token)
+const {
+  data: { user },
+  error,
+} = await supabase.auth.getUser(token);
 
 if (error || !user) {
-  return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-    status: 401
-  })
+  return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    status: 401,
+  });
 }
 ```
 
@@ -1942,6 +2091,7 @@ if (error || !user) {
 Database-level authorization is enforced through PostgreSQL Row-Level Security policies. Each table has RLS policies that ensure users can only access their own data:
 
 **Example RLS Policy (plans table):**
+
 ```sql
 -- Users can only view their own plans
 CREATE POLICY "Users can view own plans"
@@ -1978,6 +2128,7 @@ RLS policies are automatically enforced by the database when using the Supabase 
 All API endpoints validate incoming data before processing:
 
 #### Data Type Validation
+
 - UUIDs: Valid UUID v4 format
 - Dates: ISO 8601 format (YYYY-MM-DD)
 - Timestamps: ISO 8601 format with timezone
@@ -1985,10 +2136,12 @@ All API endpoints validate incoming data before processing:
 - Strings: Maximum length constraints
 
 #### Required Field Validation
+
 - Return `400 Bad Request` with descriptive error message
 - Include field name in error response
 
 **Example Error Response:**
+
 ```json
 {
   "error": "Validation failed",
@@ -2008,11 +2161,11 @@ All API endpoints validate incoming data before processing:
 ### 5.2 Business Logic Rules
 
 #### Plans
+
 - **Validation**:
   - `start_date` must be a Monday (enforced by database trigger)
   - Status must be one of: `ready`, `active`, `completed`, `archived`
   - User can have multiple plans, but only one `active` at a time (enforced by database trigger)
-  
 - **Business Logic**:
   - New plans are created with status `ready` by default
   - When a plan is set to `active`, all other active plans for the user are automatically set to `ready` (enforced by database trigger `ensure_single_active_plan`)
@@ -2022,6 +2175,7 @@ All API endpoints validate incoming data before processing:
   - Plan requires minimum 1 goal before creation (enforced at application level)
 
 #### Long-term Goals
+
 - **Validation**:
 - Minimum 1, maximum 6 goals per plan (enforced by database trigger)
 - `progress_percentage` range: 0-100
@@ -2034,6 +2188,7 @@ All API endpoints validate incoming data before processing:
   - Deleting a goal cascades to milestones
 
 #### Milestones
+
 - **Validation**:
   - Maximum 5 milestones per goal (enforced by database trigger)
   - `position` range: 1-5
@@ -2044,6 +2199,7 @@ All API endpoints validate incoming data before processing:
   - Deleting a milestone sets `milestone_id = NULL` in associated tasks
 
 #### Weekly Goals
+
 - **Validation**:
   - `week_number` range: 1-12
   - Must belong to a valid plan
@@ -2059,6 +2215,7 @@ All API endpoints validate incoming data before processing:
   - Deleting a milestone sets `milestone_id = NULL` in associated weekly goals (via trigger)
 
 #### Tasks
+
 - **Validation**:
   - `priority` must be one of: `A`, `B`, `C`
   - `status` must be one of: `todo`, `in_progress`, `completed`, `cancelled`, `postponed`
@@ -2096,6 +2253,7 @@ All API endpoints validate incoming data before processing:
     - Additional: 7 tasks (any priority)
 
 #### Weekly Reviews
+
 - **Validation**:
   - `week_number` range: 1-12
   - Only one review per week per plan
@@ -2109,6 +2267,7 @@ All API endpoints validate incoming data before processing:
   - Past week reviews remain editable
 
 #### User Metrics
+
 - **Validation**:
   - One record per user (enforced by unique constraint)
   - Boolean and integer fields only
@@ -2124,22 +2283,23 @@ All API endpoints validate incoming data before processing:
 
 #### HTTP Status Codes
 
-| Code | Meaning | Usage |
-|------|---------|-------|
-| 200 | OK | Successful GET, PATCH, DELETE, POST (non-creation) |
-| 201 | Created | Successful resource creation |
-| 400 | Bad Request | Validation error, invalid data format |
-| 401 | Unauthorized | Missing or invalid auth token |
-| 403 | Forbidden | User doesn't have permission (rarely used, RLS handles this) |
-| 404 | Not Found | Resource doesn't exist or doesn't belong to user |
-| 409 | Conflict | Resource already exists (e.g., review for week already created) |
-| 500 | Internal Server Error | Server error, database error |
+| Code | Meaning               | Usage                                                           |
+| ---- | --------------------- | --------------------------------------------------------------- |
+| 200  | OK                    | Successful GET, PATCH, DELETE, POST (non-creation)              |
+| 201  | Created               | Successful resource creation                                    |
+| 400  | Bad Request           | Validation error, invalid data format                           |
+| 401  | Unauthorized          | Missing or invalid auth token                                   |
+| 403  | Forbidden             | User doesn't have permission (rarely used, RLS handles this)    |
+| 404  | Not Found             | Resource doesn't exist or doesn't belong to user                |
+| 409  | Conflict              | Resource already exists (e.g., review for week already created) |
+| 500  | Internal Server Error | Server error, database error                                    |
 
 #### Error Response Format
 
 All error responses follow a consistent format:
 
 **Simple Error:**
+
 ```json
 {
   "error": "Resource not found",
@@ -2148,6 +2308,7 @@ All error responses follow a consistent format:
 ```
 
 **Validation Error:**
+
 ```json
 {
   "error": "Validation failed",
@@ -2162,6 +2323,7 @@ All error responses follow a consistent format:
 ```
 
 **Database Constraint Error:**
+
 ```json
 {
   "error": "Constraint violation",
@@ -2195,10 +2357,12 @@ Rate limiting is implemented to prevent abuse and ensure fair usage:
 List endpoints support pagination using limit/offset:
 
 **Query Parameters:**
+
 - `limit`: Number of results per page (default: 50, max: 100)
 - `offset`: Number of results to skip (default: 0)
 
 **Response Format:**
+
 ```json
 {
   "data": [...],
@@ -2214,18 +2378,23 @@ List endpoints support pagination using limit/offset:
 ### 5.6 Filtering and Sorting
 
 #### Filtering
+
 Most list endpoints support filtering via query parameters:
+
 - Exact match: `?status=active`
 - Multiple values: `?status=active,completed`
 - Range: `?week_number_gte=3&week_number_lte=6`
 
 #### Sorting
+
 List endpoints support sorting:
+
 - `?sort=created_at` (ascending)
 - `?sort=-created_at` (descending, note the minus)
 - `?sort=position,created_at` (multiple fields)
 
 **Example:**
+
 ```
 GET /api/v1/tasks?plan_id=abc-123&status=todo,in_progress&sort=-priority,position
 ```
@@ -2233,9 +2402,10 @@ GET /api/v1/tasks?plan_id=abc-123&status=todo,in_progress&sort=-priority,positio
 ### 5.7 Data Integrity
 
 #### Cascade Deletes
+
 - Deleting a **plan** (DELETE endpoint - hard delete) cascades to: goals, milestones, weekly_goals, tasks, task_history, weekly_reviews
 - Archiving a **plan** (soft delete) preserves all data, only changes status to `archived`
-- Deleting a **goal** cascades to: 
+- Deleting a **goal** cascades to:
   - All associated milestones (hard delete)
   - Sets `long_term_goal_id = NULL` in weekly_goals (disconnects, keeps weekly goals)
   - Sets `long_term_goal_id = NULL` in tasks (disconnects, keeps tasks)
@@ -2248,6 +2418,7 @@ GET /api/v1/tasks?plan_id=abc-123&status=todo,in_progress&sort=-priority,positio
 - Deleting a **user** (from auth.users) cascades to all user data
 
 #### Orphan Prevention
+
 - All foreign keys have `ON DELETE CASCADE` or `ON DELETE SET NULL`
 - The flexible hierarchy prevents orphaned data:
   - Tasks can survive deletion of weekly goals if they have long_term_goal_id or milestone_id
@@ -2257,6 +2428,7 @@ GET /api/v1/tasks?plan_id=abc-123&status=todo,in_progress&sort=-priority,positio
 - Database constraints prevent invalid references
 
 #### Relationship Flexibility
+
 - The database supports multiple valid hierarchy patterns:
   - **Classic hierarchy**: plan → goal → milestone → weekly_goal → task
   - **Direct goal link**: plan → goal → task (bypassing milestones and weekly goals)
@@ -2275,49 +2447,45 @@ API endpoints are implemented as Astro server endpoints:
 
 ```typescript
 // src/pages/api/v1/plans/index.ts
-import type { APIRoute } from 'astro'
-import { createClient } from '@supabase/supabase-js'
+import type { APIRoute } from "astro";
+import { createClient } from "@supabase/supabase-js";
 
 export const GET: APIRoute = async ({ request }) => {
   // Get auth token
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '')
-  
+  const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+
   // Initialize Supabase client with user token
-  const supabase = createClient(
-    import.meta.env.SUPABASE_URL,
-    import.meta.env.SUPABASE_ANON_KEY,
-    {
-      global: { headers: { Authorization: `Bearer ${token}` } }
-    }
-  )
-  
+  const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+
   // Validate user
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
   if (authError || !user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
-    })
+      headers: { "Content-Type": "application/json" },
+    });
   }
-  
+
   // Query data (RLS automatically filters by user)
-  const { data, error } = await supabase
-    .from('plans')
-    .select('*')
-    .order('created_at', { ascending: false })
-  
+  const { data, error } = await supabase.from("plans").select("*").order("created_at", { ascending: false });
+
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+      headers: { "Content-Type": "application/json" },
+    });
   }
-  
+
   return new Response(JSON.stringify({ data }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  })
-}
+    headers: { "Content-Type": "application/json" },
+  });
+};
 ```
 
 ### 6.2 Database Views Usage
@@ -2326,19 +2494,15 @@ The API can leverage database views for optimized queries:
 
 ```typescript
 // Get plan progress using view
-const { data } = await supabase
-  .from('plan_progress')
-  .select('*')
-  .eq('plan_id', planId)
-  .single()
+const { data } = await supabase.from("plan_progress").select("*").eq("plan_id", planId).single();
 
 // Get weekly task summary using view
 const { data } = await supabase
-  .from('weekly_task_summary')
-  .select('*')
-  .eq('plan_id', planId)
-  .eq('week_number', weekNumber)
-  .single()
+  .from("weekly_task_summary")
+  .select("*")
+  .eq("plan_id", planId)
+  .eq("week_number", weekNumber)
+  .single();
 ```
 
 ### 6.3 Error Handling Pattern
@@ -2351,41 +2515,36 @@ try {
   if (!planId) {
     return new Response(
       JSON.stringify({
-        error: 'Validation failed',
-        details: [{ field: 'plan_id', message: 'Plan ID is required' }]
+        error: "Validation failed",
+        details: [{ field: "plan_id", message: "Plan ID is required" }],
       }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    )
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
   }
-  
+
   // Query database
-  const { data, error } = await supabase
-    .from('plans')
-    .select('*')
-    .eq('id', planId)
-    .single()
-  
+  const { data, error } = await supabase.from("plans").select("*").eq("id", planId).single();
+
   if (error) {
-    if (error.code === 'PGRST116') {
-      return new Response(
-        JSON.stringify({ error: 'Not found', message: 'Plan not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      )
+    if (error.code === "PGRST116") {
+      return new Response(JSON.stringify({ error: "Not found", message: "Plan not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    throw error
+    throw error;
   }
-  
+
   return new Response(JSON.stringify({ data }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  })
-  
+    headers: { "Content-Type": "application/json" },
+  });
 } catch (error) {
-  console.error('API Error:', error)
-  return new Response(
-    JSON.stringify({ error: 'Internal server error' }),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
-  )
+  console.error("API Error:", error);
+  return new Response(JSON.stringify({ error: "Internal server error" }), {
+    status: 500,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -2394,11 +2553,11 @@ try {
 Use generated types from Supabase for type safety:
 
 ```typescript
-import type { Database } from '../db/database.types'
+import type { Database } from "../db/database.types";
 
-type Plan = Database['public']['Tables']['plans']['Row']
-type PlanInsert = Database['public']['Tables']['plans']['Insert']
-type PlanUpdate = Database['public']['Tables']['plans']['Update']
+type Plan = Database["public"]["Tables"]["plans"]["Row"];
+type PlanInsert = Database["public"]["Tables"]["plans"]["Insert"];
+type PlanUpdate = Database["public"]["Tables"]["plans"]["Update"];
 ```
 
 ### 6.5 Response Helpers
@@ -2410,22 +2569,22 @@ Create utility functions for consistent responses:
 export function successResponse<T>(data: T, status = 200) {
   return new Response(JSON.stringify({ data }), {
     status,
-    headers: { 'Content-Type': 'application/json' }
-  })
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export function errorResponse(error: string, message: string, status = 400) {
   return new Response(JSON.stringify({ error, message }), {
     status,
-    headers: { 'Content-Type': 'application/json' }
-  })
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export function validationErrorResponse(details: Array<{ field: string; message: string }>) {
-  return new Response(
-    JSON.stringify({ error: 'Validation failed', details }),
-    { status: 400, headers: { 'Content-Type': 'application/json' } }
-  )
+  return new Response(JSON.stringify({ error: "Validation failed", details }), {
+    status: 400,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -2434,29 +2593,32 @@ export function validationErrorResponse(details: Array<{ field: string; message:
 The database schema supports flexible relationships between goals, milestones, weekly goals, and tasks. When implementing API endpoints, consider:
 
 **1. Optional Foreign Keys:**
+
 ```typescript
 // All relationship fields are optional
 interface Task {
-  id: string
-  plan_id: string
-  weekly_goal_id: string | null      // Link to weekly goal
-  long_term_goal_id: string | null   // Direct link to goal
-  milestone_id: string | null         // Direct link to milestone
+  id: string;
+  plan_id: string;
+  weekly_goal_id: string | null; // Link to weekly goal
+  long_term_goal_id: string | null; // Direct link to goal
+  milestone_id: string | null; // Direct link to milestone
   // ... other fields
 }
 ```
 
 **2. Filtering by Multiple Relationships:**
+
 ```typescript
 // Support filtering by any combination of relationships
 const { data } = await supabase
-  .from('tasks')
-  .select('*')
-  .eq('plan_id', planId)
-  .or(`long_term_goal_id.eq.${goalId},milestone_id.eq.${milestoneId}`)
+  .from("tasks")
+  .select("*")
+  .eq("plan_id", planId)
+  .or(`long_term_goal_id.eq.${goalId},milestone_id.eq.${milestoneId}`);
 ```
 
 **3. Validation Recommendations:**
+
 ```typescript
 // Application-level validation for better UX
 // (Not enforced by database, but recommended)
@@ -2464,29 +2626,30 @@ async function validateTaskRelationships(task: TaskInput) {
   // If milestone_id is provided, verify it belongs to a goal in the same plan
   if (task.milestone_id) {
     const { data: milestone } = await supabase
-      .from('milestones')
-      .select('long_term_goal_id, long_term_goals!inner(plan_id)')
-      .eq('id', task.milestone_id)
-      .single()
-    
+      .from("milestones")
+      .select("long_term_goal_id, long_term_goals!inner(plan_id)")
+      .eq("id", task.milestone_id)
+      .single();
+
     if (milestone.long_term_goals.plan_id !== task.plan_id) {
-      throw new Error('Milestone must belong to a goal in the same plan')
+      throw new Error("Milestone must belong to a goal in the same plan");
     }
   }
 }
 ```
 
 **4. Handling Cascading Nulls:**
+
 ```typescript
-// When a goal or milestone is deleted, associated entities have their 
+// When a goal or milestone is deleted, associated entities have their
 // foreign keys set to NULL automatically by the database.
 // API responses should handle null values gracefully:
 
 interface WeeklyGoal {
-  id: string
-  plan_id: string
-  long_term_goal_id: string | null   // May be null if goal was deleted
-  milestone_id: string | null         // May be null if milestone was deleted
+  id: string;
+  plan_id: string;
+  long_term_goal_id: string | null; // May be null if goal was deleted
+  milestone_id: string | null; // May be null if milestone was deleted
   // ... other fields
 }
 
@@ -2497,17 +2660,20 @@ if (weeklyGoal.long_term_goal_id) {
 ```
 
 **5. Querying Hierarchical Data:**
+
 ```typescript
 // Get tasks with their full hierarchy
 const { data: tasks } = await supabase
-  .from('tasks')
-  .select(`
+  .from("tasks")
+  .select(
+    `
     *,
     weekly_goal:weekly_goals(*),
     long_term_goal:long_term_goals(*),
     milestone:milestones(*, long_term_goal:long_term_goals(*))
-  `)
-  .eq('plan_id', planId)
+  `
+  )
+  .eq("plan_id", planId);
 ```
 
 ---
@@ -2517,31 +2683,38 @@ const { data: tasks } = await supabase
 The following features are out of scope for MVP but may be considered for future iterations:
 
 ### 7.1 Webhooks
+
 - Event notifications for plan completion, goal achievement
 - Integration with external services
 
 ### 7.2 Bulk Operations
+
 - Batch create/update/delete endpoints
 - Bulk task status updates
 
 ### 7.3 Advanced Filtering
+
 - Full-text search across tasks and goals
 - Complex query operators (contains, starts_with, etc.)
 
 ### 7.4 Real-time Updates
+
 - WebSocket connections for live collaboration
 - Push notifications for task reminders
 
 ### 7.5 Analytics Endpoints
+
 - Detailed progress analytics
 - Historical trend analysis
 - Completion rate statistics
 
 ### 7.6 File Attachments
+
 - Upload files to tasks/goals
 - Image attachments for visual progress tracking
 
 ### 7.7 Sharing and Collaboration
+
 - Share plans with other users
 - Collaborative planning features
 - Team workspaces
@@ -2552,36 +2725,38 @@ The following features are out of scope for MVP but may be considered for future
 
 ### 8.1 HTTP Methods Summary
 
-| Method | Purpose | Idempotent | Safe |
-|--------|---------|------------|------|
-| GET | Retrieve resources | Yes | Yes |
-| POST | Create resource | No | No |
-| PATCH | Partial update | No | No |
-| PUT | Full replace | Yes | No |
-| DELETE | Remove resource | Yes | No |
+| Method | Purpose            | Idempotent | Safe |
+| ------ | ------------------ | ---------- | ---- |
+| GET    | Retrieve resources | Yes        | Yes  |
+| POST   | Create resource    | No         | No   |
+| PATCH  | Partial update     | No         | No   |
+| PUT    | Full replace       | Yes        | No   |
+| DELETE | Remove resource    | Yes        | No   |
 
 ### 8.2 Common Query Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `limit` | integer | Number of results (max 100) |
-| `offset` | integer | Pagination offset |
-| `sort` | string | Sort field(s), prefix with `-` for desc |
-| `plan_id` | uuid | Filter by plan |
-| `week_number` | integer | Filter by week (1-12) |
-| `due_day` | integer | Filter by day (1-7) |
-| `status` | enum | Filter by status |
-| `priority` | enum | Filter by priority |
+| Parameter     | Type    | Description                             |
+| ------------- | ------- | --------------------------------------- |
+| `limit`       | integer | Number of results (max 100)             |
+| `offset`      | integer | Pagination offset                       |
+| `sort`        | string  | Sort field(s), prefix with `-` for desc |
+| `plan_id`     | uuid    | Filter by plan                          |
+| `week_number` | integer | Filter by week (1-12)                   |
+| `due_day`     | integer | Filter by day (1-7)                     |
+| `status`      | enum    | Filter by status                        |
+| `priority`    | enum    | Filter by priority                      |
 
 ### 8.3 Database Enum Values
 
 **Plan Status:**
+
 - `ready` (default status when plan is created)
 - `active` (only one plan can be active at a time per user)
 - `completed`
 - `archived`
 
 **Goal Category:**
+
 - `work`
 - `finance`
 - `hobby`
@@ -2590,11 +2765,13 @@ The following features are out of scope for MVP but may be considered for future
 - `development`
 
 **Task Priority:**
+
 - `A` (highest)
 - `B`
 - `C` (lowest)
 
 **Task Status:**
+
 - `todo`
 - `in_progress`
 - `completed`
@@ -2602,6 +2779,7 @@ The following features are out of scope for MVP but may be considered for future
 - `postponed`
 
 **Task Type:**
+
 - `weekly_main` (main weekly task)
 - `weekly_sub` (subtask of weekly goal)
 - `ad_hoc` (unlinked task)
@@ -2616,6 +2794,7 @@ The following features are out of scope for MVP but may be considered for future
 ### 8.5 UUID Format
 
 All IDs use UUID v4 format:
+
 ```
 550e8400-e29b-41d4-a716-446655440000
 ```
@@ -2623,6 +2802,7 @@ All IDs use UUID v4 format:
 ### 8.6 Content Type
 
 All requests and responses use:
+
 ```
 Content-Type: application/json
 ```
@@ -2631,10 +2811,8 @@ Content-Type: application/json
 
 ## 9. Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-01-27 | Initial API plan |
-| 1.1 | 2025-10-29 | Added DELETE /api/v1/plans/:id endpoint for hard delete of plans |
-| 1.2 | 2025-01-05 | Added flexible goal-milestone-task relationships:<br>- Added `milestone_id` to weekly_goals (CREATE, UPDATE, GET endpoints)<br>- Added `long_term_goal_id` to tasks (already in examples, now fully documented)<br>- Added filtering by `milestone_id` for weekly_goals<br>- Added filtering by `long_term_goal_id` for tasks<br>- Added GET /api/v1/milestones/:id/weekly-goals endpoint<br>- Added GET /api/v1/milestones/:id/tasks endpoint<br>- Updated business logic to reflect flexible hierarchies<br>- Updated cascade delete behavior documentation<br>- Clarified validation rules for new optional foreign keys |
-
-
+| Version | Date       | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2025-01-27 | Initial API plan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.1     | 2025-10-29 | Added DELETE /api/v1/plans/:id endpoint for hard delete of plans                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.2     | 2025-01-05 | Added flexible goal-milestone-task relationships:<br>- Added `milestone_id` to weekly_goals (CREATE, UPDATE, GET endpoints)<br>- Added `long_term_goal_id` to tasks (already in examples, now fully documented)<br>- Added filtering by `milestone_id` for weekly_goals<br>- Added filtering by `long_term_goal_id` for tasks<br>- Added GET /api/v1/milestones/:id/weekly-goals endpoint<br>- Added GET /api/v1/milestones/:id/tasks endpoint<br>- Updated business logic to reflect flexible hierarchies<br>- Updated cascade delete behavior documentation<br>- Clarified validation rules for new optional foreign keys |

@@ -12,10 +12,10 @@ Ten dokument zawiera szczegółowe instrukcje testowania polityk Row Level Secur
 
 ```sql
 -- Sprawdź status RLS dla wszystkich tabel
-SELECT 
-  tablename, 
+SELECT
+  tablename,
   rowsecurity as rls_enabled
-FROM pg_tables 
+FROM pg_tables
 WHERE schemaname = 'public'
 ORDER BY tablename;
 ```
@@ -26,25 +26,26 @@ ORDER BY tablename;
 
 ```sql
 -- Lista wszystkich polityk RLS
-SELECT 
+SELECT
   schemaname,
   tablename,
   policyname,
   permissive,
   cmd as operation,
-  CASE 
+  CASE
     WHEN cmd = 'SELECT' THEN 'Read'
     WHEN cmd = 'INSERT' THEN 'Create'
     WHEN cmd = 'UPDATE' THEN 'Update'
     WHEN cmd = 'DELETE' THEN 'Delete'
     ELSE cmd
   END as operation_type
-FROM pg_policies 
+FROM pg_policies
 WHERE schemaname = 'public'
 ORDER BY tablename, policyname;
 ```
 
 **Oczekiwany wynik:** Powinno być widocznych 34 polityk:
+
 - `plans`: 4 polityki (SELECT, INSERT, UPDATE, DELETE)
 - `long_term_goals`: 4 polityki
 - `milestones`: 4 polityki
@@ -58,12 +59,12 @@ ORDER BY tablename, policyname;
 
 ```sql
 -- Zlicz polityki dla każdej tabeli
-SELECT 
-  tablename, 
-  COUNT(*) as policy_count 
-FROM pg_policies 
-WHERE schemaname = 'public' 
-GROUP BY tablename 
+SELECT
+  tablename,
+  COUNT(*) as policy_count
+FROM pg_policies
+WHERE schemaname = 'public'
+GROUP BY tablename
 ORDER BY tablename;
 ```
 
@@ -98,13 +99,14 @@ ORDER BY tablename;
 
 ```sql
 -- Jako admin/service_role, pobierz UUID użytkowników
-SELECT id, email 
-FROM auth.users 
+SELECT id, email
+FROM auth.users
 WHERE email IN ('test-user-a@example.com', 'test-user-b@example.com')
 ORDER BY email;
 ```
 
 Zapisz UUID dla dalszych testów:
+
 - `USER_A_UUID`: [uuid użytkownika A]
 - `USER_B_UUID`: [uuid użytkownika B]
 
@@ -113,6 +115,7 @@ Zapisz UUID dla dalszych testów:
 **Cel:** Sprawdzić czy User B nie widzi planerów User A
 
 #### Setup:
+
 ```sql
 -- Zaloguj się jako User A (lub użyj service_role z SET LOCAL)
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -125,6 +128,7 @@ RETURNING id;
 ```
 
 #### Test:
+
 ```sql
 -- Zaloguj się jako User B
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -136,6 +140,7 @@ SELECT * FROM plans WHERE id = 'PLAN_A_ID';
 **Oczekiwany wynik:** Pusty zestaw wyników (0 rows)
 
 #### Weryfikacja:
+
 ```sql
 -- User A powinien widzieć swój planer
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -149,6 +154,7 @@ SELECT * FROM plans WHERE id = 'PLAN_A_ID';
 **Cel:** Sprawdzić czy User B nie widzi celów User A
 
 #### Setup:
+
 ```sql
 -- User A tworzy cel
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -160,6 +166,7 @@ RETURNING id;
 ```
 
 #### Test:
+
 ```sql
 -- User B próbuje odczytać cel User A
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -173,6 +180,7 @@ SELECT * FROM long_term_goals WHERE id = 'GOAL_A_ID';
 **Cel:** Sprawdzić czy User B nie może tworzyć danych w planie User A
 
 #### Test:
+
 ```sql
 -- User B próbuje utworzyć cel w planie User A
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -188,11 +196,12 @@ VALUES ('PLAN_A_ID', 'Malicious Goal', 'Should fail', 0);
 **Cel:** Sprawdzić czy User B nie może aktualizować danych User A
 
 #### Test:
+
 ```sql
 -- User B próbuje zaktualizować planer User A
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
 
-UPDATE plans 
+UPDATE plans
 SET name = 'Hacked Plan'
 WHERE id = 'PLAN_A_ID';
 ```
@@ -200,6 +209,7 @@ WHERE id = 'PLAN_A_ID';
 **Oczekiwany wynik:** 0 rows updated (operacja nie powiedzie się, ale nie zwróci błędu)
 
 #### Weryfikacja:
+
 ```sql
 -- Sprawdź czy nazwa się nie zmieniła
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -213,6 +223,7 @@ SELECT name FROM plans WHERE id = 'PLAN_A_ID';
 **Cel:** Sprawdzić czy User B nie może usuwać danych User A
 
 #### Test:
+
 ```sql
 -- User B próbuje usunąć planer User A
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -223,6 +234,7 @@ DELETE FROM plans WHERE id = 'PLAN_A_ID';
 **Oczekiwany wynik:** 0 rows deleted
 
 #### Weryfikacja:
+
 ```sql
 -- Sprawdź czy planer nadal istnieje
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -236,6 +248,7 @@ SELECT * FROM plans WHERE id = 'PLAN_A_ID';
 **Cel:** Sprawdzić czy polityki działają przez całą hierarchię
 
 #### Setup:
+
 ```sql
 -- User A tworzy pełną hierarchię
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -260,6 +273,7 @@ RETURNING id;
 ```
 
 #### Test:
+
 ```sql
 -- User B próbuje odczytać dane z każdego poziomu hierarchii
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -276,6 +290,7 @@ SELECT * FROM tasks WHERE id = 'TASK_A_ID';
 **Cel:** Sprawdzić izolację metryk użytkowników
 
 #### Setup:
+
 ```sql
 -- User A ma metryki (utworzone automatycznie przez trigger)
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
@@ -283,6 +298,7 @@ SELECT * FROM user_metrics WHERE user_id = 'USER_A_UUID';
 ```
 
 #### Test:
+
 ```sql
 -- User B próbuje odczytać metryki User A
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -296,11 +312,12 @@ SELECT * FROM user_metrics WHERE user_id = 'USER_A_UUID';
 **Cel:** Sprawdzić izolację historii zadań
 
 #### Setup:
+
 ```sql
 -- User A aktualizuje status zadania (trigger utworzy wpis w historii)
 SET LOCAL request.jwt.claims TO '{"sub": "USER_A_UUID"}';
 
-UPDATE tasks 
+UPDATE tasks
 SET status = 'in_progress'
 WHERE id = 'TASK_A_ID';
 
@@ -310,6 +327,7 @@ SELECT * FROM task_history WHERE task_id = 'TASK_A_ID';
 ```
 
 #### Test:
+
 ```sql
 -- User B próbuje odczytać historię zadania User A
 SET LOCAL request.jwt.claims TO '{"sub": "USER_B_UUID"}';
@@ -336,7 +354,8 @@ EXPLAIN ANALYZE
 SELECT * FROM plans WHERE user_id = 'USER_A_UUID';
 ```
 
-**Oczekiwany wynik:** 
+**Oczekiwany wynik:**
+
 - Execution time < 10ms dla małej liczby rekordów
 - Index scan na `user_id`
 
@@ -345,7 +364,7 @@ SELECT * FROM plans WHERE user_id = 'USER_A_UUID';
 ```sql
 -- Query łączący wiele tabel
 EXPLAIN ANALYZE
-SELECT 
+SELECT
   p.name as plan_name,
   g.title as goal_title,
   m.title as milestone_title,
@@ -358,6 +377,7 @@ WHERE p.user_id = 'USER_A_UUID';
 ```
 
 **Oczekiwany wynik:**
+
 - Execution time < 50ms dla średniej liczby rekordów
 - Proper use of indexes
 - RLS policies applied correctly
@@ -365,12 +385,14 @@ WHERE p.user_id = 'USER_A_UUID';
 ### 4.3. Benchmark - Przed vs Po RLS
 
 **Przed włączeniem RLS:**
+
 ```sql
 -- Zapisz baseline (jeśli dostępny)
 -- Execution time: X ms
 ```
 
 **Po włączeniu RLS:**
+
 ```sql
 -- Porównaj z baseline
 -- Overhead powinien być < 10%
@@ -383,6 +405,7 @@ WHERE p.user_id = 'USER_A_UUID';
 ### 5.1. Test przez API Endpoint
 
 #### Test 1: Login i dostęp do danych
+
 ```bash
 # Login jako User A
 curl -X POST http://localhost:4321/api/auth/login \
@@ -399,6 +422,7 @@ curl -X GET http://localhost:4321/api/plans \
 **Oczekiwany wynik:** Zwraca tylko planery User A
 
 #### Test 2: Próba dostępu do cudzych danych
+
 ```bash
 # Login jako User B
 curl -X POST http://localhost:4321/api/auth/login \
@@ -415,6 +439,7 @@ curl -X GET http://localhost:4321/api/plans/PLAN_A_ID \
 ### 5.2. Test przez Frontend
 
 #### Test Manual:
+
 1. Zaloguj się jako User A
 2. Utwórz planer
 3. Wyloguj się
@@ -430,6 +455,7 @@ curl -X GET http://localhost:4321/api/plans/PLAN_A_ID \
 ### 6.1. Sprawdzenie Istniejących Funkcjonalności
 
 **Test Checklist:**
+
 - [ ] Rejestracja nowego użytkownika działa
 - [ ] Logowanie działa
 - [ ] Tworzenie planera działa
@@ -476,12 +502,14 @@ DELETE FROM user_metrics WHERE user_id IN ('USER_A_UUID', 'USER_B_UUID');
 ## 8. Checklist Wdrożenia
 
 ### Pre-Deployment
+
 - [ ] Backup bazy danych wykonany
 - [ ] Migracja przetestowana na staging
 - [ ] Peer review migracji wykonany
 - [ ] Rollback plan przygotowany
 
 ### Deployment
+
 - [ ] Migracja uruchomiona na produkcji
 - [ ] Weryfikacja: RLS włączony na wszystkich tabelach
 - [ ] Weryfikacja: Wszystkie polityki utworzone
@@ -495,6 +523,7 @@ DELETE FROM user_metrics WHERE user_id IN ('USER_A_UUID', 'USER_B_UUID');
 - [ ] Test 8: Task history isolation - PASSED
 
 ### Post-Deployment
+
 - [ ] Monitoring performance przez 24h
 - [ ] Sprawdzenie logów błędów
 - [ ] Weryfikacja metryk aplikacji
@@ -505,17 +534,21 @@ DELETE FROM user_metrics WHERE user_id IN ('USER_A_UUID', 'USER_B_UUID');
 ## 9. Troubleshooting
 
 ### Problem 1: RLS nie jest włączony
+
 **Symptom:** `rowsecurity = false` w pg_tables
 
 **Rozwiązanie:**
+
 ```sql
 ALTER TABLE [table_name] ENABLE ROW LEVEL SECURITY;
 ```
 
 ### Problem 2: Polityki nie działają
+
 **Symptom:** User B widzi dane User A
 
 **Diagnoza:**
+
 ```sql
 -- Sprawdź czy polityki istnieją
 SELECT * FROM pg_policies WHERE tablename = '[table_name]';
@@ -530,27 +563,33 @@ WHERE polname = '[policy_name]';
 **Rozwiązanie:** Upewnij się, że polityki są poprawnie zdefiniowane i używają `auth.uid()`
 
 ### Problem 3: Wolne zapytania po włączeniu RLS
+
 **Symptom:** Znaczny wzrost czasu wykonania zapytań
 
 **Diagnoza:**
+
 ```sql
 EXPLAIN ANALYZE [your_query];
 ```
 
 **Rozwiązanie:**
+
 - Sprawdź czy indeksy są używane
 - Rozważ dodanie indeksów na kolumnach używanych w politykach
 - Optymalizuj polityki (unikaj zbędnych JOINów)
 
 ### Problem 4: Błędy w aplikacji po wdrożeniu
+
 **Symptom:** 500 errors, "permission denied" errors
 
 **Diagnoza:**
+
 - Sprawdź logi aplikacji
 - Sprawdź logi Supabase
 - Zweryfikuj czy `auth.uid()` jest dostępny w kontekście
 
 **Rozwiązanie:**
+
 - Upewnij się, że middleware poprawnie ustawia sesję
 - Sprawdź czy `locals.supabase` jest używany w API endpoints
 - Zweryfikuj konfigurację Supabase client

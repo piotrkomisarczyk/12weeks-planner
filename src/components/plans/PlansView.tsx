@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { PlanCard } from "./PlanCard";
 import { usePlans } from "./hooks/usePlans";
-import { transformPlansToViewModels, type PlanViewModel } from "@/lib/plan-utils";
+import { transformPlansToViewModels } from "@/lib/plan-utils";
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -28,7 +28,9 @@ export function PlansView() {
     isOpen: false,
     title: "",
     description: "",
-    onConfirm: () => {},
+    onConfirm: () => {
+      // Placeholder function, will be replaced when dialog is opened
+    },
   });
 
   // Fetch plans on mount
@@ -68,7 +70,7 @@ export function PlansView() {
         try {
           await activatePlan(id);
           toast.success("Plan activated successfully");
-        } catch (error) {
+        } catch {
           toast.error("Failed to activate plan");
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
@@ -89,7 +91,7 @@ export function PlansView() {
         try {
           await archivePlan(id);
           toast.success("Plan archived successfully");
-        } catch (error) {
+        } catch {
           toast.error("Failed to archive plan");
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
@@ -111,7 +113,7 @@ export function PlansView() {
         try {
           await deletePlan(id);
           toast.success("Plan deleted successfully");
-        } catch (error) {
+        } catch {
           toast.error("Failed to delete plan");
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));

@@ -10,6 +10,7 @@ cat .env | grep SUPABASE
 ```
 
 Powinny być:
+
 ```
 SUPABASE_URL=https://xxxxx.supabase.co
 SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -36,6 +37,7 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Cel:** Sprawdzić czy proces rejestracji działa poprawnie
 
 **Kroki:**
+
 1. Uruchom aplikację: `npm run dev`
 2. Przejdź na: http://localhost:4321/register
 3. Wprowadź dane:
@@ -45,16 +47,19 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 4. Kliknij "Create account"
 
 **Oczekiwany wynik:**
+
 - ✅ Wyświetla się ekran "Check your email"
 - ✅ Email jest widoczny na ekranie
 - ✅ Przycisk "Back to login" przekierowuje na `/login` (NIE na `/plans`)
 
 **Sprawdź w Supabase Dashboard:**
+
 1. Przejdź do: Authentication → Users
 2. Nowy użytkownik powinien być widoczny
 3. Kolumna "Confirmed At" powinna być pusta (null)
 
 **Sprawdź email:**
+
 1. Otwórz skrzynkę email (sprawdź również SPAM)
 2. Email może przyjść po 1-5 minutach
 3. Jeśli nie przychodzi po 10 minutach - zobacz "Troubleshooting" poniżej
@@ -66,6 +71,7 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Cel:** Sprawdzić czy system blokuje logowanie bez weryfikacji
 
 **Kroki:**
+
 1. Przejdź na: http://localhost:4321/login
 2. Wprowadź dane z Test 1:
    - Email: `test+1@gmail.com`
@@ -73,11 +79,13 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 3. Kliknij "Sign in"
 
 **Oczekiwany wynik:**
+
 - ✅ Wyświetla się błąd: "Please verify your email address before logging in"
 - ✅ Użytkownik pozostaje na stronie `/login`
 - ✅ NIE ma przekierowania na `/plans`
 
 **Sprawdź w DevTools:**
+
 1. Otwórz Network tab
 2. Sprawdź response z `/api/auth/login`
 3. Status: `403`
@@ -92,16 +100,19 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Warunek:** Email musi dotrzeć (może zająć do 10 minut)
 
 **Kroki:**
+
 1. Otwórz email weryfikacyjny
 2. Kliknij "Confirm your mail"
 3. Przeglądarka powinna otworzyć aplikację
 
 **Oczekiwany wynik:**
+
 - ✅ Przekierowanie na: `http://localhost:4321/login?verified=true`
 - ✅ Wyświetla się toast: "Email verified successfully! You can now log in."
 - ✅ URL zmienia się na: `http://localhost:4321/login` (bez parametrów)
 
 **Sprawdź w Supabase Dashboard:**
+
 1. Przejdź do: Authentication → Users
 2. Znajdź użytkownika
 3. Kolumna "Confirmed At" powinna mieć datę i czas
@@ -113,12 +124,14 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Cel:** Sprawdzić czy użytkownik może się zalogować po weryfikacji
 
 **Kroki:**
+
 1. Na stronie `/login` wprowadź dane:
    - Email: `test+1@gmail.com`
    - Password: `Test1234`
 2. Kliknij "Sign in"
 
 **Oczekiwany wynik:**
+
 - ✅ Przekierowanie na: `http://localhost:4321/plans`
 - ✅ Użytkownik jest zalogowany
 - ✅ Widoczne jest menu użytkownika (UserMenu)
@@ -130,10 +143,12 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Cel:** Sprawdzić czy link jest jednorazowy
 
 **Kroki:**
+
 1. Wyloguj się
 2. Otwórz ten sam link weryfikacyjny z emaila ponownie
 
 **Oczekiwany wynik:**
+
 - ✅ Przekierowanie na: `http://localhost:4321/login?error=verification_failed`
 - ✅ Wyświetla się błąd: "Email verification failed. Please try again."
 
@@ -144,10 +159,12 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Cel:** Sprawdzić czy middleware chroni strony
 
 **Kroki:**
+
 1. Wyloguj się (jeśli zalogowany)
 2. Spróbuj wejść na: `http://localhost:4321/plans`
 
 **Oczekiwany wynik:**
+
 - ✅ Przekierowanie na: `http://localhost:4321/login`
 
 ---
@@ -157,11 +174,13 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Cel:** Sprawdzić czy zalogowani użytkownicy są przekierowywani
 
 **Kroki:**
+
 1. Zaloguj się
 2. Spróbuj wejść na: `http://localhost:4321/login`
 3. Spróbuj wejść na: `http://localhost:4321/register`
 
 **Oczekiwany wynik:**
+
 - ✅ Przekierowanie na: `http://localhost:4321/plans`
 
 ---
@@ -171,6 +190,7 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Problem: Email nie dociera
 
 **Możliwe przyczyny:**
+
 1. Domyślny provider Supabase ma limit 3-4 emaile/godzinę
 2. Email trafił do spamu
 3. Provider jest zablokowany przez dostawcę email
@@ -178,12 +198,15 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Rozwiązania:**
 
 #### Opcja 1: Sprawdź spam
+
 1. Otwórz folder SPAM
 2. Szukaj emaila od: `noreply@mail.app.supabase.io`
 3. Oznacz jako "Not spam"
 
 #### Opcja 2: Użyj aliasów Gmail
+
 Gmail traktuje `email+cokolwiek@gmail.com` jako ten sam adres:
+
 - `test+1@gmail.com`
 - `test+2@gmail.com`
 - `test+3@gmail.com`
@@ -191,6 +214,7 @@ Gmail traktuje `email+cokolwiek@gmail.com` jako ten sam adres:
 Wszystkie emaile trafią do `test@gmail.com`
 
 #### Opcja 3: Sprawdź logi Supabase
+
 1. Dashboard → Logs → Auth Logs
 2. Szukaj eventów typu:
    - `user.signup` - rejestracja użytkownika
@@ -198,9 +222,11 @@ Wszystkie emaile trafią do `test@gmail.com`
    - `email.failed` - błąd wysyłki
 
 #### Opcja 4: Skonfiguruj SMTP (ZALECANE)
+
 Zobacz: `docs/auth/supabase-email-configuration.md`
 
 Szybka konfiguracja SendGrid:
+
 1. Zarejestruj się: https://sendgrid.com
 2. Utwórz API Key
 3. Supabase Dashboard → Project Settings → Auth → SMTP Settings
@@ -211,6 +237,7 @@ Szybka konfiguracja SendGrid:
    - Password: `<twój_sendgrid_api_key>`
 
 #### Opcja 5: Tymczasowo wyłącz weryfikację (TYLKO DEV!)
+
 1. Dashboard → Project Settings → Auth → Email
 2. Wyłącz "Enable email confirmations"
 3. **PAMIĘTAJ:** Włącz to przed wdrożeniem na produkcję!
@@ -222,6 +249,7 @@ Szybka konfiguracja SendGrid:
 **Przyczyna:** URL callback nie jest w Redirect URLs
 
 **Rozwiązanie:**
+
 1. Dashboard → Authentication → URL Configuration
 2. Dodaj do **Redirect URLs**:
    - `http://localhost:4321/auth/callback` (dev)
@@ -234,6 +262,7 @@ Szybka konfiguracja SendGrid:
 **Przyczyna:** Link weryfikacyjny jest ważny 24 godziny
 
 **Rozwiązanie:**
+
 1. Zaimplementuj funkcję "Resend verification email" (TODO)
 2. Lub: Usuń użytkownika z Dashboard i zarejestruj ponownie
 
@@ -244,11 +273,14 @@ Szybka konfiguracja SendGrid:
 **Przyczyna:** Middleware nie sprawdza `email_confirmed_at`
 
 **Sprawdź:**
+
 1. Otwórz: `src/middleware/index.ts`
 2. Znajdź linię:
+
 ```typescript
 const isEmailVerified = user?.email_confirmed_at !== null;
 ```
+
 3. Sprawdź czy `locals.user` jest ustawiany tylko gdy `isEmailVerified === true`
 
 ---
@@ -258,15 +290,18 @@ const isEmailVerified = user?.email_confirmed_at !== null;
 Po skonfigurowaniu SendGrid/Mailgun:
 
 ### Test 1: Szybkość dostarczenia
+
 1. Zarejestruj nowego użytkownika
 2. Sprawdź czas dostarczenia emaila
 3. **Oczekiwany czas:** < 30 sekund
 
 ### Test 2: Spam score
+
 1. Sprawdź czy email trafia do Inbox (nie Spam)
 2. Sprawdź nagłówki emaila (SPF, DKIM)
 
 ### Test 3: Dostosowany szablon
+
 1. Dashboard → Project Settings → Auth → Email Templates
 2. Edytuj "Confirm signup"
 3. Zarejestruj testowego użytkownika
@@ -293,32 +328,35 @@ Po skonfigurowaniu SendGrid/Mailgun:
 ## Przydatne Komendy
 
 ### Sprawdź logi aplikacji
+
 ```bash
 npm run dev
 # Sprawdź terminal pod kątem błędów
 ```
 
 ### Sprawdź cookies w przeglądarce
+
 ```javascript
 // W DevTools Console:
-document.cookie
+document.cookie;
 ```
 
 ### Wyczyść cookies (wyloguj się)
+
 ```javascript
 // W DevTools Console:
-document.cookie.split(";").forEach(c => {
-  document.cookie = c.replace(/^ +/, "")
-    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+document.cookie.split(";").forEach((c) => {
+  document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
 });
 location.reload();
 ```
 
 ### Sprawdź session w Supabase
+
 ```javascript
 // W DevTools Console (na stronie aplikacji):
-fetch('/api/auth/session')
-  .then(r => r.json())
+fetch("/api/auth/session")
+  .then((r) => r.json())
   .then(console.log);
 ```
 
@@ -333,6 +371,7 @@ Jeśli problemy z emailami nie ustępują:
 3. **Support Email:** support@supabase.io
 
 Przygotuj:
+
 - Project ID
 - Timestamp problemu
 - Logi z Dashboard → Logs

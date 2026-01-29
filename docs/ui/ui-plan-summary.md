@@ -15,6 +15,7 @@
 </decisions>
 
 <matched_recommendations>
+
 1.  Zastosowanie **TanStack Query** do zarządzania stanem serwerowym i **Nano Stores** do stanu aplikacji, co ułatwi synchronizację w architekturze "Astro Island".
 2.  Projektowanie **Desktop First**, ale z użyciem klas responsywnych (np. pełnoekranowe modale/sheety na mobile, wertykalne stosy).
 3.  Wykorzystanie **Skeleton Loading** zamiast spinnerów dla list zadań i celów.
@@ -25,36 +26,40 @@
 8.  Formatowanie tytułów stron HTML (`[Widok] - [Plan]`) dla lepszej orientacji.
 9.  Blokada dat w **Datepickerze** dla kamieni milowych do zakresu dat planera.
 10. Wykorzystanie **Error Boundary** dla komponentów Reactowych.
-</matched_recommendations>
+    </matched_recommendations>
 
 <ui_architecture_planning_summary>
 Pełna architektura UI została zdefiniowana w pliku **`docs/ui/ui-plan.md`**.
 
 ### Główne wymagania i struktura
+
 Aplikacja "12 Weeks Planner" będzie oparta na **Astro 5** (SSR) z interaktywnymi "wyspami" **React 19**. Interfejs użytkownika wykorzystuje bibliotekę **Shadcn/ui** oraz **Tailwind CSS v4**. Projekt jest realizowany w podejściu **Desktop First**, z zachowaniem responsywności (RWD) dla kluczowych widoków. Język interfejsu to angielski (MVP).
 
 ### Kluczowe Widoki i Przepływy
+
 1.  **Lista Planerów (`/plans`)**: Karta planera zawiera status, daty i zwijalną listę celów. Pierwsza karta to przycisk "Create New".
 2.  **Kreator Planera**: Proces krokowy (Stepper): Dane podstawowe -> Cele -> Podsumowanie. Wymusza start w poniedziałek.
 3.  **Dashboard (`/active` lub `/plans/[id]/dashboard`)**:
-    *   Quick Links: Current Week, Today, Weekly Review.
-    *   Goals Overview: Lista celów z paskami postępu.
+    - Quick Links: Current Week, Today, Weekly Review.
+    - Goals Overview: Lista celów z paskami postępu.
 4.  **Hierarchia (`/plans/[id]/hierarchy`)**: Drzewo zadań (Goals + Other Tasks). Elementy zakończone ukryte domyślnie. Brak edycji via Drag-and-Drop w tym widoku. Możliwość pokazania elementów zakończonych (checkbox).
 5.  **Tydzień (`/plans/[id]/week/[nr]`)**: 3 sekcje zadań. Możliwość dodawania, edycji statusów i "odhaczania" zadań.
 6.  **Dzień (`/plans/[id]/week/[nr]/day/[day]`)**: Pasek nawigacji dni. Sekcje priorytetów (Primary, Secondary, Additional).
 7.  **Podsumowanie Tygodnia**: Podział ekranu: Prawa (Formularz pytań + auto-save), Lewa (Cele ze sliderami postępu).
 
 ### Integracja z API i Zarządzanie Stanem
-*   **Pobieranie danych**: Wstępne pobieranie na serwerze (Astro) -> Przekazywanie jako `initialData` do **TanStack Query** (React).
-*   **Mutacje**: Optymistyczne aktualizacje interfejsu (natychmiastowa reakcja UI) z debouncowaniem (500ms dla statusów, 1500ms dla opisów review).
-*   **Drag-and-Drop**: Obsługa sortowania list zadań. Przenoszenie zadań między dniami/tygodniami realizowane przez Modal (nie D&D między widokami).
-*   **Walidacja**: Limity biznesowe (np. max 10 zadań) walidowane po stronie klienta przed wysłaniem żądania.
+
+- **Pobieranie danych**: Wstępne pobieranie na serwerze (Astro) -> Przekazywanie jako `initialData` do **TanStack Query** (React).
+- **Mutacje**: Optymistyczne aktualizacje interfejsu (natychmiastowa reakcja UI) z debouncowaniem (500ms dla statusów, 1500ms dla opisów review).
+- **Drag-and-Drop**: Obsługa sortowania list zadań. Przenoszenie zadań między dniami/tygodniami realizowane przez Modal (nie D&D między widokami).
+- **Walidacja**: Limity biznesowe (np. max 10 zadań) walidowane po stronie klienta przed wysłaniem żądania.
 
 ### UX i Design System
-*   **Ikony**: Lucide React. Specyficzne ikony dla statusów (Gradient dla In Progress).
-*   **Feedback**: Toasty (Sonner) na górze (mobile) lub dole (desktop). Konfetti po osiągnięciu 100% celu (po 2 sekundach).
-*   **Dostępność**: Obsługa klawiatury dla niestandardowych przycisków statusu. Tryb Ciemny (Dark Mode).
-*   **Błędy**: Dedykowane strony 404/500 w stylu aplikacji. Obsługa wygaśnięcia sesji (Modal Re-login).
+
+- **Ikony**: Lucide React. Specyficzne ikony dla statusów (Gradient dla In Progress).
+- **Feedback**: Toasty (Sonner) na górze (mobile) lub dole (desktop). Konfetti po osiągnięciu 100% celu (po 2 sekundach).
+- **Dostępność**: Obsługa klawiatury dla niestandardowych przycisków statusu. Tryb Ciemny (Dark Mode).
+- **Błędy**: Dedykowane strony 404/500 w stylu aplikacji. Obsługa wygaśnięcia sesji (Modal Re-login).
 
 </ui_architecture_planning_summary>
 

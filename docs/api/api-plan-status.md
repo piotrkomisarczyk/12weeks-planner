@@ -3,6 +3,7 @@
 Status aktualnej implementacji endpointów REST API zgodnie z dokumentem `api-plan.md`.
 
 **Legenda:**
+
 - ✅ [x] - Endpoint zaimplementowany
 - ⬜ [ ] - Endpoint niezaimplementowany
 
@@ -15,6 +16,7 @@ Ostatnia aktualizacja: 2025-01-05
 ## 3. API Endpoints
 
 ### 3.1 Authentication
+
 Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - nie wymaga implementacji custom API endpoints.
 
 ---
@@ -317,31 +319,33 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 
 ## Podsumowanie według zasobów
 
-| Zasób | Zaimplementowane | Wszystkie | Procent |
-|-------|------------------|-----------|---------|
-| Plans | 7 | 8 | 87.5% |
-| Goals | 4 | 8 | 50.0% |
-| Milestones | 8 | 8 | 100.0% ✅ |
-| Weekly Goals | 5 | 5 | 100.0% ✅ |
-| Tasks | 7 | 7 | 100.0% ✅ |
-| Task History | 1 | 1 | 100.0% ✅ |
-| Weekly Reviews | 7 | 7 | 100.0% ✅ |
-| User Metrics | 1 | 1 | 100.0% ✅ |
-| Data Export | 1 | 1 | 100.0% ✅ |
-| **RAZEM** | **41** | **46** | **89.1%** |
+| Zasób          | Zaimplementowane | Wszystkie | Procent   |
+| -------------- | ---------------- | --------- | --------- |
+| Plans          | 7                | 8         | 87.5%     |
+| Goals          | 4                | 8         | 50.0%     |
+| Milestones     | 8                | 8         | 100.0% ✅ |
+| Weekly Goals   | 5                | 5         | 100.0% ✅ |
+| Tasks          | 7                | 7         | 100.0% ✅ |
+| Task History   | 1                | 1         | 100.0% ✅ |
+| Weekly Reviews | 7                | 7         | 100.0% ✅ |
+| User Metrics   | 1                | 1         | 100.0% ✅ |
+| Data Export    | 1                | 1         | 100.0% ✅ |
+| **RAZEM**      | **41**           | **46**    | **89.1%** |
 
-*(Uwaga: Authentication nie jest liczone, bo jest obsługiwane przez Supabase Auth SDK)*
+_(Uwaga: Authentication nie jest liczone, bo jest obsługiwane przez Supabase Auth SDK)_
 
 ---
 
 ## Priorytety implementacji
 
 ### Faza 1: Core Planning ✅ **ZAKOŃCZONA PRAWIE W PEŁNI**
+
 - [x] Plans - podstawowe operacje (GET, POST, PATCH, Archive) ✅
 - [x] Plans - DELETE endpoint (hard delete) ✅
 - [ ] Plans - Dashboard endpoint (agregowane dane - do późniejszej implementacji)
 
 ### Faza 2: Goals & Milestones ⚠️ **CZĘŚCIOWO ZAKOŃCZONA**
+
 - [x] Goals - POST (Create) ✅
 - [x] Goals - PATCH (Update) ✅
 - [x] Goals - DELETE ✅
@@ -356,11 +360,13 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 - [x] Milestones - GET Tasks by Milestone ✅ **NOWE 2025-01-05**
 
 ### Faza 3: Weekly Planning ✅ **ZAKOŃCZONA**
+
 - [x] Weekly Goals - wszystkie operacje CRUD ✅
 - [x] Tasks - wszystkie operacje CRUD + Copy ✅
 - [x] Task History - odczyt ✅ **ZAIMPLEMENTOWANE (2025-01-05)**
 
 ### Faza 4: Reviews & Analytics ✅ **ZAKOŃCZONA**
+
 - [x] Weekly Reviews - wszystkie operacje CRUD + Complete ✅
 - [x] User Metrics - odczyt ✅ **ZAIMPLEMENTOWANE (2025-01-05)**
 - [x] Data Export ✅ **ZAIMPLEMENTOWANE (2025-01-05)**
@@ -370,6 +376,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 ## Uwagi implementacyjne
 
 ### Co działa dobrze w aktualnej implementacji:
+
 1. ✅ **Konsystentna architektura** - wszystkie endpointy używają tego samego wzorca (Validation → Service → Endpoint)
 2. ✅ **Walidacja wielopoziomowa** - Zod schemas dla danych wejściowych + weryfikacja biznesowa w service
 3. ✅ **Szczegółowa obsługa błędów** - różnicowanie błędów walidacji (400), not found (404), i wewnętrznych (500)
@@ -381,6 +388,7 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 ### Zaimplementowane komponenty dla Goals:
 
 #### Service Layer (`src/lib/services/goal.service.ts`):
+
 - ✅ `createGoal()` - tworzenie celu z weryfikacją własności planera i limitem 5 celów
 - ✅ `getGoalById()` - pobieranie celu z weryfikacją własności przez JOIN
 - ✅ `getGoalsByPlanId()` - pobieranie wszystkich celów dla planera
@@ -388,12 +396,14 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 - ✅ `deleteGoal()` - usuwanie z cascade do milestones
 
 #### Validation Layer (`src/lib/validation/goal.validation.ts`):
+
 - ✅ `CreateGoalBodySchema` - walidacja dla POST /api/v1/goals
 - ✅ `UpdateGoalBodySchema` - walidacja dla PATCH /api/v1/goals/:id
 - ✅ `GoalIdParamsSchema` - walidacja UUID w URL params
 - ✅ `validateUpdateGoalCommand()` - helper sprawdzający co najmniej jedno pole w update
 
 #### Endpoints:
+
 - ✅ POST /api/v1/goals - tworzenie nowego celu
 - ✅ PATCH /api/v1/goals/:id - aktualizacja istniejącego celu
 - ✅ DELETE /api/v1/goals/:id - usuwanie celu
@@ -402,29 +412,31 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 ### Co należy zaimplementować:
 
 #### Priorytet WYSOKI (podstawowa funkcjonalność):
+
 1. ⏳ **GET /api/v1/goals** - lista celów z filtrowaniem po plan_id
    - Service method już istnieje (`getGoalsByPlanId`)
    - Wymaga: endpoint handler + walidacja query params
-   
 2. ⏳ **GET /api/v1/goals/:id** - pojedynczy cel z milestones
    - Service method już istnieje (`getGoalById`)
    - Wymaga: endpoint handler + query dla milestones
-   
 3. ⏳ **Milestones CRUD** - wszystkie operacje dla milestones
    - Analogicznie jak dla Goals
    - 6 endpointów do zaimplementowania
 
 #### Priorytet ŚREDNI:
+
 4. ⬜ **Weekly Goals** - operacje CRUD dla celów tygodniowych
 5. ⬜ **Tasks** - operacje CRUD dla zadań
 
 #### Priorytet NISKI (nice to have):
+
 6. ✅ **DELETE /api/v1/plans/:id** - hard delete planera ✅ **ZAIMPLEMENTOWANE**
 7. ⬜ **GET /api/v1/plans/:id/dashboard** - zagregowane dane
 
 ### Uwagi techniczne:
 
 #### Wzorzec implementacji (sprawdzony i działający):
+
 ```
 1. Validation Layer (Zod schema)
    ↓
@@ -434,17 +446,20 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 ```
 
 #### Bezpieczeństwo:
+
 - ✅ Wszystkie operacje weryfikują własność zasobów przez JOIN z tabelą `plans`
 - ✅ UUID validation przed każdym query
 - ✅ Strict mode w Zod - odrzucanie nieznanych pól
 - ✅ Prepared statements przez Supabase Client (brak SQL injection)
 
 #### Database:
+
 - ✅ Triggers działają poprawnie (max 5 goals, update timestamps)
 - ✅ CASCADE DELETE działa poprawnie (goals → milestones)
 - ✅ SET NULL działa poprawnie (goals → weekly_goals)
 
 ### Kolejne kroki (rekomendacja):
+
 1. ~~**Implementacja GET /api/v1/goals**~~ - ❌ Brak w implementacji (nie jest priorytetem - GET by Plan ID wystarczające)
 2. ~~**Implementacja GET /api/v1/goals/:id**~~ - ❌ Brak w implementacji (nie jest priorytetem - GET by Plan ID zwraca pełne dane)
 3. ~~**Implementacja Milestones CRUD**~~ - ✅ **ZAKOŃCZONE**
@@ -467,9 +482,11 @@ Authentication jest obsługiwane przez Supabase Auth SDK po stronie klienta - ni
 ### Pliki utworzone/zmodyfikowane:
 
 #### 1. Service Layer
+
 **Plik:** `src/lib/services/goal.service.ts` (288 linii)
 
 Klasa `GoalService` zawiera 5 metod publicznych:
+
 - `createGoal(userId, data)` - weryfikacja planera, insert z constraint checking
 - `getGoalById(goalId, userId)` - JOIN z plans dla weryfikacji własności
 - `getGoalsByPlanId(planId, userId)` - lista celów dla planera, sortowanie po position
@@ -477,39 +494,47 @@ Klasa `GoalService` zawiera 5 metod publicznych:
 - `deleteGoal(goalId, userId)` - usuwanie z cascade
 
 **Kluczowe cechy:**
+
 - Wszystkie metody przyjmują `userId` dla weryfikacji bezpieczeństwa
 - Szczegółowe JSDoc z przykładami użycia
 - Error handling z opisowymi komunikatami
 - Wykorzystanie `maybeSingle()` dla queries mogących zwrócić null
 
 #### 2. Validation Layer
+
 **Plik:** `src/lib/validation/goal.validation.ts` (146 linii)
 
 Zawiera 4 główne schematy Zod:
+
 - `CreateGoalBodySchema` - walidacja POST body (66 linii)
 - `UpdateGoalBodySchema` - walidacja PATCH body (34 linie)
 - `GoalIdParamsSchema` - walidacja UUID params (6 linii)
 - `validateUpdateGoalCommand()` - helper dla PATCH (10 linii)
 
 **Kluczowe cechy:**
+
 - Strict mode dla UpdateGoalBodySchema (odrzuca nieznane pola)
 - Custom error messages dla każdej walidacji
 - Transform functions dla nullable fields
 - Validation "at least one field" dla updates
 
 #### 3. API Endpoints
+
 **Plik:** `src/pages/api/v1/goals/index.ts` (153 linie)
+
 - POST /api/v1/goals
 - Obsługa: Invalid JSON, Validation errors, Plan not found, Max 6 goals constraint
 - Response: 201 Created lub błędy 400/404/500
 
 **Plik:** `src/pages/api/v1/goals/[id].ts` (256 linii)
+
 - PATCH /api/v1/goals/:id (164 linie)
 - DELETE /api/v1/goals/:id (92 linie)
 - Obsługa: UUID validation, Empty body, Not found, Database errors
 - Response: 200 OK lub błędy 400/404/500
 
 **Plik:** `src/pages/api/v1/plans/[planId]/goals.ts` (76 linii)
+
 - GET /api/v1/plans/:planId/goals
 - Obsługa: Plan verification, Goal listing
 - Response: 200 OK z listą celów lub błędy 400/404/500
@@ -517,24 +542,28 @@ Zawiera 4 główne schematy Zod:
 ### Testy HTTP:
 
 **Plik:** `api-tests/post-goals-tests.http` (361 linii)
+
 - 20+ scenariuszy testowych dla POST /api/v1/goals
 - Testy pozytywne: minimal data, all fields, different categories
 - Testy negatywne: missing fields, invalid values, constraints
 - Test max 5 goals constraint
 
 **Plik:** `api-tests/patch-delete-goals-tests.http` (442 linie)
+
 - 30+ scenariuszy testowych dla PATCH i DELETE
 - PATCH: single field, multiple fields, nullable fields, validation errors
 - DELETE: success, not found, cascade verification
 - Edge cases: empty body, unknown fields, invalid UUIDs
 
 **Plik:** `api-tests/get-goals-tests.http` (348 linii)
+
 - Testy dla GET /api/v1/plans/:planId/goals
 - Scenariusze: valid plan, empty plan, invalid UUID, not found
 
 ### Statystyki implementacji:
 
 **Łączna liczba linii kodu:**
+
 - Service: 288 linii
 - Validation: 146 linii
 - Endpoints: 485 linii (153 + 256 + 76)
@@ -542,6 +571,7 @@ Zawiera 4 główne schematy Zod:
 - **RAZEM: ~2,070 linii kodu i testów**
 
 **Czas implementacji (szacowany):**
+
 - Service layer: 3-4h
 - Validation layer: 1-2h
 - Endpoints: 3-4h
@@ -551,28 +581,34 @@ Zawiera 4 główne schematy Zod:
 ### Decyzje architektoniczne:
 
 #### 1. Weryfikacja własności przez JOIN
+
 **Decyzja:** Używać JOIN z tabelą `plans` zamiast osobnego query.
 
 **Uzasadnienie:**
+
 - Atomic operation - jedna transakcja
 - Lepsza wydajność niż 2 zapytania
 - Wykorzystanie indeksów bazodanowych
 
 **Implementacja:**
+
 ```typescript
 .select('*, plans!inner(user_id)')
 .eq('plans.user_id', userId)
 ```
 
 #### 2. Partial updates w PATCH
+
 **Decyzja:** Konstruować obiekt update tylko z podanymi polami.
 
 **Uzasadnienie:**
+
 - Zgodność z semantyką HTTP PATCH
 - Mniejsze zapytania do bazy
 - Bezpieczniejsze (nie można przypadkowo wyzerować pól)
 
 **Implementacja:**
+
 ```typescript
 const updateData = {};
 if (data.title !== undefined) updateData.title = data.title;
@@ -580,17 +616,21 @@ if (data.title !== undefined) updateData.title = data.title;
 ```
 
 #### 3. Walidacja "co najmniej jedno pole" dla PATCH
+
 **Decyzja:** Wymagać co najmniej jednego pola w PATCH request.
 
 **Uzasadnienie:**
+
 - Zapobiega pustym requestom
 - Jasny feedback dla klienta
 - Zgodność z best practices REST API
 
 #### 4. Nie rozróżnianie "not found" vs "unauthorized"
+
 **Decyzja:** Zwracać 404 zarówno gdy zasób nie istnieje jak i gdy należy do innego użytkownika.
 
 **Uzasadnienie:**
+
 - Bezpieczeństwo - nie ujawniamy istnienia zasobów innych użytkowników
 - Zapobiega information disclosure
 - Zgodność z OWASP recommendations
@@ -598,18 +638,21 @@ if (data.title !== undefined) updateData.title = data.title;
 ### Performance considerations:
 
 #### Query optimization:
+
 - Wykorzystanie istniejących indeksów:
   - `idx_long_term_goals_plan_id` - dla JOIN i filtering
   - Primary key `id` - dla lookup by ID
   - `idx_plans_user_id` - dla user verification
 
 #### Expected latencies (localhost):
+
 - POST /api/v1/goals: 20-50ms
 - PATCH /api/v1/goals/:id: 15-40ms
 - DELETE /api/v1/goals/:id: 15-35ms
 - GET /api/v1/plans/:planId/goals: 10-30ms
 
 #### Database operations count:
+
 - POST: 2 queries (verify plan + insert)
 - PATCH: 2-3 queries (verify ownership + update + select)
 - DELETE: 2 queries (verify ownership + delete with cascade)
@@ -618,6 +661,7 @@ if (data.title !== undefined) updateData.title = data.title;
 ### Lessons learned:
 
 #### Co sprawdziło się dobrze:
+
 1. **Zod strict mode** - automatycznie odrzuca nieznane pola
 2. **JSDoc examples** - bardzo pomocne dla innych developerów
 3. **Separation of concerns** - łatwe testowanie i maintenance
@@ -625,6 +669,7 @@ if (data.title !== undefined) updateData.title = data.title;
 5. **Plany implementacji** - szczegółowe plany znacznie przyspieszyły rozwój
 
 #### Co można ulepszyć w przyszłości:
+
 1. **Automated tests** - obecnie tylko manualne testy HTTP
 2. **Transaction wrapping** - niektóre operacje mogą wymagać explicit transactions
 3. **Caching** - rozważyć cache dla często czytanych danych
@@ -650,6 +695,7 @@ if (data.title !== undefined) updateData.title = data.title;
 ### 📊 Statystyki implementacji
 
 **Zaimplementowane endpointy:**
+
 - Plans: 7/8 (87.5%) - pozostał tylko Dashboard endpoint
 - Goals: 6/8 (75.0%) - brakuje 2 opcjonalnych GET endpoints
 - Milestones: 8/8 (100%) ✅ **UKOŃCZONE 2025-01-05**
@@ -661,12 +707,14 @@ if (data.title !== undefined) updateData.title = data.title;
 - Data Export: 1/1 (100%) ✅
 
 **Pozostałe do implementacji:**
+
 - Plans Dashboard: 1 endpoint (agregowane dane)
 - Goals: 2 opcjonalne endpointy (GET list, GET by ID)
 
 ### 🏗️ Jakość implementacji
 
 Wszystkie zaimplementowane endpointy posiadają:
+
 - ✅ Walidację Zod na wejściu
 - ✅ Service layer z business logic
 - ✅ Szczegółową obsługę błędów (400/404/500)
@@ -678,11 +726,13 @@ Wszystkie zaimplementowane endpointy posiadają:
 ### 📝 Uwagi architektoniczne
 
 **Decyzje implementacyjne:**
+
 1. **GET /api/v1/goals** nie zaimplementowano - zastąpiony przez GET /api/v1/plans/:planId/goals (lepszy routing)
 2. **GET /api/v1/goals/:id** nie zaimplementowano - nie jest priorytetowe dla MVP (GET by Plan wystarczające)
 3. **Task History** zaimplementowane jako część GET /api/v1/tasks/:id (nested data)
 
 **Konsekwencja:**
+
 - API jest bardziej REST-ful (resource hierarchy: plans → goals)
 - Mniejsza liczba endpointów do utrzymania
 - Lepsza wydajność (mniej round-trips dla powiązanych danych)
@@ -690,32 +740,32 @@ Wszystkie zaimplementowane endpointy posiadają:
 ### 🎯 Następne kroki
 
 **Priorytet WYSOKI (MVP completion):**
+
 1. ~~Weekly Reviews (7 endpointów)~~ - ✅ **ZAKOŃCZONE!**
 2. Task History GET endpoint - ⚠️ **Już zaimplementowane** jako część GET /api/v1/tasks/:id
 
-**Priorytet ŚREDNI:**
-3. User Metrics - 1-2h pracy (odczyt metryk użytkownika)
-4. Plans Dashboard - agregowane dane (2-3h) - nice to have
+**Priorytet ŚREDNI:** 3. User Metrics - 1-2h pracy (odczyt metryk użytkownika) 4. Plans Dashboard - agregowane dane (2-3h) - nice to have
 
-**Priorytet NISKI:**
-5. Data Export - GDPR compliance (2-3h)
-6. Goals GET endpoints (opcjonalne - funkcjonalność już pokryta przez GET /api/v1/plans/:planId/goals)
+**Priorytet NISKI:** 5. Data Export - GDPR compliance (2-3h) 6. Goals GET endpoints (opcjonalne - funkcjonalność już pokryta przez GET /api/v1/plans/:planId/goals)
 
 ### 🔍 Znalezione pliki implementacji
 
 **Service Layer:**
+
 - `src/lib/services/milestone.service.ts` - MilestoneService
 - `src/lib/services/weekly-goal.service.ts` - WeeklyGoalService
 - `src/lib/services/task.service.ts` - TaskService (459 linii!)
 - `src/lib/services/weekly-review.service.ts` - WeeklyReviewService **NOWE!**
 
 **Validation Layer:**
+
 - `src/lib/validation/milestone.validation.ts`
 - `src/lib/validation/weekly-goal.validation.ts`
 - `src/lib/validation/task.validation.ts` (251 linii!)
 - `src/lib/validation/weekly-review.validation.ts` (192 linie!) **NOWE!**
 
 **Endpoints:**
+
 - `src/pages/api/v1/milestones.ts` + `milestones/[id].ts`
 - `src/pages/api/v1/goals/[goalId]/milestones.ts`
 - `src/pages/api/v1/weekly-goals/index.ts` + `weekly-goals/[id].ts`
@@ -723,6 +773,7 @@ Wszystkie zaimplementowane endpointy posiadają:
 - `src/pages/api/v1/weekly-reviews/index.ts` + `weekly-reviews/[id].ts` + `weekly-reviews/week/[weekNumber].ts` + `weekly-reviews/[id]/complete.ts` **NOWE!**
 
 **Tests:**
+
 - `api-tests/milestones-tests.http`
 - `api-tests/weekly-goals-tests.http`
 - `api-tests/tasks-tests.http` (1186 linii testów!)
@@ -735,9 +786,11 @@ Wszystkie zaimplementowane endpointy posiadają:
 ### Pliki utworzone:
 
 #### 1. Service Layer
+
 **Plik:** `src/lib/services/weekly-review.service.ts` (390 linii)
 
 Klasa `WeeklyReviewService` zawiera 7 metod publicznych:
+
 - `createWeeklyReview(userId, data)` - weryfikacja planera, insert z unique constraint na plan_id + week_number
 - `getWeeklyReviewById(id, userId)` - JOIN z plans dla weryfikacji własności
 - `getWeeklyReviewByWeek(planId, weekNumber, userId)` - pobieranie review dla konkretnego tygodnia
@@ -747,6 +800,7 @@ Klasa `WeeklyReviewService` zawiera 7 metod publicznych:
 - `deleteWeeklyReview(id, userId)` - usuwanie z weryfikacją własności
 
 **Kluczowe cechy:**
+
 - Wszystkie metody przyjmują `userId` dla weryfikacji bezpieczeństwa
 - Auto-save support - nullable pola pozwalają na częściowe zapisy
 - Szczegółowe JSDoc z przykładami użycia
@@ -754,9 +808,11 @@ Klasa `WeeklyReviewService` zawiera 7 metod publicznych:
 - Wykorzystanie `maybeSingle()` dla queries mogących zwrócić null
 
 #### 2. Validation Layer
+
 **Plik:** `src/lib/validation/weekly-review.validation.ts` (191 linii)
 
 Zawiera 5 głównych schematów Zod:
+
 - `CreateWeeklyReviewBodySchema` - walidacja POST body (48 linii)
 - `UpdateWeeklyReviewBodySchema` - walidacja PATCH body (37 linii)
 - `WeeklyReviewListQuerySchema` - walidacja GET query params (43 linie)
@@ -764,6 +820,7 @@ Zawiera 5 głównych schematów Zod:
 - `validateUpdateWeeklyReviewCommand()` - helper dla PATCH (14 linii)
 
 **Kluczowe cechy:**
+
 - Strict mode dla UpdateWeeklyReviewBodySchema (odrzuca nieznane pola)
 - Nullable fields dla auto-save (what_worked, what_did_not_work, what_to_improve)
 - Transform functions dla string → number/boolean conversions
@@ -772,13 +829,16 @@ Zawiera 5 głównych schematów Zod:
 - Boolean parsing dla is_completed query param
 
 #### 3. API Endpoints
+
 **Plik:** `src/pages/api/v1/weekly-reviews/index.ts` (273 linie)
+
 - GET /api/v1/weekly-reviews (List with filters)
 - POST /api/v1/weekly-reviews (Create with auto-save)
 - Obsługa: Query params validation, Plan verification, Conflict (409) dla duplikatów
 - Response: 200 OK (GET), 201 Created (POST), 400/404/409/500
 
 **Plik:** `src/pages/api/v1/weekly-reviews/[id].ts` (370 linii)
+
 - GET /api/v1/weekly-reviews/:id (Get by ID)
 - PATCH /api/v1/weekly-reviews/:id (Update with auto-save)
 - DELETE /api/v1/weekly-reviews/:id (Delete)
@@ -786,11 +846,13 @@ Zawiera 5 głównych schematów Zod:
 - Response: 200 OK lub błędy 400/404/500
 
 **Plik:** `src/pages/api/v1/weekly-reviews/week/[weekNumber].ts` (190 linii)
+
 - GET /api/v1/weekly-reviews/week/:weekNumber (Get by week for plan)
 - Obsługa: Week number validation (1-12), Plan verification
 - Response: 200 OK z review lub 404 Not Found
 
 **Plik:** `src/pages/api/v1/weekly-reviews/[id]/complete.ts` (129 linii)
+
 - POST /api/v1/weekly-reviews/:id/complete (Mark as complete)
 - Obsługa: UUID validation, ownership verification
 - Response: 200 OK z updated review lub błędy 400/404/500
@@ -798,6 +860,7 @@ Zawiera 5 głównych schematów Zod:
 ### Testy HTTP:
 
 **Plik:** `api-tests/weekly-reviews-tests.http` (606 linii)
+
 - 50+ scenariuszy testowych dla wszystkich endpointów
 - **GET /api/v1/weekly-reviews**: basic list, filtering (week, completed), pagination
 - **GET by ID i by Week**: valid requests, not found scenarios
@@ -810,6 +873,7 @@ Zawiera 5 głównych schematów Zod:
 ### Statystyki implementacji:
 
 **Łączna liczba linii kodu:**
+
 - Service: 390 linii
 - Validation: 191 linii
 - Endpoints: ~862 linie (273 + 370 + 190 + 129)
@@ -817,6 +881,7 @@ Zawiera 5 głównych schematów Zod:
 - **RAZEM: ~2,049 linii kodu i testów**
 
 **Czas implementacji (szacowany na podstawie complexity):**
+
 - Service layer: 4-5h (7 metod z business logic)
 - Validation layer: 1.5-2h (5 schematów)
 - Endpoints: 4-5h (4 pliki, różne scenariusze)
@@ -826,40 +891,49 @@ Zawiera 5 głównych schematów Zod:
 ### Decyzje architektoniczne:
 
 #### 1. Auto-save support
+
 **Decyzja:** Wszystkie pola tekstowe są nullable, PATCH nie wymaga żadnego pola.
 
 **Uzasadnienie:**
+
 - Użytkownik może zapisywać review częściowo podczas wypełniania
 - Frontend może wysyłać update po każdej zmianie pola
 - Lepsza UX - nie traci się danych przy przerwie w pracy
 
 **Implementacja:**
+
 ```typescript
-what_worked: z.string().nullable().optional()
-what_did_not_work: z.string().nullable().optional()
-what_to_improve: z.string().nullable().optional()
+what_worked: z.string().nullable().optional();
+what_did_not_work: z.string().nullable().optional();
+what_to_improve: z.string().nullable().optional();
 ```
 
 #### 2. Unique constraint na plan_id + week_number
+
 **Decyzja:** Jeden review na tydzień na plan (database constraint).
 
 **Uzasadnienie:**
+
 - Zapobiega duplikatom
 - Jasna semantyka - jeden review = jeden tydzień
 - Conflict (409) response informuje frontend o duplikacie
 
 #### 3. Osobny endpoint dla mark as complete
+
 **Decyzja:** POST /api/v1/weekly-reviews/:id/complete zamiast PATCH.
 
 **Uzasadnienie:**
+
 - Semantyka akcji - "complete" to operacja, nie edycja pola
 - Jasny intent w API design
 - Możliwość dodania dodatkowej logiki w przyszłości (np. walidacja wypełnienia wszystkich pól)
 
 #### 4. Get by Week endpoint
+
 **Decyzja:** Osobny endpoint GET /api/v1/weekly-reviews/week/:weekNumber.
 
 **Uzasadnienie:**
+
 - Wygodniejszy dla frontend (częsty use case - "pokaż review dla bieżącego tygodnia")
 - Lepszy routing - RESTful resource hierarchy
 - Czytelniejszy kod vs filtering w GET /api/v1/weekly-reviews?week_number=X
@@ -867,6 +941,7 @@ what_to_improve: z.string().nullable().optional()
 ### Performance considerations:
 
 #### Query optimization:
+
 - Wykorzystanie istniejących indeksów:
   - `idx_weekly_reviews_plan_id` - dla JOIN i filtering
   - Primary key `id` - dla lookup by ID
@@ -874,6 +949,7 @@ what_to_improve: z.string().nullable().optional()
   - Unique constraint na (plan_id, week_number) - dla conflict detection
 
 #### Expected latencies (localhost):
+
 - POST /api/v1/weekly-reviews: 20-60ms
 - PATCH /api/v1/weekly-reviews/:id: 15-45ms
 - DELETE /api/v1/weekly-reviews/:id: 15-40ms
@@ -883,6 +959,7 @@ what_to_improve: z.string().nullable().optional()
 - POST /api/v1/weekly-reviews/:id/complete: 20-50ms
 
 #### Database operations count:
+
 - POST: 2 queries (verify plan + insert)
 - PATCH: 2-3 queries (verify ownership + update + select)
 - DELETE: 2 queries (verify ownership + delete)
@@ -902,12 +979,14 @@ what_to_improve: z.string().nullable().optional()
 **Endpoint:** GET /api/v1/tasks/:taskId/history
 
 **Kluczowe cechy:**
+
 - Weryfikacja własności zadania poprzez plan (ownership verification)
 - Wykorzystanie `TaskService.getTaskHistory()`
 - Walidacja UUID w path parameters
 - Historia jest automatycznie tworzona przez database trigger
 
 **Response format:**
+
 ```json
 {
   "data": [
@@ -929,12 +1008,14 @@ what_to_improve: z.string().nullable().optional()
 **Endpoint:** GET /api/v1/users/metrics
 
 **Kluczowe cechy:**
+
 - Wykorzystanie `UserService.getUserMetrics()`
 - Metryki aktualizowane automatycznie przez database triggers
 - Zwraca 404 dla nowych użytkowników bez metryki
 - Read-only endpoint (dane aktualizowane tylko przez triggery)
 
 **Response format:**
+
 ```json
 {
   "data": {
@@ -957,6 +1038,7 @@ what_to_improve: z.string().nullable().optional()
 **Endpoint:** GET /api/v1/export
 
 **Kluczowe cechy:**
+
 - GDPR compliance - eksportuje wszystkie dane użytkownika
 - Wykorzystanie `ExportService.exportUserData()`
 - Wykonuje multiple queries in parallel dla wydajności
@@ -964,6 +1046,7 @@ what_to_improve: z.string().nullable().optional()
 - Format: `user-data-export-{userId}-{timestamp}.json`
 
 **Eksportowane dane:**
+
 - Plans
 - Long-term goals
 - Milestones
@@ -977,6 +1060,7 @@ what_to_improve: z.string().nullable().optional()
 Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbiorami danych. W produkcji zalecane jest rate limiting (max 1 request per 5 minutes per user).
 
 **Response format:**
+
 ```json
 {
   "user_id": "uuid",
@@ -995,12 +1079,14 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 ### Statystyki implementacji:
 
 **Łączna liczba linii kodu:**
+
 - Task History endpoint: 131 linii
 - User Metrics endpoint: 94 linie
 - Data Export endpoint: 95 linii
 - **Endpoints RAZEM: 320 linii kodu**
 
 **Service layers:**
+
 - `ExportService` - 124 linie (cały nowy serwis)
 - `UserService` - 50 linii (cały nowy serwis)
 - `TaskService.getTaskHistory()` - ~25 linii (nowa metoda w istniejącym serwisie)
@@ -1010,6 +1096,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 
 **Testy HTTP:**
 **Plik:** `api-tests/others-tests.http` (210 linii)
+
 - Task History tests: 6 test cases
 - User Metrics tests: ~8 test cases
 - Data Export tests: ~10 test cases
@@ -1017,6 +1104,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - **RAZEM: ~30 test cases**
 
 **Czas implementacji (szacowany):**
+
 - Task History: 1-1.5h (endpoint + service)
 - User Metrics: 1-1.5h (endpoint + service)
 - Data Export: 2-3h (endpoint + service - najbardziej złożony)
@@ -1026,34 +1114,42 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 ### Decyzje architektoniczne:
 
 #### 1. Task History - Osobny endpoint
+
 **Decyzja:** Utworzenie osobnego endpointu GET /api/v1/tasks/:taskId/history zamiast tylko nested data.
 
 **Uzasadnienie:**
+
 - Lepszy separation of concerns - historia jako osobny zasób
 - Umożliwia filtrowanie i paginację w przyszłości
 - Historia może być obszerna dla długo żyjących zadań
 - Zgodność z REST principles (sub-resource)
 
 #### 2. User Metrics - Read-only
+
 **Decyzja:** Brak endpointów POST/PATCH/DELETE dla metryk.
 
 **Uzasadnienie:**
+
 - Metryki są obliczane automatycznie przez database triggers
 - Zapobiega manipulacji metrykami przez użytkownika
 - Single source of truth - database triggers
 
 #### 3. Data Export - Parallel queries
+
 **Decyzja:** Wykonanie wszystkich zapytań równolegle (Promise.all).
 
 **Uzasadnienie:**
+
 - Znacznie lepsza wydajność (vs sequential queries)
 - Zapytania są niezależne od siebie
 - Timeout handling jest łatwiejszy
 
 #### 4. Data Export - No pagination
+
 **Decyzja:** Zwracanie wszystkich danych w jednym response (brak paginacji).
 
 **Uzasadnienie:**
+
 - GDPR wymaga kompletnego exportu
 - Endpoint używany rzadko (nie performance-critical)
 - Prostszy kod - brak logiki paginacji
@@ -1064,6 +1160,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 ## Changelog
 
 ### 2025-01-05 🎉 **MAJOR UPDATE - Core API Complete!**
+
 - ✅ **Task History endpoint** - GET /api/v1/tasks/:taskId/history
   - Plik: `src/pages/api/v1/tasks/[taskId]/history.ts`
   - Service: `TaskService.getTaskHistory()`
@@ -1085,6 +1182,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - 📝 **Uwaga**: Postęp procentowy spadł z powodu dodania nowych endpointów w API plan v1.2
 
 ### 2025-12-15 🎉 **MAJOR UPDATE - Weekly Reviews Complete!**
+
 - ✅ **Weryfikacja pełnej implementacji Weekly Reviews** - odkryto 7 nowych endpointów!
 - ✅ **Weekly Reviews CRUD** - wszystkie 7 endpointów w pełni zaimplementowane:
   - GET /api/v1/weekly-reviews (List with filters: plan_id, week_number, is_completed)
@@ -1103,6 +1201,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - 📝 **Uwaga**: Task History jest zwracana jako część GET /api/v1/tasks/:id
 
 ### 2025-11-28 🎉 **MAJOR UPDATE**
+
 - ✅ **Weryfikacja pełnej implementacji API** - przeanalizowano wszystkie endpointy
 - ✅ **Milestones CRUD** - wszystkie 6 endpointów w pełni zaimplementowane:
   - GET /api/v1/milestones (List with filters)
@@ -1132,6 +1231,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - 🎯 **Faza 3 (Weekly Planning) zakończona!**
 
 ### 2025-11-10
+
 - ✅ Potwierdzono implementację DELETE /api/v1/plans/:id (Hard Delete Plan)
 - ✅ Endpoint zaimplementowany w pliku `src/pages/api/v1/plans/[id].ts` (linie 227-305)
 - ✅ Service method `PlanService.deletePlan()` dostępny
@@ -1139,6 +1239,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - 📊 Plans: 7/8 endpointów (87.5%) - prawie pełna implementacja!
 
 ### 2025-11-01
+
 - ✅ Zaimplementowano POST /api/v1/goals (Create Goal)
 - ✅ Zaimplementowano PATCH /api/v1/goals/:id (Update Goal)
 - ✅ Zaimplementowano DELETE /api/v1/goals/:id (Delete Goal)
@@ -1149,6 +1250,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - 📊 Postęp: 10/42 endpointów (23.8%)
 
 ### 2025-10-29
+
 - ✅ Zaimplementowano podstawowe endpointy Plans (6/8)
 - 📊 Postęp: 6/42 endpointów (14.3%)
 
@@ -1161,6 +1263,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 **Ogólny postęp: 89.1% (41/46 endpointów)** 🎉
 
 ### ✅ Moduły w 100% ukończone (7/9):
+
 1. **Milestones** - 8/8 endpointów (100%) ⭐ UKOŃCZONE 2025-01-05!
 2. **Weekly Goals** - 5/5 endpointów (100%)
 3. **Tasks** - 7/7 endpointów (100%)
@@ -1170,12 +1273,14 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 7. **Data Export** - 1/1 endpointów (100%)
 
 ### 🟡 Moduły prawie ukończone (2/9):
+
 8. **Plans** - 7/8 endpointów (87.5%) - brakuje Dashboard
 9. **Goals** - 6/8 endpointów (75.0%) - brakuje 2 opcjonalne endpointy (GET list, GET by ID)
 
 ### 🎯 Wnioski
 
 **Sukces projektu:**
+
 - ✅ **84.8% API zaimplementowane** - gotowe do produkcji!
 - ✅ **Wszystkie kluczowe features działają** - Plans, Goals, Milestones, Weekly Goals, Tasks, Weekly Reviews, Metrics, Export
 - ✅ **Fazy 3 i 4 w pełni zakończone** - Weekly Planning + Reviews & Analytics
@@ -1186,6 +1291,7 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 - ✅ **GDPR compliance** - Data Export endpoint zaimplementowany
 
 **Co zostało:**
+
 - ⏳ **Plans Dashboard** - 2-3h pracy (agregowane dane, optional)
 - ⏳ **GET /api/v1/goals** i **GET /api/v1/goals/:id** - opcjonalne (funkcjonalność pokryta przez inne endpointy)
 
@@ -1193,26 +1299,28 @@ Endpoint może wykonywać się kilka sekund dla użytkowników z dużymi zbioram
 Projekt jest **w pełni gotowy do produkcji!** Wszystkie kluczowe funkcjonalności MVP są zaimplementowane, włącznie z **kompletnymi endpointami Milestones** (API v1.2). Pozostałe 5 endpointów to opcjonalne usprawnienia convenience API.
 
 **Szacowany czas do pełnego ukończenia (100%):**
+
 - Plans Dashboard: 2-3h (optional)
 - 2 opcjonalne Goals endpoints: 2-3h (optional)
 - **RAZEM: ~4-6h pracy** (tylko opcjonalne endpointy)
 
 ### 📈 Postęp w czasie
 
-| Data | Endpointy | Procent | Zmiana | Uwagi |
-|------|-----------|---------|--------|-------|
-| 2025-10-29 | 6/42 | 14.3% | Początek | API plan v1.0 |
-| 2025-11-01 | 10/42 | 23.8% | +9.5% (Goals) | |
-| 2025-11-10 | 11/42 | 26.2% | +2.4% (Plan DELETE) | |
-| 2025-11-28 | 29/42 | 69.0% | +42.8% (Milestones, Weekly Goals, Tasks) 🎉 | |
-| 2025-12-15 | 36/42 | 85.7% | +16.7% (Weekly Reviews) 🎉 | API plan v1.1 |
-| **2025-01-05** | **39/46** | **84.8%** | **+3 endpointy / -0.9%*** | **API plan v1.2** 🎉 |
+| Data           | Endpointy | Procent   | Zmiana                                      | Uwagi                |
+| -------------- | --------- | --------- | ------------------------------------------- | -------------------- |
+| 2025-10-29     | 6/42      | 14.3%     | Początek                                    | API plan v1.0        |
+| 2025-11-01     | 10/42     | 23.8%     | +9.5% (Goals)                               |                      |
+| 2025-11-10     | 11/42     | 26.2%     | +2.4% (Plan DELETE)                         |                      |
+| 2025-11-28     | 29/42     | 69.0%     | +42.8% (Milestones, Weekly Goals, Tasks) 🎉 |                      |
+| 2025-12-15     | 36/42     | 85.7%     | +16.7% (Weekly Reviews) 🎉                  | API plan v1.1        |
+| **2025-01-05** | **39/46** | **84.8%** | **+3 endpointy / -0.9%\***                  | **API plan v1.2** 🎉 |
 
 \* Postęp procentowy spadł mimo dodania 3 nowych endpointów, ponieważ API plan v1.2 wprowadził 4 nowe endpointy relacji Goals/Milestones
 
 ### 🏆 Osiągnięcia
 
 **Łączna liczba linii kodu:**
+
 - Service layers: ~1,900 linii (dodano ExportService 124, UserService 50, TaskService.getTaskHistory 25)
 - Validation layers: ~800 linii
 - API endpoints: ~2,820 linii (dodano 320 linii dla 3 nowych endpointów)
@@ -1220,6 +1328,7 @@ Projekt jest **w pełni gotowy do produkcji!** Wszystkie kluczowe funkcjonalnoś
 - **RAZEM: ~9,230 linii kodu i testów**
 
 **Łączny szacowany czas implementacji:**
+
 - Goals: ~10-13h
 - Milestones: ~8-10h
 - Weekly Goals: ~8-10h
@@ -1232,6 +1341,7 @@ Projekt jest **w pełni gotowy do produkcji!** Wszystkie kluczowe funkcjonalnoś
 ### 🎓 Lessons Learned
 
 **Co działało dobrze:**
+
 1. ✅ **Konsystentny wzorzec architektoniczny** - znacznie przyspieszył implementację kolejnych modułów
 2. ✅ **Szczegółowe plany implementacji** - zaoszczędziły czas na analizę
 3. ✅ **Zod strict mode** - automatyczne odrzucanie nieprawidłowych danych
@@ -1239,6 +1349,7 @@ Projekt jest **w pełni gotowy do produkcji!** Wszystkie kluczowe funkcjonalnoś
 5. ✅ **Comprehensive test files** - wykrywają regresje wcześnie
 
 **Co można poprawić w przyszłości:**
+
 1. 🔄 **Automated tests** - przejście z manualnych testów HTTP na unit + integration tests
 2. 🔄 **OpenAPI/Swagger** - automatyczna dokumentacja API
 3. 🔄 **Rate limiting middleware** - ochrona przed abuse

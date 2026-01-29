@@ -19,6 +19,7 @@ The application was experiencing a foreign key constraint violation when newly r
 ## Solution
 
 Replaced all hardcoded `DEFAULT_USER_ID` references with proper authentication checks using:
+
 - `locals.user?.id` for API endpoints
 - `Astro.locals.user?.id` for Astro pages
 - Added 401 Unauthorized responses for unauthenticated API requests
@@ -29,11 +30,13 @@ Replaced all hardcoded `DEFAULT_USER_ID` references with proper authentication c
 ### 1. Core Infrastructure (2 files)
 
 #### `/src/middleware/index.ts`
+
 - Fixed inconsistent authentication checks
 - Changed from checking `user` to consistently checking `locals.user`
 - Ensures email verification is required before access
 
 #### `/src/layouts/Layout.astro`
+
 - Removed `DEFAULT_USER_ID` import and fallback
 - Now uses only authenticated user from `Astro.locals.user`
 - Added null check before fetching plan data
@@ -48,18 +51,19 @@ const userId = locals.user?.id;
 if (!userId) {
   return new Response(
     JSON.stringify({
-      error: 'Unauthorized',
-      message: 'You must be logged in to access this resource'
+      error: "Unauthorized",
+      message: "You must be logged in to access this resource",
     } as ErrorResponse),
     {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     }
   );
 }
 ```
 
 #### Plans Endpoints (5 files)
+
 - ✅ `/api/v1/plans.ts` - GET, POST
 - ✅ `/api/v1/plans/[id].ts` - GET, PATCH, DELETE
 - ✅ `/api/v1/plans/[id]/dashboard.ts` - GET
@@ -67,6 +71,7 @@ if (!userId) {
 - ✅ `/api/v1/plans/[id]/goals.ts` - GET
 
 #### Goals Endpoints (6 files)
+
 - ✅ `/api/v1/goals/index.ts` - GET, POST
 - ✅ `/api/v1/goals/[id].ts` - GET, PATCH, DELETE
 - ✅ `/api/v1/goals/[goalId]/milestones.ts` - GET
@@ -74,22 +79,26 @@ if (!userId) {
 - ✅ `/api/v1/goals/[goalId]/weekly-goals.ts` - GET
 
 #### Milestones Endpoints (4 files)
+
 - ✅ `/api/v1/milestones.ts` - GET, POST
 - ✅ `/api/v1/milestones/[id].ts` - GET, PATCH, DELETE
 - ✅ `/api/v1/milestones/[milestoneId]/tasks.ts` - GET
 - ✅ `/api/v1/milestones/[milestoneId]/weekly-goals.ts` - GET
 
 #### Weekly Goals Endpoints (2 files)
+
 - ✅ `/api/v1/weekly-goals/index.ts` - GET, POST
 - ✅ `/api/v1/weekly-goals/[id].ts` - GET, PATCH, DELETE
 
 #### Weekly Reviews Endpoints (4 files)
+
 - ✅ `/api/v1/weekly-reviews/index.ts` - GET, POST
 - ✅ `/api/v1/weekly-reviews/[id].ts` - GET, PATCH, DELETE
 - ✅ `/api/v1/weekly-reviews/[id]/complete.ts` - POST
 - ✅ `/api/v1/weekly-reviews/week/[weekNumber].ts` - GET
 
 #### Tasks Endpoints (5 files)
+
 - ✅ `/api/v1/tasks/index.ts` - GET, POST
 - ✅ `/api/v1/tasks/[id].ts` - GET, PATCH, DELETE
 - ✅ `/api/v1/tasks/[id]/copy.ts` - POST
@@ -97,6 +106,7 @@ if (!userId) {
 - ✅ `/api/v1/tasks/daily.ts` - GET
 
 #### Other Endpoints (2 files)
+
 - ✅ `/api/v1/users/metrics.ts` - GET
 - ✅ `/api/v1/export.ts` - GET
 
@@ -108,11 +118,12 @@ All pages now follow this pattern:
 const userId = Astro.locals.user?.id;
 
 if (!userId) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 ```
 
 #### Plan Pages
+
 - ✅ `/pages/plans/[id]/index.astro`
 - ✅ `/pages/plans/[id]/edit.astro`
 - ✅ `/pages/plans/[id]/goals.astro`
@@ -124,13 +135,16 @@ if (!userId) {
 ## Verification
 
 ### 1. Code Verification
+
 - ✅ All `DEFAULT_USER_ID` usages removed from code
 - ✅ No linter errors
 - ✅ Consistent authentication pattern across all files
 - ✅ Proper error handling for unauthenticated requests
 
 ### 2. Remaining References
+
 The only remaining references to `DEFAULT_USER_ID` are:
+
 - Export in `/src/db/supabase.client.ts` (kept for potential test usage)
 - Comments in service files (documentation only)
 
@@ -139,6 +153,7 @@ The only remaining references to `DEFAULT_USER_ID` are:
 Test the following flow to verify the fix:
 
 1. **Register a new user**
+
    ```bash
    POST /api/auth/register
    {
@@ -153,6 +168,7 @@ Test the following flow to verify the fix:
    - Should redirect to `/login?verified=true`
 
 3. **Login**
+
    ```bash
    POST /api/auth/login
    {
@@ -162,6 +178,7 @@ Test the following flow to verify the fix:
    ```
 
 4. **Create a plan** (should now work!)
+
    ```bash
    POST /api/v1/plans
    {
@@ -169,6 +186,7 @@ Test the following flow to verify the fix:
      "start_date": "2026-01-27"
    }
    ```
+
    - Should return 201 Created
    - Plan should be created with the correct user_id
 
@@ -176,6 +194,7 @@ Test the following flow to verify the fix:
    ```bash
    GET /api/v1/plans
    ```
+
    - Should return the newly created plan
    - Plan should belong to the authenticated user
 
@@ -192,6 +211,7 @@ Test the following flow to verify the fix:
 ### For Development/Testing
 
 If you were relying on `DEFAULT_USER_ID` for testing:
+
 - You must now register and login with a real user account
 - Or temporarily disable authentication in middleware for local testing
 - Or create a test user with a known ID in your test database
@@ -203,6 +223,7 @@ No breaking changes - this is how the application should have worked from the st
 ## Performance Impact
 
 Minimal performance impact:
+
 - Added one additional check per request (`locals.user?.id`)
 - Middleware already fetches user session
 - No additional database queries
@@ -225,6 +246,7 @@ Minimal performance impact:
 ## Rollback Plan
 
 If issues arise, you can temporarily revert by:
+
 1. Restoring `DEFAULT_USER_ID` usage in critical endpoints
 2. However, this will only work for the hardcoded user ID
 3. Better approach: Fix the specific issue rather than reverting
@@ -232,6 +254,7 @@ If issues arise, you can temporarily revert by:
 ## Success Criteria
 
 ✅ All criteria met:
+
 - [x] No foreign key constraint violations for new users
 - [x] All API endpoints require authentication
 - [x] All Astro pages require authentication

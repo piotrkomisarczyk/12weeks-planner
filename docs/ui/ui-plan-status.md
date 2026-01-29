@@ -12,14 +12,14 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 ### Kluczowe Wskaźniki
 
-| Kategoria | Status | Procent |
-|-----------|--------|---------|
-| **Strefa Publiczna (Auth)** | ❌ Brak | 0% |
-| **Strefa Aplikacji (Globalna)** | ⚠️ Częściowo | 67% |
-| **Kontekst Planera** | ⚠️ Częściowo | 17% |
-| **Nawigacja i Layout** | ❌ Brak | 0% |
-| **Kluczowe Komponenty** | ⚠️ Częściowo | 20% |
-| **Zarządzanie Stanem** | ❌ Brak | 0% |
+| Kategoria                       | Status       | Procent |
+| ------------------------------- | ------------ | ------- |
+| **Strefa Publiczna (Auth)**     | ❌ Brak      | 0%      |
+| **Strefa Aplikacji (Globalna)** | ⚠️ Częściowo | 67%     |
+| **Kontekst Planera**            | ⚠️ Częściowo | 17%     |
+| **Nawigacja i Layout**          | ❌ Brak      | 0%      |
+| **Kluczowe Komponenty**         | ⚠️ Częściowo | 20%     |
+| **Zarządzanie Stanem**          | ❌ Brak      | 0%      |
 
 ---
 
@@ -27,24 +27,24 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 ### ✅ Zaimplementowane
 
-| Technologia | Status | Wersja | Notatki |
-|-------------|--------|--------|---------|
-| **Astro** | ✅ Zainstalowane | 5.13.7 | SSR działa poprawnie |
-| **React** | ✅ Zainstalowane | 19.1.1 | Islands architecture |
-| **Tailwind CSS** | ✅ Zainstalowane | 4.1.13 | Konfiguracja Vite |
-| **Shadcn/ui** | ⚠️ Częściowo | - | 14/30+ komponentów |
-| **Lucide React** | ✅ Zainstalowane | 0.487.0 | Ikony |
-| **date-fns** | ✅ Zainstalowane | 4.1.0 | Formatowanie dat |
-| **Sonner** | ✅ Zainstalowane | 2.0.7 | Toast notifications |
-| **canvas-confetti** | ✅ Zainstalowane | 1.9.4 | Efekt konfetti |
-| **Zod** | ✅ Zainstalowane | 3.24.1 | Walidacja |
+| Technologia         | Status           | Wersja  | Notatki              |
+| ------------------- | ---------------- | ------- | -------------------- |
+| **Astro**           | ✅ Zainstalowane | 5.13.7  | SSR działa poprawnie |
+| **React**           | ✅ Zainstalowane | 19.1.1  | Islands architecture |
+| **Tailwind CSS**    | ✅ Zainstalowane | 4.1.13  | Konfiguracja Vite    |
+| **Shadcn/ui**       | ⚠️ Częściowo     | -       | 14/30+ komponentów   |
+| **Lucide React**    | ✅ Zainstalowane | 0.487.0 | Ikony                |
+| **date-fns**        | ✅ Zainstalowane | 4.1.0   | Formatowanie dat     |
+| **Sonner**          | ✅ Zainstalowane | 2.0.7   | Toast notifications  |
+| **canvas-confetti** | ✅ Zainstalowane | 1.9.4   | Efekt konfetti       |
+| **Zod**             | ✅ Zainstalowane | 3.24.1  | Walidacja            |
 
 ### ❌ Brakujące (zgodnie z ui-plan.md)
 
-| Technologia | Status | Powód | Priorytet |
-|-------------|--------|-------|-----------|
+| Technologia        | Status               | Powód               | Priorytet    |
+| ------------------ | -------------------- | ------------------- | ------------ |
 | **TanStack Query** | ❌ Nie zainstalowane | Brak w package.json | 🔴 Krytyczny |
-| **Nano Stores** | ❌ Nie zainstalowane | Brak w package.json | 🟡 Średni |
+| **Nano Stores**    | ❌ Nie zainstalowane | Brak w package.json | 🟡 Średni    |
 
 **Uwaga:** Dokumentacja zakłada użycie TanStack Query do zarządzania stanem serwera i optymistycznych aktualizacji, oraz Nano Stores do współdzielonego stanu UI między "wyspami" React. Obecnie projekt używa prostych hooków z `useState` i bezpośrednich wywołań `fetch`.
 
@@ -91,15 +91,15 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżki:** `/login`, `/register`
 
-| Element | Status | Notatki |
-|---------|--------|---------|
-| Strona `/login` | ❌ Nie istnieje | - |
-| Strona `/register` | ❌ Nie istnieje | - |
-| Komponent `AuthForm` | ❌ Nie istnieje | - |
-| Komponent `ErrorAlert` | ❌ Nie istnieje | - |
-| Integracja Supabase Auth | ⚠️ Skonfigurowane | Tylko backend |
-| Przekierowania auth | ❌ Brak | - |
-| Middleware auth | ⚠️ Podstawowe | `src/middleware/index.ts` istnieje ale puste |
+| Element                  | Status            | Notatki                                      |
+| ------------------------ | ----------------- | -------------------------------------------- |
+| Strona `/login`          | ❌ Nie istnieje   | -                                            |
+| Strona `/register`       | ❌ Nie istnieje   | -                                            |
+| Komponent `AuthForm`     | ❌ Nie istnieje   | -                                            |
+| Komponent `ErrorAlert`   | ❌ Nie istnieje   | -                                            |
+| Integracja Supabase Auth | ⚠️ Skonfigurowane | Tylko backend                                |
+| Przekierowania auth      | ❌ Brak           | -                                            |
+| Middleware auth          | ⚠️ Podstawowe     | `src/middleware/index.ts` istnieje ale puste |
 
 **Priorytet:** 🔴 **KRYTYCZNY** - Bez tego aplikacja nie jest użyteczna.
 
@@ -107,11 +107,11 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżki:** `/forgot-password`, `/reset-password`
 
-| Element | Status |
-|---------|--------|
-| Strona `/forgot-password` | ❌ Nie istnieje |
-| Strona `/reset-password` | ❌ Nie istnieje |
-| Flow email reset | ❌ Nie zaimplementowane |
+| Element                   | Status                  |
+| ------------------------- | ----------------------- |
+| Strona `/forgot-password` | ❌ Nie istnieje         |
+| Strona `/reset-password`  | ❌ Nie istnieje         |
+| Flow email reset          | ❌ Nie zaimplementowane |
 
 **Priorytet:** 🟢 Opcjonalny MVP - Można użyć Supabase Dashboard.
 
@@ -124,20 +124,21 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 **Ścieżka:** `/plans`  
 **Plik:** `src/pages/plans/index.astro`
 
-| Element | Status | Implementacja |
-|---------|--------|---------------|
-| Strona główna | ✅ Zaimplementowane | `/plans/index.astro` |
-| Komponent `PlansView` | ✅ Zaimplementowane | `PlansView.tsx` |
-| Komponent `PlanCard` | ✅ Zaimplementowane | `PlanCard.tsx` |
-| Hook `usePlans` | ✅ Zaimplementowane | `hooks/usePlans.ts` |
-| Empty State | ✅ Zaimplementowane | W `PlansView` |
-| Kategoryzacja (Active/Ready/Completed/Archived) | ✅ Zaimplementowane | - |
-| Akcje (Activate/Archive/Delete) | ✅ Zaimplementowane | - |
-| Dialog potwierdzenia | ✅ Zaimplementowane | - |
-| Loading states | ✅ Zaimplementowane | Spinner + tekst |
-| Error handling | ✅ Zaimplementowane | Z przyciskiem Retry |
+| Element                                         | Status              | Implementacja        |
+| ----------------------------------------------- | ------------------- | -------------------- |
+| Strona główna                                   | ✅ Zaimplementowane | `/plans/index.astro` |
+| Komponent `PlansView`                           | ✅ Zaimplementowane | `PlansView.tsx`      |
+| Komponent `PlanCard`                            | ✅ Zaimplementowane | `PlanCard.tsx`       |
+| Hook `usePlans`                                 | ✅ Zaimplementowane | `hooks/usePlans.ts`  |
+| Empty State                                     | ✅ Zaimplementowane | W `PlansView`        |
+| Kategoryzacja (Active/Ready/Completed/Archived) | ✅ Zaimplementowane | -                    |
+| Akcje (Activate/Archive/Delete)                 | ✅ Zaimplementowane | -                    |
+| Dialog potwierdzenia                            | ✅ Zaimplementowane | -                    |
+| Loading states                                  | ✅ Zaimplementowane | Spinner + tekst      |
+| Error handling                                  | ✅ Zaimplementowane | Z przyciskiem Retry  |
 
 **Uwagi:**
+
 - ✅ Implementacja zgodna z planem
 - ⚠️ Używa spinnerów zamiast Skeleton (plan zakładał Skeleton)
 - ⚠️ Brak TanStack Query (używa bezpośrednio fetch)
@@ -147,20 +148,21 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 **Ścieżka:** `/plans/new`  
 **Plik:** `src/pages/plans/new.astro`
 
-| Element | Status | Implementacja |
-|---------|--------|---------------|
-| Strona wizard | ✅ Zaimplementowane | `/plans/new.astro` |
-| Komponent `PlanWizardContainer` | ✅ Zaimplementowane | `wizard/PlanWizardContainer.tsx` |
-| Komponent `WizardStepper` | ✅ Zaimplementowane | `wizard/WizardStepper.tsx` |
-| Komponent `PlanDetailsForm` | ✅ Zaimplementowane | `wizard/steps/PlanDetailsForm.tsx` |
-| Komponent `PlanGoalsForm` | ✅ Zaimplementowane | `wizard/steps/PlanGoalsForm.tsx` |
-| Komponent `WizardControls` | ✅ Zaimplementowane | `wizard/WizardControls.tsx` |
-| Komponent `DatePicker` | ✅ Zaimplementowane | `wizard/DatePicker.tsx` |
-| Walidacja dat (tylko poniedziałki) | ✅ Zaimplementowane | - |
-| Walidacja celów (1-5) | ✅ Zaimplementowane | - |
-| Rollback przy błędzie | ✅ Zaimplementowane | Usuwa plan jeśli cele się nie utworzyły |
+| Element                            | Status              | Implementacja                           |
+| ---------------------------------- | ------------------- | --------------------------------------- |
+| Strona wizard                      | ✅ Zaimplementowane | `/plans/new.astro`                      |
+| Komponent `PlanWizardContainer`    | ✅ Zaimplementowane | `wizard/PlanWizardContainer.tsx`        |
+| Komponent `WizardStepper`          | ✅ Zaimplementowane | `wizard/WizardStepper.tsx`              |
+| Komponent `PlanDetailsForm`        | ✅ Zaimplementowane | `wizard/steps/PlanDetailsForm.tsx`      |
+| Komponent `PlanGoalsForm`          | ✅ Zaimplementowane | `wizard/steps/PlanGoalsForm.tsx`        |
+| Komponent `WizardControls`         | ✅ Zaimplementowane | `wizard/WizardControls.tsx`             |
+| Komponent `DatePicker`             | ✅ Zaimplementowane | `wizard/DatePicker.tsx`                 |
+| Walidacja dat (tylko poniedziałki) | ✅ Zaimplementowane | -                                       |
+| Walidacja celów (1-5)              | ✅ Zaimplementowane | -                                       |
+| Rollback przy błędzie              | ✅ Zaimplementowane | Usuwa plan jeśli cele się nie utworzyły |
 
 **Uwagi:**
+
 - ✅ Pełna zgodność z planem implementacji
 - ✅ Dwuetapowy proces (Details → Goals)
 - ✅ Obsługa błędów z rollbackiem
@@ -170,14 +172,14 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżka:** `/profile`
 
-| Element | Status |
-|---------|--------|
-| Strona `/profile` | ❌ Nie istnieje |
-| Komponent `MetricsCard` | ❌ Nie istnieje |
-| Komponent `ExportDataButton` | ❌ Nie istnieje |
-| Komponent `LanguageSwitcher` | ❌ Nie istnieje |
-| API endpoint `/api/v1/users/metrics` | ✅ Istnieje |
-| API endpoint `/api/v1/export` | ✅ Istnieje |
+| Element                              | Status          |
+| ------------------------------------ | --------------- |
+| Strona `/profile`                    | ❌ Nie istnieje |
+| Komponent `MetricsCard`              | ❌ Nie istnieje |
+| Komponent `ExportDataButton`         | ❌ Nie istnieje |
+| Komponent `LanguageSwitcher`         | ❌ Nie istnieje |
+| API endpoint `/api/v1/users/metrics` | ✅ Istnieje     |
+| API endpoint `/api/v1/export`        | ✅ Istnieje     |
 
 **Priorytet:** 🟡 Średni - Nice to have dla MVP.
 
@@ -189,18 +191,19 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżka:** `/plans/[id]/dashboard` lub `/active`
 
-| Element | Status | Notatki |
-|---------|--------|---------|
-| Strona dashboard | ❌ Nie istnieje | - |
-| Komponent `QuickActionsPanel` | ❌ Nie istnieje | - |
-| Komponent `GoalsOverviewList` | ❌ Nie istnieje | Może użyć GoalCard |
-| Komponent `WeeklyReviewReminder` | ❌ Nie istnieje | - |
-| Quick Links (Current Week, Today) | ❌ Brak | - |
-| Goals Overview z progress | ❌ Brak | - |
+| Element                           | Status          | Notatki            |
+| --------------------------------- | --------------- | ------------------ |
+| Strona dashboard                  | ❌ Nie istnieje | -                  |
+| Komponent `QuickActionsPanel`     | ❌ Nie istnieje | -                  |
+| Komponent `GoalsOverviewList`     | ❌ Nie istnieje | Może użyć GoalCard |
+| Komponent `WeeklyReviewReminder`  | ❌ Nie istnieje | -                  |
+| Quick Links (Current Week, Today) | ❌ Brak         | -                  |
+| Goals Overview z progress         | ❌ Brak         | -                  |
 
 **Priorytet:** 🔴 **KRYTYCZNY** - Punkt centralny aplikacji.
 
 **Możliwa ponowna użycie:**
+
 - ✅ `GoalCard` i `GoalProgress` z `/plans/[id]/goals` mogą być użyte
 - ✅ Logika pobierania celów istnieje w `useGoals` hook
 
@@ -208,12 +211,12 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżka:** `/plans/[id]/hierarchy`
 
-| Element | Status |
-|---------|--------|
-| Strona hierarchy | ❌ Nie istnieje |
-| Komponent `HierarchyTree` | ❌ Nie istnieje |
+| Element                    | Status          |
+| -------------------------- | --------------- |
+| Strona hierarchy           | ❌ Nie istnieje |
+| Komponent `HierarchyTree`  | ❌ Nie istnieje |
 | Komponent `TaskStatusIcon` | ❌ Nie istnieje |
-| Expand/Collapse logic | ❌ Brak |
+| Expand/Collapse logic      | ❌ Brak         |
 
 **Priorytet:** 🟡 Średni - Nice to have, nie krytyczny dla MVP.
 
@@ -222,28 +225,29 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 **Ścieżka:** `/plans/[id]/goals`  
 **Plik:** `src/pages/plans/[id]/goals.astro`
 
-| Element | Status | Implementacja |
-|---------|--------|---------------|
-| Strona goals | ✅ Zaimplementowane | `/plans/[id]/goals.astro` |
-| Komponent `GoalsManager` | ✅ Zaimplementowane | `goals/GoalsManager.tsx` |
-| Komponent `GoalCard` | ✅ Zaimplementowane | `goals/GoalCard.tsx` |
-| Komponent `GoalForm` | ✅ Zaimplementowane | `goals/GoalForm.tsx` |
-| Komponent `GoalProgress` | ✅ Zaimplementowane | `goals/GoalProgress.tsx` |
-| Komponent `CreateGoalDialog` | ✅ Zaimplementowane | `goals/CreateGoalDialog.tsx` |
-| Komponent `MilestoneManager` | ✅ Zaimplementowane | `goals/milestones/MilestoneManager.tsx` |
-| Komponent `MilestoneList` | ✅ Zaimplementowane | `goals/milestones/MilestoneList.tsx` |
-| Komponent `MilestoneItem` | ✅ Zaimplementowane | `goals/milestones/MilestoneItem.tsx` |
-| Komponent `MilestoneForm` | ✅ Zaimplementowane | `goals/milestones/MilestoneForm.tsx` |
-| Hook `useGoals` | ✅ Zaimplementowane | `goals/hooks/useGoals.ts` |
-| Hook `useMilestones` | ✅ Zaimplementowane | `goals/hooks/useMilestones.ts` |
-| Limit 5 celów | ✅ Zaimplementowane | - |
-| Limit 5 kamieni milowych | ✅ Zaimplementowane | - |
-| Walidacja dat kamieni milowych | ✅ Zaimplementowane | - |
-| Auto-save (1500ms debounce) | ✅ Zaimplementowane | - |
-| Slider postępu z konfetti | ✅ Zaimplementowane | Przy 100% |
-| Accordion (expand/collapse) | ✅ Zaimplementowane | - |
+| Element                        | Status              | Implementacja                           |
+| ------------------------------ | ------------------- | --------------------------------------- |
+| Strona goals                   | ✅ Zaimplementowane | `/plans/[id]/goals.astro`               |
+| Komponent `GoalsManager`       | ✅ Zaimplementowane | `goals/GoalsManager.tsx`                |
+| Komponent `GoalCard`           | ✅ Zaimplementowane | `goals/GoalCard.tsx`                    |
+| Komponent `GoalForm`           | ✅ Zaimplementowane | `goals/GoalForm.tsx`                    |
+| Komponent `GoalProgress`       | ✅ Zaimplementowane | `goals/GoalProgress.tsx`                |
+| Komponent `CreateGoalDialog`   | ✅ Zaimplementowane | `goals/CreateGoalDialog.tsx`            |
+| Komponent `MilestoneManager`   | ✅ Zaimplementowane | `goals/milestones/MilestoneManager.tsx` |
+| Komponent `MilestoneList`      | ✅ Zaimplementowane | `goals/milestones/MilestoneList.tsx`    |
+| Komponent `MilestoneItem`      | ✅ Zaimplementowane | `goals/milestones/MilestoneItem.tsx`    |
+| Komponent `MilestoneForm`      | ✅ Zaimplementowane | `goals/milestones/MilestoneForm.tsx`    |
+| Hook `useGoals`                | ✅ Zaimplementowane | `goals/hooks/useGoals.ts`               |
+| Hook `useMilestones`           | ✅ Zaimplementowane | `goals/hooks/useMilestones.ts`          |
+| Limit 5 celów                  | ✅ Zaimplementowane | -                                       |
+| Limit 5 kamieni milowych       | ✅ Zaimplementowane | -                                       |
+| Walidacja dat kamieni milowych | ✅ Zaimplementowane | -                                       |
+| Auto-save (1500ms debounce)    | ✅ Zaimplementowane | -                                       |
+| Slider postępu z konfetti      | ✅ Zaimplementowane | Przy 100%                               |
+| Accordion (expand/collapse)    | ✅ Zaimplementowane | -                                       |
 
 **Uwagi:**
+
 - ✅ **Pełna zgodność z planem**
 - ✅ Doskonała implementacja według specyfikacji
 - ✅ Wszystkie funkcjonalności działają
@@ -253,17 +257,17 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżka:** `/plans/[id]/week/[nr]`
 
-| Element | Status | Backend |
-|---------|--------|---------|
-| Strona week | ❌ Nie istnieje | - |
-| Komponent `WeekNavigator` | ❌ Nie istnieje | - |
-| Komponent `WeeklyTaskColumn` | ❌ Nie istnieje | - |
-| Komponent `AddTaskButton` | ❌ Nie istnieje | - |
-| Komponent `PriorityBadge` | ❌ Nie istnieje | Badge istnieje |
-| 3 sekcje (Main Focus, Subtasks, Ad-hoc) | ❌ Brak | - |
-| Drag-and-drop sortowanie | ❌ Brak | - |
-| Menu kontekstowe (assign to day) | ❌ Brak | - |
-| API endpoints | ✅ Gotowe | `/api/v1/weekly-goals`, `/api/v1/tasks` |
+| Element                                 | Status          | Backend                                 |
+| --------------------------------------- | --------------- | --------------------------------------- |
+| Strona week                             | ❌ Nie istnieje | -                                       |
+| Komponent `WeekNavigator`               | ❌ Nie istnieje | -                                       |
+| Komponent `WeeklyTaskColumn`            | ❌ Nie istnieje | -                                       |
+| Komponent `AddTaskButton`               | ❌ Nie istnieje | -                                       |
+| Komponent `PriorityBadge`               | ❌ Nie istnieje | Badge istnieje                          |
+| 3 sekcje (Main Focus, Subtasks, Ad-hoc) | ❌ Brak         | -                                       |
+| Drag-and-drop sortowanie                | ❌ Brak         | -                                       |
+| Menu kontekstowe (assign to day)        | ❌ Brak         | -                                       |
+| API endpoints                           | ✅ Gotowe       | `/api/v1/weekly-goals`, `/api/v1/tasks` |
 
 **Priorytet:** 🔴 **KRYTYCZNY** - Kluczowy dla planowania tygodniowego.
 
@@ -271,23 +275,24 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżka:** `/plans/[id]/week/[nr]/day/[date]`
 
-| Element | Status | Backend |
-|---------|--------|---------|
-| Strona day | ❌ Nie istnieje | - |
-| Komponent `DayNavigator` | ❌ Nie istnieje | - |
-| Komponent `WeekStrip` | ❌ Nie istnieje | - |
-| Komponent `DailyTaskSlot` | ❌ Nie istnieje | - |
-| Komponent `TaskItem` | ❌ Nie istnieje | **FUNDAMENTALNY** |
-| Komponent `TaskSheet` | ❌ Nie istnieje | **FUNDAMENTALNY** |
-| Sekcje priorytetów (A=1, B=2, C=7) | ❌ Brak | - |
-| Zadanie "Most Important" wyróżnione | ❌ Brak | - |
-| Drag-and-drop | ❌ Brak | - |
-| Kopiowanie/Przenoszenie zadań | ❌ Brak | - |
-| API endpoint daily tasks | ✅ Gotowe | `/api/v1/tasks/daily` |
+| Element                             | Status          | Backend               |
+| ----------------------------------- | --------------- | --------------------- |
+| Strona day                          | ❌ Nie istnieje | -                     |
+| Komponent `DayNavigator`            | ❌ Nie istnieje | -                     |
+| Komponent `WeekStrip`               | ❌ Nie istnieje | -                     |
+| Komponent `DailyTaskSlot`           | ❌ Nie istnieje | -                     |
+| Komponent `TaskItem`                | ❌ Nie istnieje | **FUNDAMENTALNY**     |
+| Komponent `TaskSheet`               | ❌ Nie istnieje | **FUNDAMENTALNY**     |
+| Sekcje priorytetów (A=1, B=2, C=7)  | ❌ Brak         | -                     |
+| Zadanie "Most Important" wyróżnione | ❌ Brak         | -                     |
+| Drag-and-drop                       | ❌ Brak         | -                     |
+| Kopiowanie/Przenoszenie zadań       | ❌ Brak         | -                     |
+| API endpoint daily tasks            | ✅ Gotowe       | `/api/v1/tasks/daily` |
 
 **Priorytet:** 🔴 **KRYTYCZNY** - Codzienna praca z aplikacją.
 
 **Brakujące fundamentalne komponenty:**
+
 - ❌ **`TaskItem`** - Główny komponent zadania z:
   - Ikoną statusu (SVG custom: Todo/In Progress/Completed/Cancelled/Postponed)
   - Interakcjami: Click (cykl statusów), Right Click (menu), Double Click (otwiera Sheet)
@@ -302,15 +307,15 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Ścieżka:** `/plans/[id]/review/[nr]`
 
-| Element | Status | Backend |
-|---------|--------|---------|
-| Strona review | ❌ Nie istnieje | - |
-| Komponent `ReflectionForm` | ❌ Nie istnieje | - |
-| Komponent `GoalsProgressUpdater` | ❌ Nie istnieje | Slider istnieje |
-| 3 pytania (Co wyszło? Co nie? Co poprawić?) | ❌ Brak | - |
-| Auto-save z debounce | ❌ Brak | - |
-| Integracja z aktualizacją postępu celów | ❌ Brak | - |
-| API endpoints | ✅ Gotowe | `/api/v1/weekly-reviews` |
+| Element                                     | Status          | Backend                  |
+| ------------------------------------------- | --------------- | ------------------------ |
+| Strona review                               | ❌ Nie istnieje | -                        |
+| Komponent `ReflectionForm`                  | ❌ Nie istnieje | -                        |
+| Komponent `GoalsProgressUpdater`            | ❌ Nie istnieje | Slider istnieje          |
+| 3 pytania (Co wyszło? Co nie? Co poprawić?) | ❌ Brak         | -                        |
+| Auto-save z debounce                        | ❌ Brak         | -                        |
+| Integracja z aktualizacją postępu celów     | ❌ Brak         | -                        |
+| API endpoints                               | ✅ Gotowe       | `/api/v1/weekly-reviews` |
 
 **Priorytet:** 🔴 **KRYTYCZNY** - Kluczowa refleksja.
 
@@ -322,14 +327,14 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Wymagania z planu:**
 
-| Element | Status | Notatki |
-|---------|--------|---------|
-| Sticky Top Bar | ❌ Brak | - |
-| Logo aplikacji | ❌ Brak | - |
-| Breadcrumbs | ❌ Brak | Format: `Planers > [Plan] > [View]` |
-| Language Flag (PL/EN) | ❌ Brak | - |
-| User Menu (Avatar + dropdown) | ❌ Brak | Settings, Export, Logout |
-| Theme Toggle (Sun/Moon) | ❌ Brak | `next-themes` zainstalowane ale nie używane |
+| Element                       | Status  | Notatki                                     |
+| ----------------------------- | ------- | ------------------------------------------- |
+| Sticky Top Bar                | ❌ Brak | -                                           |
+| Logo aplikacji                | ❌ Brak | -                                           |
+| Breadcrumbs                   | ❌ Brak | Format: `Planers > [Plan] > [View]`         |
+| Language Flag (PL/EN)         | ❌ Brak | -                                           |
+| User Menu (Avatar + dropdown) | ❌ Brak | Settings, Export, Logout                    |
+| Theme Toggle (Sun/Moon)       | ❌ Brak | `next-themes` zainstalowane ale nie używane |
 
 **Priorytet:** 🔴 Krytyczny - Bez nawigacji niemożliwe poruszanie się po aplikacji.
 
@@ -337,15 +342,15 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Wymagania z planu:**
 
-| Element | Status | Docelowa lokalizacja |
-|---------|--------|---------------------|
-| Zakładki/Linki nawigacyjne | ❌ Brak | Pod Top Bar |
-| Link: Dashboard | ❌ Brak | → `/plans/[id]/dashboard` |
-| Link: Hierarchy | ❌ Brak | → `/plans/[id]/hierarchy` |
-| Link: Goals | ❌ Brak | → `/plans/[id]/goals` |
-| Link: Weeks | ❌ Brak | → Obecny tydzień |
-| Link: Days | ❌ Brak | → Today |
-| Link: Reviews | ❌ Brak | → Weekly reviews |
+| Element                    | Status  | Docelowa lokalizacja      |
+| -------------------------- | ------- | ------------------------- |
+| Zakładki/Linki nawigacyjne | ❌ Brak | Pod Top Bar               |
+| Link: Dashboard            | ❌ Brak | → `/plans/[id]/dashboard` |
+| Link: Hierarchy            | ❌ Brak | → `/plans/[id]/hierarchy` |
+| Link: Goals                | ❌ Brak | → `/plans/[id]/goals`     |
+| Link: Weeks                | ❌ Brak | → Obecny tydzień          |
+| Link: Days                 | ❌ Brak | → Today                   |
+| Link: Reviews              | ❌ Brak | → Weekly reviews          |
 
 **Priorytet:** 🔴 Krytyczny
 
@@ -353,17 +358,18 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Plik:** `src/layouts/Layout.astro`
 
-| Element | Status |
-|---------|--------|
-| Podstawowy HTML skeleton | ✅ Istnieje |
-| Global CSS | ✅ Zaimportowane |
-| Meta tags | ⚠️ Podstawowe |
-| Slot dla contentu | ✅ Działa |
-| **Nawigacja** | ❌ Brak |
-| **Top Bar** | ❌ Brak |
-| **Footer** | ❌ Brak |
+| Element                  | Status           |
+| ------------------------ | ---------------- |
+| Podstawowy HTML skeleton | ✅ Istnieje      |
+| Global CSS               | ✅ Zaimportowane |
+| Meta tags                | ⚠️ Podstawowe    |
+| Slot dla contentu        | ✅ Działa        |
+| **Nawigacja**            | ❌ Brak          |
+| **Top Bar**              | ❌ Brak          |
+| **Footer**               | ❌ Brak          |
 
 **Uwagi:**
+
 - Layout jest minimalny, tylko szkielet HTML
 - Brak struktury nawigacyjnej
 - Każda strona renderuje się bez kontekstu aplikacji
@@ -376,19 +382,20 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Wymagania z planu:**
 
-| Funkcjonalność | Status | Priorytet |
-|----------------|--------|-----------|
-| Ikona statusu (custom SVG) | ❌ Brak | 🔴 Krytyczny |
-| Badge priorytetu | ⚠️ Istnieje komponent | 🔴 Krytyczny |
-| Click → Cykl statusów | ❌ Brak | 🔴 Krytyczny |
-| Click na "chevrons" → Dropdown statusów | ❌ Brak | 🔴 Krytyczny |
-| Right Click → Menu kontekstowe | ❌ Brak | 🟡 Średni |
-| Double Click → Otwiera TaskSheet | ❌ Brak | 🔴 Krytyczny |
-| Drag-and-drop handle | ❌ Brak | 🟡 Średni |
+| Funkcjonalność                          | Status                | Priorytet    |
+| --------------------------------------- | --------------------- | ------------ |
+| Ikona statusu (custom SVG)              | ❌ Brak               | 🔴 Krytyczny |
+| Badge priorytetu                        | ⚠️ Istnieje komponent | 🔴 Krytyczny |
+| Click → Cykl statusów                   | ❌ Brak               | 🔴 Krytyczny |
+| Click na "chevrons" → Dropdown statusów | ❌ Brak               | 🔴 Krytyczny |
+| Right Click → Menu kontekstowe          | ❌ Brak               | 🟡 Średni    |
+| Double Click → Otwiera TaskSheet        | ❌ Brak               | 🔴 Krytyczny |
+| Drag-and-drop handle                    | ❌ Brak               | 🟡 Średni    |
 
 **Priorytet:** 🔴 **FUNDAMENTALNY** - Bez tego nie ma zarządzania zadaniami.
 
 **Zależności:**
+
 - Wymaga komponentu `dropdown-menu` (✅ istnieje)
 - Wymaga komponentu `context-menu` (❌ brak)
 - Wymaga custom SVG ikon statusów (❌ brak)
@@ -398,19 +405,20 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Wymagania z planu:**
 
-| Funkcjonalność | Status | Priorytet |
-|----------------|--------|-----------|
-| Panel boczny (Shadcn Sheet) | ❌ Komponent nie zainstalowany | 🔴 Krytyczny |
-| Edycja tytułu | ❌ Brak | 🔴 Krytyczny |
-| Edycja opisu | ❌ Brak | 🔴 Krytyczny |
-| Zmiana dnia/tygodnia | ❌ Brak | 🟡 Średni |
-| Activity Log (historia zmian) | ❌ Brak | 🟢 Opcjonalny |
-| Auto-save po zamknięciu | ❌ Brak | 🔴 Krytyczny |
-| API `/api/v1/tasks/[taskId]/history` | ✅ Gotowe | - |
+| Funkcjonalność                       | Status                         | Priorytet     |
+| ------------------------------------ | ------------------------------ | ------------- |
+| Panel boczny (Shadcn Sheet)          | ❌ Komponent nie zainstalowany | 🔴 Krytyczny  |
+| Edycja tytułu                        | ❌ Brak                        | 🔴 Krytyczny  |
+| Edycja opisu                         | ❌ Brak                        | 🔴 Krytyczny  |
+| Zmiana dnia/tygodnia                 | ❌ Brak                        | 🟡 Średni     |
+| Activity Log (historia zmian)        | ❌ Brak                        | 🟢 Opcjonalny |
+| Auto-save po zamknięciu              | ❌ Brak                        | 🔴 Krytyczny  |
+| API `/api/v1/tasks/[taskId]/history` | ✅ Gotowe                      | -             |
 
 **Priorytet:** 🔴 **FUNDAMENTALNY**
 
 **Akcje wymagane:**
+
 1. Zainstalować Shadcn Sheet component
 2. Stworzyć komponent `TaskSheet.tsx`
 3. Zaimplementować auto-save z debounce
@@ -418,15 +426,16 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 ### 5.3. GoalCard ✅ ZAIMPLEMENTOWANY
 
-| Funkcjonalność | Status | Implementacja |
-|----------------|--------|---------------|
-| Tytuł celu | ✅ Zaimplementowane | `GoalCard.tsx` |
-| Kategoria (ikona/kolor) | ✅ Zaimplementowane | - |
-| Slider postępu | ✅ Zaimplementowane | `GoalProgress.tsx` |
-| Accordion (expand/collapse) | ✅ Zaimplementowane | Shadcn Accordion |
-| Read-only mode | ⚠️ Częściowo | Slider zawsze interaktywny |
+| Funkcjonalność              | Status              | Implementacja              |
+| --------------------------- | ------------------- | -------------------------- |
+| Tytuł celu                  | ✅ Zaimplementowane | `GoalCard.tsx`             |
+| Kategoria (ikona/kolor)     | ✅ Zaimplementowane | -                          |
+| Slider postępu              | ✅ Zaimplementowane | `GoalProgress.tsx`         |
+| Accordion (expand/collapse) | ✅ Zaimplementowane | Shadcn Accordion           |
+| Read-only mode              | ⚠️ Częściowo        | Slider zawsze interaktywny |
 
 **Uwagi:**
+
 - ✅ Doskonale zaimplementowane dla widoku Goals
 - ⚠️ Plan zakłada read-only slider na Dashboard (nie zaimplementowane, bo nie ma Dashboard)
 
@@ -434,28 +443,29 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Wymagania z planu:**
 
-| Funkcjonalność | Status | Priorytet |
-|----------------|--------|-----------|
-| 7 kafelków (pon-niedz) | ❌ Brak | 🔴 Krytyczny |
-| Stan "Active" (podświetlony) | ❌ Brak | 🔴 Krytyczny |
-| Stan "Today" (obramowany) | ❌ Brak | 🔴 Krytyczny |
-| Stan "Has Tasks" (wskaźnik) | ❌ Brak | 🟡 Średni |
-| Responsive (scroll horizontal na mobile) | ❌ Brak | 🟡 Średni |
+| Funkcjonalność                           | Status  | Priorytet    |
+| ---------------------------------------- | ------- | ------------ |
+| 7 kafelków (pon-niedz)                   | ❌ Brak | 🔴 Krytyczny |
+| Stan "Active" (podświetlony)             | ❌ Brak | 🔴 Krytyczny |
+| Stan "Today" (obramowany)                | ❌ Brak | 🔴 Krytyczny |
+| Stan "Has Tasks" (wskaźnik)              | ❌ Brak | 🟡 Średni    |
+| Responsive (scroll horizontal na mobile) | ❌ Brak | 🟡 Średni    |
 
 **Priorytet:** 🔴 Krytyczny dla widoku Dnia.
 
 ### 5.5. ErrorBoundary & LoadingStates ⚠️ CZĘŚCIOWO
 
-| Element | Status | Implementacja |
-|---------|--------|---------------|
-| Error handling w komponentach | ✅ Częściowo | Try-catch + toasty |
-| Loading spinner | ✅ Zaimplementowane | W PlansView, GoalsManager |
-| Skeleton loading | ❌ Brak | **Plan zakładał Skeleton zamiast spinnerów** |
-| Retry button | ✅ Zaimplementowane | W PlansView error state |
-| Offline indicator | ❌ Brak | - |
-| React Error Boundary | ❌ Brak | - |
+| Element                       | Status              | Implementacja                                |
+| ----------------------------- | ------------------- | -------------------------------------------- |
+| Error handling w komponentach | ✅ Częściowo        | Try-catch + toasty                           |
+| Loading spinner               | ✅ Zaimplementowane | W PlansView, GoalsManager                    |
+| Skeleton loading              | ❌ Brak             | **Plan zakładał Skeleton zamiast spinnerów** |
+| Retry button                  | ✅ Zaimplementowane | W PlansView error state                      |
+| Offline indicator             | ❌ Brak             | -                                            |
+| React Error Boundary          | ❌ Brak             | -                                            |
 
 **Uwagi:**
+
 - ⚠️ Plan zakładał **Skeleton Loading** (shimmer effect) zamiast spinnerów
 - Należy zainstalować i użyć Shadcn `skeleton` component
 
@@ -467,16 +477,17 @@ Projekt znajduje się we wczesnej fazie implementacji frontendu. Backend jest w 
 
 **Wymagania z planu:**
 
-| Funkcjonalność | Obecny stan | Docelowy stan (plan) |
-|----------------|-------------|---------------------|
-| Pobieranie danych serwera | ⚠️ Bezpośrednie `fetch` | ✅ TanStack Query |
-| Cache management | ❌ Brak | ✅ Automatic caching |
-| Optymistyczne aktualizacje | ❌ Brak | ✅ Optimistic UI |
-| Retry logic | ⚠️ Manualne | ✅ Automatic retry |
-| Prefetching | ❌ Brak | ✅ Prefetch navigation |
-| Invalidation | ⚠️ Manualne | ✅ Automatic invalidation |
+| Funkcjonalność             | Obecny stan             | Docelowy stan (plan)      |
+| -------------------------- | ----------------------- | ------------------------- |
+| Pobieranie danych serwera  | ⚠️ Bezpośrednie `fetch` | ✅ TanStack Query         |
+| Cache management           | ❌ Brak                 | ✅ Automatic caching      |
+| Optymistyczne aktualizacje | ❌ Brak                 | ✅ Optimistic UI          |
+| Retry logic                | ⚠️ Manualne             | ✅ Automatic retry        |
+| Prefetching                | ❌ Brak                 | ✅ Prefetch navigation    |
+| Invalidation               | ⚠️ Manualne             | ✅ Automatic invalidation |
 
 **Akcje wymagane:**
+
 ```bash
 npm install @tanstack/react-query
 ```
@@ -484,6 +495,7 @@ npm install @tanstack/react-query
 **Priorytet:** 🔴 **KRYTYCZNY** - Fundamentalny element architektury według planu.
 
 **Korzyści:**
+
 - Optymistyczne UI (natychmiastowy feedback)
 - Automatic retry przy błędach
 - Cache'owanie między widokami
@@ -494,14 +506,15 @@ npm install @tanstack/react-query
 
 **Wymagania z planu:**
 
-| Use Case | Obecny stan | Docelowy stan |
-|----------|-------------|---------------|
-| Współdzielenie stanu między React Islands | ❌ Niemożliwe | ✅ Nano Stores |
-| Stan aktywnego planera | ❌ Props drilling | ✅ Store |
-| Stan użytkownika | ❌ Brak | ✅ Store |
-| UI state (theme, language) | ❌ Brak | ✅ Store |
+| Use Case                                  | Obecny stan       | Docelowy stan  |
+| ----------------------------------------- | ----------------- | -------------- |
+| Współdzielenie stanu między React Islands | ❌ Niemożliwe     | ✅ Nano Stores |
+| Stan aktywnego planera                    | ❌ Props drilling | ✅ Store       |
+| Stan użytkownika                          | ❌ Brak           | ✅ Store       |
+| UI state (theme, language)                | ❌ Brak           | ✅ Store       |
 
 **Akcje wymagane:**
+
 ```bash
 npm install nanostores @nanostores/react
 ```
@@ -509,6 +522,7 @@ npm install nanostores @nanostores/react
 **Priorytet:** 🟡 Średni - Ulepszy architekturę, ale nie blokuje MVP.
 
 **Korzyści:**
+
 - Współdzielenie stanu między izolowanymi "wyspami" React
 - Minimalna wielkość (< 1KB)
 - Świetna integracja z Astro
@@ -519,39 +533,40 @@ npm install nanostores @nanostores/react
 
 ### 7.1. Drag-and-Drop ❌ BRAK
 
-| Funkcjonalność | Status | Priorytet |
-|----------------|--------|-----------|
-| Sortowanie zadań w Day View | ❌ Brak | 🔴 Krytyczny |
-| Sortowanie zadań w Week View | ❌ Brak | 🔴 Krytyczny |
-| Przenoszenie między sekcjami priorytetów | ❌ Brak | 🟡 Średni |
-| Blokada pełnych sekcji (limit 10 zadań) | ❌ Brak | 🟡 Średni |
-| Biblioteka DnD | ❌ Nie zainstalowana | - |
+| Funkcjonalność                           | Status               | Priorytet    |
+| ---------------------------------------- | -------------------- | ------------ |
+| Sortowanie zadań w Day View              | ❌ Brak              | 🔴 Krytyczny |
+| Sortowanie zadań w Week View             | ❌ Brak              | 🔴 Krytyczny |
+| Przenoszenie między sekcjami priorytetów | ❌ Brak              | 🟡 Średni    |
+| Blokada pełnych sekcji (limit 10 zadań)  | ❌ Brak              | 🟡 Średni    |
+| Biblioteka DnD                           | ❌ Nie zainstalowana | -            |
 
 **Rekomendowana biblioteka:** `@dnd-kit/core` (nowoczesna, accessible)
 
 ### 7.2. Auto-save ✅ CZĘŚCIOWO
 
-| Widok | Status | Debounce |
-|-------|--------|----------|
+| Widok                   | Status              | Debounce  |
+| ----------------------- | ------------------- | --------- |
 | Goal Form (text fields) | ✅ Zaimplementowane | 1500ms ✅ |
-| Milestone Form | ✅ Zaimplementowane | 1500ms ✅ |
-| Goal Progress (slider) | ✅ Zaimplementowane | 500ms ✅ |
-| Review Form | ❌ Brak widoku | - |
-| TaskSheet | ❌ Brak komponentu | - |
+| Milestone Form          | ✅ Zaimplementowane | 1500ms ✅ |
+| Goal Progress (slider)  | ✅ Zaimplementowane | 500ms ✅  |
+| Review Form             | ❌ Brak widoku      | -         |
+| TaskSheet               | ❌ Brak komponentu  | -         |
 
 **Uwagi:**
+
 - ✅ Debounce zgodne z planem (1500ms tekst, 500ms slider)
 - ✅ Wskaźnik "Saving..." w UI
 
 ### 7.3. Animations i Feedback
 
-| Element | Status | Implementacja |
-|---------|--------|---------------|
-| Konfetti przy 100% celu | ✅ Zaimplementowane | `canvas-confetti` |
-| Konfetti przy ukończeniu wszystkich zadań dnia | ❌ Brak widoku | - |
-| Toast notifications | ✅ Zaimplementowane | Sonner |
-| Loading skeletons | ❌ Brak | Używa spinnerów |
-| View Transitions | ❌ Brak | Astro obsługuje, nie używane |
+| Element                                        | Status              | Implementacja                |
+| ---------------------------------------------- | ------------------- | ---------------------------- |
+| Konfetti przy 100% celu                        | ✅ Zaimplementowane | `canvas-confetti`            |
+| Konfetti przy ukończeniu wszystkich zadań dnia | ❌ Brak widoku      | -                            |
+| Toast notifications                            | ✅ Zaimplementowane | Sonner                       |
+| Loading skeletons                              | ❌ Brak             | Używa spinnerów              |
+| View Transitions                               | ❌ Brak             | Astro obsługuje, nie używane |
 
 ---
 
@@ -563,13 +578,13 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 
 ### 8.2. Mobile Support ⚠️ NIEZNANE
 
-| Element | Status | Notatki |
-|---------|--------|---------|
-| Responsive breakpoints | ⚠️ Tailwind default | Nie testowane |
-| Mobile navigation (Hamburger) | ❌ Brak | Plan zakłada |
-| Full-width Sheet na mobile | ❌ Komponent nie istnieje | - |
-| WeekStrip scroll horizontal | ❌ Komponent nie istnieje | - |
-| Touch gestures (long press) | ❌ Brak | Plan zakłada dla menu |
+| Element                       | Status                    | Notatki               |
+| ----------------------------- | ------------------------- | --------------------- |
+| Responsive breakpoints        | ⚠️ Tailwind default       | Nie testowane         |
+| Mobile navigation (Hamburger) | ❌ Brak                   | Plan zakłada          |
+| Full-width Sheet na mobile    | ❌ Komponent nie istnieje | -                     |
+| WeekStrip scroll horizontal   | ❌ Komponent nie istnieje | -                     |
+| Touch gestures (long press)   | ❌ Brak                   | Plan zakłada dla menu |
 
 **Uwaga:** Bez testów nie można ocenić jakości RWD.
 
@@ -579,13 +594,13 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 
 ### 9.1. ARIA ⚠️ PODSTAWOWE
 
-| Aspekt | Status | Notatki |
-|--------|--------|---------|
-| ARIA landmarks | ⚠️ Częściowo | W PlansView sekcje z `aria-labelledby` |
-| ARIA labels | ⚠️ Częściowo | Niektóre elementy |
-| Keyboard navigation | ⚠️ Shadcn default | Nie testowane |
-| Focus management | ⚠️ Shadcn default | Nie testowane |
-| Screen reader support | ⚠️ Nieznane | Nie testowane |
+| Aspekt                | Status            | Notatki                                |
+| --------------------- | ----------------- | -------------------------------------- |
+| ARIA landmarks        | ⚠️ Częściowo      | W PlansView sekcje z `aria-labelledby` |
+| ARIA labels           | ⚠️ Częściowo      | Niektóre elementy                      |
+| Keyboard navigation   | ⚠️ Shadcn default | Nie testowane                          |
+| Focus management      | ⚠️ Shadcn default | Nie testowane                          |
+| Screen reader support | ⚠️ Nieznane       | Nie testowane                          |
 
 ### 9.2. Semantic HTML ✅ DOBRE
 
@@ -598,11 +613,11 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 
 ### 10.1. Client-side Validation ✅ DOBRE
 
-| Widok | Status | Implementacja |
-|-------|--------|---------------|
-| Plan Wizard | ✅ Zaimplementowane | Zod + custom checks |
-| Goals Form | ✅ Zaimplementowane | Limits enforcement |
-| Milestones Form | ✅ Zaimplementowane | Date validation |
+| Widok           | Status              | Implementacja       |
+| --------------- | ------------------- | ------------------- |
+| Plan Wizard     | ✅ Zaimplementowane | Zod + custom checks |
+| Goals Form      | ✅ Zaimplementowane | Limits enforcement  |
+| Milestones Form | ✅ Zaimplementowane | Date validation     |
 
 ### 10.2. CSRF & XSS ⚠️ NIEZNANE
 
@@ -704,33 +719,33 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 
 ### Strony
 
-| Kategoria | Zaimplementowane | Wymagane | % |
-|-----------|------------------|----------|---|
-| **Auth** | 0 | 4 | 0% |
-| **Globalne** | 2 | 3 | 67% |
-| **Kontekst Planera** | 1 | 6 | 17% |
-| **RAZEM** | 3 | 13 | **23%** |
+| Kategoria            | Zaimplementowane | Wymagane | %       |
+| -------------------- | ---------------- | -------- | ------- |
+| **Auth**             | 0                | 4        | 0%      |
+| **Globalne**         | 2                | 3        | 67%     |
+| **Kontekst Planera** | 1                | 6        | 17%     |
+| **RAZEM**            | 3                | 13       | **23%** |
 
 ### Komponenty
 
-| Kategoria | Zaimplementowane | Wymagane | % |
-|-----------|------------------|----------|---|
-| **Shadcn UI** | 14 | 22 | 64% |
-| **Kluczowe (TaskItem, TaskSheet, etc.)** | 1 | 5 | 20% |
-| **Nawigacja** | 0 | 4 | 0% |
-| **RAZEM** | 15 | 31 | **48%** |
+| Kategoria                                | Zaimplementowane | Wymagane | %       |
+| ---------------------------------------- | ---------------- | -------- | ------- |
+| **Shadcn UI**                            | 14               | 22       | 64%     |
+| **Kluczowe (TaskItem, TaskSheet, etc.)** | 1                | 5        | 20%     |
+| **Nawigacja**                            | 0                | 4        | 0%      |
+| **RAZEM**                                | 15               | 31       | **48%** |
 
 ### Funkcjonalności
 
-| Funkcjonalność | Status | % |
-|----------------|--------|---|
-| Zarządzanie planerami | ✅ Ukończone | 100% |
-| Zarządzanie celami i milestones | ✅ Ukończone | 100% |
-| Zarządzanie zadaniami | ❌ Brak | 0% |
-| Dashboard i przeglądy | ❌ Brak | 0% |
-| Autentykacja | ❌ Brak | 0% |
-| Nawigacja | ❌ Brak | 0% |
-| **ŚREDNIA WAŻONA** | - | **~25%** |
+| Funkcjonalność                  | Status       | %        |
+| ------------------------------- | ------------ | -------- |
+| Zarządzanie planerami           | ✅ Ukończone | 100%     |
+| Zarządzanie celami i milestones | ✅ Ukończone | 100%     |
+| Zarządzanie zadaniami           | ❌ Brak      | 0%       |
+| Dashboard i przeglądy           | ❌ Brak      | 0%       |
+| Autentykacja                    | ❌ Brak      | 0%       |
+| Nawigacja                       | ❌ Brak      | 0%       |
+| **ŚREDNIA WAŻONA**              | -            | **~25%** |
 
 ---
 
@@ -754,6 +769,7 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 ### 13.2. Komponenty
 
 1. **KRYTYCZNE:** Zainstalować brakujące Shadcn komponenty
+
    ```bash
    npx shadcn-ui@latest add sheet
    npx shadcn-ui@latest add tabs
@@ -833,13 +849,13 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 
 ### 📊 Ogólny Status
 
-| Metryka | Wartość |
-|---------|---------|
-| **Ukończenie UI** | ~25% |
-| **Ukończenie Backend** | 100% |
-| **Gotowość MVP** | ~40% |
-| **Czas do MVP** | 14-22 dni (tylko Priorytet 1) |
-| **Czas do Full Plan** | 20-32 dni (Priorytet 1+2) |
+| Metryka                | Wartość                       |
+| ---------------------- | ----------------------------- |
+| **Ukończenie UI**      | ~25%                          |
+| **Ukończenie Backend** | 100%                          |
+| **Gotowość MVP**       | ~40%                          |
+| **Czas do MVP**        | 14-22 dni (tylko Priorytet 1) |
+| **Czas do Full Plan**  | 20-32 dni (Priorytet 1+2)     |
 
 ---
 
@@ -860,5 +876,4 @@ Plan zakłada Desktop First, co jest zgodne z obecną implementacją.
 
 **Koniec raportu**
 
-*Dokument wygenerowany automatycznie na podstawie analizy kodu źródłowego i porównania z `docs/ui/ui-plan.md`.*
-
+_Dokument wygenerowany automatycznie na podstawie analizy kodu źródłowego i porównania z `docs/ui/ui-plan.md`._

@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { supabaseClient } from "@/db/supabase.client";
 
 interface UserMenuProps {
   userEmail?: string;
@@ -43,7 +42,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
       // Success - redirect to login page
       toast.success("Logged out successfully");
       window.location.href = "/login";
-    } catch (error) {
+    } catch {
       toast.error("Failed to log out", {
         description: "An unexpected error occurred",
       });

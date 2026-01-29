@@ -1,6 +1,7 @@
 # Diagram Autentykacji
 
 <authentication_analysis>
+
 1. **Przepływy autentykacji (wg docs/auth-spec.md):**
    - **Rejestracja (US-001):** Użytkownik podaje dane -> Supabase Auth (signUp) -> Email weryfikacyjny -> Link callback -> Utworzenie sesji.
    - **Logowanie (US-002):** Użytkownik podaje dane -> Supabase Auth (signInWithPassword) -> Ustawienie ciasteczek sesyjnych (via @supabase/ssr) -> Przekierowanie na Dashboard (jeśli ma planery) lub listę planerów.
@@ -23,13 +24,14 @@
 4. **Opis kroków (skrócony):**
    - Żądanie strony -> Middleware sprawdza sesję.
    - Logowanie -> Strzał do Supabase -> Zwrot sesji -> Zapis ciasteczek -> Przeładowanie.
-</authentication_analysis>
+     </authentication_analysis>
 
 <mermaid_diagram>
+
 ```mermaid
 sequenceDiagram
     autonumber
-    
+
     participant Browser as Przeglądarka<br/>(Client)
     participant Middleware as Middleware<br/>(src/middleware/index.ts)
     participant Server as Astro Server<br/>(SSR Pages & API)
@@ -40,10 +42,10 @@ sequenceDiagram
 
     Browser->>Middleware: GET /dashboard
     activate Middleware
-    
+
     Middleware->>SB_Client: Utwórz klienta serwerowego
     SB_Client->>Middleware: Instancja z kontekstem ciasteczek
-    
+
     Middleware->>SB_Client: auth.getUser()
     activate SB_Client
     SB_Client-->>Middleware: Wynik weryfikacji (User lub Error)
@@ -64,7 +66,7 @@ sequenceDiagram
     Browser->>Browser: Wypełnienie formularza (Login Page)
     Browser->>SB_Auth: signInWithPassword(email, pass)
     activate SB_Auth
-    
+
     alt Dane niepoprawne
         SB_Auth-->>Browser: Error (400/401)
         Browser->>Browser: Wyświetl błąd (Toast)
@@ -78,7 +80,7 @@ sequenceDiagram
     Browser->>Middleware: GET / (lub callback po loginie)
     activate Middleware
     Middleware->>SB_Client: auth.getUser() (weryfikacja nowych ciasteczek)
-    
+
     alt Użytkownik zweryfikowany
         Middleware->>Server: Sprawdź stan użytkownika (czy ma planery?)
         activate Server
@@ -97,7 +99,7 @@ sequenceDiagram
     SB_Auth-->>SB_Client: Nowe Tokeny
     SB_Client-->>Middleware: Zaktualizowana Sesja
     deactivate SB_Client
-    
+
     Middleware->>Browser: Response + Set-Cookie (Nowe Tokeny)
     deactivate Middleware
 
@@ -113,4 +115,5 @@ sequenceDiagram
     Middleware-->>Browser: Redirect do /login (brak sesji)
     deactivate Middleware
 ```
+
 </mermaid_diagram>

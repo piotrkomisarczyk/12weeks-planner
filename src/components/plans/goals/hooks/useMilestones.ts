@@ -136,34 +136,28 @@ export function useMilestones(goalId: string): UseMilestonesReturn {
 
   // Update a milestone
   const updateMilestone = useCallback(async (id: string, data: UpdateMilestoneCommand) => {
-    try {
-      const response = await fetch(`/api/v1/milestones/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+    const response = await fetch(`/api/v1/milestones/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        // For validation errors, extract the specific message from details[0].message
-        const errorMessage = errorData.details?.[0]?.message || errorData.error || "Failed to update milestone";
-        throw new Error(errorMessage);
-      }
-
-      const result: ItemResponse<MilestoneDTO> = await response.json();
-
-      // Update milestone in local state
-      setState((prev) => ({
-        ...prev,
-        milestones: prev.milestones.map((milestone) => (milestone.id === id ? result.data : milestone)),
-      }));
-    } catch (error) {
-      // Don't set global error state for validation/update errors
-      // Let the calling component handle error display
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      // For validation errors, extract the specific message from details[0].message
+      const errorMessage = errorData.details?.[0]?.message || errorData.error || "Failed to update milestone";
+      throw new Error(errorMessage);
     }
+
+    const result: ItemResponse<MilestoneDTO> = await response.json();
+
+    // Update milestone in local state
+    setState((prev) => ({
+      ...prev,
+      milestones: prev.milestones.map((milestone) => (milestone.id === id ? result.data : milestone)),
+    }));
   }, []);
 
   // Toggle milestone completion status

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
   cn,
   calculateCurrentDay,
@@ -16,7 +16,6 @@ import {
   getPlanDateRange,
   computeDayNumberFromDate,
 } from "./utils";
-import type { PlanStatus } from "@/types";
 
 describe("utils", () => {
   describe("cn", () => {
@@ -25,7 +24,9 @@ describe("utils", () => {
     });
 
     it("should handle conditional classes", () => {
-      expect(cn("base", true && "active", false && "inactive")).toBe("base active");
+      const isActive = true;
+      const isInactive = false;
+      expect(cn("base", isActive && "active", isInactive && "inactive")).toBe("base active");
     });
 
     it("should handle empty inputs", () => {

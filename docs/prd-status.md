@@ -4,26 +4,26 @@ Data utworzenia: 2025-01-04
 
 ## Tabela statusu User Stories
 
-| ID User Story | Opis | Status |
-|--------------|------|--------|
-| US-001 | Rejestracja nowego użytkownika | Do zrobienia |
-| US-002 | Logowanie użytkownika | Do zrobienia |
-| US-003 | Reset hasła | Do zrobienia |
-| US-004 | Tworzenie nowego planera | Zakończone |
-| US-005 | Nawigacja między planerami | Zakończone |
-| US-006 | Tworzenie i edycja celu | Zakończone |
-| US-007 | Planowanie zadania tygodniowego | Do zrobienia |
-| US-008 | Zarządzanie zadaniami dziennymi | Do zrobienia |
-| US-009 | Podsumowanie tygodnia | Do zrobienia |
-| US-010 | Wizualizacja hierarchii na dashboardzie | Do zrobienia |
-| US-011 | Wylogowanie i bezpieczeństwo | Do zrobienia |
-| US-012 | Archiwizacja planera | Zakończone |
-| US-013 | Obsługa błędów i walidacji | Do zrobienia |
-| US-014 | Zmiana języka aplikacji na dashboardzie | Do zrobienia |
-| US-015 | Wyświetlanie numeru tygodnia na dashboardzie oraz na widoku | Do zrobienia |
-| US-016 | Nawigacja po widoku dnia | Do zrobienia |
-| US-017 | Nawigacja po widoku tygodnia | Do zrobienia |
-| US-018 | Nawigacja po widoku podsumowań | Do zrobienia |
+| ID User Story | Opis                                                        | Status       |
+| ------------- | ----------------------------------------------------------- | ------------ |
+| US-001        | Rejestracja nowego użytkownika                              | Do zrobienia |
+| US-002        | Logowanie użytkownika                                       | Do zrobienia |
+| US-003        | Reset hasła                                                 | Do zrobienia |
+| US-004        | Tworzenie nowego planera                                    | Zakończone   |
+| US-005        | Nawigacja między planerami                                  | Zakończone   |
+| US-006        | Tworzenie i edycja celu                                     | Zakończone   |
+| US-007        | Planowanie zadania tygodniowego                             | Do zrobienia |
+| US-008        | Zarządzanie zadaniami dziennymi                             | Do zrobienia |
+| US-009        | Podsumowanie tygodnia                                       | Do zrobienia |
+| US-010        | Wizualizacja hierarchii na dashboardzie                     | Do zrobienia |
+| US-011        | Wylogowanie i bezpieczeństwo                                | Do zrobienia |
+| US-012        | Archiwizacja planera                                        | Zakończone   |
+| US-013        | Obsługa błędów i walidacji                                  | Do zrobienia |
+| US-014        | Zmiana języka aplikacji na dashboardzie                     | Do zrobienia |
+| US-015        | Wyświetlanie numeru tygodnia na dashboardzie oraz na widoku | Do zrobienia |
+| US-016        | Nawigacja po widoku dnia                                    | Do zrobienia |
+| US-017        | Nawigacja po widoku tygodnia                                | Do zrobienia |
+| US-018        | Nawigacja po widoku podsumowań                              | Do zrobienia |
 
 ## Podsumowanie
 
@@ -38,22 +38,26 @@ Data utworzenia: 2025-01-04
 ### ✅ Zakończone (4/18)
 
 #### US-004: Tworzenie nowego planera
+
 - **Backend:** ✅ API endpoint `POST /api/v1/plans` w pełni zaimplementowane
 - **Frontend:** ✅ Wizard tworzenia planera (`/plans/new`) z walidacją dat (poniedziałki)
 - **Komponenty:** ✅ `PlanWizardContainer`, `PlanDetailsForm`, `DatePicker`
 
 #### US-005: Nawigacja między planerami
+
 - **Backend:** ✅ API endpoints `GET /api/v1/plans` oraz `GET /api/v1/plans/active`
 - **Frontend:** ✅ Widok listy planerów (`/plans`) z kategoryzacją (Active, Ready, Completed, Archived)
 - **Komponenty:** ✅ `PlansView`, `PlanCard`, `usePlans` hook
 
 #### US-006: Tworzenie i edycja celu
+
 - **Backend:** ✅ Pełne API dla celów (`POST/PATCH/DELETE /api/v1/goals`) i kamieni milowych (`POST/PATCH/DELETE /api/v1/milestones`)
 - **Frontend:** ✅ Menedżer celów (`/plans/[id]/goals`) z formularzami i zarządzaniem kamieniami milowymi
 - **Komponenty:** ✅ `GoalsManager`, `GoalCard`, `GoalForm`, `MilestoneManager`, `useGoals`, `useMilestones`
 - **Funkcjonalności:** ✅ Dodawanie do 5 celów, kamienie milowe (do 5 na cel), pasek postępu
 
 #### US-012: Archiwizacja planera
+
 - **Backend:** ✅ API endpoint `POST /api/v1/plans/[id]/archive`
 - **Frontend:** ✅ Funkcja archiwizacji z dialogiem potwierdzenia w `PlansView`
 - **Funkcjonalności:** ✅ Soft-delete z flagą `archived`, możliwość przeglądania archiwalnych planerów
@@ -63,30 +67,35 @@ Data utworzenia: 2025-01-04
 ### ❌ Do zrobienia (14/18)
 
 #### US-001: Rejestracja nowego użytkownika
+
 - **Backend:** ⚠️ Supabase Auth skonfigurowane w dokumentacji, brak implementacji w UI
 - **Frontend:** ❌ Brak strony rejestracji (`/register`)
 - **Brakujące:** Formularz rejestracji, integracja z Supabase Auth
 
 #### US-002: Logowanie użytkownika
+
 - **Backend:** ⚠️ Supabase Auth dostępne
 - **Frontend:** ❌ Brak strony logowania (`/login`)
 - **Brakujące:** Formularz logowania, przekierowania, zarządzanie sesją w UI
 
 #### US-003: Reset hasła
+
 - **Backend:** ⚠️ Supabase Auth obsługuje reset hasła
 - **Frontend:** ❌ Brak stron `/forgot-password` i `/reset-password`
 - **Brakujące:** Formularz resetu hasła, flow email
 
 #### US-007: Planowanie zadania tygodniowego
+
 - **Backend:** ✅ API dla weekly goals w pełni zaimplementowane (`/api/v1/weekly-goals`, `/api/v1/tasks`)
 - **Frontend:** ❌ Brak widoku tygodnia (`/plans/[id]/week/[nr]`)
-- **Brakujące:** 
+- **Brakujące:**
   - Widok 3 sekcji (główne zadanie, podzadania, ad-hoc)
   - Dropdown priorytetu A/B/C
   - Menu przypisywania do dni
   - Zarządzanie zadaniami tygodniowymi
 
 #### US-008: Zarządzanie zadaniami dziennymi
+
 - **Backend:** ✅ API endpoint `GET /api/v1/tasks/daily` zaimplementowany
 - **Frontend:** ❌ Brak widoku dnia (`/plans/[id]/week/[nr]/day/[day]`)
 - **Brakujące:**
@@ -96,6 +105,7 @@ Data utworzenia: 2025-01-04
   - Zmiana stanów zadań (ikony)
 
 #### US-009: Podsumowanie tygodnia
+
 - **Backend:** ✅ Pełne API dla weekly reviews (`/api/v1/weekly-reviews`)
 - **Frontend:** ❌ Brak widoku podsumowania tygodnia
 - **Brakujące:**
@@ -104,6 +114,7 @@ Data utworzenia: 2025-01-04
   - Przypomnienie w niedzielę
 
 #### US-010: Wizualizacja hierarchii na dashboardzie
+
 - **Backend:** ✅ Wszystkie dane dostępne przez API
 - **Frontend:** ❌ Brak dashboardu (`/plans/[id]/dashboard` lub `/active`)
 - **Brakujące:**
@@ -113,6 +124,7 @@ Data utworzenia: 2025-01-04
   - Węzeł 'ad-hoc' dla zadań niezwiązanych z celami
 
 #### US-011: Wylogowanie i bezpieczeństwo
+
 - **Backend:** ⚠️ Supabase Auth dostępne
 - **Frontend:** ❌ Brak UI wylogowania
 - **Brakujące:**
@@ -121,6 +133,7 @@ Data utworzenia: 2025-01-04
   - Przekierowania dla niezalogowanych użytkowników
 
 #### US-013: Obsługa błędów i walidacji
+
 - **Backend:** ✅ Walidacja formularzy z Zod zaimplementowana
 - **Frontend:** ⚠️ Częściowo zaimplementowane (toasty błędów w niektórych komponentach)
 - **Brakujące:**
@@ -129,6 +142,7 @@ Data utworzenia: 2025-01-04
   - Tłumaczenia komunikatów (MVP: angielski)
 
 #### US-014: Zmiana języka aplikacji na dashboardzie
+
 - **Backend:** N/A
 - **Frontend:** ❌ Brak implementacji
 - **Brakujące:**
@@ -136,6 +150,7 @@ Data utworzenia: 2025-01-04
   - System i18n (MVP: tylko angielski)
 
 #### US-015: Wyświetlanie numeru tygodnia
+
 - **Backend:** ✅ Logika kalkulacji tygodnia dostępna
 - **Frontend:** ❌ Brak implementacji w widokach
 - **Brakujące:**
@@ -143,6 +158,7 @@ Data utworzenia: 2025-01-04
   - Wyświetlanie numeru tygodnia w widokach (week, day, summary)
 
 #### US-016: Nawigacja po widoku dnia
+
 - **Backend:** ✅ API do pobierania zadań dziennych dostępne
 - **Frontend:** ❌ Brak widoku dnia
 - **Brakujące:**
@@ -151,6 +167,7 @@ Data utworzenia: 2025-01-04
   - Link z dashboardu do widoku dnia
 
 #### US-017: Nawigacja po widoku tygodnia
+
 - **Backend:** ✅ API do pobierania zadań tygodniowych dostępne
 - **Frontend:** ❌ Brak widoku tygodnia
 - **Brakujące:**
@@ -159,6 +176,7 @@ Data utworzenia: 2025-01-04
   - Link z dashboardu do widoku tygodnia
 
 #### US-018: Nawigacja po widoku podsumowań
+
 - **Backend:** ✅ API weekly reviews zaimplementowane
 - **Frontend:** ❌ Brak widoku podsumowań
 - **Brakujące:**
@@ -185,6 +203,7 @@ Wszystkie endpointy API zostały w pełni zaimplementowane:
 - ✅ **Export Data:** GET
 
 **Notatki:**
+
 - Wszystkie endpointy używają DEFAULT_USER_ID (MVP)
 - Brak faktycznej autentykacji JWT (TODO w kodzie)
 - RLS policies zdefiniowane w migracjach, ale wyłączone (migration 20251016120600)
@@ -200,12 +219,14 @@ Wszystkie endpointy API zostały w pełni zaimplementowane:
 ### Frontend Components - Status: ⚠️ CZĘŚCIOWO (25%)
 
 **Zaimplementowane:**
+
 - ✅ PlansView - lista i zarządzanie planerami
 - ✅ Plan Wizard - tworzenie nowych planerów
 - ✅ GoalsManager - zarządzanie celami i kamieniami milowymi
 - ✅ Shadcn/ui components (Button, Dialog, Card, Input, etc.)
 
 **Brakujące:**
+
 - ❌ Auth pages (login, register, reset)
 - ❌ Dashboard
 - ❌ Week view
@@ -247,8 +268,9 @@ Wszystkie endpointy API zostały w pełni zaimplementowane:
 ### Obecny stan: 22% (4/18 User Stories)
 
 **Aby ukończyć MVP potrzeba:**
+
 - ❌ 0% Authentication (US-001, US-002, US-003)
-- ✅ 100% Plans Management (US-004, US-005, US-012) 
+- ✅ 100% Plans Management (US-004, US-005, US-012)
 - ✅ 100% Goals Management (US-006)
 - ❌ 0% Tasks Management (US-007, US-008)
 - ❌ 0% Reviews & Dashboard (US-009, US-010)
@@ -293,4 +315,3 @@ Wszystkie endpointy API zostały w pełni zaimplementowane:
 - ✅ Kod jest dobrze zorganizowany (services, validation, types)
 - ✅ API jest kompletne i gotowe do użycia
 - ✅ Database schema jest przemyślana i zgodna z PRD
-

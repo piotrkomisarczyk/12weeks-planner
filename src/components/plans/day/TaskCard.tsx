@@ -121,12 +121,13 @@ export function TaskCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.title);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [copyMoveMenuOpen, setCopyMoveMenuOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     title: "",
     description: "",
-    onConfirm: () => {},
+    onConfirm: () => {
+      // Placeholder function, will be replaced when dialog is opened
+    },
   });
   const inputRef = useRef<HTMLInputElement>(null);
 

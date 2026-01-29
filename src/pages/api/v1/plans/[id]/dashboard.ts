@@ -12,7 +12,7 @@ import type { APIRoute } from "astro";
 import { PlanService } from "../../../../../lib/services/plan.service";
 import { PlanIdParamsSchema } from "../../../../../lib/validation/plan.validation";
 import { GetUnauthorizedResponse } from "../../../../../lib/utils";
-import type { ErrorResponse, ValidationErrorResponse, PlanDashboardResponse } from "../../../../../types";
+import type { ErrorResponse, ValidationErrorResponse } from "../../../../../types";
 
 export const prerender = false;
 

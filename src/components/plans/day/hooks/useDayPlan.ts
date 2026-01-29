@@ -17,7 +17,7 @@ import type {
   UpdateTaskCommand,
   CopyTaskCommand,
 } from "@/types";
-import { encodePosition, getDayRank, getWeekOrder, generateDayViewPositions } from "@/lib/position-utils";
+import { encodePosition, getWeekOrder, generateDayViewPositions } from "@/lib/position-utils";
 import { computePlanDate } from "@/lib/utils";
 
 type LoadingStatus = "idle" | "loading" | "success" | "error";

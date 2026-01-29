@@ -5,6 +5,7 @@ This document describes the authentication UI components and pages that have bee
 ## Overview
 
 The authentication UI provides a complete user interface for:
+
 - User login
 - User registration
 - Password reset request
@@ -15,6 +16,7 @@ All components follow the existing design patterns from the PlanWizardContainer 
 ## Implementation Status
 
 ✅ **Completed:**
+
 - All authentication form components
 - All authentication pages
 - AuthLayout for minimal auth-focused layout
@@ -24,6 +26,7 @@ All components follow the existing design patterns from the PlanWizardContainer 
 - Accessibility features (ARIA labels, error descriptions)
 
 ⏳ **Pending (Backend Integration):**
+
 - Supabase client integration
 - Actual authentication logic
 - Middleware for route protection
@@ -54,6 +57,7 @@ src/
 ### 1. AuthLayout.astro
 
 A minimal layout for authentication pages featuring:
+
 - Simple header with logo and app name
 - Centered content area (max-width: 28rem)
 - Footer with copyright
@@ -63,6 +67,7 @@ A minimal layout for authentication pages featuring:
 ### 2. LoginForm.tsx
 
 **Features:**
+
 - Email and password fields
 - Client-side validation (email format, required fields)
 - "Forgot password?" link
@@ -71,12 +76,14 @@ A minimal layout for authentication pages featuring:
 - Error handling with toast notifications
 
 **Validation Rules:**
+
 - Email: Required, valid email format
 - Password: Required
 
 ### 3. RegisterForm.tsx
 
 **Features:**
+
 - Email, password, and confirm password fields
 - Strong password validation
 - Success screen with email verification instructions
@@ -85,8 +92,9 @@ A minimal layout for authentication pages featuring:
 - Error handling with toast notifications
 
 **Validation Rules:**
+
 - Email: Required, valid email format
-- Password: 
+- Password:
   - Minimum 8 characters
   - At least one uppercase letter
   - At least one lowercase letter
@@ -95,6 +103,7 @@ A minimal layout for authentication pages featuring:
 
 **Success Flow:**
 After successful registration, displays:
+
 - Success icon
 - Confirmation message
 - Email address where verification was sent
@@ -105,6 +114,7 @@ After successful registration, displays:
 ### 4. ForgotPasswordForm.tsx
 
 **Features:**
+
 - Single email field
 - Success screen with instructions
 - Option to resend email
@@ -113,10 +123,12 @@ After successful registration, displays:
 - Error handling with toast notifications
 
 **Validation Rules:**
+
 - Email: Required, valid email format
 
 **Success Flow:**
 After successful submission, displays:
+
 - Email icon
 - Confirmation message
 - Email address where reset link was sent
@@ -127,6 +139,7 @@ After successful submission, displays:
 ### 5. UpdatePasswordForm.tsx
 
 **Features:**
+
 - New password and confirm password fields
 - Dual mode: password reset flow vs. logged-in user
 - Strong password validation
@@ -135,10 +148,12 @@ After successful submission, displays:
 - Error handling with toast notifications
 
 **Props:**
+
 - `isLoggedIn` (boolean, default: false): Determines UI text and redirect behavior
 
 **Validation Rules:**
-- Password: 
+
+- Password:
   - Minimum 8 characters
   - At least one uppercase letter
   - At least one lowercase letter
@@ -209,6 +224,7 @@ The authentication components follow the same patterns as the PlanWizardContaine
 ### Accessibility
 
 All forms include:
+
 - Proper label associations
 - ARIA attributes (`aria-invalid`, `aria-describedby`)
 - Required field indicators
@@ -226,21 +242,25 @@ All forms include:
 ## Validation Rules Summary
 
 ### Email Validation
+
 - Required field
 - Must match email format: `[text]@[domain].[tld]`
 
 ### Password Validation (Registration & Update)
+
 - Minimum 8 characters
 - At least one uppercase letter (A-Z)
 - At least one lowercase letter (a-z)
 - At least one number (0-9)
 
 ### Password Confirmation
+
 - Must exactly match the password field
 
 ## User Flows
 
 ### Registration Flow
+
 1. User fills out registration form
 2. Client-side validation
 3. Form submission (TODO: Supabase integration)
@@ -249,6 +269,7 @@ All forms include:
 6. User redirected to login
 
 ### Login Flow
+
 1. User fills out login form
 2. Client-side validation
 3. Form submission (TODO: Supabase integration)
@@ -256,6 +277,7 @@ All forms include:
 5. Redirect to dashboard or plans list
 
 ### Password Reset Flow
+
 1. User clicks "Forgot password?" on login page
 2. User enters email on forgot password page
 3. Success screen with instructions
@@ -266,6 +288,7 @@ All forms include:
 8. Redirect to login page
 
 ### Password Change Flow (Logged-in User)
+
 1. User navigates to update password page (from settings/menu)
 2. User enters new password and confirmation
 3. Form submission

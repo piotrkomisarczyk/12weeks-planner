@@ -1,5 +1,5 @@
 stateDiagram-v2
-    [*] --> MiddlewareSprawdzenieSesji
+[*] --> MiddlewareSprawdzenieSesji
 
     state "Weryfikacja Sesji (Middleware)" as MiddlewareSprawdzenieSesji {
         state if_sesja <<choice>>
@@ -10,7 +10,7 @@ stateDiagram-v2
 
     state "Użytkownik Niezalogowany" as Gosc {
         [*] --> EkranLogowania
-        
+
         state "Ekran Logowania\n(/login)" as EkranLogowania
         state "Ekran Rejestracji\n(/register)" as EkranRejestracji
         state "Odzyskiwanie Hasła\n(/forgot-password)" as OdzyskiwanieHasla
@@ -19,7 +19,7 @@ stateDiagram-v2
         EkranLogowania --> EkranRejestracji: "Nie masz konta?"
         EkranLogowania --> OdzyskiwanieHasla: "Zapomniałeś hasła?"
         EkranRejestracji --> EkranLogowania: "Masz już konto?"
-        
+
         OdzyskiwanieHasla --> WyslanieResetu: Podanie email
         WyslanieResetu --> EkranLogowania: Powrót
     }
@@ -27,11 +27,11 @@ stateDiagram-v2
     state "Proces Logowania" as ProcesLogowania {
         state if_dane_poprawne <<choice>>
         state if_aktywny_planer <<choice>>
-        
+
         EkranLogowania --> if_dane_poprawne: "Zaloguj"
         if_dane_poprawne --> BladLogowania: Błędne dane
         BladLogowania --> EkranLogowania
-        
+
         if_dane_poprawne --> if_aktywny_planer: Dane poprawne
         if_aktywny_planer --> Dashboard: "Posiada aktywny planer"
         if_aktywny_planer --> ListaPlanerow: "Brak aktywnego planera"
@@ -39,21 +39,21 @@ stateDiagram-v2
 
     state "Proces Rejestracji" as ProcesRejestracji {
         state if_walidacja <<choice>>
-        
+
         EkranRejestracji --> if_walidacja: "Zarejestruj"
         if_walidacja --> BladRejestracji: Błąd walidacji / Email zajęty
         BladRejestracji --> EkranRejestracji
-        
+
         if_walidacja --> OczekiwanieNaWeryfikacje: Dane poprawne
         OczekiwanieNaWeryfikacje: "Oczekiwanie na kliknięcie w emailu"
-        
+
         OczekiwanieNaWeryfikacje --> CallbackAuth: "Kliknięcie w link aktywacyjny"
     }
 
     state "Proces Resetu Hasła" as ProcesResetu {
         state "Formularz Nowego Hasła\n(/update-password)" as NoweHaslo
         state if_zmiana_udana <<choice>>
-        
+
         WyslanieResetu --> NoweHaslo: "Kliknięcie w link z emaila"
         NoweHaslo --> if_zmiana_udana: "Zapisz nowe hasło"
         if_zmiana_udana --> EkranLogowania: Sukces
@@ -67,10 +67,10 @@ stateDiagram-v2
         state "Wylogowanie" as WylogowanieStan
 
         CallbackAuth --> Dashboard: Utworzenie sesji
-        
+
         Dashboard --> ListaPlanerow: Nawigacja
         ListaPlanerow --> Dashboard: Wybór planera
-        
+
         Dashboard --> UstawieniaKonta: Menu użytkownika
         UstawieniaKonta --> WylogowanieStan: "Wyloguj"
         WylogowanieStan --> EkranLogowania: Usunięcie sesji

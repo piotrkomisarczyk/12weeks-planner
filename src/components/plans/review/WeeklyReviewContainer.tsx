@@ -27,9 +27,6 @@ export default function WeeklyReviewContainer({
   initialGoals,
   planStatus,
 }: WeeklyReviewContainerProps) {
-  // Compute flags from plan status
-  const isReadOnly = isPlanReadOnly(planStatus) || isPlanReady(planStatus);
-
   // Use custom hook for state management and business logic
   const { review, goals, error, updateReflection, updateGoalProgress, toggleMilestone, toggleCompletion } =
     useWeeklyReview({

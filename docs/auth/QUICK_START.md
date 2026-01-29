@@ -24,6 +24,7 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...  # anon key
 ### 2. Utwórz użytkownika testowego w Supabase
 
 **Opcja A: Przez Dashboard**
+
 1. Otwórz Supabase Dashboard
 2. Idź do Authentication > Users
 3. Kliknij "Add user"
@@ -32,6 +33,7 @@ PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...  # anon key
 6. ✅ Disable email confirmation (dla testów)
 
 **Opcja B: Przez SQL**
+
 ```sql
 -- W Supabase SQL Editor
 INSERT INTO auth.users (
@@ -76,6 +78,7 @@ npm run dev
 ## 🎯 Szybkie Testy
 
 ### Test 1: Poprawne logowanie
+
 ```
 URL: http://localhost:3000/login
 Email: test@example.com
@@ -84,6 +87,7 @@ Expected: Redirect to /plans or /plans/{id}
 ```
 
 ### Test 2: Błędne hasło
+
 ```
 URL: http://localhost:3000/login
 Email: test@example.com
@@ -92,6 +96,7 @@ Expected: Toast "Invalid email or password"
 ```
 
 ### Test 3: Ochrona tras
+
 ```
 URL: http://localhost:3000/plans (bez logowania)
 Expected: Redirect to /login
@@ -102,15 +107,19 @@ Expected: Redirect to /login
 ## 🐛 Troubleshooting
 
 ### Problem: "Cannot connect to Supabase"
+
 **Rozwiązanie:** Sprawdź czy zmienne w `.env` są poprawne
 
 ### Problem: "Invalid email or password" mimo poprawnych danych
-**Rozwiązanie:** 
+
+**Rozwiązanie:**
+
 1. Sprawdź czy użytkownik istnieje w Supabase
 2. Sprawdź czy email jest potwierdzony
 3. Sprawdź czy używasz `PUBLIC_SUPABASE_ANON_KEY` (nie service_role)
 
 ### Problem: Redirect loop
+
 **Rozwiązanie:** Sprawdź czy middleware PUBLIC_PATHS zawiera `/login`
 
 ---

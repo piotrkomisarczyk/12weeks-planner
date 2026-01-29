@@ -11,6 +11,7 @@
 ## 🎯 Cel Projektu
 
 Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
+
 - `docs/auth/auth-spec.md`
 - `docs/prd.md` (US-002)
 - `.cursor/rules/supabase-auth.mdc`
@@ -21,37 +22,43 @@ Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
 ## 📦 Zrealizowane Komponenty
 
 ### 1. **Infrastruktura Supabase (@supabase/ssr)**
-   - ✅ `src/lib/supabase/client.ts` - Browser client (React)
-   - ✅ `src/lib/supabase/server.ts` - Server client (SSR)
-   - ✅ Proper cookie management (`getAll`/`setAll`)
+
+- ✅ `src/lib/supabase/client.ts` - Browser client (React)
+- ✅ `src/lib/supabase/server.ts` - Server client (SSR)
+- ✅ Proper cookie management (`getAll`/`setAll`)
 
 ### 2. **Middleware Auth Guard**
-   - ✅ `src/middleware/index.ts`
-   - ✅ Session management per request
-   - ✅ Protected routes (redirect to `/login`)
-   - ✅ Guest routes protection (redirect to `/`)
+
+- ✅ `src/middleware/index.ts`
+- ✅ Session management per request
+- ✅ Protected routes (redirect to `/login`)
+- ✅ Guest routes protection (redirect to `/`)
 
 ### 3. **Backend API**
-   - ✅ `src/pages/api/auth/login.ts`
-   - ✅ Zod validation
-   - ✅ Secure error handling (generic messages)
-   - ✅ Proper HTTP status codes
+
+- ✅ `src/pages/api/auth/login.ts`
+- ✅ Zod validation
+- ✅ Secure error handling (generic messages)
+- ✅ Proper HTTP status codes
 
 ### 4. **Frontend**
-   - ✅ `src/components/auth/LoginForm.tsx` - API integration
-   - ✅ `src/pages/login.astro` - Clean implementation
-   - ✅ Toast notifications (sonner)
-   - ✅ Loading states
+
+- ✅ `src/components/auth/LoginForm.tsx` - API integration
+- ✅ `src/pages/login.astro` - Clean implementation
+- ✅ Toast notifications (sonner)
+- ✅ Loading states
 
 ### 5. **Smart Redirect Logic (US-002)**
-   - ✅ `src/pages/index.astro`
-   - ✅ Check for active planner
-   - ✅ Redirect to dashboard OR planners list
+
+- ✅ `src/pages/index.astro`
+- ✅ Check for active planner
+- ✅ Redirect to dashboard OR planners list
 
 ### 6. **Configuration**
-   - ✅ `src/env.d.ts` - TypeScript types
-   - ✅ `.env.example` - Documentation
-   - ✅ Updated `src/pages/api/v1/plans/active.ts`
+
+- ✅ `src/env.d.ts` - TypeScript types
+- ✅ `.env.example` - Documentation
+- ✅ Updated `src/pages/api/v1/plans/active.ts`
 
 ---
 
@@ -122,32 +129,33 @@ Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
 
 ## 🔒 Security Features
 
-| Feature | Status | Implementation |
-|---------|--------|----------------|
-| Password hashing | ✅ | Handled by Supabase |
-| Secure cookies | ✅ | httpOnly, secure, sameSite: lax |
-| CSRF protection | ✅ | SameSite cookies |
-| Generic error messages | ✅ | No user enumeration |
-| Input validation | ✅ | Zod schema |
-| Session per request | ✅ | Server client pattern |
+| Feature                | Status | Implementation                  |
+| ---------------------- | ------ | ------------------------------- |
+| Password hashing       | ✅     | Handled by Supabase             |
+| Secure cookies         | ✅     | httpOnly, secure, sameSite: lax |
+| CSRF protection        | ✅     | SameSite cookies                |
+| Generic error messages | ✅     | No user enumeration             |
+| Input validation       | ✅     | Zod schema                      |
+| Session per request    | ✅     | Server client pattern           |
 
 ---
 
 ## 📊 Decyzje Architektoniczne
 
-| # | Pytanie | Wybór | Uzasadnienie |
-|---|---------|-------|--------------|
-| 1 | Supabase Client Strategy | **A** - Separacja | Best practices @supabase/ssr |
-| 2 | Login Architecture | **B** - API endpoint | Lepsza kontrola, zgodne z rules |
-| 3 | Redirect Logic | **B** - W index.astro | SSR best practice |
-| 4 | Route Protection | **A** - Middleware | Automatyczna, centralna |
-| 5 | Error Handling | **C** - Hybrydowa | UX + Security balance |
+| #   | Pytanie                  | Wybór                 | Uzasadnienie                    |
+| --- | ------------------------ | --------------------- | ------------------------------- |
+| 1   | Supabase Client Strategy | **A** - Separacja     | Best practices @supabase/ssr    |
+| 2   | Login Architecture       | **B** - API endpoint  | Lepsza kontrola, zgodne z rules |
+| 3   | Redirect Logic           | **B** - W index.astro | SSR best practice               |
+| 4   | Route Protection         | **A** - Middleware    | Automatyczna, centralna         |
+| 5   | Error Handling           | **C** - Hybrydowa     | UX + Security balance           |
 
 ---
 
 ## 📁 Zmodyfikowane Pliki
 
 ### Nowe pliki (8):
+
 ```
 ✅ src/lib/supabase/client.ts
 ✅ src/lib/supabase/server.ts
@@ -160,6 +168,7 @@ Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
 ```
 
 ### Zmodyfikowane pliki (7):
+
 ```
 ✅ src/middleware/index.ts
 ✅ src/components/auth/LoginForm.tsx
@@ -178,6 +187,7 @@ Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
 ## ✅ Zgodność z Wymaganiami
 
 ### US-002: Logowanie użytkownika
+
 - ✅ Formularz logowania z email i hasłem
 - ✅ Link do formularza rejestracji (istniejący)
 - ✅ Po sukcesie, przekierowanie do dashboardu lub listy planerów
@@ -186,12 +196,14 @@ Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
 - ✅ Wymóg logowania dla wszystkich stron
 
 ### auth-spec.md - Sekcja 3.2
+
 - ✅ Formularz na `/login`
 - ✅ Wywołanie `signInWithPassword()`
 - ✅ Automatyczne cookies
 - ✅ Logika aktywnego plannera
 
 ### Cursor Rules
+
 - ✅ `@supabase/ssr` pattern
 - ✅ Tylko `getAll`/`setAll` dla cookies
 - ✅ SSR configuration
@@ -204,6 +216,7 @@ Integracja flow logowania w aplikacji 12 Weeks Planner zgodnie z:
 ## 🧪 Następne Kroki - Testowanie
 
 ### 1. Konfiguracja środowiska
+
 ```bash
 # Skopiuj i wypełnij .env
 cp .env.example .env
@@ -213,9 +226,11 @@ npm run dev
 ```
 
 ### 2. Testy manualne
+
 Użyj checklisty: `docs/auth/MANUAL_TEST_CHECKLIST.md`
 
 **Kluczowe scenariusze:**
+
 1. ✅ Udane logowanie z aktywnym plannerem
 2. ✅ Udane logowanie bez aktywnego plannera
 3. ✅ Błędne dane logowania
@@ -224,6 +239,7 @@ Użyj checklisty: `docs/auth/MANUAL_TEST_CHECKLIST.md`
 6. ✅ Ochrona tras
 
 ### 3. Weryfikacja w Supabase Dashboard
+
 - Sprawdź czy użytkownik testowy istnieje
 - Sprawdź czy email jest potwierdzony
 - Sprawdź logi autentykacji
@@ -247,20 +263,26 @@ Następujące elementy **NIE** są częścią tego zadania:
 ## 📝 Notatki Techniczne
 
 ### Zmienne środowiskowe
+
 Aplikacja wymaga 4 zmiennych Supabase:
+
 - `SUPABASE_URL` (server)
 - `SUPABASE_KEY` (server)
 - `PUBLIC_SUPABASE_URL` (client)
 - `PUBLIC_SUPABASE_ANON_KEY` (client)
 
 ### Cookies
+
 Supabase ustawia następujące cookies:
+
 - `sb-<project-ref>-auth-token` (access token)
 - `sb-<project-ref>-auth-token.0` (refresh token, jeśli > 4KB)
 - `sb-<project-ref>-auth-token.1` (continuation)
 
 ### Middleware Flow
+
 Middleware działa na **każdym** request:
+
 1. Tworzy Supabase client
 2. Pobiera sesję użytkownika
 3. Przypisuje do `locals.user`
@@ -293,7 +315,7 @@ Middleware działa na **każdym** request:
 ✅ Wszystkie wymagania spełnione  
 ✅ Build bez błędów  
 ✅ Zgodne z best practices  
-✅ Gotowe do testowania manualnego  
+✅ Gotowe do testowania manualnego
 
 **Następny krok:** Przeprowadź testy manualne zgodnie z checklistą.
 

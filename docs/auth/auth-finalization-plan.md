@@ -13,23 +13,28 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 ### 2.1. Frontend - Login Flow ✅
 
 #### Strona Logowania (`src/pages/login.astro`)
+
 **Status:** ✅ Kompletna i zgodna z najlepszymi praktykami
 
 **Pozytywne aspekty:**
+
 - Poprawne użycie `AuthLayout` dla spójnego UI
 - Komponent React załadowany z dyrektywą `client:load`
 - Integracja z systemem powiadomień (Sonner/Toaster)
 - Middleware automatycznie przekierowuje zalogowanych użytkowników
 
 **Zgodność z regułami Astro:**
+
 - ✅ SSR włączone (brak `export const prerender = true`)
 - ✅ Wykorzystuje layout system
 - ✅ Minimalistyczna struktura strony
 
 #### Komponent LoginForm (`src/components/auth/LoginForm.tsx`)
+
 **Status:** ✅ Kompletny i zgodny z najlepszymi praktykami React
 
 **Pozytywne aspekty:**
+
 - ✅ Funkcyjny komponent z hooks (zgodnie z regułami React)
 - ✅ Wykorzystanie `useCallback` dla optymalizacji re-renderów
 - ✅ Wykorzystanie `useEffect` do obsługi parametrów URL (verification status)
@@ -42,6 +47,7 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - ✅ Toast notifications dla UX feedback
 
 **Zgodność z User Stories:**
+
 - ✅ US-002: Formularz logowania z email i hasłem
 - ✅ US-002: Link do formularza rejestracji
 - ✅ US-002: Przekierowanie do dashboard po sukcesie
@@ -50,15 +56,18 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - ✅ US-002: Wymóg zalogowania do korzystania z systemu
 
 **Potencjalne ulepszenia (opcjonalne):**
+
 - Rozważenie użycia `useTransition` dla non-urgent updates (zgodnie z regułami React)
 - Ekstrakcja logiki walidacji do custom hook (`useLoginValidation`)
 
 ### 2.2. Backend - API Endpoint ✅
 
 #### Login API (`src/pages/api/auth/login.ts`)
+
 **Status:** ✅ Kompletny i zgodny z najlepszymi praktykami
 
 **Pozytywne aspekty:**
+
 - ✅ `export const prerender = false` (zgodnie z regułami Astro)
 - ✅ Walidacja z Zod (zgodnie z regułami backend)
 - ✅ Wykorzystanie `locals.supabase` z middleware
@@ -70,6 +79,7 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - ✅ Structured error responses z kodem błędu
 
 **Zgodność z User Stories:**
+
 - ✅ US-002: Autentykacja z email i hasłem
 - ✅ US-001: Wymóg weryfikacji email przed logowaniem
 - ✅ US-002: Obsługa błędów logowania
@@ -77,9 +87,11 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 ### 2.3. Middleware - Auth Guard ✅
 
 #### Middleware (`src/middleware/index.ts`)
+
 **Status:** ✅ Kompletny i zgodny z najlepszymi praktykami
 
 **Pozytywne aspekty:**
+
 - ✅ Tworzenie Supabase server client per-request
 - ✅ Przypisanie `supabase` i `user` do `locals`
 - ✅ Weryfikacja email confirmation w middleware
@@ -88,19 +100,23 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - ✅ Lista PUBLIC_PATHS dla publicznych endpointów
 
 **Zgodność z User Stories:**
+
 - ✅ US-002: Przekierowanie do /plans dla zalogowanych
 - ✅ US-002: Przekierowanie do /login dla niezalogowanych
 - ✅ US-011: Ochrona danych użytkownika
 
 **Potencjalne ulepszenia (opcjonalne):**
+
 - Dodanie `/email-confirmed` do PUBLIC_PATHS (obecnie brakuje)
 
 ### 2.4. Supabase Integration ✅
 
 #### Server Client (`src/lib/supabase/server.ts`)
+
 **Status:** ✅ Kompletny i zgodny z najlepszymi praktykami SSR
 
 **Pozytywne aspekty:**
+
 - ✅ Wykorzystanie `@supabase/ssr` (zgodnie z regułami Supabase Auth)
 - ✅ Użycie TYLKO `getAll` i `setAll` (zgodnie z wymaganiami)
 - ✅ Proper cookie options (httpOnly, secure, sameSite)
@@ -108,50 +124,63 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - ✅ TypeScript typing z Database types
 
 **Zgodność z regułami Supabase Auth:**
+
 - ✅ Używa `@supabase/ssr` zamiast auth-helpers
 - ✅ Używa TYLKO `getAll` i `setAll`
 - ✅ Proper cookie management
 
 #### Client (`src/db/supabase.client.ts`)
+
 **Status:** ⚠️ Wymaga weryfikacji
 
 **Uwagi:**
+
 - Obecny plik używa starego podejścia (singleton)
 - Dla SSR powinien być zastąpiony przez `src/lib/supabase/server.ts`
 - Jeśli jest używany w komponentach React, należy utworzyć dedykowany browser client
 
 **Rekomendacja:**
+
 - Utworzyć `src/lib/supabase/client.ts` dla browser (zgodnie z regułami Supabase Auth)
 - Usunąć lub zdeprecjonować `src/db/supabase.client.ts`
 
 ### 2.5. Pozostałe Endpointy Auth ✅
 
 #### Register API (`src/pages/api/auth/register.ts`)
+
 **Status:** ✅ Kompletny
+
 - Walidacja z Zod schema
 - Email verification flow
 - Natychmiastowe wylogowanie po rejestracji
 - Redirect URL z parametrem `next=email-confirmed`
 
 #### Logout API (`src/pages/api/auth/logout.ts`)
+
 **Status:** ✅ Kompletny
+
 - Wykorzystuje `locals.supabase.auth.signOut()`
 - Proper error handling
 
 #### Callback Handler (`src/pages/auth/callback.ts`)
+
 **Status:** ✅ Kompletny
+
 - Obsługa PKCE flow (code exchange)
 - Obsługa OTP flow (token_hash)
 - Rozróżnienie między email confirmation a password reset
 - Proper error handling i redirects
 
 #### Forgot Password & Update Password
+
 **Status:** ✅ Kompletne (na podstawie plików w projekcie)
 
 ### 2.6. TypeScript Types ✅
 
 #### Environment Types (`src/env.d.ts`)
+
 **Status:** ✅ Kompletny
+
 - Definicja `Locals` z `supabase` i `user`
 - Environment variables dla Supabase
 - Proper typing dla Database
@@ -161,7 +190,9 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 ## 3. Analiza Zgodności z User Stories
 
 ### ✅ US-001: Rejestracja nowego użytkownika
+
 **Status:** Zaimplementowane
+
 - Formularz rejestracji z email i hasłem ✅
 - Email weryfikacyjny ✅
 - Przekierowanie po potwierdzeniu ✅
@@ -169,7 +200,9 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - Walidacja formatu email ✅
 
 ### ✅ US-002: Logowanie użytkownika
+
 **Status:** Zaimplementowane
+
 - Formularz logowania ✅
 - Link do rejestracji ✅
 - Przekierowanie do dashboard/planners ✅
@@ -178,7 +211,9 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - Wymóg logowania dla wszystkich stron ✅
 
 ### ✅ US-003: Reset hasła
+
 **Status:** Zaimplementowane
+
 - Link "Forgot password" ✅
 - Email z linkiem resetu ✅
 - Formularz nowego hasła ✅
@@ -187,7 +222,9 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 - Zmiana hasła z UserMenu ✅
 
 ### ✅ US-011: Wylogowanie i bezpieczeństwo
+
 **Status:** Zaimplementowane
+
 - Wylogowanie z UserMenu ✅
 - Czyszczenie sesji ✅
 - Automatyczne wylogowanie (token expiry) ✅
@@ -202,6 +239,7 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 **Problem:** RLS został wyłączony w migracji `20251016120600_disable_all_policies.sql`
 
 **Konsekwencje:**
+
 - ❌ Brak izolacji danych między użytkownikami
 - ❌ Każdy zalogowany użytkownik ma dostęp do danych innych użytkowników
 - ❌ Naruszenie wymagań bezpieczeństwa (US-011)
@@ -211,6 +249,7 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 ### 4.2. Stan Migracji
 
 **Wykonane migracje:**
+
 1. ✅ `20251016120000_create_initial_schema.sql` - Schemat tabel
 2. ✅ `20251016120100_create_indexes.sql` - Indeksy
 3. ✅ `20251016120200_enable_rls.sql` - Włączenie RLS
@@ -229,55 +268,71 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 **Polityki zdefiniowane w `20251016120300_create_rls_policies.sql`:**
 
 #### Tabela: `plans`
+
 ```sql
 -- SELECT: auth.uid() = user_id
 -- INSERT: auth.uid() = user_id
 -- UPDATE: auth.uid() = user_id
 -- DELETE: auth.uid() = user_id
 ```
+
 **Status:** ✅ Poprawne - bezpośrednie porównanie user_id
 
 #### Tabela: `long_term_goals`
+
 ```sql
 -- SELECT/INSERT/UPDATE/DELETE: EXISTS (SELECT 1 FROM plans WHERE plans.id = long_term_goals.plan_id AND plans.user_id = auth.uid())
 ```
+
 **Status:** ✅ Poprawne - weryfikacja przez relację z plans
 
 #### Tabela: `milestones`
+
 ```sql
 -- SELECT/INSERT/UPDATE/DELETE: EXISTS (SELECT 1 FROM long_term_goals JOIN plans ...)
 ```
+
 **Status:** ✅ Poprawne - weryfikacja przez 2 joiny (goals -> plans)
 
 #### Tabela: `weekly_goals`
+
 ```sql
 -- SELECT/INSERT/UPDATE/DELETE: EXISTS (SELECT 1 FROM plans WHERE plans.id = weekly_goals.plan_id AND plans.user_id = auth.uid())
 ```
+
 **Status:** ✅ Poprawne
 
 #### Tabela: `tasks`
+
 ```sql
 -- SELECT/INSERT/UPDATE/DELETE: EXISTS (SELECT 1 FROM plans WHERE plans.id = tasks.plan_id AND plans.user_id = auth.uid())
 ```
+
 **Status:** ✅ Poprawne
 
 #### Tabela: `task_history`
+
 ```sql
 -- SELECT/INSERT: EXISTS (SELECT 1 FROM tasks JOIN plans ...)
 -- No UPDATE/DELETE policies (history immutable)
 ```
+
 **Status:** ✅ Poprawne
 
 #### Tabela: `weekly_reviews`
+
 ```sql
 -- SELECT/INSERT/UPDATE/DELETE: EXISTS (SELECT 1 FROM plans WHERE plans.id = weekly_reviews.plan_id AND plans.user_id = auth.uid())
 ```
+
 **Status:** ✅ Poprawne
 
 #### Tabela: `user_metrics`
+
 ```sql
 -- SELECT/INSERT/UPDATE/DELETE: auth.uid() = user_id
 ```
+
 **Status:** ✅ Poprawne
 
 **Wniosek:** Wszystkie polityki RLS są poprawnie zdefiniowane i zgodne z wymaganiami bezpieczeństwa.
@@ -298,6 +353,7 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 ### 5.1. Priorytet: KRYTYCZNY 🔴
 
 **Uzasadnienie:**
+
 - Bezpieczeństwo danych użytkowników
 - Zgodność z GDPR
 - Zgodność z wymaganiami PRD (prywatność)
@@ -306,9 +362,11 @@ Dokument zawiera kompleksową analizę aktualnego stanu implementacji modułu au
 ### 5.2. Kroki Implementacji
 
 #### Krok 1: Utworzenie Nowej Migracji - Re-enable RLS
+
 **Plik:** `supabase/migrations/20260127000000_re_enable_rls.sql`
 
 **Zawartość:**
+
 ```sql
 -- Migration: Re-enable Row Level Security
 -- Purpose: Restore RLS policies for data isolation and security
@@ -655,15 +713,17 @@ USING (auth.uid() = user_id);
 #### Krok 2: Weryfikacja Migracji
 
 **Przed uruchomieniem:**
+
 1. Backup bazy danych
 2. Test na środowisku staging
 3. Weryfikacja czy triggery działają poprawnie
 
 **Po uruchomieniu:**
+
 ```sql
 -- Sprawdź czy RLS jest włączony
-SELECT tablename, rowsecurity 
-FROM pg_tables 
+SELECT tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public';
 
 -- Sprawdź polityki
@@ -700,6 +760,7 @@ ORDER BY tablename, policyname;
 #### Krok 4: Deployment
 
 **Proces:**
+
 1. Przegląd kodu migracji (peer review)
 2. Backup produkcyjnej bazy danych
 3. Test migracji na staging
@@ -709,6 +770,7 @@ ORDER BY tablename, policyname;
 
 **Rollback Plan:**
 Jeśli wystąpią problemy, można tymczasowo wyłączyć RLS:
+
 ```sql
 -- TYLKO W PRZYPADKU KRYTYCZNEGO BŁĘDU
 ALTER TABLE plans DISABLE ROW LEVEL SECURITY;
@@ -722,20 +784,20 @@ ALTER TABLE plans DISABLE ROW LEVEL SECURITY;
 ### 6.1. Zadania Opcjonalne - Frontend
 
 #### 1. Refaktoryzacja Supabase Client
+
 **Priorytet:** Średni
 **Opis:** Utworzenie dedykowanego browser client dla komponentów React
 
 **Kroki:**
+
 1. Utworzyć `src/lib/supabase/client.ts`:
+
 ```typescript
-import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@/db/database.types';
+import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/db/database.types";
 
 export const createBrowserSupabaseClient = () => {
-  return createBrowserClient<Database>(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-  );
+  return createBrowserClient<Database>(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 };
 ```
 
@@ -743,34 +805,38 @@ export const createBrowserSupabaseClient = () => {
 3. Usunąć lub zdeprecjonować `src/db/supabase.client.ts`
 
 #### 2. Dodanie `/email-confirmed` do PUBLIC_PATHS
+
 **Priorytet:** Niski
 **Opis:** Dodać `/email-confirmed` do listy publicznych ścieżek w middleware
 
 **Zmiana w `src/middleware/index.ts`:**
+
 ```typescript
 const PUBLIC_PATHS = [
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/update-password',
-  '/email-confirmed', // <- Dodać
-  '/auth/callback',
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/update-password",
+  "/email-confirmed", // <- Dodać
+  "/auth/callback",
   // ... API endpoints
 ];
 ```
 
 #### 3. Custom Hook dla Walidacji
+
 **Priorytet:** Niski (optymalizacja)
 **Opis:** Ekstrakcja logiki walidacji do custom hook
 
 **Przykład:**
+
 ```typescript
 // src/components/hooks/useLoginValidation.ts
 export function useLoginValidation() {
   const validate = useCallback((formData: LoginFormData) => {
     // ... validation logic
   }, []);
-  
+
   return { validate };
 }
 ```
@@ -778,19 +844,23 @@ export function useLoginValidation() {
 ### 6.2. Zadania Opcjonalne - Backend
 
 #### 1. Rate Limiting dla Login Endpoint
+
 **Priorytet:** Średni (security)
 **Opis:** Dodanie rate limiting dla ochrony przed brute-force attacks
 
 **Implementacja:**
+
 - Użyć middleware lub Supabase Edge Functions
 - Limit: np. 5 prób logowania na 15 minut
 - Zwracać HTTP 429 (Too Many Requests)
 
 #### 2. Audit Logging
+
 **Priorytet:** Niski (dla przyszłości)
 **Opis:** Logowanie ważnych zdarzeń (login, logout, failed attempts)
 
 **Implementacja:**
+
 - Utworzyć tabelę `audit_logs`
 - Trigger lub application-level logging
 - Przechowywać: user_id, action, timestamp, IP, user_agent
@@ -798,19 +868,23 @@ export function useLoginValidation() {
 ### 6.3. Zadania Opcjonalne - Baza Danych
 
 #### 1. Optymalizacja Polityk RLS
+
 **Priorytet:** Niski (po wdrożeniu RLS)
 **Opis:** Monitorowanie i optymalizacja wydajności polityk RLS
 
 **Kroki:**
+
 1. Użyć `EXPLAIN ANALYZE` dla kluczowych zapytań
 2. Sprawdzić czy indeksy są wykorzystywane
 3. Rozważyć materialized views dla złożonych polityk
 
 #### 2. Backup Strategy
+
 **Priorytet:** Średni
 **Opis:** Weryfikacja i dokumentacja strategii backupu
 
 **Elementy:**
+
 - Automated daily backups (Supabase)
 - Manual export scripts (pg_dump)
 - Retention policy (7 dni dla free tier)
@@ -819,32 +893,38 @@ export function useLoginValidation() {
 ### 6.4. Zadania Opcjonalne - Testing
 
 #### 1. Integration Tests dla Auth Flow
+
 **Priorytet:** Średni
 **Opis:** Testy end-to-end dla pełnego flow autentykacji
 
 **Test Cases:**
+
 - Registration → Email verification → Login
 - Login → Access protected route
 - Logout → Redirect to login
 - Forgot password → Reset → Login
 
 #### 2. RLS Policy Tests
+
 **Priorytet:** Wysoki (po wdrożeniu RLS)
 **Opis:** Testy jednostkowe dla polityk RLS
 
 **Narzędzia:**
+
 - pgTAP dla PostgreSQL
 - Supabase Test Helpers
 
 ### 6.5. Zadania Opcjonalne - Documentation
 
 #### 1. API Documentation
+
 **Priorytet:** Niski
 **Opis:** Dokumentacja wszystkich endpointów auth API
 
 **Format:** OpenAPI/Swagger lub Markdown
 
 #### 2. User Guide
+
 **Priorytet:** Niski
 **Opis:** Instrukcja dla użytkowników (rejestracja, logowanie, reset hasła)
 
@@ -855,6 +935,7 @@ export function useLoginValidation() {
 ### 7.1. Zakończone Zadania ✅
 
 **Frontend:**
+
 - ✅ Strona logowania (`/login`)
 - ✅ Komponent LoginForm z walidacją
 - ✅ Strona rejestracji (`/register`)
@@ -867,6 +948,7 @@ export function useLoginValidation() {
 - ✅ Toast notifications (Sonner)
 
 **Backend:**
+
 - ✅ API endpoint: `/api/auth/login`
 - ✅ API endpoint: `/api/auth/register`
 - ✅ API endpoint: `/api/auth/logout`
@@ -880,6 +962,7 @@ export function useLoginValidation() {
 - ✅ Password reset flow
 
 **Baza Danych:**
+
 - ✅ Schemat tabel
 - ✅ Indeksy
 - ✅ Views
@@ -887,6 +970,7 @@ export function useLoginValidation() {
 - ✅ Definicje polityk RLS (w migracji)
 
 **Dokumentacja:**
+
 - ✅ Specyfikacja techniczna (auth-spec.md)
 - ✅ Dokumentacja forgot password flow
 - ✅ Dokumentacja registration confirmation fix
@@ -901,15 +985,18 @@ export function useLoginValidation() {
 ### 7.3. Zadania Opcjonalne do Rozważenia
 
 **Wysoki priorytet:**
+
 - Testy RLS policies
 - Rate limiting dla login endpoint
 
 **Średni priorytet:**
+
 - Refaktoryzacja Supabase client (browser vs server)
 - Backup strategy verification
 - Integration tests dla auth flow
 
 **Niski priorytet:**
+
 - Custom hooks dla walidacji
 - Audit logging
 - API documentation
@@ -922,17 +1009,20 @@ export function useLoginValidation() {
 ### 8.1. Metryki Techniczne
 
 **Bezpieczeństwo:**
+
 - ✅ RLS włączony na wszystkich tabelach
 - ✅ Polityki RLS działają poprawnie (100% test coverage)
 - ✅ Brak wycieków danych między użytkownikami
 - ✅ Proper cookie management (httpOnly, secure, sameSite)
 
 **Wydajność:**
+
 - ✅ Czas odpowiedzi login endpoint < 500ms (p95)
 - ✅ Polityki RLS nie spowalniają zapytań > 10%
 - ✅ Brak błędów 500 w production
 
 **Funkcjonalność:**
+
 - ✅ Wszystkie User Stories (US-001, US-002, US-003, US-011) zaimplementowane
 - ✅ Email verification flow działa
 - ✅ Password reset flow działa
@@ -941,11 +1031,13 @@ export function useLoginValidation() {
 ### 8.2. Metryki Biznesowe (z PRD)
 
 **Z User Stories:**
+
 - 90% zarejestrowanych użytkowników tworzy co najmniej 1 planer
 - 50% użytkowników realizuje co najmniej 1 cel na 100% w pierwszym planerze
 - Czas sesji >5 min dla 70% wizyt
 
 **Tracking:**
+
 - Flaga `first_planner_created` w `user_metrics` ✅
 - Flaga `first_planner_completed` w `user_metrics` ✅
 - Triggery aktualizujące metryki ✅
@@ -955,21 +1047,25 @@ export function useLoginValidation() {
 ## 9. Harmonogram Wdrożenia
 
 ### Faza 1: Przywrócenie RLS (KRYTYCZNE)
+
 **Czas: 1-2 dni**
 
 **Dzień 1:**
+
 - Utworzenie migracji `20260127000000_re_enable_rls.sql`
 - Przegląd kodu (peer review)
 - Backup bazy danych
 - Test na staging
 
 **Dzień 2:**
+
 - Deployment na produkcję
 - Weryfikacja polityk RLS
 - Testy izolacji danych
 - Monitoring performance
 
 ### Faza 2: Testy i Weryfikacja (WAŻNE)
+
 **Czas: 2-3 dni**
 
 - Testy RLS policies (pgTAP)
@@ -978,6 +1074,7 @@ export function useLoginValidation() {
 - Security audit
 
 ### Faza 3: Optymalizacje (OPCJONALNE)
+
 **Czas: 3-5 dni**
 
 - Rate limiting
@@ -990,30 +1087,36 @@ export function useLoginValidation() {
 ## 10. Ryzyka i Mitigation
 
 ### Ryzyko 1: Problemy z wydajnością po włączeniu RLS
+
 **Prawdopodobieństwo:** Średnie
 **Impact:** Średni
 
 **Mitigation:**
+
 - Testowanie performance przed deployment
 - Monitoring po deployment
 - Optymalizacja indeksów jeśli potrzebne
 - Rollback plan gotowy
 
 ### Ryzyko 2: Błędy w politykach RLS
+
 **Prawdopodobieństwo:** Niskie
 **Impact:** Wysoki (wyciek danych)
 
 **Mitigation:**
+
 - Dokładne testy izolacji danych
 - Peer review migracji
 - Test na staging z realnymi danymi
 - Automated tests dla polityk
 
 ### Ryzyko 3: Breaking changes dla istniejących użytkowników
+
 **Prawdopodobieństwo:** Niskie
 **Impact:** Wysoki
 
 **Mitigation:**
+
 - Migracja nie zmienia struktury danych
 - Tylko dodaje polityki RLS
 - Istniejące zapytania powinny działać bez zmian
@@ -1028,6 +1131,7 @@ export function useLoginValidation() {
 **Ogólna ocena:** ✅ Bardzo dobra
 
 Implementacja modułu autentykacji jest w dużej mierze kompletna i zgodna z najlepszymi praktykami:
+
 - Frontend wykorzystuje nowoczesne podejście React z hooks
 - Backend wykorzystuje SSR z Astro i proper Supabase integration
 - Middleware zapewnia ochronę tras
@@ -1049,12 +1153,14 @@ Jest to jedyne krytyczne zadanie pozostałe do wykonania. Polityki RLS są już 
 ### 11.4. Zgodność z PRD i User Stories
 
 **Wszystkie wymagania spełnione:**
+
 - ✅ US-001: Rejestracja z weryfikacją email
 - ✅ US-002: Logowanie z przekierowaniem
 - ✅ US-003: Reset hasła i zmiana hasła
 - ✅ US-011: Wylogowanie i bezpieczeństwo (po wdrożeniu RLS)
 
 **Metryki:**
+
 - ✅ Triggery dla user_metrics działają
 - ✅ Tracking first_planner_created i first_planner_completed
 

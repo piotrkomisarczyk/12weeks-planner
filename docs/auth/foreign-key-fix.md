@@ -37,18 +37,19 @@ const userId = locals.user?.id;
 if (!userId) {
   return new Response(
     JSON.stringify({
-      error: 'Unauthorized',
-      message: 'You must be logged in to access this resource'
+      error: "Unauthorized",
+      message: "You must be logged in to access this resource",
     } as ErrorResponse),
     {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     }
   );
 }
 ```
 
 **Changes Made:**
+
 - Removed import of `DEFAULT_USER_ID`
 - Added proper authentication check in both GET and POST handlers
 - Returns 401 Unauthorized if user is not authenticated
@@ -59,27 +60,28 @@ Corrected the middleware to consistently use `locals.user` (which includes email
 
 ```typescript
 // OLD CODE - INCONSISTENT
-if (user && isPublicPath && url.pathname !== '/api/auth/logout') {
-  return redirect('/plans');
+if (user && isPublicPath && url.pathname !== "/api/auth/logout") {
+  return redirect("/plans");
 }
 
 if (!user && !isPublicPath) {
-  return redirect('/login');
+  return redirect("/login");
 }
 ```
 
 ```typescript
 // NEW CODE - CONSISTENT
-if (locals.user && isPublicPath && url.pathname !== '/api/auth/logout') {
-  return redirect('/plans');
+if (locals.user && isPublicPath && url.pathname !== "/api/auth/logout") {
+  return redirect("/plans");
 }
 
 if (!locals.user && !isPublicPath) {
-  return redirect('/login');
+  return redirect("/login");
 }
 ```
 
 **Why This Matters:**
+
 - `user` - Raw user object from Supabase (may have unverified email)
 - `locals.user` - Only set if email is verified
 - Ensures consistent authentication state throughout the application
@@ -89,6 +91,7 @@ if (!locals.user && !isPublicPath) {
 After applying these fixes, test the following flow:
 
 1. **Register a new user**
+
    ```bash
    POST /api/auth/register
    {
@@ -102,6 +105,7 @@ After applying these fixes, test the following flow:
    - Should redirect to `/login?verified=true`
 
 3. **Login**
+
    ```bash
    POST /api/auth/login
    {
@@ -111,6 +115,7 @@ After applying these fixes, test the following flow:
    ```
 
 4. **Create a plan**
+
    ```bash
    POST /api/v1/plans
    {
@@ -118,7 +123,7 @@ After applying these fixes, test the following flow:
      "start_date": "2026-01-27"
    }
    ```
-   
+
    Should return 201 Created with the plan data
 
 ## Important Notes
@@ -129,15 +134,17 @@ The middleware requires email verification before allowing access:
 
 ```typescript
 // Only set locals.user if email is verified
-locals.user = user && isEmailVerified
-  ? {
-      id: user.id,
-      email: user.email,
-    }
-  : null;
+locals.user =
+  user && isEmailVerified
+    ? {
+        id: user.id,
+        email: user.email,
+      }
+    : null;
 ```
 
 **Implications:**
+
 - Users must verify their email before they can create plans
 - If Supabase email confirmation is disabled, users can access immediately after registration
 - If enabled, users must click the verification link first
@@ -149,6 +156,7 @@ locals.user = user && isEmailVerified
 The following changes were applied across the entire codebase:
 
 #### API Endpoints Fixed (31 files):
+
 - ✅ `/api/v1/plans.ts` (GET, POST)
 - ✅ `/api/v1/plans/[id].ts` (GET, PATCH, DELETE)
 - ✅ `/api/v1/plans/[id]/dashboard.ts` (GET)
@@ -178,6 +186,7 @@ The following changes were applied across the entire codebase:
 - ✅ `/api/v1/export.ts` (GET)
 
 #### Astro Pages Fixed (7 files):
+
 - ✅ `/pages/plans/[id]/index.astro`
 - ✅ `/pages/plans/[id]/edit.astro`
 - ✅ `/pages/plans/[id]/goals.astro`
@@ -187,34 +196,37 @@ The following changes were applied across the entire codebase:
 - ✅ `/pages/plans/[id]/week/[weekNumber]/day/[dayNumber].astro`
 
 #### Layout Fixed:
+
 - ✅ `/layouts/Layout.astro`
 
 **Pattern Applied:**
 
 For API endpoints:
+
 ```typescript
 const userId = locals.user?.id;
 
 if (!userId) {
   return new Response(
     JSON.stringify({
-      error: 'Unauthorized',
-      message: 'You must be logged in to access this resource'
+      error: "Unauthorized",
+      message: "You must be logged in to access this resource",
     } as ErrorResponse),
     {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     }
   );
 }
 ```
 
 For Astro pages:
+
 ```typescript
 const userId = Astro.locals.user?.id;
 
 if (!userId) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 ```
 
@@ -223,13 +235,16 @@ if (!userId) {
 **Total: 40 files updated**
 
 ### Core Infrastructure (2 files):
+
 1. `/src/middleware/index.ts` - Fixed inconsistent user checks
 2. `/src/layouts/Layout.astro` - Removed DEFAULT_USER_ID fallback
 
 ### API Endpoints (31 files):
+
 All API endpoints in `/src/pages/api/v1/` now use authenticated user from `locals.user`
 
 ### Astro Pages (7 files):
+
 All plan pages in `/src/pages/plans/` now use authenticated user from `Astro.locals.user`
 
 ## Related Documentation

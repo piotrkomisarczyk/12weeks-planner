@@ -3,6 +3,7 @@
 ## Problem
 
 PlanContextBar (podmenu z opcjami nawigacyjnymi) nie wyświetlało się w widokach:
+
 - `/plans/[id]` (Dashboard)
 - `/plans/[id]/goals` (Goals)
 - `/plans/[id]/hierarchy` (Hierarchy)
@@ -22,21 +23,23 @@ Dodano fallback do `DEFAULT_USER_ID` w przypadku braku zalogowanego użytkownika
 
 ```typescript
 // Get current user (with fallback to DEFAULT_USER_ID for development)
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 const userId = user?.id || DEFAULT_USER_ID;
 
 // Extract plan ID from URL if we're in a plan context
-const urlParts = Astro.url.pathname.split('/').filter(Boolean);
+const urlParts = Astro.url.pathname.split("/").filter(Boolean);
 let plan: PlanSummary | null = null;
 
 // Check if we're on a plan-specific page: /plans/[id]/...
-if (urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
+if (urlParts[0] === "plans" && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
   const planId = urlParts[1];
-  
+
   try {
     const planService = new PlanService(supabase);
     const fullPlan = await planService.getPlanById(planId, userId);
-    
+
     if (fullPlan) {
       // Create a minimal PlanSummary for navigation
       plan = {
@@ -47,15 +50,16 @@ if (urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0
       };
     }
   } catch (error) {
-    console.error('Failed to fetch plan for navigation:', error);
+    console.error("Failed to fetch plan for navigation:", error);
     // Continue without plan data - TopNavigation will handle null plan
   }
 }
 
-const userEmail = user?.email || 'dev@example.com';
+const userEmail = user?.email || "dev@example.com";
 ```
 
 **Klucze zmiany:**
+
 - Dodano import `DEFAULT_USER_ID` z `@/db/supabase.client`
 - Zastąpiono `if (user)` bezwarunkowym pobieraniem planu z `userId` (user?.id || DEFAULT_USER_ID)
 - Dodano fallback dla `userEmail` na potrzeby UserMenu
@@ -66,15 +70,17 @@ Ulepszona logika sprawdzania kontekstu planu:
 
 ```typescript
 const currentPath = Astro.url.pathname;
-const urlParts = currentPath.split('/').filter(Boolean);
-const isInPlanContext = urlParts[0] === 'plans' && 
-                        urlParts.length >= 2 && 
-                        urlParts[1].match(/^[a-f0-9-]{36}$/i) &&
-                        plan !== null && 
-                        plan !== undefined;
+const urlParts = currentPath.split("/").filter(Boolean);
+const isInPlanContext =
+  urlParts[0] === "plans" &&
+  urlParts.length >= 2 &&
+  urlParts[1].match(/^[a-f0-9-]{36}$/i) &&
+  plan !== null &&
+  plan !== undefined;
 ```
 
 **Klucze zmiany:**
+
 - Użyto `split('/').filter(Boolean)` zamiast `split('/')` dla bardziej niezawodnego parsowania
 - Sprawdzenie UUID za pomocą regex dla bezpieczeństwa
 
@@ -86,18 +92,14 @@ Poprawiona widoczność paska nawigacyjnego:
 <div class="flex h-12 items-center gap-1 border-b border-border bg-muted px-4 lg:px-6 overflow-x-auto">
   <nav class="flex items-center gap-1" aria-label="Plan navigation">
     {navLinks.map((link) => (
-      <NavLink
-        href={link.href}
-        icon={link.icon}
-        label={link.label}
-        isActive={isLinkActive(link.href)}
-      />
+    <NavLink href="{link.href}" icon="{link.icon}" label="{link.label}" isActive="{isLinkActive(link.href)}" />
     ))}
   </nav>
 </div>
 ```
 
 **Klucze zmiany:**
+
 - Zmieniono `bg-muted/50` na `bg-muted` dla lepszej widoczności
 - Dodano `border-border` dla wyraźniejszego obramowania
 - Dodano `overflow-x-auto` dla responsywności na małych ekranach
@@ -120,6 +122,7 @@ Poprawiona widoczność paska nawigacyjnego:
 ## Verification
 
 PlanContextBar teraz renderuje się poprawnie na wszystkich stronach planu:
+
 - ✅ `/plans/[id]` - Dashboard
 - ✅ `/plans/[id]/goals` - Goals
 - ✅ `/plans/[id]/hierarchy` - Hierarchy View

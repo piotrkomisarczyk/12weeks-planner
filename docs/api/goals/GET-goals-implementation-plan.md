@@ -21,14 +21,17 @@ These endpoints provide read-only access to long-term goals, which are the found
 **URL Structure**: `/api/v1/goals`
 
 **Query Parameters**:
+
 - `plan_id` (optional, UUID): Filter goals by plan ID
 - `limit` (optional, number): Number of results to return (default: 50, min: 1, max: 100)
 - `offset` (optional, number): Pagination offset (default: 0, min: 0)
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (required for production, MVP uses default user)
 
 **Example Request**:
+
 ```
 GET /api/v1/goals?plan_id=123e4567-e89b-12d3-a456-426614174000&limit=20&offset=0
 ```
@@ -40,12 +43,15 @@ GET /api/v1/goals?plan_id=123e4567-e89b-12d3-a456-426614174000&limit=20&offset=0
 **URL Structure**: `/api/v1/plans/:planId/goals`
 
 **URL Parameters**:
+
 - `planId` (required, UUID): ID of the plan
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (required for production, MVP uses default user)
 
 **Example Request**:
+
 ```
 GET /api/v1/plans/123e4567-e89b-12d3-a456-426614174000/goals
 ```
@@ -57,12 +63,15 @@ GET /api/v1/plans/123e4567-e89b-12d3-a456-426614174000/goals
 **URL Structure**: `/api/v1/goals/:id`
 
 **URL Parameters**:
+
 - `id` (required, UUID): ID of the goal
 
 **Request Headers**:
+
 - `Authorization: Bearer <token>` (required for production, MVP uses default user)
 
 **Example Request**:
+
 ```
 GET /api/v1/goals/123e4567-e89b-12d3-a456-426614174000
 ```
@@ -117,15 +126,15 @@ From database schema (`long_term_goals` table):
 
 ```typescript
 {
-  id: string;              // UUID
-  plan_id: string;         // UUID
-  title: string;           // Goal title
-  description: string | null;  // Why this goal is important
-  category: 'work' | 'finance' | 'hobby' | 'relationships' | 'health' | 'development' | null;
-  progress_percentage: number;  // 0-100
-  position: number;        // 1-6 (ordering)
-  created_at: string;      // ISO timestamp
-  updated_at: string;      // ISO timestamp
+  id: string; // UUID
+  plan_id: string; // UUID
+  title: string; // Goal title
+  description: string | null; // Why this goal is important
+  category: "work" | "finance" | "hobby" | "relationships" | "health" | "development" | null;
+  progress_percentage: number; // 0-100
+  position: number; // 1-6 (ordering)
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }
 ```
 
@@ -136,6 +145,7 @@ From database schema (`long_term_goals` table):
 ### 4.1. GET /api/v1/goals
 
 **Success Response (200 OK)**:
+
 ```json
 {
   "data": [
@@ -156,6 +166,7 @@ From database schema (`long_term_goals` table):
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Invalid query parameters (invalid UUID, invalid limit/offset)
 - `401 Unauthorized`: Missing or invalid authentication token
 - `500 Internal Server Error`: Database error or unexpected exception
@@ -163,6 +174,7 @@ From database schema (`long_term_goals` table):
 ### 4.2. GET /api/v1/plans/:planId/goals
 
 **Success Response (200 OK)**:
+
 ```json
 {
   "data": [
@@ -182,6 +194,7 @@ From database schema (`long_term_goals` table):
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Invalid plan ID format
 - `401 Unauthorized`: Missing or invalid authentication token
 - `404 Not Found`: Plan not found or doesn't belong to user
@@ -190,6 +203,7 @@ From database schema (`long_term_goals` table):
 ### 4.3. GET /api/v1/goals/:id
 
 **Success Response (200 OK)**:
+
 ```json
 {
   "data": {
@@ -220,6 +234,7 @@ From database schema (`long_term_goals` table):
 ```
 
 **Error Responses**:
+
 - `400 Bad Request`: Invalid goal ID format
 - `401 Unauthorized`: Missing or invalid authentication token
 - `404 Not Found`: Goal not found or doesn't belong to user
@@ -251,7 +266,7 @@ From database schema (`long_term_goals` table):
    - Execute query with count
    ↓
 5. Database (Supabase)
-   - Query: SELECT * FROM long_term_goals 
+   - Query: SELECT * FROM long_term_goals
            WHERE user_id = ? [AND plan_id = ?]
            ORDER BY position ASC
            LIMIT ? OFFSET ?
@@ -289,7 +304,7 @@ From database schema (`long_term_goals` table):
    - Execute query
    ↓
 7. Database (Supabase)
-   - Query: SELECT * FROM long_term_goals 
+   - Query: SELECT * FROM long_term_goals
            WHERE plan_id = ? AND user_id = ?
            ORDER BY position ASC
    ↓
@@ -323,9 +338,9 @@ From database schema (`long_term_goals` table):
    - Order milestones by position ASC
    ↓
 7. Database (Supabase)
-   - Query 1: SELECT * FROM long_term_goals 
+   - Query 1: SELECT * FROM long_term_goals
               WHERE id = ? AND user_id = ?
-   - Query 2: SELECT * FROM milestones 
+   - Query 2: SELECT * FROM milestones
               WHERE long_term_goal_id = ?
               ORDER BY position ASC
    ↓
@@ -385,12 +400,14 @@ From database schema (`long_term_goals` table):
 **Scenario**: Invalid query parameters or URL parameters
 
 **Example Causes**:
+
 - Invalid UUID format for plan_id, planId, or goal id
 - Limit exceeds maximum (100) or is negative
 - Offset is negative
 - Invalid JSON in request body (not applicable for GET)
 
 **Response Format**:
+
 ```json
 {
   "error": "Validation failed",
@@ -405,19 +422,20 @@ From database schema (`long_term_goals` table):
 ```
 
 **Implementation**:
+
 ```typescript
 const validationResult = schema.safeParse(input);
 if (!validationResult.success) {
-  const details = validationResult.error.issues.map(issue => ({
-    field: issue.path.join('.'),
+  const details = validationResult.error.issues.map((issue) => ({
+    field: issue.path.join("."),
     message: issue.message,
-    received: 'input' in issue ? issue.input : undefined
+    received: "input" in issue ? issue.input : undefined,
   }));
-  
-  return new Response(
-    JSON.stringify({ error: 'Validation failed', details }),
-    { status: 400, headers: { 'Content-Type': 'application/json' } }
-  );
+
+  return new Response(JSON.stringify({ error: "Validation failed", details }), {
+    status: 400,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -426,12 +444,14 @@ if (!validationResult.success) {
 **Scenario**: Missing or invalid authentication token
 
 **Example Causes**:
+
 - Authorization header missing
 - Token expired
 - Token invalid or malformed
 - User not found in database
 
 **Response Format**:
+
 ```json
 {
   "error": "Unauthorized",
@@ -440,14 +460,15 @@ if (!validationResult.success) {
 ```
 
 **Implementation**:
+
 ```typescript
 // In middleware or endpoint
-const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+const token = request.headers.get("Authorization")?.replace("Bearer ", "");
 if (!token) {
-  return new Response(
-    JSON.stringify({ error: 'Unauthorized', message: 'Authentication required' }),
-    { status: 401, headers: { 'Content-Type': 'application/json' } }
-  );
+  return new Response(JSON.stringify({ error: "Unauthorized", message: "Authentication required" }), {
+    status: 401,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
@@ -456,11 +477,13 @@ if (!token) {
 **Scenario**: Resource doesn't exist or doesn't belong to user
 
 **Example Causes**:
+
 - Plan not found (GET /api/v1/plans/:planId/goals)
 - Goal not found (GET /api/v1/goals/:id)
 - Plan/Goal exists but belongs to different user
 
 **Response Format**:
+
 ```json
 {
   "error": "Not found",
@@ -478,15 +501,16 @@ or
 ```
 
 **Implementation**:
+
 ```typescript
 const resource = await service.getById(id, userId);
 if (!resource) {
   return new Response(
-    JSON.stringify({ 
-      error: 'Not found', 
-      message: 'Resource not found' 
+    JSON.stringify({
+      error: "Not found",
+      message: "Resource not found",
     }),
-    { status: 404, headers: { 'Content-Type': 'application/json' } }
+    { status: 404, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
@@ -496,11 +520,13 @@ if (!resource) {
 **Scenario**: Unexpected errors or database failures
 
 **Example Causes**:
+
 - Database connection failure
 - Supabase query error
 - Unexpected exception in service layer
 
 **Response Format**:
+
 ```json
 {
   "error": "Internal server error",
@@ -509,18 +535,19 @@ if (!resource) {
 ```
 
 **Implementation**:
+
 ```typescript
 try {
   // ... endpoint logic
 } catch (error) {
-  console.error('Error in GET /api/v1/goals:', error);
-  
+  console.error("Error in GET /api/v1/goals:", error);
+
   return new Response(
     JSON.stringify({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred'
+      error: "Internal server error",
+      message: "An unexpected error occurred",
     }),
-    { status: 500, headers: { 'Content-Type': 'application/json' } }
+    { status: 500, headers: { "Content-Type": "application/json" } }
   );
 }
 ```
@@ -528,6 +555,7 @@ try {
 ### 7.5. Error Logging Strategy
 
 **What to Log**:
+
 - Endpoint path and method
 - Error message and stack trace
 - User ID (if available)
@@ -535,17 +563,19 @@ try {
 - Timestamp
 
 **What NOT to Log**:
+
 - Sensitive user data
 - Authentication tokens
 - Full request bodies with potential PII
 
 **Implementation Pattern**:
+
 ```typescript
-console.error('Error in GET /api/v1/goals:', {
+console.error("Error in GET /api/v1/goals:", {
   error: error.message,
   userId: userId,
   params: { plan_id, limit, offset },
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 });
 ```
 
@@ -556,10 +586,12 @@ console.error('Error in GET /api/v1/goals:', {
 ### 8.1. Database Query Optimization
 
 **Indexes Required** (already defined in migration):
+
 - `idx_long_term_goals_plan_id` ON `long_term_goals(plan_id)` - speeds up filtering by plan
 - `idx_long_term_goals_position` ON `long_term_goals(plan_id, position)` - speeds up ordering
 
 **Query Optimization**:
+
 - Use `select('*')` only when needed; consider selecting specific columns
 - Apply filters before ordering
 - Use pagination to limit result set size
@@ -568,23 +600,27 @@ console.error('Error in GET /api/v1/goals:', {
 ### 8.2. Pagination Strategy
 
 **Implementation**:
+
 - Default limit: 50 (reasonable for UI display)
 - Maximum limit: 100 (prevents excessive data transfer)
 - Use offset-based pagination (simple, works well for small datasets)
 - Consider cursor-based pagination for future optimization
 
 **Trade-offs**:
+
 - Offset-based pagination can be slow for large offsets
 - For MVP, offset pagination is sufficient (users typically have < 100 goals total)
 
 ### 8.3. Caching Considerations
 
 **Not Implemented in MVP**:
+
 - Goals change frequently (progress updates)
 - Real-time updates needed for multi-device sync
 - Caching adds complexity
 
 **Future Optimization**:
+
 - Client-side caching with cache invalidation
 - Redis cache for frequently accessed goals
 - ETags for conditional requests
@@ -592,6 +628,7 @@ console.error('Error in GET /api/v1/goals:', {
 ### 8.4. N+1 Query Prevention
 
 **GET /api/v1/goals/:id**:
+
 - Current approach: 2 queries (goal + milestones)
 - Alternative: Single query with JOIN
 - Trade-off: Simpler code vs. marginally faster execution
@@ -601,12 +638,14 @@ console.error('Error in GET /api/v1/goals:', {
 ### 8.5. Response Size Optimization
 
 **Strategies**:
+
 - Pagination limits response size for list endpoints
 - Goals typically have small data payloads
 - Milestones array limited to max 5 per goal
 - No need for field filtering in MVP
 
 **Estimated Response Sizes**:
+
 - Single goal: ~200-500 bytes
 - Goal with 5 milestones: ~1-2 KB
 - List of 50 goals: ~10-25 KB (acceptable)
@@ -620,6 +659,7 @@ console.error('Error in GET /api/v1/goals:', {
 **File**: `/src/lib/services/goal.service.ts`
 
 **Tasks**:
+
 1. Create `GoalService` class with constructor accepting `SupabaseClient`
 2. Implement `getGoals(userId, params)` method:
    - Accept `userId` and `GoalListParams` (plan_id, limit, offset)
@@ -650,14 +690,10 @@ console.error('Error in GET /api/v1/goals:', {
    - Handle errors with descriptive messages
 
 **Example Implementation**:
+
 ```typescript
-import type { SupabaseClient } from '../../db/supabase.client';
-import type { 
-  GoalDTO, 
-  GoalWithMilestonesDTO,
-  MilestoneDTO,
-  PaginatedResponse 
-} from '../../types';
+import type { SupabaseClient } from "../../db/supabase.client";
+import type { GoalDTO, GoalWithMilestonesDTO, MilestoneDTO, PaginatedResponse } from "../../types";
 
 export interface GoalListParams {
   plan_id?: string;
@@ -668,24 +704,15 @@ export interface GoalListParams {
 export class GoalService {
   constructor(private supabase: SupabaseClient) {}
 
-  async getGoals(
-    userId: string,
-    params: GoalListParams
-  ): Promise<PaginatedResponse<GoalDTO>> {
+  async getGoals(userId: string, params: GoalListParams): Promise<PaginatedResponse<GoalDTO>> {
     // Implementation here
   }
 
-  async getGoalsByPlanId(
-    planId: string,
-    userId: string
-  ): Promise<GoalDTO[]> {
+  async getGoalsByPlanId(planId: string, userId: string): Promise<GoalDTO[]> {
     // Implementation here
   }
 
-  async getGoalById(
-    goalId: string,
-    userId: string
-  ): Promise<GoalWithMilestonesDTO | null> {
+  async getGoalById(goalId: string, userId: string): Promise<GoalWithMilestonesDTO | null> {
     // Implementation here
   }
 }
@@ -696,6 +723,7 @@ export class GoalService {
 **File**: `/src/lib/validation/goal.validation.ts`
 
 **Tasks**:
+
 1. Import Zod: `import { z } from 'zod';`
 
 2. Create `GetGoalsQuerySchema`:
@@ -713,32 +741,39 @@ export class GoalService {
    - Export inferred type `GoalIdParams`
 
 **Example Implementation**:
-```typescript
-import { z } from 'zod';
 
-export const GetGoalsQuerySchema = z.object({
-  plan_id: z.string().uuid().nullish(),
-  limit: z.string().nullish()
-    .transform((val) => val === null || val === undefined ? '50' : val)
-    .pipe(z.coerce.number().int().positive().max(100)),
-  offset: z.string().nullish()
-    .transform((val) => val === null || val === undefined ? '0' : val)
-    .pipe(z.coerce.number().int().min(0))
-}).transform((data) => ({
-  ...data,
-  plan_id: data.plan_id ?? undefined
-}));
+```typescript
+import { z } from "zod";
+
+export const GetGoalsQuerySchema = z
+  .object({
+    plan_id: z.string().uuid().nullish(),
+    limit: z
+      .string()
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? "50" : val))
+      .pipe(z.coerce.number().int().positive().max(100)),
+    offset: z
+      .string()
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? "0" : val))
+      .pipe(z.coerce.number().int().min(0)),
+  })
+  .transform((data) => ({
+    ...data,
+    plan_id: data.plan_id ?? undefined,
+  }));
 
 export type GetGoalsQuery = z.infer<typeof GetGoalsQuerySchema>;
 
 export const PlanIdParamsSchema = z.object({
-  planId: z.string().uuid({ message: 'Invalid plan ID format' })
+  planId: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
 
 export const GoalIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid goal ID format' })
+  id: z.string().uuid({ message: "Invalid goal ID format" }),
 });
 
 export type GoalIdParams = z.infer<typeof GoalIdParamsSchema>;
@@ -749,6 +784,7 @@ export type GoalIdParams = z.infer<typeof GoalIdParamsSchema>;
 **File**: `/src/pages/api/v1/goals.ts`
 
 **Tasks**:
+
 1. Add file header with JSDoc comments describing endpoint
 2. Import required types and services
 3. Add `export const prerender = false;`
@@ -764,17 +800,18 @@ export type GoalIdParams = z.infer<typeof GoalIdParamsSchema>;
    - Log errors to console
 
 **Example Implementation**:
+
 ```typescript
 /**
  * API Endpoints: /api/v1/goals
  * GET - Retrieves goals for authenticated user with optional filtering
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../lib/services/goal.service';
-import { GetGoalsQuerySchema } from '../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
-import type { ErrorResponse, ValidationErrorResponse } from '../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../lib/services/goal.service";
+import { GetGoalsQuerySchema } from "../../../lib/validation/goal.validation";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse } from "../../../types";
 
 export const prerender = false;
 
@@ -785,24 +822,24 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     // Parse and validate query parameters
     const queryParams = {
-      plan_id: url.searchParams.get('plan_id'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset')
+      plan_id: url.searchParams.get("plan_id"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     const validationResult = GetGoalsQuerySchema.safeParse(queryParams);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Call service
@@ -810,24 +847,21 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const result = await goalService.getGoals(userId, validationResult.data);
 
     // Return success
-    return new Response(
-      JSON.stringify(result),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/goals:', error);
+    console.error("Error in GET /api/v1/goals:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -838,6 +872,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
 **File**: `/src/pages/api/v1/plans/[planId]/goals.ts`
 
 **Tasks**:
+
 1. Create directory structure: `/src/pages/api/v1/plans/[planId]/`
 2. Add file header with JSDoc comments
 3. Import required types and services (GoalService and PlanService)
@@ -857,18 +892,19 @@ export const GET: APIRoute = async ({ locals, url }) => {
    - Log errors to console
 
 **Example Implementation**:
+
 ```typescript
 /**
  * API Endpoints: /api/v1/plans/:planId/goals
  * GET - Retrieves all goals for a specific plan
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../../lib/services/goal.service';
-import { PlanService } from '../../../../lib/services/plan.service';
-import { PlanIdParamsSchema } from '../../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import type { ErrorResponse, ValidationErrorResponse, ListResponse, GoalDTO } from '../../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../../lib/services/goal.service";
+import { PlanService } from "../../../../lib/services/plan.service";
+import { PlanIdParamsSchema } from "../../../../lib/validation/goal.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ListResponse, GoalDTO } from "../../../../types";
 
 export const prerender = false;
 
@@ -881,16 +917,16 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const validationResult = PlanIdParamsSchema.safeParse(params);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { planId } = validationResult.data;
@@ -900,10 +936,10 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const plan = await planService.getPlanById(planId, userId);
 
     if (!plan) {
-      return new Response(
-        JSON.stringify({ error: 'Not found', message: 'Plan not found' } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Not found", message: "Plan not found" } as ErrorResponse), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Get goals for plan
@@ -911,24 +947,21 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const goals = await goalService.getGoalsByPlanId(planId, userId);
 
     // Return success
-    return new Response(
-      JSON.stringify({ data: goals } as ListResponse<GoalDTO>),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify({ data: goals } as ListResponse<GoalDTO>), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/plans/:planId/goals:', error);
+    console.error("Error in GET /api/v1/plans/:planId/goals:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -939,6 +972,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
 **File**: `/src/pages/api/v1/goals/[id].ts`
 
 **Tasks**:
+
 1. Create directory structure: `/src/pages/api/v1/goals/`
 2. Add file header with JSDoc comments
 3. Import required types and services
@@ -957,22 +991,18 @@ export const GET: APIRoute = async ({ locals, params }) => {
    - Log errors to console
 
 **Example Implementation**:
+
 ```typescript
 /**
  * API Endpoints: /api/v1/goals/:id
  * GET - Retrieves a specific goal with its milestones
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../../lib/services/goal.service';
-import { GoalIdParamsSchema } from '../../../../lib/validation/goal.validation';
-import { DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import type { 
-  ErrorResponse, 
-  ValidationErrorResponse, 
-  ItemResponse, 
-  GoalWithMilestonesDTO 
-} from '../../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../../lib/services/goal.service";
+import { GoalIdParamsSchema } from "../../../../lib/validation/goal.validation";
+import { DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import type { ErrorResponse, ValidationErrorResponse, ItemResponse, GoalWithMilestonesDTO } from "../../../../types";
 
 export const prerender = false;
 
@@ -985,16 +1015,16 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const validationResult = GoalIdParamsSchema.safeParse(params);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { id } = validationResult.data;
@@ -1004,31 +1034,28 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const goal = await goalService.getGoalById(id, userId);
 
     if (!goal) {
-      return new Response(
-        JSON.stringify({ error: 'Not found', message: 'Goal not found' } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Not found", message: "Goal not found" } as ErrorResponse), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Return success
-    return new Response(
-      JSON.stringify({ data: goal } as ItemResponse<GoalWithMilestonesDTO>),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify({ data: goal } as ItemResponse<GoalWithMilestonesDTO>), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/goals/:id:', error);
+    console.error("Error in GET /api/v1/goals/:id:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -1037,6 +1064,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
 ### Step 6: Create Directory Structure
 
 **Tasks**:
+
 1. Create `/src/pages/api/v1/goals/` directory
 2. Create `/src/pages/api/v1/plans/[planId]/` directory (if doesn't exist)
 3. Ensure proper file placement according to Astro routing conventions
@@ -1079,6 +1107,7 @@ Create `/api-tests/get-goals-tests.http` with test cases for all three endpoints
 ### Step 8: Documentation
 
 **Tasks**:
+
 1. Update API documentation with endpoint details
 2. Document query parameters and response formats
 3. Add example requests and responses
@@ -1087,6 +1116,7 @@ Create `/api-tests/get-goals-tests.http` with test cases for all three endpoints
 ### Step 9: Code Review Checklist
 
 **Before marking complete, verify**:
+
 - [ ] All three endpoints implemented and working
 - [ ] Validation schemas cover all edge cases
 - [ ] Service methods filter by user_id for security
@@ -1141,10 +1171,10 @@ Create `/api-tests/get-goals-tests.http` with test cases for all three endpoints
 This implementation plan provides a comprehensive guide for implementing three GET endpoints for the Goals resource. The plan follows established patterns from the existing Plan endpoints, ensures proper security through user-based filtering, and maintains consistency with the project's architecture.
 
 Key implementation principles:
+
 1. **Security First**: All queries filter by user_id to prevent unauthorized access
 2. **Validation**: Use Zod schemas for all input validation with descriptive errors
 3. **Service Layer**: Business logic isolated in GoalService for testability and reusability
 4. **Error Handling**: Comprehensive error handling with appropriate status codes
 5. **Performance**: Leverage database indexes and pagination for scalability
 6. **Consistency**: Follow existing patterns from PlanService and Plan endpoints
-

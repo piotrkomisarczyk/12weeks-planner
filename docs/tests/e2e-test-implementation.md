@@ -9,58 +9,114 @@ This document summarizes the implementation of E2E tests for the Weekly Goals Ma
 ### 1. Added Data Test IDs to Components
 
 #### Login Components (`src/components/auth/LoginForm.tsx`)
+
 ```typescript
-- login-form              // Form container
-- login-email-input       // Email input field
-- login-password-input    // Password input field
-- login-submit-button     // Submit button
+-login -
+  form - // Form container
+  login -
+  email -
+  input - // Email input field
+  login -
+  password -
+  input - // Password input field
+  login -
+  submit -
+  button; // Submit button
 ```
 
 #### Navigation Components
+
 - **`src/components/navigation/NavLink.astro`**
   ```typescript
-  - nav-link-{label}      // Dynamic, e.g., "nav-link-week", "nav-link-plans"
+  -nav - link - { label }; // Dynamic, e.g., "nav-link-week", "nav-link-plans"
   ```
 
 #### Week Planning Components
 
 **`src/components/plans/week/WeeklyGoalsSection.tsx`**
+
 ```typescript
-- add-weekly-goal-button  // Button to open create goal dialog
+-add - weekly - goal - button; // Button to open create goal dialog
 ```
 
 **`src/components/plans/week/CreateWeeklyGoalDialog.tsx`**
+
 ```typescript
-- create-weekly-goal-dialog           // Dialog container
-- weekly-goal-title-input             // Goal title input
-- weekly-goal-longterm-select         // Long-term goal dropdown
-- longterm-goal-option-{goalTitle}    // Dynamic option
-- longterm-goal-option-none           // "None" option
-- create-weekly-goal-submit-button    // Create button
-- create-weekly-goal-cancel-button    // Cancel button
+-create -
+  weekly -
+  goal -
+  dialog - // Dialog container
+  weekly -
+  goal -
+  title -
+  input - // Goal title input
+  weekly -
+  goal -
+  longterm -
+  select - // Long-term goal dropdown
+  longterm -
+  goal -
+  option -
+  { goalTitle } - // Dynamic option
+  longterm -
+  goal -
+  option -
+  none - // "None" option
+  create -
+  weekly -
+  goal -
+  submit -
+  button - // Create button
+  create -
+  weekly -
+  goal -
+  cancel -
+  button; // Cancel button
 ```
 
 **`src/components/plans/week/WeeklyGoalCard.tsx`**
+
 ```typescript
-- weekly-goal-title-{goalTitle}       // Dynamic goal title
-- add-task-to-goal-{goalTitle}        // Dynamic add task button
+-weekly -
+  goal -
+  title -
+  { goalTitle } - // Dynamic goal title
+  add -
+  task -
+  to -
+  goal -
+  { goalTitle }; // Dynamic add task button
 ```
 
 **`src/components/plans/week/InlineAddTask.tsx`**
+
 ```typescript
-- inline-task-title-input     // Task title input
-- inline-task-submit-button   // Submit button (plus icon)
+-inline -
+  task -
+  title -
+  input - // Task title input
+  inline -
+  task -
+  submit -
+  button; // Submit button (plus icon)
 ```
 
 **`src/components/plans/week/AdHocSection.tsx`**
+
 ```typescript
-- other-tasks-section      // Section header
-- add-adhoc-task-button    // Add task button
+-other -
+  tasks -
+  section - // Section header
+  add -
+  adhoc -
+  task -
+  button; // Add task button
 ```
 
 **`src/components/plans/week/TaskItem.tsx`**
+
 ```typescript
-- task-item-{taskTitle}    // Dynamic task item
+-task - item - { taskTitle }; // Dynamic task item
 ```
 
 ### 2. Page Object Models (POMs)
@@ -68,17 +124,20 @@ This document summarizes the implementation of E2E tests for the Weekly Goals Ma
 Created four Page Object Model classes:
 
 #### `e2e/pages/LoginPage.ts` (Updated)
+
 - Updated to use new `data-test-id` attributes
 - Maintains existing login functionality
 - Methods: `goto()`, `login()`, `goToRegister()`, `goToForgotPassword()`
 
 #### `e2e/pages/NavigationBar.ts` (New)
+
 - Encapsulates navigation menu interactions
 - Methods for all navigation links: `goToPlans()`, `goToWeek()`, `goToGoals()`, etc.
 
 #### `e2e/pages/WeekPage.ts` (New)
+
 - Handles Week planning page interactions
-- Methods: 
+- Methods:
   - `goto(planId, weekNumber)` - Navigate to week page
   - `clickAddWeeklyGoal()` - Open create goal dialog
   - `clickAddTaskForGoal(goalTitle)` - Add task to specific goal
@@ -90,6 +149,7 @@ Created four Page Object Model classes:
   - `hasTask(title)` - Check task existence
 
 #### `e2e/pages/CreateWeeklyGoalDialog.ts` (New)
+
 - Handles weekly goal creation dialog
 - Methods:
   - `waitForDialog()` - Wait for dialog visibility
@@ -105,7 +165,9 @@ Created four Page Object Model classes:
 Created `e2e/weekly-goals.spec.ts` with three test scenarios:
 
 #### Test 1: Complete Weekly Goals Workflow
+
 **Steps:**
+
 1. Login using `E2E_USERNAME` and `E2E_PASSWORD` environment variables
 2. Navigate to Week page via navigation menu
 3. Click "Add Weekly Goal" button
@@ -120,10 +182,12 @@ Created `e2e/weekly-goals.spec.ts` with three test scenarios:
 12. Verify ad-hoc task exists in "Other Tasks" section
 
 #### Test 2: Verify Weekly Goal Display
+
 - Verifies weekly goal is displayed with long-term goal association
 - Checks goal visibility and badge display
 
 #### Test 3: Multiple Tasks Management
+
 - Creates a new weekly goal
 - Adds multiple tasks to the same goal
 - Verifies all tasks are displayed correctly
@@ -131,7 +195,9 @@ Created `e2e/weekly-goals.spec.ts` with three test scenarios:
 ### 4. Documentation
 
 #### `e2e/README.md`
+
 Comprehensive documentation including:
+
 - Test structure and organization
 - Prerequisites and setup instructions
 - Running tests commands
@@ -143,7 +209,9 @@ Comprehensive documentation including:
 ## Test Execution
 
 ### Environment Setup
+
 Create `.env.test` file:
+
 ```bash
 E2E_USERNAME=your-test-email@example.com
 E2E_PASSWORD=your-test-password
@@ -151,6 +219,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000
 ```
 
 ### Run Commands
+
 ```bash
 # Run all tests
 npm run test:e2e
@@ -168,21 +237,25 @@ npx playwright test --debug
 ## Benefits
 
 ### 1. Maintainability
+
 - **Page Object Model**: Encapsulates page interactions, making tests easier to maintain
 - **Consistent selectors**: `data-test-id` attributes are stable and resistant to UI changes
 - **Centralized logic**: Page-specific logic lives in POM classes
 
 ### 2. Reliability
+
 - **Stable selectors**: `data-test-id` doesn't break when CSS classes or structure changes
 - **Explicit waits**: Tests wait for elements to be ready before interacting
 - **Clear assertions**: Tests verify exact expected outcomes
 
 ### 3. Readability
+
 - **Descriptive test IDs**: Easy to understand element purpose
 - **Clear test steps**: Each test scenario is well-documented
 - **Semantic method names**: POM methods describe what they do
 
 ### 4. Scalability
+
 - **Reusable components**: POMs can be used across multiple tests
 - **Easy to extend**: New tests can leverage existing POMs
 - **Consistent patterns**: Following established conventions
@@ -190,6 +263,7 @@ npx playwright test --debug
 ## Component Tree Reference
 
 ### Login Page Flow
+
 ```
 src/pages/login.astro
 └── LoginForm [data-test-id="login-form"]
@@ -199,6 +273,7 @@ src/pages/login.astro
 ```
 
 ### Week Page Flow
+
 ```
 src/pages/plans/[id]/week/[weekNumber].astro
 ├── NavigationBar
@@ -239,6 +314,7 @@ src/pages/plans/[id]/week/[weekNumber].astro
 ## Next Steps
 
 ### Recommended Improvements
+
 1. **Add more test scenarios**:
    - Edit weekly goal title
    - Delete weekly goal
@@ -267,6 +343,7 @@ src/pages/plans/[id]/week/[weekNumber].astro
 ## Files Modified
 
 ### Component Files
+
 1. `src/components/auth/LoginForm.tsx`
 2. `src/components/navigation/NavLink.astro`
 3. `src/components/plans/week/WeeklyGoalsSection.tsx`
@@ -277,6 +354,7 @@ src/pages/plans/[id]/week/[weekNumber].astro
 8. `src/components/plans/week/TaskItem.tsx`
 
 ### Test Files Created
+
 1. `e2e/pages/LoginPage.ts` (updated)
 2. `e2e/pages/NavigationBar.ts` (new)
 3. `e2e/pages/WeekPage.ts` (new)
@@ -284,6 +362,7 @@ src/pages/plans/[id]/week/[weekNumber].astro
 5. `e2e/weekly-goals.spec.ts` (new)
 
 ### Documentation Files Created
+
 1. `e2e/README.md`
 2. `docs/e2e-test-implementation.md` (this file)
 

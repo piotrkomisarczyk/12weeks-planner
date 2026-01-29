@@ -12,11 +12,9 @@ import type {
   WeeklyGoalListParams,
   WeeklyGoalInsert,
   WeeklyGoalUpdate,
-  TaskDTO,
 } from "../../types";
 import { PlanService } from "./plan.service";
 import { GoalService } from "./goal.service";
-import { MilestoneService } from "./milestone.service";
 
 export class WeeklyGoalService {
   constructor(private supabase: SupabaseClient) {}

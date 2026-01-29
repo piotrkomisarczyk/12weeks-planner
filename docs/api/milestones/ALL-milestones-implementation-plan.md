@@ -5,6 +5,7 @@
 Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w ramach celów długoterminowych. Milestones reprezentują kluczowe etapy w realizacji celu długoterminowego. Każdy cel może mieć maksymalnie 5 kamieni milowych.
 
 **Endpoints do zaimplementowania:**
+
 1. `GET /api/v1/milestones` - lista milestones z filtrami
 2. `GET /api/v1/goals/:goalId/milestones` - milestones dla konkretnego celu
 3. `GET /api/v1/milestones/:id` - pojedynczy milestone
@@ -15,6 +16,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 8. `GET /api/v1/milestones/:milestoneId/tasks` - tasks dla milestone z filtrami
 
 **Ograniczenia biznesowe:**
+
 - Maksymalnie 5 milestones na goal (enforced przez database trigger)
 - Position range: 1-5
 - ⚠️ **MVP Mode**: Brak RLS i autentykacji - wszystkie operacje używają `DEFAULT_USER_ID`
@@ -30,6 +32,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/milestones`
 
 **Query Parameters:**
+
 - `long_term_goal_id` (opcjonalny): UUID - filtrowanie po ID celu
 - `is_completed` (opcjonalny): boolean - filtrowanie po statusie ukończenia (true/false)
 - `limit` (opcjonalny): number - liczba wyników (default: 50, max: 100)
@@ -48,6 +51,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/goals/:goalId/milestones`
 
 **URL Parameters:**
+
 - `goalId` (wymagany): UUID - ID celu długoterminowego
 
 **Query Parameters:** Brak
@@ -65,6 +69,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/milestones/:id`
 
 **URL Parameters:**
+
 - `id` (wymagany): UUID - ID milestone
 
 **Query Parameters:** Brak
@@ -86,6 +91,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Query Parameters:** Brak
 
 **Request Body:**
+
 ```json
 {
   "long_term_goal_id": "uuid",
@@ -97,6 +103,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 ```
 
 **Pola:**
+
 - `long_term_goal_id` (wymagane): UUID - ID celu długoterminowego
 - `title` (wymagane): string - tytuł milestone (max 255 znaków)
 - `description` (opcjonalne): string - opis milestone
@@ -104,6 +111,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 - `position` (opcjonalne): number - pozycja w kolejności (1-5, default: 1)
 
 **Headers:**
+
 - `Content-Type: application/json` (wymagany)
 
 ---
@@ -115,11 +123,13 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/milestones/:id`
 
 **URL Parameters:**
+
 - `id` (wymagany): UUID - ID milestone
 
 **Query Parameters:** Brak
 
 **Request Body:**
+
 ```json
 {
   "title": "Updated title",
@@ -131,6 +141,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 ```
 
 **Pola (wszystkie opcjonalne):**
+
 - `title`: string - nowy tytuł (max 255 znaków)
 - `description`: string - nowy opis
 - `due_date`: string - nowa data (ISO 8601)
@@ -138,6 +149,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 - `position`: number - nowa pozycja (1-5)
 
 **Headers:**
+
 - `Content-Type: application/json` (wymagany)
 
 ---
@@ -149,6 +161,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/milestones/:id`
 
 **URL Parameters:**
+
 - `id` (wymagany): UUID - ID milestone
 
 **Query Parameters:** Brak
@@ -166,6 +179,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/milestones/:milestoneId/weekly-goals`
 
 **URL Parameters:**
+
 - `milestoneId` (wymagany): UUID - ID milestone
 
 **Query Parameters:** Brak
@@ -183,9 +197,11 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 **Struktura URL:** `/api/v1/milestones/:milestoneId/tasks`
 
 **URL Parameters:**
+
 - `milestoneId` (wymagany): UUID - ID milestone
 
 **Query Parameters:**
+
 - `status` (opcjonalny): string - filtrowanie po statusie zadania (todo, in_progress, completed, cancelled, postponed)
 - `week_number` (opcjonalny): number - filtrowanie po numerze tygodnia (1-12)
 - `limit` (opcjonalny): number - liczba wyników (default: 50, max: 100)
@@ -202,6 +218,7 @@ Zestaw endpointów REST API do zarządzania kamieniami milowymi (milestones) w r
 ### 3.1. DTOs (Data Transfer Objects)
 
 **MilestoneDTO** - odpowiedź GET (mapuje na `milestones` table row):
+
 ```typescript
 type MilestoneDTO = {
   id: string;
@@ -213,29 +230,32 @@ type MilestoneDTO = {
   position: number;
   created_at: string;
   updated_at: string;
-}
+};
 ```
 
 ### 3.2. Command Models
 
 **CreateMilestoneCommand** - request body dla POST:
+
 ```typescript
 type CreateMilestoneCommand = Pick<
   MilestoneInsert,
-  'long_term_goal_id' | 'title' | 'description' | 'due_date' | 'position'
+  "long_term_goal_id" | "title" | "description" | "due_date" | "position"
 >;
 ```
 
 **UpdateMilestoneCommand** - request body dla PATCH:
+
 ```typescript
 type UpdateMilestoneCommand = Partial<
-  Pick<MilestoneUpdate, 'title' | 'description' | 'due_date' | 'is_completed' | 'position'>
+  Pick<MilestoneUpdate, "title" | "description" | "due_date" | "is_completed" | "position">
 >;
 ```
 
 ### 3.3. Response Wrappers
 
 **ListResponse** - dla list endpoints:
+
 ```typescript
 interface ListResponse<T> {
   data: T[];
@@ -244,6 +264,7 @@ interface ListResponse<T> {
 ```
 
 **ItemResponse** - dla single item endpoints:
+
 ```typescript
 interface ItemResponse<T> {
   data: T;
@@ -251,6 +272,7 @@ interface ItemResponse<T> {
 ```
 
 **SuccessResponse** - dla DELETE:
+
 ```typescript
 interface SuccessResponse {
   message: string;
@@ -260,9 +282,10 @@ interface SuccessResponse {
 ### 3.4. Error Types
 
 **ValidationErrorResponse** - błędy walidacji (400):
+
 ```typescript
 interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: Array<{
     field: string;
     message: string;
@@ -272,6 +295,7 @@ interface ValidationErrorResponse {
 ```
 
 **ErrorResponse** - ogólne błędy:
+
 ```typescript
 interface ErrorResponse {
   error: string;
@@ -286,6 +310,7 @@ interface ErrorResponse {
 ### 4.1. GET /api/v1/milestones
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "data": [
@@ -306,6 +331,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 400 Bad Request:**
+
 ```json
 {
   "error": "Validation failed",
@@ -323,6 +349,7 @@ interface ErrorResponse {
 ### 4.2. GET /api/v1/goals/:goalId/milestones
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "data": [
@@ -342,6 +369,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -354,6 +382,7 @@ interface ErrorResponse {
 ### 4.3. GET /api/v1/milestones/:id
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "data": {
@@ -371,6 +400,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -383,6 +413,7 @@ interface ErrorResponse {
 ### 4.4. POST /api/v1/milestones
 
 **Sukces - 201 Created:**
+
 ```json
 {
   "data": {
@@ -400,6 +431,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 400 Bad Request (Validation):**
+
 ```json
 {
   "error": "Validation failed",
@@ -413,6 +445,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 400 Bad Request (Constraint):**
+
 ```json
 {
   "error": "Bad Request",
@@ -421,6 +454,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -433,6 +467,7 @@ interface ErrorResponse {
 ### 4.5. PATCH /api/v1/milestones/:id
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "data": {
@@ -450,6 +485,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -458,6 +494,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 400 Bad Request:**
+
 ```json
 {
   "error": "Validation failed",
@@ -475,6 +512,7 @@ interface ErrorResponse {
 ### 4.6. DELETE /api/v1/milestones/:id
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "message": "Milestone deleted successfully"
@@ -482,6 +520,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -494,6 +533,7 @@ interface ErrorResponse {
 ### 4.7. GET /api/v1/milestones/:milestoneId/weekly-goals
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "data": [
@@ -514,6 +554,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 400 Bad Request:**
+
 ```json
 {
   "error": "Validation failed",
@@ -527,6 +568,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -539,6 +581,7 @@ interface ErrorResponse {
 ### 4.8. GET /api/v1/milestones/:milestoneId/tasks
 
 **Sukces - 200 OK:**
+
 ```json
 {
   "data": [
@@ -565,6 +608,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 400 Bad Request:**
+
 ```json
 {
   "error": "Validation failed",
@@ -579,6 +623,7 @@ interface ErrorResponse {
 ```
 
 **Błąd - 404 Not Found:**
+
 ```json
 {
   "error": "Not Found",
@@ -609,6 +654,7 @@ Client Response
 ```
 
 **⚠️ MVP Mode:**
+
 - Brak uwierzytelniania - używamy `DEFAULT_USER_ID`
 - RLS wyłączone - zostanie włączone po implementacji wszystkich endpointów
 
@@ -719,7 +765,7 @@ Client Response
 ### 5.9. GET /api/v1/milestones/:milestoneId/tasks - Przepływ
 
 1. **Endpoint**: Odbiera request z milestoneId w URL i query params
-2. **Walidacja**: 
+2. **Walidacja**:
    - Sprawdza poprawność UUID dla milestoneId
    - Waliduje query params (status, week_number, limit, offset)
 3. **Service**: `milestoneService.getTasksByMilestoneId(milestoneId, filters, DEFAULT_USER_ID)`
@@ -744,24 +790,27 @@ Client Response
 ### 6.1. MVP Mode - Uproszczone bezpieczeństwo
 
 **⚠️ Obecny stan (MVP):**
+
 - Brak uwierzytelniania JWT
 - Brak RLS policies
 - Wszystkie operacje używają `DEFAULT_USER_ID` z `supabase.client.ts`
 - Brak izolacji danych między użytkownikami
 
 **Implementacja MVP:**
+
 ```typescript
 // src/db/supabase.client.ts
-export const DEFAULT_USER_ID = 'default-user-uuid';
+export const DEFAULT_USER_ID = "default-user-uuid";
 
 // W route handlers
-import { DEFAULT_USER_ID } from '../../../db/supabase.client';
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 
 // Używamy DEFAULT_USER_ID zamiast locals.user.id
 const result = await service.method(data, DEFAULT_USER_ID);
 ```
 
 **🔒 Planowane (Po MVP):**
+
 - Włączenie RLS policies na wszystkich tabelach
 - Implementacja JWT authentication przez Supabase Auth
 - Middleware sprawdzający tokeny
@@ -775,7 +824,7 @@ const result = await service.method(data, DEFAULT_USER_ID);
 // Query params dla GET /api/v1/milestones
 const listMilestonesQuerySchema = z.object({
   long_term_goal_id: z.string().uuid().optional(),
-  is_completed: z.enum(['true', 'false']).optional(),
+  is_completed: z.enum(["true", "false"]).optional(),
   limit: z.coerce.number().min(1).max(100).default(50),
   offset: z.coerce.number().min(0).default(0),
 });
@@ -785,26 +834,35 @@ const createMilestoneSchema = z.object({
   long_term_goal_id: z.string().uuid(),
   title: z.string().min(1).max(255),
   description: z.string().optional(),
-  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  due_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   position: z.number().int().min(1).max(5).default(1),
 });
 
 // Body dla PATCH
-const updateMilestoneSchema = z.object({
-  title: z.string().min(1).max(255).optional(),
-  description: z.string().optional(),
-  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  is_completed: z.boolean().optional(),
-  position: z.number().int().min(1).max(5).optional(),
-}).refine(data => Object.keys(data).length > 0, {
-  message: "At least one field must be provided for update"
-});
+const updateMilestoneSchema = z
+  .object({
+    title: z.string().min(1).max(255).optional(),
+    description: z.string().optional(),
+    due_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+    is_completed: z.boolean().optional(),
+    position: z.number().int().min(1).max(5).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided for update",
+  });
 
 // UUID validation helper
 const uuidSchema = z.string().uuid();
 ```
 
 **Ochrona przed:**
+
 - SQL Injection (parametryzowane queries + walidacja UUID)
 - XSS (sanityzacja stringów, brak HTML rendering)
 - NoSQL Injection (nie dotyczy PostgreSQL)
@@ -813,11 +871,13 @@ const uuidSchema = z.string().uuid();
 ### 6.3. Ograniczenia biznesowe (Aktywne w MVP)
 
 **Ograniczenia biznesowe (enforced przez DB triggers):**
+
 - Maksymalnie 5 milestones per goal (`check_milestone_count` trigger)
 - Position range: 1-5
 - Title max 255 characters
 
 **Monitoring (opcjonalne dla MVP):**
+
 - Logowanie prób przekroczenia limitów biznesowych
 - Error tracking (console.error)
 
@@ -827,21 +887,22 @@ const uuidSchema = z.string().uuid();
 
 ### 7.1. Tabela kodów statusu
 
-| Kod | Scenariusz | Response Body |
-|-----|------------|---------------|
-| 200 | Sukces GET/PATCH/DELETE | `{ data: {...} }` lub `{ message: "..." }` |
-| 201 | Sukces POST | `{ data: {...} }` |
-| 400 | Błąd walidacji | `{ error: "Validation failed", details: [...] }` |
+| Kod | Scenariusz                            | Response Body                                                                      |
+| --- | ------------------------------------- | ---------------------------------------------------------------------------------- |
+| 200 | Sukces GET/PATCH/DELETE               | `{ data: {...} }` lub `{ message: "..." }`                                         |
+| 201 | Sukces POST                           | `{ data: {...} }`                                                                  |
+| 400 | Błąd walidacji                        | `{ error: "Validation failed", details: [...] }`                                   |
 | 400 | Constraint violation (max milestones) | `{ error: "Bad Request", message: "Cannot add more than 5 milestones to a goal" }` |
-| 404 | Milestone nie istnieje | `{ error: "Not Found", message: "Milestone not found" }` |
-| 404 | Goal nie istnieje | `{ error: "Not Found", message: "Goal not found or access denied" }` |
-| 500 | Błąd serwera/bazy danych | `{ error: "Internal Server Error", message: "..." }` |
+| 404 | Milestone nie istnieje                | `{ error: "Not Found", message: "Milestone not found" }`                           |
+| 404 | Goal nie istnieje                     | `{ error: "Not Found", message: "Goal not found or access denied" }`               |
+| 500 | Błąd serwera/bazy danych              | `{ error: "Internal Server Error", message: "..." }`                               |
 
 ### 7.2. Szczegółowe scenariusze błędów
 
 #### 7.2.1. GET /api/v1/milestones
 
 **400 Bad Request:**
+
 ```typescript
 // Invalid UUID format
 {
@@ -881,6 +942,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **500 Internal Server Error:**
+
 ```typescript
 {
   error: "Internal Server Error",
@@ -891,6 +953,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.2. GET /api/v1/goals/:goalId/milestones
 
 **400 Bad Request:**
+
 ```typescript
 // Invalid goalId UUID
 {
@@ -906,6 +969,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **404 Not Found:**
+
 ```typescript
 // Goal doesn't exist or belongs to another user
 {
@@ -917,6 +981,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.3. GET /api/v1/milestones/:id
 
 **400 Bad Request:**
+
 ```typescript
 // Invalid id UUID
 {
@@ -932,6 +997,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **404 Not Found:**
+
 ```typescript
 // Milestone doesn't exist or belongs to another user
 {
@@ -943,6 +1009,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.4. POST /api/v1/milestones
 
 **400 Bad Request - Validation:**
+
 ```typescript
 // Missing required fields
 {
@@ -997,6 +1064,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **400 Bad Request - Constraint:**
+
 ```typescript
 // Max milestones exceeded (database trigger)
 {
@@ -1006,6 +1074,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **404 Not Found:**
+
 ```typescript
 // Goal doesn't exist or belongs to another user
 {
@@ -1017,6 +1086,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.5. PATCH /api/v1/milestones/:id
 
 **400 Bad Request:**
+
 ```typescript
 // No fields provided
 {
@@ -1043,6 +1113,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **404 Not Found:**
+
 ```typescript
 {
   error: "Not Found",
@@ -1053,6 +1124,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.6. DELETE /api/v1/milestones/:id
 
 **404 Not Found:**
+
 ```typescript
 {
   error: "Not Found",
@@ -1063,6 +1135,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.7. GET /api/v1/milestones/:milestoneId/weekly-goals
 
 **400 Bad Request:**
+
 ```typescript
 // Invalid milestoneId UUID
 {
@@ -1078,6 +1151,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **404 Not Found:**
+
 ```typescript
 // Milestone doesn't exist or belongs to another user
 {
@@ -1089,6 +1163,7 @@ const uuidSchema = z.string().uuid();
 #### 7.2.8. GET /api/v1/milestones/:milestoneId/tasks
 
 **400 Bad Request:**
+
 ```typescript
 // Invalid milestoneId UUID
 {
@@ -1140,6 +1215,7 @@ const uuidSchema = z.string().uuid();
 ```
 
 **404 Not Found:**
+
 ```typescript
 // Milestone doesn't exist or belongs to another user
 {
@@ -1155,79 +1231,93 @@ const uuidSchema = z.string().uuid();
 try {
   // Walidacja
   const validatedData = schema.parse(data);
-  
+
   // Service call
   const result = await milestoneService.method(validatedData, userId);
-  
+
   // Success response
   return new Response(JSON.stringify({ data: result }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
+    headers: { "Content-Type": "application/json" },
   });
-  
 } catch (error) {
   // Zod validation error
   if (error instanceof z.ZodError) {
-    return new Response(JSON.stringify({
-      error: 'Validation failed',
-      details: error.errors.map(e => ({
-        field: e.path.join('.'),
-        message: e.message,
-        received: e.received
-      }))
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Validation failed",
+        details: error.errors.map((e) => ({
+          field: e.path.join("."),
+          message: e.message,
+          received: e.received,
+        })),
+      }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
-  
+
   // Database constraint error
-  if (error.message.includes('Cannot add more than 5 milestones')) {
-    return new Response(JSON.stringify({
-      error: 'Bad Request',
-      message: error.message
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  if (error.message.includes("Cannot add more than 5 milestones")) {
+    return new Response(
+      JSON.stringify({
+        error: "Bad Request",
+        message: error.message,
+      }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
-  
+
   // Not found error
-  if (error.message.includes('not found') || error.message.includes('access denied')) {
-    return new Response(JSON.stringify({
-      error: 'Not Found',
-      message: error.message
-    }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  if (error.message.includes("not found") || error.message.includes("access denied")) {
+    return new Response(
+      JSON.stringify({
+        error: "Not Found",
+        message: error.message,
+      }),
+      {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
-  
+
   // Generic server error
-  console.error('Unexpected error:', error);
-  return new Response(JSON.stringify({
-    error: 'Internal Server Error',
-    message: 'An unexpected error occurred'
-  }), {
-    status: 500,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  console.error("Unexpected error:", error);
+  return new Response(
+    JSON.stringify({
+      error: "Internal Server Error",
+      message: "An unexpected error occurred",
+    }),
+    {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 }
 ```
 
 ### 7.4. Logging strategia
 
 **Development:**
+
 - `console.log()` dla debug info
 - `console.error()` dla błędów z pełnym stack trace
 
 **Production:**
+
 - Structured logging (np. Winston, Pino)
 - Log levels: ERROR, WARN, INFO, DEBUG
 - Logowanie do pliku lub external service (Sentry, LogRocket)
 - Nie logować sensitive data (tokens, passwords)
 
 **Co logować:**
+
 - Wszystkie błędy 500 z full stack trace
 - Database constraint violations (max milestones exceeded)
 - Request metadata: timestamp, endpoint, method
@@ -1240,6 +1330,7 @@ try {
 ### 8.1. Database Query Optimization
 
 **Istniejące indeksy (z db-plan.md):**
+
 ```sql
 -- Primary key index (automatic)
 CREATE INDEX milestones_pkey ON milestones(id);
@@ -1254,17 +1345,19 @@ CREATE INDEX idx_milestones_position ON milestones(long_term_goal_id, position);
 CREATE INDEX idx_milestones_is_completed ON milestones(is_completed);
 
 -- Partial index dla incomplete milestones (często używane)
-CREATE INDEX idx_milestones_incomplete ON milestones(long_term_goal_id) 
+CREATE INDEX idx_milestones_incomplete ON milestones(long_term_goal_id)
 WHERE is_completed = FALSE;
 ```
 
 **Query performance:**
+
 - GET list z filtrami: używa `idx_milestones_long_term_goal_id` + `idx_milestones_is_completed`
 - GET by goal: używa `idx_milestones_long_term_goal_id` + `idx_milestones_position`
 - GET by id: używa primary key index (najszybsze)
 - Wszystkie queries automatycznie ograniczone przez RLS policies
 
 **Expected performance:**
+
 - GET by id: <5ms
 - GET list (without filters): <10ms
 - GET list (with filters): <15ms
@@ -1273,10 +1366,12 @@ WHERE is_completed = FALSE;
 ### 8.2. Caching Strategy
 
 **Dla MVP (opcjonalne):**
+
 - Brak cachingu - database queries są wystarczająco szybkie
 - Supabase PostgREST ma wbudowane connection pooling
 
 **Dla produkcji (future consideration):**
+
 - Redis cache dla często odczytywanych milestones
 - Cache key: `milestone:{userId}:{goalId}`
 - TTL: 5 minut
@@ -1285,44 +1380,51 @@ WHERE is_completed = FALSE;
 ### 8.3. Pagination
 
 **Implementacja:**
+
 - Cursor-based pagination preferowana nad offset-based dla dużych zbiorów
 - Default limit: 50, max: 100
 - Dla małych zbiorów (max 5 milestones per goal) pagination nie jest krytyczne
 
 **Optymalizacja dla GET /api/v1/milestones:**
+
 ```typescript
 // Zamiast COUNT(*) dla total (wolne dla dużych tabel)
 // Używamy estimate lub pomijamy total count
 const { data, error } = await supabase
-  .from('milestones')
-  .select('*', { count: 'estimated' }) // lub { count: 'exact' } jeśli potrzebne
+  .from("milestones")
+  .select("*", { count: "estimated" }) // lub { count: 'exact' } jeśli potrzebne
   .range(offset, offset + limit - 1);
 ```
 
 ### 8.4. N+1 Query Problem
 
 **Zapobieganie:**
+
 - GET /api/v1/goals/:goalId/milestones już zwraca wszystkie milestones w jednym query
 - Nie ma potrzeby dodatkowych queries dla related data w kontekście milestones
 
 ### 8.5. Request/Response Size Optimization
 
 **Gzip compression:**
+
 - Włączyć w Astro config dla JSON responses
 - Redukcja rozmiaru response o ~70%
 
 **Field selection (future enhancement):**
+
 - Query param `fields` dla wyboru zwracanych pól
 - Przykład: `?fields=id,title,is_completed` - zwróci tylko wybrane pola
 
 ### 8.6. Database Connection Pooling
 
 **Supabase:**
+
 - Wbudowane connection pooling (PgBouncer)
 - Transaction pooling mode
 - Max connections: zależne od planu (free tier: 60)
 
 **Best practices:**
+
 - Nie trzymać długo żyjących connections
 - Używać prepared statements (automatycznie przez Supabase SDK)
 - Zamykać connections po każdym request (automatyczne w serverless)
@@ -1330,12 +1432,14 @@ const { data, error } = await supabase
 ### 8.7. Monitoring i Profiling
 
 **Metryki do monitorowania:**
+
 - Response time per endpoint (p50, p95, p99)
 - Error rate (4xx, 5xx)
 - Database query time
 - Active connections count
 
 **Tools:**
+
 - Supabase Dashboard: query performance
 - Astro dev tools: SSR performance
 - APM tools (New Relic, DataDog) dla produkcji
@@ -1343,6 +1447,7 @@ const { data, error } = await supabase
 ### 8.8. Potencjalne wąskie gardła
 
 **Identyfikowane bottlenecks:**
+
 1. RLS policies z JOIN przez 3 tabele (milestones → goals → plans)
    - Mitigation: indeksy na foreign keys, query planner optimization
 2. Concurrent updates tego samego milestone
@@ -1388,19 +1493,21 @@ src/
 **Plik: `src/lib/validation/milestone.validation.ts`**
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // UUID validation helper
 export const uuidSchema = z.string().uuid({
-  message: 'Invalid UUID format'
+  message: "Invalid UUID format",
 });
 
 // Query params dla GET /api/v1/milestones
 export const listMilestonesQuerySchema = z.object({
   long_term_goal_id: uuidSchema.optional(),
-  is_completed: z.enum(['true', 'false'], {
-    errorMap: () => ({ message: "Must be 'true' or 'false'" })
-  }).optional(),
+  is_completed: z
+    .enum(["true", "false"], {
+      errorMap: () => ({ message: "Must be 'true' or 'false'" }),
+    })
+    .optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
 });
@@ -1408,54 +1515,61 @@ export const listMilestonesQuerySchema = z.object({
 // Body schema dla POST /api/v1/milestones
 export const createMilestoneSchema = z.object({
   long_term_goal_id: uuidSchema,
-  title: z.string()
-    .min(1, { message: 'Title is required' })
-    .max(255, { message: 'Title must be max 255 characters' }),
+  title: z.string().min(1, { message: "Title is required" }).max(255, { message: "Title must be max 255 characters" }),
   description: z.string().optional().nullable(),
-  due_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Must be in YYYY-MM-DD format' })
+  due_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Must be in YYYY-MM-DD format" })
     .optional()
     .nullable(),
-  position: z.number()
-    .int({ message: 'Position must be an integer' })
-    .min(1, { message: 'Position must be at least 1' })
-    .max(5, { message: 'Position must be at most 5' })
+  position: z
+    .number()
+    .int({ message: "Position must be an integer" })
+    .min(1, { message: "Position must be at least 1" })
+    .max(5, { message: "Position must be at most 5" })
     .default(1),
 });
 
 // Body schema dla PATCH /api/v1/milestones/:id
-export const updateMilestoneSchema = z.object({
-  title: z.string()
-    .min(1, { message: 'Title cannot be empty' })
-    .max(255, { message: 'Title must be max 255 characters' })
-    .optional(),
-  description: z.string().optional().nullable(),
-  due_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Must be in YYYY-MM-DD format' })
-    .optional()
-    .nullable(),
-  is_completed: z.boolean({
-    errorMap: () => ({ message: 'Must be a boolean' })
-  }).optional(),
-  position: z.number()
-    .int({ message: 'Position must be an integer' })
-    .min(1, { message: 'Position must be at least 1' })
-    .max(5, { message: 'Position must be at most 5' })
-    .optional(),
-}).refine(
-  (data) => Object.keys(data).length > 0,
-  { message: 'At least one field must be provided for update' }
-);
+export const updateMilestoneSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, { message: "Title cannot be empty" })
+      .max(255, { message: "Title must be max 255 characters" })
+      .optional(),
+    description: z.string().optional().nullable(),
+    due_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Must be in YYYY-MM-DD format" })
+      .optional()
+      .nullable(),
+    is_completed: z
+      .boolean({
+        errorMap: () => ({ message: "Must be a boolean" }),
+      })
+      .optional(),
+    position: z
+      .number()
+      .int({ message: "Position must be an integer" })
+      .min(1, { message: "Position must be at least 1" })
+      .max(5, { message: "Position must be at most 5" })
+      .optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, { message: "At least one field must be provided for update" });
 
 // Query params dla GET /api/v1/milestones/:milestoneId/tasks
 export const listTasksByMilestoneQuerySchema = z.object({
-  status: z.enum(['todo', 'in_progress', 'completed', 'cancelled', 'postponed'], {
-    errorMap: () => ({ message: "Invalid status value" })
-  }).optional(),
-  week_number: z.coerce.number()
-    .int({ message: 'Week number must be an integer' })
-    .min(1, { message: 'Week number must be at least 1' })
-    .max(12, { message: 'Week number must be at most 12' })
+  status: z
+    .enum(["todo", "in_progress", "completed", "cancelled", "postponed"], {
+      errorMap: () => ({ message: "Invalid status value" }),
+    })
+    .optional(),
+  week_number: z.coerce
+    .number()
+    .int({ message: "Week number must be an integer" })
+    .min(1, { message: "Week number must be at least 1" })
+    .max(12, { message: "Week number must be at most 12" })
     .optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
@@ -1469,6 +1583,7 @@ export type ListTasksByMilestoneQuery = z.infer<typeof listTasksByMilestoneQuery
 ```
 
 **Sprawdzić:**
+
 - ✅ Import z 'zod'
 - ✅ Wszystkie validation messages są czytelne
 - ✅ Regex dla daty poprawny
@@ -1484,18 +1599,9 @@ export type ListTasksByMilestoneQuery = z.infer<typeof listTasksByMilestoneQuery
 **Plik: `src/lib/services/milestone.service.ts`**
 
 ```typescript
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type {
-  MilestoneDTO,
-  CreateMilestoneCommand,
-  UpdateMilestoneCommand,
-  WeeklyGoalDTO,
-  TaskDTO,
-} from '../../types';
-import type {
-  ListMilestonesQuery,
-  ListTasksByMilestoneQuery,
-} from '../validation/milestone.validation';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { MilestoneDTO, CreateMilestoneCommand, UpdateMilestoneCommand, WeeklyGoalDTO, TaskDTO } from "../../types";
+import type { ListMilestonesQuery, ListTasksByMilestoneQuery } from "../validation/milestone.validation";
 
 /**
  * Service for milestone operations
@@ -1507,32 +1613,25 @@ export class MilestoneService {
   /**
    * List milestones with optional filters
    */
-  async listMilestones(
-    filters: ListMilestonesQuery,
-    userId: string
-  ): Promise<{ data: MilestoneDTO[]; count: number }> {
-    let query = this.supabase
-      .from('milestones')
-      .select('*', { count: 'exact' });
+  async listMilestones(filters: ListMilestonesQuery, userId: string): Promise<{ data: MilestoneDTO[]; count: number }> {
+    let query = this.supabase.from("milestones").select("*", { count: "exact" });
 
     // Apply filters
     if (filters.long_term_goal_id) {
-      query = query.eq('long_term_goal_id', filters.long_term_goal_id);
+      query = query.eq("long_term_goal_id", filters.long_term_goal_id);
     }
 
     if (filters.is_completed !== undefined) {
-      query = query.eq('is_completed', filters.is_completed === 'true');
+      query = query.eq("is_completed", filters.is_completed === "true");
     }
 
     // Apply pagination and ordering
-    query = query
-      .order('position', { ascending: true })
-      .range(filters.offset, filters.offset + filters.limit - 1);
+    query = query.order("position", { ascending: true }).range(filters.offset, filters.offset + filters.limit - 1);
 
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error listing milestones:', error);
+      console.error("Error listing milestones:", error);
       throw new Error(`Failed to list milestones: ${error.message}`);
     }
 
@@ -1545,30 +1644,27 @@ export class MilestoneService {
   /**
    * Get milestones for a specific goal
    */
-  async getMilestonesByGoalId(
-    goalId: string,
-    userId: string
-  ): Promise<MilestoneDTO[]> {
+  async getMilestonesByGoalId(goalId: string, userId: string): Promise<MilestoneDTO[]> {
     // First check if goal exists and belongs to user
     const { data: goal, error: goalError } = await this.supabase
-      .from('long_term_goals')
-      .select('id')
-      .eq('id', goalId)
+      .from("long_term_goals")
+      .select("id")
+      .eq("id", goalId)
       .single();
 
     if (goalError || !goal) {
-      throw new Error('Goal not found or access denied');
+      throw new Error("Goal not found or access denied");
     }
 
     // Get milestones
     const { data, error } = await this.supabase
-      .from('milestones')
-      .select('*')
-      .eq('long_term_goal_id', goalId)
-      .order('position', { ascending: true });
+      .from("milestones")
+      .select("*")
+      .eq("long_term_goal_id", goalId)
+      .order("position", { ascending: true });
 
     if (error) {
-      console.error('Error fetching milestones by goal:', error);
+      console.error("Error fetching milestones by goal:", error);
       throw new Error(`Failed to fetch milestones: ${error.message}`);
     }
 
@@ -1578,18 +1674,11 @@ export class MilestoneService {
   /**
    * Get a single milestone by ID
    */
-  async getMilestoneById(
-    id: string,
-    userId: string
-  ): Promise<MilestoneDTO> {
-    const { data, error } = await this.supabase
-      .from('milestones')
-      .select('*')
-      .eq('id', id)
-      .single();
+  async getMilestoneById(id: string, userId: string): Promise<MilestoneDTO> {
+    const { data, error } = await this.supabase.from("milestones").select("*").eq("id", id).single();
 
     if (error || !data) {
-      throw new Error('Milestone not found or access denied');
+      throw new Error("Milestone not found or access denied");
     }
 
     return data as MilestoneDTO;
@@ -1598,42 +1687,41 @@ export class MilestoneService {
   /**
    * Create a new milestone
    */
-  async createMilestone(
-    milestoneData: CreateMilestoneCommand,
-    userId: string
-  ): Promise<MilestoneDTO> {
+  async createMilestone(milestoneData: CreateMilestoneCommand, userId: string): Promise<MilestoneDTO> {
     // Verify goal exists and belongs to user
     const { data: goal, error: goalError } = await this.supabase
-      .from('long_term_goals')
-      .select('id')
-      .eq('id', milestoneData.long_term_goal_id)
+      .from("long_term_goals")
+      .select("id")
+      .eq("id", milestoneData.long_term_goal_id)
       .single();
 
     if (goalError || !goal) {
-      throw new Error('Goal not found or access denied');
+      throw new Error("Goal not found or access denied");
     }
 
     // Create milestone
     const { data, error } = await this.supabase
-      .from('milestones')
-      .insert([{
-        long_term_goal_id: milestoneData.long_term_goal_id,
-        title: milestoneData.title,
-        description: milestoneData.description ?? null,
-        due_date: milestoneData.due_date ?? null,
-        position: milestoneData.position ?? 1,
-      }])
+      .from("milestones")
+      .insert([
+        {
+          long_term_goal_id: milestoneData.long_term_goal_id,
+          title: milestoneData.title,
+          description: milestoneData.description ?? null,
+          due_date: milestoneData.due_date ?? null,
+          position: milestoneData.position ?? 1,
+        },
+      ])
       .select()
       .single();
 
     if (error) {
-      console.error('Error creating milestone:', error);
-      
+      console.error("Error creating milestone:", error);
+
       // Check for max milestones constraint
-      if (error.message.includes('Cannot add more than 5 milestones')) {
-        throw new Error('Cannot add more than 5 milestones to a goal');
+      if (error.message.includes("Cannot add more than 5 milestones")) {
+        throw new Error("Cannot add more than 5 milestones to a goal");
       }
-      
+
       throw new Error(`Failed to create milestone: ${error.message}`);
     }
 
@@ -1643,24 +1731,15 @@ export class MilestoneService {
   /**
    * Update a milestone
    */
-  async updateMilestone(
-    id: string,
-    updateData: UpdateMilestoneCommand,
-    userId: string
-  ): Promise<MilestoneDTO> {
-    const { data, error } = await this.supabase
-      .from('milestones')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
+  async updateMilestone(id: string, updateData: UpdateMilestoneCommand, userId: string): Promise<MilestoneDTO> {
+    const { data, error } = await this.supabase.from("milestones").update(updateData).eq("id", id).select().single();
 
     if (error || !data) {
-      if (error?.code === 'PGRST116') {
-        throw new Error('Milestone not found or access denied');
+      if (error?.code === "PGRST116") {
+        throw new Error("Milestone not found or access denied");
       }
-      console.error('Error updating milestone:', error);
-      throw new Error(`Failed to update milestone: ${error?.message || 'Unknown error'}`);
+      console.error("Error updating milestone:", error);
+      throw new Error(`Failed to update milestone: ${error?.message || "Unknown error"}`);
     }
 
     return data as MilestoneDTO;
@@ -1669,20 +1748,14 @@ export class MilestoneService {
   /**
    * Delete a milestone
    */
-  async deleteMilestone(
-    id: string,
-    userId: string
-  ): Promise<void> {
-    const { error } = await this.supabase
-      .from('milestones')
-      .delete()
-      .eq('id', id);
+  async deleteMilestone(id: string, userId: string): Promise<void> {
+    const { error } = await this.supabase.from("milestones").delete().eq("id", id);
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        throw new Error('Milestone not found or access denied');
+      if (error.code === "PGRST116") {
+        throw new Error("Milestone not found or access denied");
       }
-      console.error('Error deleting milestone:', error);
+      console.error("Error deleting milestone:", error);
       throw new Error(`Failed to delete milestone: ${error.message}`);
     }
   }
@@ -1690,31 +1763,28 @@ export class MilestoneService {
   /**
    * Get weekly goals for a specific milestone
    */
-  async getWeeklyGoalsByMilestoneId(
-    milestoneId: string,
-    userId: string
-  ): Promise<WeeklyGoalDTO[]> {
+  async getWeeklyGoalsByMilestoneId(milestoneId: string, userId: string): Promise<WeeklyGoalDTO[]> {
     // First check if milestone exists and belongs to user
     const { data: milestone, error: milestoneError } = await this.supabase
-      .from('milestones')
-      .select('id')
-      .eq('id', milestoneId)
+      .from("milestones")
+      .select("id")
+      .eq("id", milestoneId)
       .single();
 
     if (milestoneError || !milestone) {
-      throw new Error('Milestone not found or access denied');
+      throw new Error("Milestone not found or access denied");
     }
 
     // Get weekly goals
     const { data, error } = await this.supabase
-      .from('weekly_goals')
-      .select('*')
-      .eq('milestone_id', milestoneId)
-      .order('week_number', { ascending: true })
-      .order('position', { ascending: true });
+      .from("weekly_goals")
+      .select("*")
+      .eq("milestone_id", milestoneId)
+      .order("week_number", { ascending: true })
+      .order("position", { ascending: true });
 
     if (error) {
-      console.error('Error fetching weekly goals by milestone:', error);
+      console.error("Error fetching weekly goals by milestone:", error);
       throw new Error(`Failed to fetch weekly goals: ${error.message}`);
     }
 
@@ -1731,41 +1801,38 @@ export class MilestoneService {
   ): Promise<{ data: TaskDTO[]; count: number }> {
     // First check if milestone exists and belongs to user
     const { data: milestone, error: milestoneError } = await this.supabase
-      .from('milestones')
-      .select('id')
-      .eq('id', milestoneId)
+      .from("milestones")
+      .select("id")
+      .eq("id", milestoneId)
       .single();
 
     if (milestoneError || !milestone) {
-      throw new Error('Milestone not found or access denied');
+      throw new Error("Milestone not found or access denied");
     }
 
     // Build query
-    let query = this.supabase
-      .from('tasks')
-      .select('*', { count: 'exact' })
-      .eq('milestone_id', milestoneId);
+    let query = this.supabase.from("tasks").select("*", { count: "exact" }).eq("milestone_id", milestoneId);
 
     // Apply filters
     if (filters.status) {
-      query = query.eq('status', filters.status);
+      query = query.eq("status", filters.status);
     }
 
     if (filters.week_number !== undefined) {
-      query = query.eq('week_number', filters.week_number);
+      query = query.eq("week_number", filters.week_number);
     }
 
     // Apply ordering and pagination
     query = query
-      .order('week_number', { ascending: true, nullsFirst: false })
-      .order('due_day', { ascending: true, nullsFirst: false })
-      .order('position', { ascending: true })
+      .order("week_number", { ascending: true, nullsFirst: false })
+      .order("due_day", { ascending: true, nullsFirst: false })
+      .order("position", { ascending: true })
       .range(filters.offset, filters.offset + filters.limit - 1);
 
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching tasks by milestone:', error);
+      console.error("Error fetching tasks by milestone:", error);
       throw new Error(`Failed to fetch tasks: ${error.message}`);
     }
 
@@ -1778,6 +1845,7 @@ export class MilestoneService {
 ```
 
 **Sprawdzić:**
+
 - ✅ Wszystkie metody są async
 - ✅ RLS policies są wykorzystywane (nie ma ręcznych JOIN do plans)
 - ✅ Error handling z informacyjnymi messages
@@ -1792,14 +1860,11 @@ export class MilestoneService {
 **Plik: `src/pages/api/v1/milestones.ts`** (NOWY PLIK)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { supabase, DEFAULT_USER_ID } from '../../../db/supabase.client';
-import { MilestoneService } from '../../../lib/services/milestone.service';
-import {
-  listMilestonesQuerySchema,
-  createMilestoneSchema,
-} from '../../../lib/validation/milestone.validation';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { supabase, DEFAULT_USER_ID } from "../../../db/supabase.client";
+import { MilestoneService } from "../../../lib/services/milestone.service";
+import { listMilestonesQuerySchema, createMilestoneSchema } from "../../../lib/validation/milestone.validation";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -1809,20 +1874,17 @@ export const GET: APIRoute = async ({ request }) => {
     // Parse and validate query parameters
     const url = new URL(request.url);
     const queryParams = {
-      long_term_goal_id: url.searchParams.get('long_term_goal_id') ?? undefined,
-      is_completed: url.searchParams.get('is_completed') ?? undefined,
-      limit: url.searchParams.get('limit') ?? undefined,
-      offset: url.searchParams.get('offset') ?? undefined,
+      long_term_goal_id: url.searchParams.get("long_term_goal_id") ?? undefined,
+      is_completed: url.searchParams.get("is_completed") ?? undefined,
+      limit: url.searchParams.get("limit") ?? undefined,
+      offset: url.searchParams.get("offset") ?? undefined,
     };
 
     const validatedParams = listMilestonesQuerySchema.parse(queryParams);
 
     // Get milestones from service
     const milestoneService = new MilestoneService(supabase);
-    const result = await milestoneService.listMilestones(
-      validatedParams,
-      DEFAULT_USER_ID
-    );
+    const result = await milestoneService.listMilestones(validatedParams, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -1831,7 +1893,7 @@ export const GET: APIRoute = async ({ request }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -1839,30 +1901,30 @@ export const GET: APIRoute = async ({ request }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: e.path.join('.') || '_root',
+            field: e.path.join(".") || "_root",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in GET /api/v1/milestones:', error);
+    console.error("Error in GET /api/v1/milestones:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1877,10 +1939,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Create milestone via service
     const milestoneService = new MilestoneService(supabase);
-    const milestone = await milestoneService.createMilestone(
-      validatedData,
-      DEFAULT_USER_ID
-    );
+    const milestone = await milestoneService.createMilestone(validatedData, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -1888,7 +1947,7 @@ export const POST: APIRoute = async ({ request }) => {
       }),
       {
         status: 201,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -1896,58 +1955,58 @@ export const POST: APIRoute = async ({ request }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: e.path.join('.') || '_root',
+            field: e.path.join(".") || "_root",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found errors
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Max milestones constraint
-    if (error instanceof Error && error.message.includes('Cannot add more than 5')) {
+    if (error instanceof Error && error.message.includes("Cannot add more than 5")) {
       return new Response(
         JSON.stringify({
-          error: 'Bad Request',
+          error: "Bad Request",
           message: error.message,
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in POST /api/v1/milestones:', error);
+    console.error("Error in POST /api/v1/milestones:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -1955,6 +2014,7 @@ export const POST: APIRoute = async ({ request }) => {
 ```
 
 **Sprawdzić:**
+
 - ✅ `export const prerender = false` na początku
 - ✅ Import `DEFAULT_USER_ID` z supabase.client
 - ✅ Brak sprawdzania `locals.user`
@@ -1969,14 +2029,11 @@ export const POST: APIRoute = async ({ request }) => {
 **Plik: `src/pages/api/v1/milestones/[id].ts`** (NOWY PLIK)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { supabase, DEFAULT_USER_ID } from '../../../../db/supabase.client';
-import { MilestoneService } from '../../../../lib/services/milestone.service';
-import {
-  uuidSchema,
-  updateMilestoneSchema,
-} from '../../../../lib/validation/milestone.validation';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { supabase, DEFAULT_USER_ID } from "../../../../db/supabase.client";
+import { MilestoneService } from "../../../../lib/services/milestone.service";
+import { uuidSchema, updateMilestoneSchema } from "../../../../lib/validation/milestone.validation";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -1988,10 +2045,7 @@ export const GET: APIRoute = async ({ params }) => {
 
     // Get milestone from service
     const milestoneService = new MilestoneService(supabase);
-    const milestone = await milestoneService.getMilestoneById(
-      milestoneId,
-      DEFAULT_USER_ID
-    );
+    const milestone = await milestoneService.getMilestoneById(milestoneId, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -1999,7 +2053,7 @@ export const GET: APIRoute = async ({ params }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -2007,44 +2061,44 @@ export const GET: APIRoute = async ({ params }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: 'id',
+            field: "id",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found error
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in GET /api/v1/milestones/:id:', error);
+    console.error("Error in GET /api/v1/milestones/:id:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -2062,11 +2116,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
 
     // Update milestone via service
     const milestoneService = new MilestoneService(supabase);
-    const milestone = await milestoneService.updateMilestone(
-      milestoneId,
-      validatedData,
-      DEFAULT_USER_ID
-    );
+    const milestone = await milestoneService.updateMilestone(milestoneId, validatedData, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -2074,7 +2124,7 @@ export const PATCH: APIRoute = async ({ params, request }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -2082,44 +2132,44 @@ export const PATCH: APIRoute = async ({ params, request }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: e.path.join('.') || 'id',
+            field: e.path.join(".") || "id",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found error
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in PATCH /api/v1/milestones/:id:', error);
+    console.error("Error in PATCH /api/v1/milestones/:id:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -2137,11 +2187,11 @@ export const DELETE: APIRoute = async ({ params }) => {
 
     return new Response(
       JSON.stringify({
-        message: 'Milestone deleted successfully',
+        message: "Milestone deleted successfully",
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -2149,44 +2199,44 @@ export const DELETE: APIRoute = async ({ params }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: 'id',
+            field: "id",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found error
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in DELETE /api/v1/milestones/:id:', error);
+    console.error("Error in DELETE /api/v1/milestones/:id:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -2194,6 +2244,7 @@ export const DELETE: APIRoute = async ({ params }) => {
 ```
 
 **Sprawdzić:**
+
 - ✅ Wszystkie trzy handlery (GET, PATCH, DELETE)
 - ✅ Walidacja UUID dla params.id
 - ✅ Consistent error handling pattern
@@ -2206,11 +2257,11 @@ export const DELETE: APIRoute = async ({ params }) => {
 **Plik: `src/pages/api/v1/goals/[goalId]/milestones.ts`** (NOWY PLIK, sprawdzić czy folder istnieje)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { supabase, DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import { MilestoneService } from '../../../../../lib/services/milestone.service';
-import { uuidSchema } from '../../../../../lib/validation/milestone.validation';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { supabase, DEFAULT_USER_ID } from "../../../../../db/supabase.client";
+import { MilestoneService } from "../../../../../lib/services/milestone.service";
+import { uuidSchema } from "../../../../../lib/validation/milestone.validation";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -2222,10 +2273,7 @@ export const GET: APIRoute = async ({ params }) => {
 
     // Get milestones from service
     const milestoneService = new MilestoneService(supabase);
-    const milestones = await milestoneService.getMilestonesByGoalId(
-      goalId,
-      DEFAULT_USER_ID
-    );
+    const milestones = await milestoneService.getMilestonesByGoalId(goalId, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -2233,7 +2281,7 @@ export const GET: APIRoute = async ({ params }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -2241,44 +2289,44 @@ export const GET: APIRoute = async ({ params }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: 'goalId',
+            field: "goalId",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found error
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in GET /api/v1/goals/:goalId/milestones:', error);
+    console.error("Error in GET /api/v1/goals/:goalId/milestones:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -2286,6 +2334,7 @@ export const GET: APIRoute = async ({ params }) => {
 ```
 
 **Sprawdzić:**
+
 - ✅ Proper path depth (6x ../ dla imports)
 - ✅ params.goalId (nie params.id)
 - ✅ Same error handling pattern jako inne endpoints
@@ -2297,11 +2346,11 @@ export const GET: APIRoute = async ({ params }) => {
 **Plik: `src/pages/api/v1/milestones/[milestoneId]/weekly-goals.ts`** (NOWY PLIK)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { supabase, DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import { MilestoneService } from '../../../../../lib/services/milestone.service';
-import { uuidSchema } from '../../../../../lib/validation/milestone.validation';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { supabase, DEFAULT_USER_ID } from "../../../../../db/supabase.client";
+import { MilestoneService } from "../../../../../lib/services/milestone.service";
+import { uuidSchema } from "../../../../../lib/validation/milestone.validation";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -2313,10 +2362,7 @@ export const GET: APIRoute = async ({ params }) => {
 
     // Get weekly goals from service
     const milestoneService = new MilestoneService(supabase);
-    const weeklyGoals = await milestoneService.getWeeklyGoalsByMilestoneId(
-      milestoneId,
-      DEFAULT_USER_ID
-    );
+    const weeklyGoals = await milestoneService.getWeeklyGoalsByMilestoneId(milestoneId, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -2324,7 +2370,7 @@ export const GET: APIRoute = async ({ params }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -2332,44 +2378,44 @@ export const GET: APIRoute = async ({ params }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: 'milestoneId',
+            field: "milestoneId",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found error
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in GET /api/v1/milestones/:milestoneId/weekly-goals:', error);
+    console.error("Error in GET /api/v1/milestones/:milestoneId/weekly-goals:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -2377,6 +2423,7 @@ export const GET: APIRoute = async ({ params }) => {
 ```
 
 **Sprawdzić:**
+
 - ✅ Proper path depth (6x ../ dla imports)
 - ✅ params.milestoneId (nie params.id)
 - ✅ Same error handling pattern jako inne endpoints
@@ -2389,14 +2436,11 @@ export const GET: APIRoute = async ({ params }) => {
 **Plik: `src/pages/api/v1/milestones/[milestoneId]/tasks.ts`** (NOWY PLIK)
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { supabase, DEFAULT_USER_ID } from '../../../../../db/supabase.client';
-import { MilestoneService } from '../../../../../lib/services/milestone.service';
-import {
-  uuidSchema,
-  listTasksByMilestoneQuerySchema,
-} from '../../../../../lib/validation/milestone.validation';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { supabase, DEFAULT_USER_ID } from "../../../../../db/supabase.client";
+import { MilestoneService } from "../../../../../lib/services/milestone.service";
+import { uuidSchema, listTasksByMilestoneQuerySchema } from "../../../../../lib/validation/milestone.validation";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -2409,21 +2453,17 @@ export const GET: APIRoute = async ({ params, request }) => {
     // Parse and validate query parameters
     const url = new URL(request.url);
     const queryParams = {
-      status: url.searchParams.get('status') ?? undefined,
-      week_number: url.searchParams.get('week_number') ?? undefined,
-      limit: url.searchParams.get('limit') ?? undefined,
-      offset: url.searchParams.get('offset') ?? undefined,
+      status: url.searchParams.get("status") ?? undefined,
+      week_number: url.searchParams.get("week_number") ?? undefined,
+      limit: url.searchParams.get("limit") ?? undefined,
+      offset: url.searchParams.get("offset") ?? undefined,
     };
 
     const validatedParams = listTasksByMilestoneQuerySchema.parse(queryParams);
 
     // Get tasks from service
     const milestoneService = new MilestoneService(supabase);
-    const result = await milestoneService.getTasksByMilestoneId(
-      milestoneId,
-      validatedParams,
-      DEFAULT_USER_ID
-    );
+    const result = await milestoneService.getTasksByMilestoneId(milestoneId, validatedParams, DEFAULT_USER_ID);
 
     return new Response(
       JSON.stringify({
@@ -2432,7 +2472,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
@@ -2440,44 +2480,44 @@ export const GET: APIRoute = async ({ params, request }) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: error.errors.map((e) => ({
-            field: e.path.join('.') || 'milestoneId',
+            field: e.path.join(".") || "milestoneId",
             message: e.message,
             received: e.input,
           })),
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Not found error
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && error.message.includes("not found")) {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
+          error: "Not Found",
           message: error.message,
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Other errors
-    console.error('Error in GET /api/v1/milestones/:milestoneId/tasks:', error);
+    console.error("Error in GET /api/v1/milestones/:milestoneId/tasks:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred',
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
@@ -2485,6 +2525,7 @@ export const GET: APIRoute = async ({ params, request }) => {
 ```
 
 **Sprawdzić:**
+
 - ✅ Proper path depth (6x ../ dla imports)
 - ✅ params.milestoneId (nie params.id)
 - ✅ Query params validation
@@ -2642,6 +2683,7 @@ GET {{baseUrl}}/milestones/{{milestoneId}}/tasks?limit=200
 ```
 
 **Test checklist:**
+
 - [ ] Upewnić się że `DEFAULT_USER_ID` jest zdefiniowany w `supabase.client.ts`
 - [ ] Uruchomić Supabase lokalnie (bez RLS)
 - [ ] Uruchomić dev server: `npm run dev`
@@ -2668,8 +2710,8 @@ RLS Policies zostaną włączone po implementacji wszystkich endpointów API. W 
 
 ```sql
 -- W Supabase SQL Editor lub lokalnym psql
-SELECT tablename, rowsecurity 
-FROM pg_tables 
+SELECT tablename, rowsecurity
+FROM pg_tables
 WHERE schemaname = 'public' AND tablename = 'milestones';
 
 -- Powinno zwrócić: rowsecurity = false (dla MVP)
@@ -2678,6 +2720,7 @@ WHERE schemaname = 'public' AND tablename = 'milestones';
 **🔒 Po MVP - Planowane włączenie RLS:**
 
 1. Włączyć RLS na tabeli milestones:
+
    ```sql
    ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
    ```
@@ -2708,25 +2751,26 @@ ORDER BY position ASC;
 
 ```sql
 -- Sprawdzić czy indexes istnieją
-SELECT indexname, indexdef 
-FROM pg_indexes 
+SELECT indexname, indexdef
+FROM pg_indexes
 WHERE tablename = 'milestones';
 
 -- Dodać brakujące (jeśli nie istnieją):
-CREATE INDEX IF NOT EXISTS idx_milestones_long_term_goal_id 
+CREATE INDEX IF NOT EXISTS idx_milestones_long_term_goal_id
 ON milestones(long_term_goal_id);
 
-CREATE INDEX IF NOT EXISTS idx_milestones_position 
+CREATE INDEX IF NOT EXISTS idx_milestones_position
 ON milestones(long_term_goal_id, position);
 
-CREATE INDEX IF NOT EXISTS idx_milestones_is_completed 
+CREATE INDEX IF NOT EXISTS idx_milestones_is_completed
 ON milestones(is_completed);
 
-CREATE INDEX IF NOT EXISTS idx_milestones_incomplete 
+CREATE INDEX IF NOT EXISTS idx_milestones_incomplete
 ON milestones(long_term_goal_id) WHERE is_completed = FALSE;
 ```
 
 **9.3. Code cleanup:**
+
 - [ ] Usunąć console.log statements (zostawić tylko console.error)
 - [ ] Dodać JSDoc comments do wszystkich public methods
 - [ ] Sprawdzić consistent naming conventions
@@ -2755,6 +2799,7 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 ## [Unreleased]
 
 ### Added
+
 - Milestone API endpoints (GET, POST, PATCH, DELETE)
 - Milestone related resources endpoints (weekly-goals, tasks)
 - MilestoneService for business logic
@@ -2818,6 +2863,7 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 ### Security measures:
 
 **⚠️ MVP Mode:**
+
 - ⚠️ Brak JWT authentication - używamy `DEFAULT_USER_ID`
 - ⚠️ RLS wyłączone - zostanie włączone po MVP
 - ✅ Input validation (Zod schemas)
@@ -2826,6 +2872,7 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 - ✅ Error message sanitization (no data leakage)
 
 **🔒 Po MVP:**
+
 - JWT token authentication
 - RLS policies (row-level isolation)
 - Multi-user support
@@ -2841,19 +2888,14 @@ W pliku `docs/api/api-plan.md` sprawdzić czy sekcja Milestones (3.4) jest aktua
 ### Następne kroki (post-implementacja):
 
 **Priorytet 1 - Po implementacji wszystkich endpointów:**
+
 1. **Włączenie RLS policies** - Aktywować RLS na wszystkich tabelach
 2. **JWT Authentication** - Dodać Supabase Auth middleware
 3. **Multi-user support** - Usunąć DEFAULT_USER_ID, używać rzeczywistych user ID
 
-**Priorytet 2 - Testy i monitoring:**
-4. **Integration tests** - Napisać automated tests (Vitest + Supabase test client)
-5. **E2E tests** - Przetestować flow: create plan → create goal → create milestones
-6. **Performance monitoring** - Dodać logging/metrics dla query times
+**Priorytet 2 - Testy i monitoring:** 4. **Integration tests** - Napisać automated tests (Vitest + Supabase test client) 5. **E2E tests** - Przetestować flow: create plan → create goal → create milestones 6. **Performance monitoring** - Dodać logging/metrics dla query times
 
-**Opcjonalne (produkcja):**
-7. **API documentation** - Rozważyć OpenAPI/Swagger spec
-8. **Rate limiting** - Implementacja dla produkcji
-9. **Caching** - Rozważyć Redis cache dla często odczytywanych danych
+**Opcjonalne (produkcja):** 7. **API documentation** - Rozważyć OpenAPI/Swagger spec 8. **Rate limiting** - Implementacja dla produkcji 9. **Caching** - Rozważyć Redis cache dla często odczytywanych danych
 
 ---
 
@@ -2865,13 +2907,13 @@ Wersja: 1.2 (MVP Mode - bez autentykacji i RLS)
 Status: Ready for implementation
 
 **⚠️ Uwaga MVP:**
-Ten plan implementuje uproszczoną wersję API bez autentykacji JWT i RLS policies. 
-Używany jest `DEFAULT_USER_ID` dla wszystkich operacji. Po implementacji wszystkich 
+Ten plan implementuje uproszczoną wersję API bez autentykacji JWT i RLS policies.
+Używany jest `DEFAULT_USER_ID` dla wszystkich operacji. Po implementacji wszystkich
 endpointów należy włączyć RLS i dodać prawdziwą autentykację.
 
 **Changelog:**
+
 - v1.2 (2025-01-05): Dodano endpointy do pobierania powiązanych zasobów:
   - GET /api/v1/milestones/:milestoneId/weekly-goals
   - GET /api/v1/milestones/:milestoneId/tasks (z filtrami)
 - v1.1 (2025-01-11): Wersja bazowa z 6 podstawowymi endpointami
-

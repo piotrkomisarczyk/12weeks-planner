@@ -18,7 +18,7 @@ export const prerender = false;
  *
  * @returns Redirect to appropriate page based on the auth flow
  */
-export const GET: APIRoute = async ({ url, locals, redirect, cookies }) => {
+export const GET: APIRoute = async ({ url, locals, redirect }) => {
   const token_hash = url.searchParams.get("token_hash");
   const type = url.searchParams.get("type");
   const code = url.searchParams.get("code");
@@ -27,7 +27,7 @@ export const GET: APIRoute = async ({ url, locals, redirect, cookies }) => {
   // Handle PKCE flow (used for both password reset and email confirmation)
   if (code) {
     try {
-      const { data, error } = await locals.supabase.auth.exchangeCodeForSession(code);
+      const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
         console.error("PKCE code exchange error:", error);

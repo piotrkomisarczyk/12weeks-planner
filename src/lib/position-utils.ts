@@ -136,7 +136,7 @@ export function normalizePositions<T extends { position: number }>(
 
     Array.from(grouped.entries())
       .sort(([a], [b]) => a - b)
-      .forEach(([_, group]) => {
+      .forEach(([, group]) => {
         const normalized = group.map((item, index) => ({
           ...item,
           position: encodePosition(currentWeekOrder, index + 1),

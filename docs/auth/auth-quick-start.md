@@ -5,6 +5,7 @@ This guide will help you quickly understand and work with the authentication sys
 ## 🎯 What's Been Implemented
 
 ✅ **Complete UI** for authentication:
+
 - Login page (`/login`)
 - Registration page (`/register`)
 - Forgot password page (`/forgot-password`)
@@ -19,11 +20,13 @@ This guide will help you quickly understand and work with the authentication sys
 ### 1. View the UI
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
 
 Visit the auth pages:
+
 - http://localhost:4321/login
 - http://localhost:4321/register
 - http://localhost:4321/forgot-password
@@ -32,6 +35,7 @@ Visit the auth pages:
 ### 2. Test Form Validation
 
 Try these scenarios:
+
 - Submit empty forms → See validation errors
 - Enter invalid email → See format error
 - Use weak password → See strength requirements
@@ -69,21 +73,25 @@ Try these scenarios:
 ## 📖 Key Documentation
 
 ### For Understanding
+
 1. **auth-implementation-summary.md** - Start here for overview
 2. **auth-ui-preview.md** - See visual mockups
 3. **diagrams/auth-flow.md** - Understand the flows
 
 ### For Integration
+
 1. **auth-backend-integration-guide.md** - Step-by-step integration
 2. **auth-integration-checklist.md** - Track your progress
 
 ### For Reference
+
 1. **auth-ui-implementation.md** - Detailed component docs
 2. **src/components/auth/README.md** - Component usage guide
 
 ## 🔧 Next Steps (Backend Integration)
 
 ### Phase 1: Setup (15 min)
+
 ```bash
 # Install dependencies
 npm install @supabase/ssr @supabase/supabase-js
@@ -94,14 +102,18 @@ echo "PUBLIC_SUPABASE_ANON_KEY=your_key" >> .env
 ```
 
 ### Phase 2: Create Clients (30 min)
+
 Create these files:
+
 - `src/lib/supabase/client.ts` - Browser client
 - `src/lib/supabase/server.ts` - Server client
 
 See: `auth-backend-integration-guide.md` → Step 3
 
 ### Phase 3: Update Middleware (20 min)
+
 Update `src/middleware/index.ts` to:
+
 - Create Supabase client
 - Get user session
 - Protect routes
@@ -109,7 +121,9 @@ Update `src/middleware/index.ts` to:
 See: `auth-backend-integration-guide.md` → Step 4
 
 ### Phase 4: Integrate Forms (45 min)
+
 Update each form component:
+
 - Import Supabase client
 - Replace placeholder logic
 - Handle success/error cases
@@ -117,7 +131,9 @@ Update each form component:
 See: `auth-backend-integration-guide.md` → Step 5
 
 ### Phase 5: Test (30 min)
+
 Test all flows:
+
 - Registration + email verification
 - Login + session persistence
 - Password reset + update
@@ -128,6 +144,7 @@ See: `auth-integration-checklist.md` → Phase 10
 ## 💡 Common Tasks
 
 ### Add a New Auth Component
+
 1. Create component in `src/components/auth/`
 2. Follow existing patterns (state, validation, errors)
 3. Use Shadcn UI components
@@ -135,17 +152,20 @@ See: `auth-integration-checklist.md` → Phase 10
 5. Update `src/components/auth/README.md`
 
 ### Modify Validation Rules
+
 1. Find the component in `src/components/auth/`
 2. Update the `validate()` function
 3. Update error messages
 4. Update helper text in JSX
 
 ### Change Redirect Behavior
+
 1. Find the component in `src/components/auth/`
 2. Update the `handleSubmit()` function
 3. Change `window.location.href` value
 
 ### Add OAuth Provider
+
 1. Configure provider in Supabase dashboard
 2. Add OAuth button to LoginForm/RegisterForm
 3. Call `supabase.auth.signInWithOAuth()`
@@ -154,21 +174,25 @@ See: `auth-integration-checklist.md` → Phase 10
 ## 🐛 Troubleshooting
 
 ### Forms don't submit
+
 - Check browser console for errors
 - Verify validation is passing
 - Check network tab for API calls
 
 ### Validation not working
+
 - Check the `validate()` function
 - Verify error state is being set
 - Check error display in JSX
 
 ### Styling looks wrong
+
 - Verify Shadcn UI components are installed
 - Check Tailwind CSS is configured
 - Verify global styles are loaded
 
 ### TypeScript errors
+
 - Run `npm run build` to see all errors
 - Check imports are correct
 - Verify types are defined
@@ -176,11 +200,13 @@ See: `auth-integration-checklist.md` → Phase 10
 ## 📚 Learning Resources
 
 ### Understanding the Code
+
 1. Read `PlanWizardContainer.tsx` - Same patterns used
 2. Review Shadcn UI docs - Component library
 3. Check React hooks docs - State management
 
 ### Understanding the Flow
+
 1. Read `diagrams/auth-flow.md` - Visual diagrams
 2. Review `auth-ui-preview.md` - UI mockups
 3. Check Supabase auth docs - Backend system
@@ -188,6 +214,7 @@ See: `auth-integration-checklist.md` → Phase 10
 ## 🎓 Best Practices
 
 ### When Modifying Components
+
 - ✅ Keep validation logic in `validate()` function
 - ✅ Use `useCallback` for event handlers
 - ✅ Clear errors when user types
@@ -196,6 +223,7 @@ See: `auth-integration-checklist.md` → Phase 10
 - ✅ Include accessibility attributes
 
 ### When Adding Features
+
 - ✅ Follow existing patterns
 - ✅ Update documentation
 - ✅ Add TypeScript types
@@ -204,6 +232,7 @@ See: `auth-integration-checklist.md` → Phase 10
 - ✅ Test with screen reader
 
 ### When Integrating Backend
+
 - ✅ Follow the integration guide
 - ✅ Use the checklist
 - ✅ Test each step
@@ -214,6 +243,7 @@ See: `auth-integration-checklist.md` → Phase 10
 ## 🔗 Quick Links
 
 ### Files
+
 - [LoginForm.tsx](../src/components/auth/LoginForm.tsx)
 - [RegisterForm.tsx](../src/components/auth/RegisterForm.tsx)
 - [ForgotPasswordForm.tsx](../src/components/auth/ForgotPasswordForm.tsx)
@@ -221,6 +251,7 @@ See: `auth-integration-checklist.md` → Phase 10
 - [AuthLayout.astro](../src/layouts/AuthLayout.astro)
 
 ### Documentation
+
 - [Implementation Summary](./auth-implementation-summary.md)
 - [Integration Guide](./auth-backend-integration-guide.md)
 - [Integration Checklist](./auth-integration-checklist.md)
@@ -228,6 +259,7 @@ See: `auth-integration-checklist.md` → Phase 10
 - [Flow Diagrams](./diagrams/auth-flow.md)
 
 ### External Resources
+
 - [Supabase Auth Docs](https://supabase.com/docs/guides/auth)
 - [Supabase SSR Guide](https://supabase.com/docs/guides/auth/server-side-rendering)
 - [Astro Docs](https://docs.astro.build)
@@ -259,6 +291,7 @@ A: Yes! The UI is decoupled from the backend. Just replace the Supabase calls wi
 ## 🎉 You're Ready!
 
 You now have:
+
 - ✅ Complete authentication UI
 - ✅ Comprehensive documentation
 - ✅ Clear integration path

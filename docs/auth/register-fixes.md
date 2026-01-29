@@ -3,33 +3,41 @@
 ## Zidentyfikowane Problemy
 
 ### 1. Email weryfikacyjny nie dociera
+
 **Przyczyna:** Supabase domyślnie używa wbudowanego email providera z ograniczeniami (3-4 emaile/godzinę, często blokowany przez spam).
 
-**Rozwiązanie:** 
+**Rozwiązanie:**
+
 - Utworzono szczegółową dokumentację konfiguracji SMTP: `docs/auth/supabase-email-configuration.md`
 - Zalecane providery: SendGrid, Mailgun, AWS SES, Resend
 - Dla testów: użyj aliasów Gmail (`email+test1@gmail.com`) i sprawdź folder spam
 
 ### 2. Błędne przekierowanie z "Back to login"
+
 **Przyczyna:** Po rejestracji użytkownik otrzymywał sesję w Supabase (mimo niezweryfikowanego emaila), więc middleware przekierowywał go na `/plans` zamiast na `/login`.
 
 **Rozwiązanie:**
+
 - Endpoint `/api/auth/register` teraz natychmiast wylogowuje użytkownika po rejestracji
 - Middleware sprawdza czy email jest zweryfikowany (`email_confirmed_at !== null`)
 - Tylko użytkownicy z zweryfikowanym emailem są traktowani jako zalogowani
 
 ### 3. Brak weryfikacji emaila przy logowaniu
+
 **Przyczyna:** Endpoint logowania nie sprawdzał czy email został zweryfikowany.
 
 **Rozwiązanie:**
+
 - Endpoint `/api/auth/login` teraz sprawdza `email_confirmed_at`
 - Jeśli email nie jest zweryfikowany, użytkownik otrzymuje błąd 403 z odpowiednim komunikatem
 - Sesja jest natychmiast zamykana dla niezweryfikowanych użytkowników
 
 ### 4. Brak obsługi callback po weryfikacji
+
 **Przyczyna:** Nie było endpointu do obsługi linku weryfikacyjnego z emaila.
 
 **Rozwiązanie:**
+
 - Utworzono `/auth/callback` do obsługi weryfikacji emaila
 - Endpoint weryfikuje token z Supabase i przekierowuje na `/login` z komunikatem sukcesu
 - Obsługuje również błędy (wygasły link, nieprawidłowy token)
@@ -37,6 +45,7 @@
 ## Wprowadzone Zmiany
 
 ### 1. `/src/pages/api/auth/register.ts`
+
 ```typescript
 // Zmiany:
 - Zmieniono emailRedirectTo z /login na /auth/callback
@@ -45,6 +54,7 @@
 ```
 
 ### 2. `/src/pages/api/auth/login.ts`
+
 ```typescript
 // Zmiany:
 - Dodano sprawdzenie email_confirmed_at
@@ -53,6 +63,7 @@
 ```
 
 ### 3. `/src/middleware/index.ts`
+
 ```typescript
 // Zmiany:
 - Dodano sprawdzenie email_confirmed_at przy ustawianiu locals.user
@@ -61,6 +72,7 @@
 ```
 
 ### 4. `/src/components/auth/LoginForm.tsx`
+
 ```typescript
 // Zmiany:
 - Dodano useEffect do obsługi parametrów URL (verified, error)
@@ -70,6 +82,7 @@
 ```
 
 ### 5. `/src/pages/auth/callback.ts` (NOWY)
+
 ```typescript
 // Funkcjonalność:
 - Obsługuje weryfikację emaila z linku
@@ -79,7 +92,9 @@
 ```
 
 ### 6. `/docs/auth/supabase-email-configuration.md` (NOWY)
+
 Szczegółowa dokumentacja konfiguracji email providera:
+
 - Instrukcje dla SendGrid, Mailgun, AWS SES
 - Konfiguracja SMTP w Supabase Dashboard
 - Dostosowanie szablonów email
@@ -105,9 +120,9 @@ sequenceDiagram
     S->>E: Wysyła email weryfikacyjny
     API->>F: 200 OK (sukces, sprawdź email)
     F->>U: Wyświetla "Check your email"
-    
+
     Note over U,E: Użytkownik sprawdza email
-    
+
     E->>U: Email z linkiem weryfikacyjnym
     U->>CB: Klika link (z token_hash)
     CB->>S: verifyOtp(token_hash)
@@ -130,7 +145,7 @@ sequenceDiagram
     U->>F: Wypełnia formularz logowania
     F->>API: POST /api/auth/login
     API->>S: signInWithPassword(email, password)
-    
+
     alt Email niezweryfikowany
         S->>API: Zwraca użytkownika (email_confirmed_at = null)
         API->>S: signOut() (wylogowanie)
@@ -150,6 +165,7 @@ sequenceDiagram
 ## Testowanie
 
 ### Test 1: Rejestracja nowego użytkownika
+
 1. Przejdź na `/register`
 2. Wprowadź email i hasło
 3. Kliknij "Create account"
@@ -158,12 +174,14 @@ sequenceDiagram
 6. **Oczekiwany wynik:** Przekierowanie na `/login` (NIE na `/plans`)
 
 ### Test 2: Próba logowania przed weryfikacją
+
 1. Zarejestruj nowego użytkownika (bez klikania linku w emailu)
 2. Przejdź na `/login`
 3. Wprowadź dane logowania
 4. **Oczekiwany wynik:** Błąd "Please verify your email address before logging in"
 
 ### Test 3: Weryfikacja emaila
+
 1. Sprawdź skrzynkę email (również spam)
 2. Kliknij link weryfikacyjny
 3. **Oczekiwany wynik:** Przekierowanie na `/login?verified=true` z komunikatem sukcesu
@@ -171,6 +189,7 @@ sequenceDiagram
 5. **Oczekiwany wynik:** Przekierowanie na `/plans` (dostęp OK)
 
 ### Test 4: Wygasły link weryfikacyjny
+
 1. Poczekaj 24h lub użyj starego linku
 2. Kliknij link
 3. **Oczekiwany wynik:** Przekierowanie na `/login?error=link_expired` z odpowiednim komunikatem
@@ -193,6 +212,7 @@ sequenceDiagram
    - Sender: `noreply@yourdomain.com`
 
 ### Weryfikacja konfiguracji
+
 1. Zarejestruj testowego użytkownika
 2. Sprawdź logi: Supabase Dashboard → Logs → Auth Logs
 3. Szukaj eventów `user.signup` i `email.sent`
@@ -200,6 +220,7 @@ sequenceDiagram
 ## Bezpieczeństwo
 
 ### Implementowane zabezpieczenia:
+
 ✅ Weryfikacja emaila wymagana przed dostępem
 ✅ Natychmiastowe wylogowanie po rejestracji
 ✅ Sprawdzanie `email_confirmed_at` w middleware
@@ -209,6 +230,7 @@ sequenceDiagram
 ✅ Generyczne komunikaty błędów (nie ujawniamy czy email istnieje)
 
 ### Dodatkowe zabezpieczenia do rozważenia:
+
 - Rate limiting dla endpointów auth
 - CAPTCHA dla rejestracji
 - 2FA (opcjonalnie)
@@ -232,17 +254,20 @@ sequenceDiagram
 ## Następne Kroki
 
 ### Priorytet 1 (Wymagane):
+
 - [ ] Skonfigurować SMTP provider (SendGrid/Mailgun)
 - [ ] Przetestować pełny przepływ rejestracji
 - [ ] Dostosować szablony email do brandingu
 
 ### Priorytet 2 (Zalecane):
+
 - [ ] Dodać przycisk "Resend verification email"
 - [ ] Dodać rate limiting dla auth endpoints
 - [ ] Skonfigurować SPF/DKIM dla domeny
 - [ ] Dodać monitoring wysyłki emaili
 
 ### Priorytet 3 (Opcjonalne):
+
 - [ ] Dodać CAPTCHA dla rejestracji
 - [ ] Zaimplementować 2FA
 - [ ] Dodać social login (Google, GitHub)
@@ -251,6 +276,7 @@ sequenceDiagram
 ## Pliki do Review
 
 Przed wdrożeniem na produkcję, zreviewuj:
+
 1. `/src/pages/api/auth/register.ts` - endpoint rejestracji
 2. `/src/pages/api/auth/login.ts` - endpoint logowania
 3. `/src/middleware/index.ts` - middleware auth

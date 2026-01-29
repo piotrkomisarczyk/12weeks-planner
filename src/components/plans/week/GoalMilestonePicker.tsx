@@ -181,7 +181,9 @@ export function GoalMilestonePicker({
                   <Target className="h-5 w-5 mt-0.5 text-primary shrink-0" />
                   <div className="flex-1">
                     <div className="font-medium text-sm">Just the goal</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Link only to "{selectedGoal?.title}"</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      Link only to &quot;{selectedGoal?.title}&quot;
+                    </div>
                   </div>
                   {currentGoalId === selectedGoalId && !currentMilestoneId && (
                     <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />

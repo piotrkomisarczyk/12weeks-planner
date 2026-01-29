@@ -34,7 +34,6 @@ import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, P
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
 import { getDisabledTooltip } from "@/lib/utils";
 import { Target, MoreVertical, Trash2, Plus, Flag, ArrowUp, ArrowDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -115,7 +114,9 @@ export function WeeklyGoalCard({
     isOpen: false,
     title: "",
     description: "",
-    onConfirm: () => {},
+    onConfirm: () => {
+      // Placeholder function, will be replaced when dialog is opened
+    },
   });
 
   const completedTasks = goal.tasks.filter((t) => t.status === "completed").length;

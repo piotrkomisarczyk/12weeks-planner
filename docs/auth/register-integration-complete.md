@@ -11,6 +11,7 @@ Przeprowadzono pełną integrację procesu rejestracji użytkownika z backendem 
 ## Zaimplementowane komponenty
 
 ### 1. Wspólny schemat walidacji (✅)
+
 **Plik:** `src/lib/validation/auth.validation.ts`
 
 Utworzono wspólne schematy walidacji z użyciem Zod, które są używane zarówno po stronie frontendu (React) jak i backendu (API):
@@ -23,9 +24,11 @@ Utworzono wspólne schematy walidacji z użyciem Zod, które są używane zarów
 - `UpdatePasswordBodySchema` - walidacja zmiany hasła
 
 ### 2. Endpoint API rejestracji (✅)
+
 **Plik:** `src/pages/api/auth/register.ts`
 
 Utworzono endpoint `POST /api/auth/register` który:
+
 - Waliduje dane wejściowe używając `RegisterBodySchema`
 - Tworzy konto użytkownika w Supabase Auth (`supabase.auth.signUp`)
 - Wysyła email weryfikacyjny (jeśli włączony w Supabase)
@@ -33,19 +36,23 @@ Utworzono endpoint `POST /api/auth/register` który:
 - Obsługuje błędy z odpowiednimi kodami HTTP (400, 500)
 
 **Konfiguracja:**
+
 - `emailRedirectTo`: Po weryfikacji email użytkownik jest przekierowywany na `/login`
 - `prerender: false` - endpoint renderowany server-side
 
 ### 3. Refaktoryzacja RegisterForm (✅)
+
 **Plik:** `src/components/auth/RegisterForm.tsx`
 
 Zrefaktoryzowano komponent do użycia:
+
 - `react-hook-form` - zarządzanie stanem formularza
 - `@hookform/resolvers/zod` - integracja z Zod
 - Wspólny schemat `RegisterBodySchema` - spójność walidacji z backendem
 - `mode: 'onBlur'` - walidacja po opuszczeniu pola
 
 **Funkcjonalności:**
+
 - Walidacja w czasie rzeczywistym
 - Wyświetlanie błędów walidacji pod polami
 - Obsługa błędów z API (duplikat email, problemy z siecią)
@@ -54,17 +61,21 @@ Zrefaktoryzowano komponent do użycia:
 - Link do strony logowania
 
 ### 4. Aktualizacja register.astro (✅)
+
 **Plik:** `src/pages/register.astro`
 
 Zaktualizowano stronę:
+
 - Dodano `export const prerender = false` - SSR
 - Zaimplementowano middleware check - zalogowani użytkownicy są przekierowywani na `/plans`
 - Usunięto TODO komentarze
 
 ### 5. Aktualizacja middleware (✅)
+
 **Plik:** `src/middleware/index.ts`
 
 Zaktualizowano middleware:
+
 - Zmieniono przekierowanie zalogowanych użytkowników z `/` na `/plans` (zgodnie z wymaganiami)
 - `/register` i `/api/auth/register` już były w `PUBLIC_PATHS` (nie wymagało zmian)
 
@@ -118,6 +129,7 @@ npm install react-hook-form @hookform/resolvers
 ```
 
 Zależności już obecne w projekcie:
+
 - `zod` (3.24.1)
 - `@supabase/ssr` (0.8.0)
 - `@supabase/supabase-js` (2.75.0)
@@ -144,6 +156,7 @@ Zależności już obecne w projekcie:
 ### Test 1: Rejestracja nowego użytkownika ✅
 
 **Kroki:**
+
 1. Otwórz `http://localhost:3000/register`
 2. Wypełnij formularz:
    - Email: `test@example.com`
@@ -152,6 +165,7 @@ Zależności już obecne w projekcie:
 3. Kliknij "Create account"
 
 **Oczekiwany rezultat:**
+
 - Formularz zostaje wysłany
 - Pojawia się ekran "Check your email"
 - Email weryfikacyjny jest wysłany na podany adres
@@ -160,6 +174,7 @@ Zależności już obecne w projekcie:
 ### Test 2: Walidacja hasła ✅
 
 **Kroki:**
+
 1. Otwórz `http://localhost:3000/register`
 2. Wypełnij formularz ze słabym hasłem:
    - Email: `test@example.com`
@@ -168,6 +183,7 @@ Zależności już obecne w projekcie:
 3. Kliknij w inne pole (blur)
 
 **Oczekiwany rezultat:**
+
 - Pojawia się błąd: "Password must be at least 8 characters long"
 - Przycisk "Create account" jest aktywny (walidacja nie blokuje submitu)
 - Po kliknięciu przycisku formularz nie zostaje wysłany
@@ -175,6 +191,7 @@ Zależności już obecne w projekcie:
 ### Test 3: Niezgodność haseł ✅
 
 **Kroki:**
+
 1. Otwórz `http://localhost:3000/register`
 2. Wypełnij formularz:
    - Email: `test@example.com`
@@ -183,16 +200,19 @@ Zależności już obecne w projekcie:
 3. Kliknij w inne pole (blur)
 
 **Oczekiwany rezultat:**
+
 - Pojawia się błąd: "Passwords do not match"
 - Formularz nie zostaje wysłany
 
 ### Test 4: Duplikat email ✅
 
 **Kroki:**
+
 1. Zarejestruj użytkownika z emailem `test@example.com`
 2. Spróbuj zarejestrować ponownie z tym samym emailem
 
 **Oczekiwany rezultat:**
+
 - Toast error: "An account with this email already exists."
 - Formularz pozostaje widoczny
 - Użytkownik może poprawić email
@@ -200,25 +220,30 @@ Zależności już obecne w projekcie:
 ### Test 5: Przekierowanie zalogowanego użytkownika ✅
 
 **Kroki:**
+
 1. Zaloguj się do aplikacji
 2. Spróbuj wejść na `http://localhost:3000/register`
 
 **Oczekiwany rezultat:**
+
 - Automatyczne przekierowanie na `/plans`
 - Strona rejestracji nie jest wyświetlana
 
 ### Test 6: Link "Back to login" ✅
 
 **Kroki:**
+
 1. Otwórz `http://localhost:3000/register`
 2. Kliknij "Sign in" na dole formularza
 
 **Oczekiwany rezultat:**
+
 - Przekierowanie na `/login`
 
 ### Test 7: Weryfikacja email (End-to-End) 🔄
 
 **Kroki:**
+
 1. Zarejestruj nowego użytkownika z prawdziwym emailem
 2. Sprawdź skrzynkę email
 3. Kliknij link weryfikacyjny w emailu
@@ -226,6 +251,7 @@ Zależności już obecne w projekcie:
 5. Zaloguj się używając zarejestrowanych danych
 
 **Oczekiwany rezultat:**
+
 - Email weryfikacyjny dostarczony
 - Link działa i weryfikuje konto
 - Logowanie powiodło się
@@ -281,6 +307,7 @@ Zależności już obecne w projekcie:
 ## Logi i debugging
 
 ### Sprawdzanie logów Supabase:
+
 ```bash
 # W Supabase Dashboard:
 # Authentication → Users → sprawdź czy użytkownik został utworzony
@@ -288,6 +315,7 @@ Zależności już obecne w projekcie:
 ```
 
 ### Sprawdzanie logów aplikacji:
+
 ```bash
 # Terminal z npm run dev
 # Szukaj linii:
@@ -297,6 +325,7 @@ Zależności już obecne w projekcie:
 ```
 
 ### Debugging w przeglądarce:
+
 ```javascript
 // Console → Network → XHR
 // Sprawdź request do /api/auth/register
@@ -306,6 +335,7 @@ Zależności już obecne w projekcie:
 ## Podsumowanie
 
 Integracja procesu rejestracji została ukończona zgodnie z wymaganiami:
+
 - ✅ Wspólny schemat walidacji (DRY principle)
 - ✅ Endpoint API z walidacją backendową
 - ✅ Refaktoryzacja formularza do react-hook-form + zod
