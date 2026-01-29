@@ -1,10 +1,10 @@
 /**
  * TaskStatusControl Component
- * 
+ *
  * Specialized control for task status with 5 states.
  * - Click cycles through: todo -> in_progress -> completed -> todo
  * - Chevron/Menu opens popover with all 5 options (including cancelled, postponed)
- * 
+ *
  * Icons:
  * - todo: Empty square (black border, white background)
  * - in_progress: Half-filled square (diagonal from top-left)
@@ -13,12 +13,12 @@
  * - postponed: Right arrow
  */
 
-import { useState } from 'react';
-import { Check, X, ArrowRight, ChevronDown } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import type { TaskStatus } from '@/types';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { Check, X, ArrowRight, ChevronDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import type { TaskStatus } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface TaskStatusControlProps {
   status: TaskStatus;
@@ -27,24 +27,22 @@ interface TaskStatusControlProps {
 }
 
 // Status cycle for click interaction (excludes cancelled and postponed)
-const STATUS_CYCLE: TaskStatus[] = ['todo', 'in_progress', 'completed'];
+const STATUS_CYCLE: TaskStatus[] = ["todo", "in_progress", "completed"];
 
 // All available statuses
 const ALL_STATUSES: { value: TaskStatus; label: string; icon: React.ReactNode }[] = [
-  { value: 'todo', label: 'To Do', icon: <StatusIconTodo /> },
-  { value: 'in_progress', label: 'In Progress', icon: <StatusIconInProgress /> },
-  { value: 'completed', label: 'Completed', icon: <StatusIconCompleted /> },
-  { value: 'cancelled', label: 'Cancelled', icon: <StatusIconCancelled /> },
-  { value: 'postponed', label: 'Postponed', icon: <StatusIconPostponed /> },
+  { value: "todo", label: "To Do", icon: <StatusIconTodo /> },
+  { value: "in_progress", label: "In Progress", icon: <StatusIconInProgress /> },
+  { value: "completed", label: "Completed", icon: <StatusIconCompleted /> },
+  { value: "cancelled", label: "Cancelled", icon: <StatusIconCancelled /> },
+  { value: "postponed", label: "Postponed", icon: <StatusIconPostponed /> },
 ];
 
 /**
  * Empty square icon for 'todo' status
  */
 function StatusIconTodo() {
-  return (
-    <div className="w-5 h-5 border-2 border-foreground bg-background rounded-sm" />
-  );
+  return <div className="w-5 h-5 border-2 border-foreground bg-background rounded-sm" />;
 }
 
 /**
@@ -54,10 +52,10 @@ function StatusIconTodo() {
 function StatusIconInProgress() {
   return (
     <div className="w-5 h-5 border-2 border-foreground rounded-sm relative overflow-hidden bg-background">
-      <div 
+      <div
         className="absolute inset-0 bg-foreground"
         style={{
-          clipPath: 'polygon(0 0, 100% 0, 0 100%)'
+          clipPath: "polygon(0 0, 100% 0, 0 100%)",
         }}
       />
     </div>
@@ -101,7 +99,7 @@ function StatusIconPostponed() {
  * Get icon component for a given status
  */
 function getStatusIcon(status: TaskStatus): React.ReactNode {
-  const statusConfig = ALL_STATUSES.find(s => s.value === status);
+  const statusConfig = ALL_STATUSES.find((s) => s.value === status);
   return statusConfig?.icon || <StatusIconTodo />;
 }
 
@@ -144,8 +142,8 @@ export function TaskStatusControl({ status, onChange, disabled = false }: TaskSt
         onClick={handleIconClick}
         disabled={disabled}
         className={cn(
-          'flex items-center justify-center transition-opacity',
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'
+          "flex items-center justify-center transition-opacity",
+          disabled ? "opacity-50 cursor-not-allowed" : "hover:opacity-70 cursor-pointer"
         )}
         aria-label={`Current status: ${status}. Click to cycle status.`}
       >
@@ -159,8 +157,8 @@ export function TaskStatusControl({ status, onChange, disabled = false }: TaskSt
             type="button"
             disabled={disabled}
             className={cn(
-              'flex items-center justify-center transition-opacity',
-              disabled ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'
+              "flex items-center justify-center transition-opacity",
+              disabled ? "opacity-50 cursor-not-allowed" : "hover:opacity-70 cursor-pointer"
             )}
             aria-label="Open status menu"
           >
@@ -172,7 +170,7 @@ export function TaskStatusControl({ status, onChange, disabled = false }: TaskSt
             {ALL_STATUSES.map(({ value, label, icon }) => (
               <Button
                 key={value}
-                variant={status === value ? 'secondary' : 'ghost'}
+                variant={status === value ? "secondary" : "ghost"}
                 size="sm"
                 className="w-full justify-start gap-2 h-9"
                 onClick={() => handleStatusSelect(value)}
@@ -187,4 +185,3 @@ export function TaskStatusControl({ status, onChange, disabled = false }: TaskSt
     </div>
   );
 }
-

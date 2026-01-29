@@ -1,11 +1,11 @@
 /**
  * Position Utilities
- * 
+ *
  * Helper functions for managing task positions using a single-field strategy.
  * Position is encoded as: weekOrder * 100 + dayRank
  * - weekOrder: Position within week view (1, 2, 3... → 100, 200, 300...)
  * - dayRank: Position within day/slot (1-99)
- * 
+ *
  * This allows:
  * - Week view to maintain block order of goals/sections
  * - Day view to reorder tasks within a day without affecting week order
@@ -71,11 +71,7 @@ export function updateDayRank(position: number, newDayRank: number): number {
  * @param defaultDayRank - Default day rank to use (default: 1)
  * @returns Updated position with new week order
  */
-export function updateWeekOrder(
-  position: number, 
-  newWeekOrder: number, 
-  defaultDayRank: number = 1
-): number {
+export function updateWeekOrder(position: number, newWeekOrder: number, defaultDayRank = 1): number {
   return encodePosition(newWeekOrder, defaultDayRank);
 }
 
@@ -85,9 +81,7 @@ export function updateWeekOrder(
  * @param items - Array of items with position field
  * @returns Array of items with updated positions
  */
-export function generateWeekViewPositions<T extends { position: number }>(
-  items: T[]
-): Array<T & { position: number }> {
+export function generateWeekViewPositions<T extends { position: number }>(items: T[]): (T & { position: number })[] {
   return items.map((item, index) => ({
     ...item,
     position: encodePosition(index + 1, getDayRank(item.position) || 1),
@@ -100,12 +94,10 @@ export function generateWeekViewPositions<T extends { position: number }>(
  * @param items - Array of items with position field
  * @returns Array of items with updated positions
  */
-export function generateDayViewPositions<T extends { position: number }>(
-  items: T[]
-): Array<T & { position: number }> {
+export function generateDayViewPositions<T extends { position: number }>(items: T[]): (T & { position: number })[] {
   // Get the week order from the first item (all should be same day)
   const weekOrder = items.length > 0 ? getWeekOrder(items[0].position) : 1;
-  
+
   return items.map((item, index) => ({
     ...item,
     position: encodePosition(weekOrder, index + 1),
@@ -121,8 +113,8 @@ export function generateDayViewPositions<T extends { position: number }>(
  */
 export function normalizePositions<T extends { position: number }>(
   items: T[],
-  preserveWeekOrder: boolean = true
-): Array<T & { position: number }> {
+  preserveWeekOrder = true
+): (T & { position: number })[] {
   if (items.length === 0) return [];
 
   // Sort by current position
@@ -139,7 +131,7 @@ export function normalizePositions<T extends { position: number }>(
     });
 
     // Normalize each group
-    let result: Array<T & { position: number }> = [];
+    let result: (T & { position: number })[] = [];
     let currentWeekOrder = 1;
 
     Array.from(grouped.entries())
@@ -169,10 +161,7 @@ export function normalizePositions<T extends { position: number }>(
  * @param threshold - Maximum safe position value (default: 1000000)
  * @returns True if normalization is recommended
  */
-export function shouldNormalizePositions(
-  positions: number[], 
-  threshold: number = 1000000
-): boolean {
+export function shouldNormalizePositions(positions: number[], threshold = 1000000): boolean {
   if (positions.length === 0) return false;
   const maxPosition = Math.max(...positions);
   return maxPosition > threshold;
@@ -186,4 +175,3 @@ export function shouldNormalizePositions(
 export function sortByPosition<T extends { position: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.position - b.position);
 }
-

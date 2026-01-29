@@ -3,12 +3,12 @@
  * Shows completion status and button to mark review as complete
  */
 
-import React from 'react';
-import { Button } from '../../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
-import { CheckCircle, Circle } from 'lucide-react';
-import { getDisabledTooltip, isPlanReadOnly, isPlanReady } from '../../../lib/utils';
-import type { PlanStatus } from '../../../types';
+import React from "react";
+import { Button } from "../../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+import { CheckCircle, Circle } from "lucide-react";
+import { getDisabledTooltip, isPlanReadOnly, isPlanReady } from "../../../lib/utils";
+import type { PlanStatus } from "../../../types";
 
 interface ReviewCompletionStatusProps {
   isCompleted: boolean;
@@ -19,7 +19,7 @@ interface ReviewCompletionStatusProps {
 export default function ReviewCompletionStatus({
   isCompleted,
   onToggleComplete,
-  planStatus
+  planStatus,
 }: ReviewCompletionStatusProps) {
   // Compute read-only state for review (ready or completed/archived)
   const isReadOnly = isPlanReadOnly(planStatus) || isPlanReady(planStatus);
@@ -34,13 +34,12 @@ export default function ReviewCompletionStatus({
           )}
           <div>
             <h3 className="font-medium text-foreground">
-              {isCompleted ? 'Review Completed' : 'Mark Review as Complete'}
+              {isCompleted ? "Review Completed" : "Mark Review as Complete"}
             </h3>
             <p className="text-sm text-muted-foreground">
               {isCompleted
-                ? 'This weekly review has been marked as complete.'
-                : 'Mark this review as complete when you\'ve finished reflecting and updating goal progress.'
-              }
+                ? "This weekly review has been marked as complete."
+                : "Mark this review as complete when you've finished reflecting and updating goal progress."}
             </p>
           </div>
         </div>
@@ -50,7 +49,7 @@ export default function ReviewCompletionStatus({
             <span className="inline-flex">
               <Button
                 onClick={onToggleComplete}
-                variant={isCompleted ? 'outline' : 'default'}
+                variant={isCompleted ? "outline" : "default"}
                 className="flex items-center space-x-2"
                 disabled={isReadOnly}
               >
@@ -70,7 +69,7 @@ export default function ReviewCompletionStatus({
           </TooltipTrigger>
           {isReadOnly && (
             <TooltipContent>
-              <p>{getDisabledTooltip(planStatus, 'general')}</p>
+              <p>{getDisabledTooltip(planStatus, "general")}</p>
             </TooltipContent>
           )}
         </Tooltip>

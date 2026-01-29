@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,21 +7,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Slider } from '@/components/ui/slider';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { GoalDTO, GoalCategory, CreateGoalCommand, UpdateGoalCommand } from '@/types';
+} from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import type { GoalDTO, GoalCategory, CreateGoalCommand, UpdateGoalCommand } from "@/types";
 
 interface GoalFormDialogProps {
   open: boolean;
@@ -33,19 +33,14 @@ interface GoalFormDialogProps {
 /**
  * Goal Form Dialog for creating and editing goals
  */
-export function GoalFormDialog({
-  open,
-  onOpenChange,
-  goal,
-  onSubmit,
-}: GoalFormDialogProps) {
+export function GoalFormDialog({ open, onOpenChange, goal, onSubmit }: GoalFormDialogProps) {
   const isEditing = !!goal;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    category: 'development' as GoalCategory,
-    description: '',
+    title: "",
+    category: "development" as GoalCategory,
+    description: "",
     progress_percentage: 0,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,16 +52,16 @@ export function GoalFormDialog({
         // Editing existing goal
         setFormData({
           title: goal.title,
-          category: (goal.category as GoalCategory) || 'development',
-          description: goal.description || '',
+          category: (goal.category as GoalCategory) || "development",
+          description: goal.description || "",
           progress_percentage: goal.progress_percentage,
         });
       } else {
         // Creating new goal
         setFormData({
-          title: '',
-          category: 'development',
-          description: '',
+          title: "",
+          category: "development",
+          description: "",
           progress_percentage: 0,
         });
       }
@@ -78,10 +73,10 @@ export function GoalFormDialog({
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = "Title is required";
     }
     if (formData.title.length > 255) {
-      newErrors.title = 'Title must be less than 255 characters';
+      newErrors.title = "Title must be less than 255 characters";
     }
 
     setErrors(newErrors);
@@ -108,7 +103,7 @@ export function GoalFormDialog({
       });
     } catch (error) {
       // Error handling is done by parent component
-      console.error('Failed to save goal:', error);
+      console.error("Failed to save goal:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -118,14 +113,9 @@ export function GoalFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Goal' : 'Add New Goal'}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Goal" : "Add New Goal"}</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? 'Update your goal details below.'
-              : 'Create a new long-term goal for your 12-week plan.'
-            }
+            {isEditing ? "Update your goal details below." : "Create a new long-term goal for your 12-week plan."}
           </DialogDescription>
         </DialogHeader>
 
@@ -145,9 +135,7 @@ export function GoalFormDialog({
               aria-invalid={!!errors.title}
               autoFocus
             />
-            {errors.title && (
-              <p className="text-sm text-destructive">{errors.title}</p>
-            )}
+            {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </div>
 
           {/* Category */}
@@ -155,12 +143,7 @@ export function GoalFormDialog({
             <Label htmlFor="goal-category">Category</Label>
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button
-                  id="goal-category"
-                  variant="outline"
-                  className="w-full justify-between"
-                  type="button"
-                >
+                <Button id="goal-category" variant="outline" className="w-full justify-between" type="button">
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[formData.category]}`}
                   >
@@ -172,9 +155,7 @@ export function GoalFormDialog({
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]" align="start">
                 <DropdownMenuRadioGroup
                   value={formData.category}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, category: value as GoalCategory })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, category: value as GoalCategory })}
                 >
                   {GOAL_CATEGORIES.map((cat) => (
                     <DropdownMenuRadioItem key={cat.value} value={cat.value}>
@@ -204,11 +185,11 @@ export function GoalFormDialog({
                 className="w-full border-0 focus:ring-0 focus:ring-offset-0 resize-none"
                 rows={4}
                 style={{
-                  minHeight: '80px',
-                  maxHeight: '120px',
-                  wordBreak: 'break-word',
-                  overflowWrap: 'break-word',
-                  whiteSpace: 'pre-wrap'
+                  minHeight: "80px",
+                  maxHeight: "120px",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "pre-wrap",
                 }}
               />
             </div>
@@ -226,25 +207,15 @@ export function GoalFormDialog({
               onValueChange={(value) => setFormData({ ...formData, progress_percentage: value[0] })}
               className="w-full"
             />
-            <p className="text-xs text-muted-foreground">
-              Set the current progress percentage for this goal.
-            </p>
+            <p className="text-xs text-muted-foreground">Set the current progress percentage for this goal.</p>
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? (isEditing ? 'Saving...' : 'Creating...')
-                : (isEditing ? 'Save Changes' : 'Create Goal')
-              }
+              {isSubmitting ? (isEditing ? "Saving..." : "Creating...") : isEditing ? "Save Changes" : "Create Goal"}
             </Button>
           </DialogFooter>
         </form>

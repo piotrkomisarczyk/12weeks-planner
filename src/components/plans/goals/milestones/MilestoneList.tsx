@@ -3,9 +3,9 @@
  * Displays list of milestones for a goal with drag and drop support
  */
 
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { MilestoneItem } from './MilestoneItem';
-import type { MilestoneDTO, PlanStatus } from '@/types';
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { MilestoneItem } from "./MilestoneItem";
+import type { MilestoneDTO, PlanStatus } from "@/types";
 
 interface MilestoneListProps {
   milestones: MilestoneDTO[];
@@ -33,7 +33,7 @@ export function MilestoneList({
   disabled = false,
   deletingMilestoneId = null,
   dragDisabled = false,
-  planStatus
+  planStatus,
 }: MilestoneListProps) {
   if (milestones.length === 0) {
     return (
@@ -45,10 +45,7 @@ export function MilestoneList({
 
   return (
     <div className="space-y-1">
-      <SortableContext
-        items={milestones.map(m => m.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={milestones.map((m) => m.id)} strategy={verticalListSortingStrategy}>
         {milestones.map((milestone) => (
           <MilestoneItem
             key={milestone.id}
@@ -68,4 +65,3 @@ export function MilestoneList({
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface WizardControlsProps {
   currentStep: 1 | 2;
@@ -12,13 +12,7 @@ interface WizardControlsProps {
 /**
  * Navigation controls for wizard (Back, Next, Create buttons)
  */
-export function WizardControls({
-  currentStep,
-  isSubmitting,
-  onBack,
-  onNext,
-  onSubmit,
-}: WizardControlsProps) {
+export function WizardControls({ currentStep, isSubmitting, onBack, onNext, onSubmit }: WizardControlsProps) {
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === 2;
 
@@ -26,12 +20,7 @@ export function WizardControls({
     <div className="mt-8 flex items-center justify-between border-t pt-6">
       <div>
         {!isFirstStep && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
             <ArrowLeft className="size-4" />
             Back
           </Button>
@@ -42,7 +31,7 @@ export function WizardControls({
         <Button
           type="button"
           variant="outline"
-          onClick={() => (window.location.href = '/plans')}
+          onClick={() => (window.location.href = "/plans")}
           disabled={isSubmitting}
         >
           Cancel
@@ -57,11 +46,10 @@ export function WizardControls({
 
         {isLastStep && (
           <Button type="button" onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Planner'}
+            {isSubmitting ? "Creating..." : "Create Planner"}
           </Button>
         )}
       </div>
     </div>
   );
 }
-

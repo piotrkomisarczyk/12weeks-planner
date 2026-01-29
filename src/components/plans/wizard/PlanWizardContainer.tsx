@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
-import type { PlanWizardState, GoalFormData, CreatePlanCommand, CreateGoalCommand } from '@/types';
-import { WizardStepper } from './WizardStepper';
-import { WizardControls } from './WizardControls';
-import { PlanDetailsForm } from './steps/PlanDetailsForm';
-import { PlanGoalsForm } from './steps/PlanGoalsForm';
+import { useState, useCallback } from "react";
+import { toast } from "sonner";
+import type { PlanWizardState, GoalFormData, CreatePlanCommand, CreateGoalCommand } from "@/types";
+import { WizardStepper } from "./WizardStepper";
+import { WizardControls } from "./WizardControls";
+import { PlanDetailsForm } from "./steps/PlanDetailsForm";
+import { PlanGoalsForm } from "./steps/PlanGoalsForm";
 
 /**
  * Main wizard container component that orchestrates the plan creation process
@@ -24,16 +24,16 @@ export function PlanWizardContainer() {
   // Generate default plan name based on date
   const generateDefaultName = (date: Date): string => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `Planner_${year}-${month}-${day}`;
   };
 
   // Format date to YYYY-MM-DD using local timezone (not UTC)
   const formatDateLocal = (date: Date): string => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -49,9 +49,9 @@ export function PlanWizardContainer() {
     goals: [
       {
         id: crypto.randomUUID(),
-        title: '',
-        category: 'development',
-        description: '',
+        title: "",
+        category: "development",
+        description: "",
       },
     ],
     isSubmitting: false,
@@ -63,18 +63,18 @@ export function PlanWizardContainer() {
     const errors: Record<string, string> = {};
 
     if (!wizardState.details.name || wizardState.details.name.trim().length === 0) {
-      errors['details.name'] = 'Plan name is required';
+      errors["details.name"] = "Plan name is required";
     } else if (wizardState.details.name.length > 255) {
-      errors['details.name'] = 'Plan name is too long (max 255 characters)';
+      errors["details.name"] = "Plan name is too long (max 255 characters)";
     }
 
     if (!wizardState.details.startDate) {
-      errors['details.startDate'] = 'Start date is required';
+      errors["details.startDate"] = "Start date is required";
     } else {
       const date = wizardState.details.startDate;
       const dayOfWeek = date.getDay();
       if (dayOfWeek !== 1) {
-        errors['details.startDate'] = 'Start date must be a Monday';
+        errors["details.startDate"] = "Start date must be a Monday";
       }
     }
 
@@ -87,14 +87,14 @@ export function PlanWizardContainer() {
     const errors: Record<string, string> = {};
 
     if (wizardState.goals.length === 0) {
-      errors['goals'] = 'At least one goal is required';
+      errors["goals"] = "At least one goal is required";
     } else if (wizardState.goals.length > 6) {
-      errors['goals'] = 'Maximum 6 goals allowed';
+      errors["goals"] = "Maximum 6 goals allowed";
     }
 
     wizardState.goals.forEach((goal, index) => {
       if (!goal.title || goal.title.trim().length === 0) {
-        errors[`goals.${index}.title`] = 'Goal title is required';
+        errors[`goals.${index}.title`] = "Goal title is required";
       }
     });
 
@@ -143,15 +143,15 @@ export function PlanWizardContainer() {
         start_date: formatDateLocal(wizardState.details.startDate!),
       };
 
-      const planResponse = await fetch('/api/v1/plans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const planResponse = await fetch("/api/v1/plans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(planCommand),
       });
 
       if (!planResponse.ok) {
         const errorData = await planResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to create plan');
+        throw new Error(errorData.error || "Failed to create plan");
       }
 
       const { data: createdPlan } = await planResponse.json();
@@ -163,15 +163,15 @@ export function PlanWizardContainer() {
           const goalCommand: CreateGoalCommand = {
             plan_id: planId,
             title: goal.title,
-            description: goal.description || '',
+            description: goal.description || "",
             category: goal.category,
             progress_percentage: 0,
             position: index + 1,
           };
 
-          return fetch('/api/v1/goals', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          return fetch("/api/v1/goals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(goalCommand),
           });
         });
@@ -181,27 +181,27 @@ export function PlanWizardContainer() {
         // Check if all goals were created successfully
         const failedGoals = goalResponses.filter((res) => !res.ok);
         if (failedGoals.length > 0) {
-          throw new Error('Failed to create some goals');
+          throw new Error("Failed to create some goals");
         }
 
         // Success! Show toast and redirect
-        toast.success('Planner created successfully');
-        window.location.href = '/plans';
+        toast.success("Planner created successfully");
+        window.location.href = "/plans";
       } catch (goalError) {
         // Rollback: Delete the plan if goal creation failed
-        console.error('Goal creation failed, rolling back plan:', goalError);
-        
+        console.error("Goal creation failed, rolling back plan:", goalError);
+
         await fetch(`/api/v1/plans/${planId}`, {
-          method: 'DELETE',
+          method: "DELETE",
         }).catch((deleteError) => {
-          console.error('Failed to rollback plan:', deleteError);
+          console.error("Failed to rollback plan:", deleteError);
         });
 
-        throw new Error('Error creating goals. The planner creation was rolled back.');
+        throw new Error("Error creating goals. The planner creation was rolled back.");
       }
     } catch (error) {
-      console.error('Wizard submission error:', error);
-      const message = error instanceof Error ? error.message : 'Failed to create planner. Please try again.';
+      console.error("Wizard submission error:", error);
+      const message = error instanceof Error ? error.message : "Failed to create planner. Please try again.";
       toast.error(message);
       setWizardState((prev) => ({ ...prev, isSubmitting: false }));
     }
@@ -211,9 +211,7 @@ export function PlanWizardContainer() {
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Create New Planner</h1>
-        <p className="text-muted-foreground mt-2">
-          Set up your 12-week plan and define your long-term goals
-        </p>
+        <p className="text-muted-foreground mt-2">Set up your 12-week plan and define your long-term goals</p>
       </div>
 
       {/* Wizard Stepper */}
@@ -222,19 +220,11 @@ export function PlanWizardContainer() {
       {/* Step Forms */}
       <div className="mt-8">
         {wizardState.step === 1 && (
-          <PlanDetailsForm
-            data={wizardState.details}
-            onChange={handleDetailsChange}
-            errors={wizardState.errors}
-          />
+          <PlanDetailsForm data={wizardState.details} onChange={handleDetailsChange} errors={wizardState.errors} />
         )}
 
         {wizardState.step === 2 && (
-          <PlanGoalsForm
-            goals={wizardState.goals}
-            onChange={handleGoalsChange}
-            errors={wizardState.errors}
-          />
+          <PlanGoalsForm goals={wizardState.goals} onChange={handleGoalsChange} errors={wizardState.errors} />
         )}
       </div>
 
@@ -249,4 +239,3 @@ export function PlanWizardContainer() {
     </div>
   );
 }
-

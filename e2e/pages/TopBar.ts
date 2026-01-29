@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 /**
  * Page Object Model for the Top Bar
@@ -12,9 +12,9 @@ export class TopBar {
 
   constructor(page: Page) {
     this.page = page;
-    this.userMenuButton = page.getByRole('button', { name: 'User menu' });
-    this.logoutButton = page.getByTestId('logout-button');
-    this.themeToggle = page.getByRole('button', { name: 'Toggle theme' });
+    this.userMenuButton = page.getByRole("button", { name: "User menu" });
+    this.logoutButton = page.getByTestId("logout-button");
+    this.themeToggle = page.getByRole("button", { name: "Toggle theme" });
   }
 
   /**

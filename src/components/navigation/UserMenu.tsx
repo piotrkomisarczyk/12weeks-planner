@@ -1,8 +1,8 @@
-import { LogOut, Settings, Download } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { LogOut, Settings, Download } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { supabaseClient } from '@/db/supabase.client';
+} from "@/components/ui/dropdown-menu";
+import { supabaseClient } from "@/db/supabase.client";
 
 interface UserMenuProps {
   userEmail?: string;
@@ -24,28 +24,28 @@ export function UserMenu({ userEmail }: UserMenuProps) {
     setIsLoggingOut(true);
     try {
       // Call logout API endpoint
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error('Failed to log out', {
-          description: data.message || 'An error occurred',
+        toast.error("Failed to log out", {
+          description: data.message || "An error occurred",
         });
         return;
       }
 
       // Success - redirect to login page
-      toast.success('Logged out successfully');
-      window.location.href = '/login';
+      toast.success("Logged out successfully");
+      window.location.href = "/login";
     } catch (error) {
-      toast.error('Failed to log out', {
-        description: 'An unexpected error occurred',
+      toast.error("Failed to log out", {
+        description: "An unexpected error occurred",
       });
     } finally {
       setIsLoggingOut(false);
@@ -54,18 +54,18 @@ export function UserMenu({ userEmail }: UserMenuProps) {
 
   const handleExportData = () => {
     // Placeholder for export functionality
-    toast.info('Export feature coming soon');
+    toast.info("Export feature coming soon");
   };
 
   const handleSettings = () => {
     // Placeholder for settings functionality
-    toast.info('Settings feature coming soon');
+    toast.info("Settings feature coming soon");
   };
 
   // Get initials from email
   const getInitials = (email?: string): string => {
-    if (!email) return 'U';
-    const parts = email.split('@')[0].split('.');
+    if (!email) return "U";
+    const parts = email.split("@")[0].split(".");
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
@@ -88,11 +88,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">My Account</p>
-            {userEmail && (
-              <p className="text-xs leading-none text-muted-foreground">
-                {userEmail}
-              </p>
-            )}
+            {userEmail && <p className="text-xs leading-none text-muted-foreground">{userEmail}</p>}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -112,7 +108,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
           data-test-id="logout-button"
         >
           <LogOut className="mr-2 size-4" />
-          <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
+          <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

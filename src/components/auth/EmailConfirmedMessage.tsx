@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 /**
  * EmailConfirmedMessage Component
- * 
+ *
  * Displays a success message after email verification
  * Automatically redirects to /plans after 3 seconds
  * User can also click a button to go immediately
@@ -19,7 +19,7 @@ export function EmailConfirmedMessage() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          window.location.href = '/plans';
+          window.location.href = "/plans";
           return 0;
         }
         return prev - 1;
@@ -30,7 +30,7 @@ export function EmailConfirmedMessage() {
   }, []);
 
   const handleGoToPlans = () => {
-    window.location.href = '/plans';
+    window.location.href = "/plans";
   };
 
   return (
@@ -46,7 +46,7 @@ export function EmailConfirmedMessage() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-center text-sm text-muted-foreground">
-          Redirecting to your plans in {countdown} second{countdown !== 1 ? 's' : ''}...
+          Redirecting to your plans in {countdown} second{countdown !== 1 ? "s" : ""}...
         </div>
         <Button onClick={handleGoToPlans} className="w-full" size="lg">
           Go to Plans Now

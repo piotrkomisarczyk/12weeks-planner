@@ -1,22 +1,23 @@
 /**
  * WeeklyGoalCard Component
- * 
+ *
  * Card representing a single weekly goal with its associated tasks.
  * Displays goal title, link to long-term goal, progress, and task list.
  */
 
-import { useState } from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useState } from "react";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -24,27 +25,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { TaskItem } from './TaskItem';
-import { InlineAddTask } from './InlineAddTask';
-import { GoalMilestonePicker } from './GoalMilestonePicker';
-import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, PlanStatus } from '@/types';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import { getDisabledTooltip } from '@/lib/utils';
-import { Target, MoreVertical, Trash2, Plus, Flag, ArrowUp, ArrowDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TaskItem } from "./TaskItem";
+import { InlineAddTask } from "./InlineAddTask";
+import { GoalMilestonePicker } from "./GoalMilestonePicker";
+import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, PlanStatus } from "@/types";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import { getDisabledTooltip } from "@/lib/utils";
+import { Target, MoreVertical, Trash2, Plus, Flag, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ConfirmDialogState {
   isOpen: boolean;
   title: string;
   description: string;
   onConfirm: () => void;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
 }
 
 interface WeeklyGoalCardProps {
@@ -76,7 +73,7 @@ const MAX_TITLE_LENGTH = 120;
  * Get the display label for a goal category
  */
 const getCategoryLabel = (category: string): string => {
-  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  const categoryItem = GOAL_CATEGORIES.find((cat) => cat.value === category);
   return categoryItem?.label || category;
 };
 
@@ -85,7 +82,7 @@ const getCategoryLabel = (category: string): string => {
  */
 const truncateTitle = (title: string, maxLength: number = MAX_TITLE_LENGTH): string => {
   if (title.length <= maxLength) return title;
-  return title.substring(0, maxLength - 3) + '...';
+  return title.substring(0, maxLength - 3) + "...";
 };
 
 export function WeeklyGoalCard({
@@ -116,29 +113,29 @@ export function WeeklyGoalCard({
   const [expandedValue, setExpandedValue] = useState<string>(goal.id);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     onConfirm: () => {},
   });
 
-  const completedTasks = goal.tasks.filter(t => t.status === 'completed').length;
+  const completedTasks = goal.tasks.filter((t) => t.status === "completed").length;
   const totalTasks = goal.tasks.length;
   const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const isAtTaskLimit = totalTasks >= MAX_TASKS_PER_GOAL;
 
   const getLongTermGoalTitle = (goalId: string | null) => {
     if (!goalId) return null;
-    return availableLongTermGoals.find(g => g.id === goalId)?.title;
+    return availableLongTermGoals.find((g) => g.id === goalId)?.title;
   };
 
   const getLongTermGoalCategory = (goalId: string | null) => {
     if (!goalId) return null;
-    return availableLongTermGoals.find(g => g.id === goalId)?.category;
+    return availableLongTermGoals.find((g) => g.id === goalId)?.category;
   };
 
   const getMilestoneTitle = (milestoneId: string | null) => {
     if (!milestoneId) return null;
-    return availableMilestones.find(m => m.id === milestoneId)?.title;
+    return availableMilestones.find((m) => m.id === milestoneId)?.title;
   };
 
   const handleGoalMilestoneSelect = (goalId: string | null, milestoneId: string | null) => {
@@ -156,9 +153,9 @@ export function WeeklyGoalCard({
   };
 
   const handleTitleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleTitleSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setEditValue(goal.title);
       setIsEditingTitle(false);
     }
@@ -166,15 +163,16 @@ export function WeeklyGoalCard({
 
   const handleDelete = () => {
     const taskCount = goal.tasks.length;
-    const description = taskCount > 0
-      ? `Are you sure you want to delete "${goal.title}"? This will also delete ${taskCount} task${taskCount > 1 ? 's' : ''}. This action cannot be undone.`
-      : `Are you sure you want to delete "${goal.title}"? This action cannot be undone.`;
+    const description =
+      taskCount > 0
+        ? `Are you sure you want to delete "${goal.title}"? This will also delete ${taskCount} task${taskCount > 1 ? "s" : ""}. This action cannot be undone.`
+        : `Are you sure you want to delete "${goal.title}"? This action cannot be undone.`;
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Delete Weekly Goal',
+      title: "Delete Weekly Goal",
       description,
-      variant: 'destructive',
+      variant: "destructive",
       onConfirm: async () => {
         try {
           onDelete(goal.id);
@@ -235,7 +233,7 @@ export function WeeklyGoalCard({
                       </TooltipTrigger>
                       {isReadOnly ? (
                         <TooltipContent side="top">
-                          <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                          <p>{getDisabledTooltip(planStatus, "general")}</p>
                         </TooltipContent>
                       ) : goal.title.length > MAX_TITLE_LENGTH ? (
                         <TooltipContent side="top" className="max-w-md">
@@ -250,7 +248,10 @@ export function WeeklyGoalCard({
                     <div className="flex flex-wrap gap-2">
                       {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
                         <Badge
-                          className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'}
+                          className={
+                            GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] ||
+                            "bg-gray-500 text-white"
+                          }
                         >
                           {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
                         </Badge>
@@ -258,17 +259,13 @@ export function WeeklyGoalCard({
                       {goal.long_term_goal_id && (
                         <Badge variant="outline" className="text-xs gap-1">
                           <Target className="h-3 w-3" />
-                          <span className="truncate max-w-[150px]">
-                            {getLongTermGoalTitle(goal.long_term_goal_id)}
-                          </span>
+                          <span className="truncate max-w-[150px]">{getLongTermGoalTitle(goal.long_term_goal_id)}</span>
                         </Badge>
                       )}
                       {goal.milestone_id && (
                         <Badge variant="outline" className="text-xs gap-1">
                           <Flag className="h-3 w-3" />
-                          <span className="truncate max-w-[150px]">
-                            {getMilestoneTitle(goal.milestone_id)}
-                          </span>
+                          <span className="truncate max-w-[150px]">{getMilestoneTitle(goal.milestone_id)}</span>
                         </Badge>
                       )}
                     </div>
@@ -325,26 +322,26 @@ export function WeeklyGoalCard({
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {/* Link to Goal & Milestone */}
-                  <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
-                    <Target className="mr-2 h-4 w-4" />
-                    Link Goal & Milestone
-                  </DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {/* Link to Goal & Milestone */}
+                    <DropdownMenuItem onClick={() => setIsPickerOpen(true)}>
+                      <Target className="mr-2 h-4 w-4" />
+                      Link Goal & Milestone
+                    </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                    <DropdownMenuSeparator />
 
-                  {/* Delete */}
-                  <DropdownMenuItem
-                    onClick={handleDelete}
-                    className="text-destructive focus:text-destructive"
-                    data-test-id={`weekly-goal-delete-menu-item-${goal.title}`}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Goal
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    {/* Delete */}
+                    <DropdownMenuItem
+                      onClick={handleDelete}
+                      className="text-destructive focus:text-destructive"
+                      data-test-id={`weekly-goal-delete-menu-item-${goal.title}`}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Goal
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>
@@ -354,7 +351,9 @@ export function WeeklyGoalCard({
             <div className="space-y-1 mt-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Progress</span>
-                <span className="font-medium">{completedTasks} / {totalTasks} tasks</span>
+                <span className="font-medium">
+                  {completedTasks} / {totalTasks} tasks
+                </span>
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div
@@ -372,7 +371,9 @@ export function WeeklyGoalCard({
               <div className="flex flex-wrap gap-2">
                 {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
                   <Badge
-                    className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || 'bg-gray-500 text-white'}
+                    className={
+                      GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || "bg-gray-500 text-white"
+                    }
                   >
                     {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
                   </Badge>
@@ -380,17 +381,13 @@ export function WeeklyGoalCard({
                 {goal.long_term_goal_id && (
                   <Badge variant="outline" className="text-xs gap-1">
                     <Target className="h-3 w-3" />
-                    <span className="truncate max-w-[150px]">
-                      {getLongTermGoalTitle(goal.long_term_goal_id)}
-                    </span>
+                    <span className="truncate max-w-[150px]">{getLongTermGoalTitle(goal.long_term_goal_id)}</span>
                   </Badge>
                 )}
                 {goal.milestone_id && (
                   <Badge variant="outline" className="text-xs gap-1">
                     <Flag className="h-3 w-3" />
-                    <span className="truncate max-w-[150px]">
-                      {getMilestoneTitle(goal.milestone_id)}
-                    </span>
+                    <span className="truncate max-w-[150px]">{getMilestoneTitle(goal.milestone_id)}</span>
                   </Badge>
                 )}
               </div>
@@ -400,7 +397,9 @@ export function WeeklyGoalCard({
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Progress</span>
-                    <span className="font-medium">{completedTasks} / {totalTasks} tasks</span>
+                    <span className="font-medium">
+                      {completedTasks} / {totalTasks} tasks
+                    </span>
                   </div>
                   <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                     <div
@@ -412,7 +411,7 @@ export function WeeklyGoalCard({
               )}
 
               {/* Task List */}
-              <SortableContext items={goal.tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext items={goal.tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                   {goal.tasks.map((task) => (
                     <TaskItem
@@ -459,8 +458,8 @@ export function WeeklyGoalCard({
                       {(isReadOnly || isAtTaskLimit) && (
                         <TooltipContent>
                           <p>
-                            {isReadOnly 
-                              ? getDisabledTooltip(planStatus, 'general') 
+                            {isReadOnly
+                              ? getDisabledTooltip(planStatus, "general")
                               : `Maximum ${MAX_TASKS_PER_GOAL} tasks per goal reached`}
                           </p>
                         </TooltipContent>
@@ -497,9 +496,7 @@ export function WeeklyGoalCard({
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.isOpen}
-        onOpenChange={(open) =>
-          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
-        }
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, isOpen: open }))}
       >
         <DialogContent className="max-w-md" data-test-id={`weekly-goal-delete-confirmation-dialog-${goal.title}`}>
           <DialogHeader>
@@ -509,15 +506,13 @@ export function WeeklyGoalCard({
           <DialogFooter className="gap-2 sm:gap-2">
             <Button
               variant="outline"
-              onClick={() =>
-                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
-              }
+              onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
               data-test-id={`weekly-goal-delete-cancel-button-${goal.title}`}
             >
               Cancel
             </Button>
             <Button
-              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              variant={confirmDialog.variant === "destructive" ? "destructive" : "default"}
               onClick={confirmDialog.onConfirm}
               data-test-id={`weekly-goal-delete-confirm-button-${goal.title}`}
             >
@@ -529,4 +524,3 @@ export function WeeklyGoalCard({
     </Accordion>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from "react";
 import type {
   PlanDTO,
   GoalDTO,
@@ -7,7 +7,7 @@ import type {
   UpdatePlanCommand,
   ItemResponse,
   ListResponse,
-} from '@/types';
+} from "@/types";
 
 interface EditPlanState {
   step: 1 | 2;
@@ -56,13 +56,13 @@ export function useEditPlan(planId: string): UseEditPlanReturn {
       // Check plan response
       if (!planResponse.ok) {
         const errorData = await planResponse.json();
-        throw new Error(errorData.error || 'Failed to load plan');
+        throw new Error(errorData.error || "Failed to load plan");
       }
 
       // Check goals response
       if (!goalsResponse.ok) {
         const errorData = await goalsResponse.json();
-        throw new Error(errorData.error || 'Failed to load goals');
+        throw new Error(errorData.error || "Failed to load goals");
       }
 
       const planData: ItemResponse<PlanDTO> = await planResponse.json();
@@ -76,8 +76,7 @@ export function useEditPlan(planId: string): UseEditPlanReturn {
         error: null,
       }));
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to load data';
+      const errorMessage = error instanceof Error ? error.message : "Failed to load data";
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -90,23 +89,23 @@ export function useEditPlan(planId: string): UseEditPlanReturn {
   const updatePlanDetails = useCallback(
     async (name: string) => {
       if (!state.plan) {
-        throw new Error('No plan loaded');
+        throw new Error("No plan loaded");
       }
 
       setState((prev) => ({ ...prev, isSaving: true }));
 
       try {
         const response = await fetch(`/api/v1/plans/${planId}`, {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ name } as UpdatePlanCommand),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to update plan');
+          throw new Error(errorData.error || "Failed to update plan");
         }
 
         const data: ItemResponse<PlanDTO> = await response.json();
@@ -118,8 +117,7 @@ export function useEditPlan(planId: string): UseEditPlanReturn {
           step: 2, // Move to goals step after successful update
         }));
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to update plan';
+        const errorMessage = error instanceof Error ? error.message : "Failed to update plan";
         setState((prev) => ({
           ...prev,
           isSaving: false,
@@ -131,118 +129,104 @@ export function useEditPlan(planId: string): UseEditPlanReturn {
     [planId, state.plan]
   );
 
-  const addGoal = useCallback(
-    async (data: CreateGoalCommand) => {
-      setState((prev) => ({ ...prev, isSaving: true }));
+  const addGoal = useCallback(async (data: CreateGoalCommand) => {
+    setState((prev) => ({ ...prev, isSaving: true }));
 
-      try {
-        const response = await fetch('/api/v1/goals', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+    try {
+      const response = await fetch("/api/v1/goals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to create goal');
-        }
-
-        const result: ItemResponse<GoalDTO> = await response.json();
-
-        setState((prev) => ({
-          ...prev,
-          goals: [...prev.goals, result.data],
-          isSaving: false,
-        }));
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to create goal';
-        setState((prev) => ({
-          ...prev,
-          isSaving: false,
-          error: errorMessage,
-        }));
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create goal");
       }
-    },
-    []
-  );
 
-  const updateGoal = useCallback(
-    async (id: string, data: UpdateGoalCommand) => {
-      setState((prev) => ({ ...prev, isSaving: true }));
+      const result: ItemResponse<GoalDTO> = await response.json();
 
-      try {
-        const response = await fetch(`/api/v1/goals/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+      setState((prev) => ({
+        ...prev,
+        goals: [...prev.goals, result.data],
+        isSaving: false,
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to create goal";
+      setState((prev) => ({
+        ...prev,
+        isSaving: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, []);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to update goal');
-        }
+  const updateGoal = useCallback(async (id: string, data: UpdateGoalCommand) => {
+    setState((prev) => ({ ...prev, isSaving: true }));
 
-        const result: ItemResponse<GoalDTO> = await response.json();
+    try {
+      const response = await fetch(`/api/v1/goals/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        setState((prev) => ({
-          ...prev,
-          goals: prev.goals.map((goal) =>
-            goal.id === id ? result.data : goal
-          ),
-          isSaving: false,
-        }));
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to update goal';
-        setState((prev) => ({
-          ...prev,
-          isSaving: false,
-          error: errorMessage,
-        }));
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update goal");
       }
-    },
-    []
-  );
 
-  const deleteGoal = useCallback(
-    async (id: string) => {
-      setState((prev) => ({ ...prev, isSaving: true }));
+      const result: ItemResponse<GoalDTO> = await response.json();
 
-      try {
-        const response = await fetch(`/api/v1/goals/${id}`, {
-          method: 'DELETE',
-        });
+      setState((prev) => ({
+        ...prev,
+        goals: prev.goals.map((goal) => (goal.id === id ? result.data : goal)),
+        isSaving: false,
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update goal";
+      setState((prev) => ({
+        ...prev,
+        isSaving: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, []);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to delete goal');
-        }
+  const deleteGoal = useCallback(async (id: string) => {
+    setState((prev) => ({ ...prev, isSaving: true }));
 
-        setState((prev) => ({
-          ...prev,
-          goals: prev.goals.filter((goal) => goal.id !== id),
-          isSaving: false,
-        }));
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to delete goal';
-        setState((prev) => ({
-          ...prev,
-          isSaving: false,
-          error: errorMessage,
-        }));
-        throw error;
+    try {
+      const response = await fetch(`/api/v1/goals/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete goal");
       }
-    },
-    []
-  );
+
+      setState((prev) => ({
+        ...prev,
+        goals: prev.goals.filter((goal) => goal.id !== id),
+        isSaving: false,
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to delete goal";
+      setState((prev) => ({
+        ...prev,
+        isSaving: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  }, []);
 
   const nextStep = useCallback(() => {
     setState((prev) => ({
@@ -260,7 +244,7 @@ export function useEditPlan(planId: string): UseEditPlanReturn {
 
   const finish = useCallback(() => {
     // Navigate to plans list - this will be handled by the component
-    window.location.href = '/plans';
+    window.location.href = "/plans";
   }, []);
 
   const setFormErrors = useCallback((errors: Record<string, string>) => {

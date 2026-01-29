@@ -1,100 +1,105 @@
 /**
  * Type definitions for 12 Weeks Planner API
- * 
+ *
  * This file contains:
  * - DTOs (Data Transfer Objects) for API responses
  * - Command Models for API requests (CREATE, UPDATE)
  * - Utility types for pagination, errors, etc.
- * 
+ *
  * All types are derived from database models defined in database.types.ts
  */
 
-import type { Database } from './db/database.types';
+import type { Database } from "./db/database.types";
 
 // ============================================================================
 // DATABASE TYPE ALIASES
 // ============================================================================
 
 // Table Row types (entities from database)
-export type PlanEntity = Database['public']['Tables']['plans']['Row'];
-export type LongTermGoalEntity = Database['public']['Tables']['long_term_goals']['Row'];
-export type MilestoneEntity = Database['public']['Tables']['milestones']['Row'];
-export type WeeklyGoalEntity = Database['public']['Tables']['weekly_goals']['Row'];
-export type TaskEntity = Database['public']['Tables']['tasks']['Row'];
-export type TaskHistoryEntity = Database['public']['Tables']['task_history']['Row'];
-export type WeeklyReviewEntity = Database['public']['Tables']['weekly_reviews']['Row'];
-export type UserMetricsEntity = Database['public']['Tables']['user_metrics']['Row'];
+export type PlanEntity = Database["public"]["Tables"]["plans"]["Row"];
+export type LongTermGoalEntity = Database["public"]["Tables"]["long_term_goals"]["Row"];
+export type MilestoneEntity = Database["public"]["Tables"]["milestones"]["Row"];
+export type WeeklyGoalEntity = Database["public"]["Tables"]["weekly_goals"]["Row"];
+export type TaskEntity = Database["public"]["Tables"]["tasks"]["Row"];
+export type TaskHistoryEntity = Database["public"]["Tables"]["task_history"]["Row"];
+export type WeeklyReviewEntity = Database["public"]["Tables"]["weekly_reviews"]["Row"];
+export type UserMetricsEntity = Database["public"]["Tables"]["user_metrics"]["Row"];
 
 // Table Insert types (for database inserts)
-export type PlanInsert = Database['public']['Tables']['plans']['Insert'];
-export type LongTermGoalInsert = Database['public']['Tables']['long_term_goals']['Insert'];
-export type MilestoneInsert = Database['public']['Tables']['milestones']['Insert'];
-export type WeeklyGoalInsert = Database['public']['Tables']['weekly_goals']['Insert'];
-export type TaskInsert = Database['public']['Tables']['tasks']['Insert'];
-export type TaskHistoryInsert = Database['public']['Tables']['task_history']['Insert'];
-export type WeeklyReviewInsert = Database['public']['Tables']['weekly_reviews']['Insert'];
-export type UserMetricsInsert = Database['public']['Tables']['user_metrics']['Insert'];
+export type PlanInsert = Database["public"]["Tables"]["plans"]["Insert"];
+export type LongTermGoalInsert = Database["public"]["Tables"]["long_term_goals"]["Insert"];
+export type MilestoneInsert = Database["public"]["Tables"]["milestones"]["Insert"];
+export type WeeklyGoalInsert = Database["public"]["Tables"]["weekly_goals"]["Insert"];
+export type TaskInsert = Database["public"]["Tables"]["tasks"]["Insert"];
+export type TaskHistoryInsert = Database["public"]["Tables"]["task_history"]["Insert"];
+export type WeeklyReviewInsert = Database["public"]["Tables"]["weekly_reviews"]["Insert"];
+export type UserMetricsInsert = Database["public"]["Tables"]["user_metrics"]["Insert"];
 
 // Table Update types (for database updates)
-export type PlanUpdate = Database['public']['Tables']['plans']['Update'];
-export type LongTermGoalUpdate = Database['public']['Tables']['long_term_goals']['Update'];
-export type MilestoneUpdate = Database['public']['Tables']['milestones']['Update'];
-export type WeeklyGoalUpdate = Database['public']['Tables']['weekly_goals']['Update'];
-export type TaskUpdate = Database['public']['Tables']['tasks']['Update'];
-export type TaskHistoryUpdate = Database['public']['Tables']['task_history']['Update'];
-export type WeeklyReviewUpdate = Database['public']['Tables']['weekly_reviews']['Update'];
-export type UserMetricsUpdate = Database['public']['Tables']['user_metrics']['Update'];
+export type PlanUpdate = Database["public"]["Tables"]["plans"]["Update"];
+export type LongTermGoalUpdate = Database["public"]["Tables"]["long_term_goals"]["Update"];
+export type MilestoneUpdate = Database["public"]["Tables"]["milestones"]["Update"];
+export type WeeklyGoalUpdate = Database["public"]["Tables"]["weekly_goals"]["Update"];
+export type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
+export type TaskHistoryUpdate = Database["public"]["Tables"]["task_history"]["Update"];
+export type WeeklyReviewUpdate = Database["public"]["Tables"]["weekly_reviews"]["Update"];
+export type UserMetricsUpdate = Database["public"]["Tables"]["user_metrics"]["Update"];
 
 // View types
-export type PlanProgressView = Database['public']['Views']['plan_progress']['Row'];
-export type MilestoneProgressView = Database['public']['Views']['milestone_progress']['Row'];
-export type WeeklyTaskSummaryView = Database['public']['Views']['weekly_task_summary']['Row'];
-export type DailyTaskSummaryView = Database['public']['Views']['daily_task_summary']['Row'];
-export type WeeklyReviewCompletionView = Database['public']['Views']['weekly_review_completion']['Row'];
+export type PlanProgressView = Database["public"]["Views"]["plan_progress"]["Row"];
+export type MilestoneProgressView = Database["public"]["Views"]["milestone_progress"]["Row"];
+export type WeeklyTaskSummaryView = Database["public"]["Views"]["weekly_task_summary"]["Row"];
+export type DailyTaskSummaryView = Database["public"]["Views"]["daily_task_summary"]["Row"];
+export type WeeklyReviewCompletionView = Database["public"]["Views"]["weekly_review_completion"]["Row"];
 
 // ============================================================================
 // ENUM TYPES
 // ============================================================================
 
-export type PlanStatus = 'ready' | 'active' | 'completed' | 'archived';
+export type PlanStatus = "ready" | "active" | "completed" | "archived";
 
-export type GoalCategory = 'work' | 'finance' | 'hobby' | 'relationships' | 'health' | 'development';
+export type GoalCategory = "work" | "finance" | "hobby" | "relationships" | "health" | "development";
 
 export const GOAL_CATEGORIES: { value: GoalCategory; label: string }[] = [
-  { value: 'work', label: 'Work' },
-  { value: 'finance', label: 'Finance' },
-  { value: 'hobby', label: 'Hobby' },
-  { value: 'relationships', label: 'Relationships' },
-  { value: 'health', label: 'Health' },
-  { value: 'development', label: 'Growth' },
+  { value: "work", label: "Work" },
+  { value: "finance", label: "Finance" },
+  { value: "hobby", label: "Hobby" },
+  { value: "relationships", label: "Relationships" },
+  { value: "health", label: "Health" },
+  { value: "development", label: "Growth" },
 ];
 
 export const GOAL_CATEGORY_COLORS: Record<GoalCategory, string> = {
-  work: 'text-xs font-semibold uppercase bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-900 dark:text-yellow-200 dark:hover:bg-yellow-800',
-  finance: 'text-xs font-semibold uppercase bg-green-700 text-white hover:bg-green-800 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800',
-  hobby: 'text-xs font-semibold uppercase bg-purple-700 text-white hover:bg-purple-800 dark:bg-purple-900 dark:text-purple-200 dark:hover:bg-purple-800',
-  relationships: 'text-xs font-semibold uppercase bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-900 dark:text-orange-200 dark:hover:bg-orange-800',
-  health: 'text-xs font-semibold uppercase bg-red-700 text-white hover:bg-red-800 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800',
-  development: 'text-xs font-semibold uppercase bg-blue-700 text-white hover:bg-blue-800 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800',
+  work: "text-xs font-semibold uppercase bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-900 dark:text-yellow-200 dark:hover:bg-yellow-800",
+  finance:
+    "text-xs font-semibold uppercase bg-green-700 text-white hover:bg-green-800 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800",
+  hobby:
+    "text-xs font-semibold uppercase bg-purple-700 text-white hover:bg-purple-800 dark:bg-purple-900 dark:text-purple-200 dark:hover:bg-purple-800",
+  relationships:
+    "text-xs font-semibold uppercase bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-900 dark:text-orange-200 dark:hover:bg-orange-800",
+  health:
+    "text-xs font-semibold uppercase bg-red-700 text-white hover:bg-red-800 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800",
+  development:
+    "text-xs font-semibold uppercase bg-blue-700 text-white hover:bg-blue-800 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800",
 };
 
-export type TaskPriority = 'A' | 'B' | 'C';
+export type TaskPriority = "A" | "B" | "C";
 
 export const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  A: 'bg-red-600 hover:bg-red-700 dark:bg-red-800 hover:dark:bg-red-900',
-  B: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700 hover:dark:bg-yellow-800',
-  C: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-800 hover:dark:bg-blue-900',
+  A: "bg-red-600 hover:bg-red-700 dark:bg-red-800 hover:dark:bg-red-900",
+  B: "bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-700 hover:dark:bg-yellow-800",
+  C: "bg-blue-500 hover:bg-blue-600 dark:bg-blue-800 hover:dark:bg-blue-900",
 };
 
-export type TaskStatus = 'todo' | 'in_progress' | 'completed' | 'cancelled' | 'postponed';
+export type TaskStatus = "todo" | "in_progress" | "completed" | "cancelled" | "postponed";
 
-export type TaskType = 'weekly_main' | 'weekly_sub' | 'ad_hoc';
+export type TaskType = "weekly_main" | "weekly_sub" | "ad_hoc";
 
 /**
  * Day names array for consistent day name display
  * Index 0 = Monday, Index 6 = Sunday (matches DayOfWeek type where 1=Monday, 7=Sunday)
  */
-export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
+export const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 
 // ============================================================================
 // PLAN DTOs
@@ -120,13 +125,13 @@ export interface PlanSummary {
  * Create Plan Command - POST /api/v1/plans
  * Only name and start_date are required from client
  */
-export type CreatePlanCommand = Pick<PlanInsert, 'name' | 'start_date'>;
+export type CreatePlanCommand = Pick<PlanInsert, "name" | "start_date">;
 
 /**
  * Update Plan Command - PATCH /api/v1/plans/:id
  * Name and status can be updated by user
  */
-export type UpdatePlanCommand = Pick<PlanUpdate, 'name' | 'status'>;
+export type UpdatePlanCommand = Pick<PlanUpdate, "name" | "status">;
 
 /**
  * Plan Dashboard DTO - GET /api/v1/plans/:id/dashboard
@@ -140,19 +145,15 @@ export interface PlanDashboardDTO {
     status: PlanStatus;
     current_week: number;
   };
-  goals: Array<
-    GoalWithMilestonesDTO & {
-      weekly_goals_count: number;
-      tasks_count: number;
-    }
-  >;
-  weekly_goals: Array<
-    WeeklyGoalDTO & {
-      tasks_count: number;
-      completed_tasks: number;
-    }
-  >;
-  ad_hoc_tasks: Pick<TaskDTO, 'id' | 'week_number' | 'title' | 'priority' | 'status'>[];
+  goals: (GoalWithMilestonesDTO & {
+    weekly_goals_count: number;
+    tasks_count: number;
+  })[];
+  weekly_goals: (WeeklyGoalDTO & {
+    tasks_count: number;
+    completed_tasks: number;
+  })[];
+  ad_hoc_tasks: Pick<TaskDTO, "id" | "week_number" | "title" | "priority" | "status">[];
   progress_summary: {
     total_goals: number;
     completed_goals: number;
@@ -193,8 +194,8 @@ export interface PlanDashboardResponse {
  * Kept for backward compatibility only
  */
 export interface DashboardOptions {
-  weekView?: 'current' | 'all';
-  statusView?: 'active' | 'all';
+  weekView?: "current" | "all";
+  statusView?: "active" | "all";
   weekNumber?: number;
 }
 
@@ -205,7 +206,7 @@ export interface DashboardOptions {
 /**
  * Node Type - represents different types of nodes in the hierarchy tree
  */
-export type NodeType = 'plan' | 'goal' | 'milestone' | 'weekly_goal' | 'task' | 'ad_hoc_group';
+export type NodeType = "plan" | "goal" | "milestone" | "weekly_goal" | "task" | "ad_hoc_group";
 
 /**
  * Hierarchy Tree Node - unified structure for UI tree nodes
@@ -252,12 +253,10 @@ export type GoalDTO = LongTermGoalEntity;
  * Goal entity with nested milestones array and optional counts
  */
 export interface GoalWithMilestonesDTO extends GoalDTO {
-  milestones: Array<
-    MilestoneDTO & {
-      weekly_goals_count?: number;
-      tasks_count?: number;
-    }
-  >;
+  milestones: (MilestoneDTO & {
+    weekly_goals_count?: number;
+    tasks_count?: number;
+  })[];
 }
 
 /**
@@ -266,7 +265,7 @@ export interface GoalWithMilestonesDTO extends GoalDTO {
  */
 export type CreateGoalCommand = Pick<
   LongTermGoalInsert,
-  'plan_id' | 'title' | 'description' | 'category' | 'progress_percentage' | 'position'
+  "plan_id" | "title" | "description" | "category" | "progress_percentage" | "position"
 >;
 
 /**
@@ -274,7 +273,7 @@ export type CreateGoalCommand = Pick<
  * All fields are optional for partial updates
  */
 export type UpdateGoalCommand = Partial<
-  Pick<LongTermGoalUpdate, 'title' | 'description' | 'category' | 'progress_percentage' | 'position'>
+  Pick<LongTermGoalUpdate, "title" | "description" | "category" | "progress_percentage" | "position">
 >;
 
 /**
@@ -296,7 +295,7 @@ export interface PlanContext {
   startDate: string;
   endDate: string;
   isArchived: boolean;
-  status: PlanDTO['status'];
+  status: PlanDTO["status"];
 }
 
 /**
@@ -322,7 +321,7 @@ export interface MilestoneFormData {
 /**
  * Save status for auto-save forms
  */
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 // ============================================================================
 // MILESTONE DTOs
@@ -340,7 +339,7 @@ export type MilestoneDTO = MilestoneEntity;
  */
 export type CreateMilestoneCommand = Pick<
   MilestoneInsert,
-  'long_term_goal_id' | 'title' | 'description' | 'due_date' | 'position'
+  "long_term_goal_id" | "title" | "description" | "due_date" | "position"
 >;
 
 /**
@@ -348,7 +347,7 @@ export type CreateMilestoneCommand = Pick<
  * All fields optional for partial updates
  */
 export type UpdateMilestoneCommand = Partial<
-  Pick<MilestoneUpdate, 'title' | 'description' | 'due_date' | 'is_completed' | 'position'>
+  Pick<MilestoneUpdate, "title" | "description" | "due_date" | "is_completed" | "position">
 >;
 
 // ============================================================================
@@ -366,7 +365,7 @@ export type WeeklyGoalDTO = WeeklyGoalEntity;
  * Weekly goal with nested array of subtasks
  */
 export interface WeeklyGoalWithSubtasksDTO extends WeeklyGoalDTO {
-  subtasks: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status'>[];
+  subtasks: Pick<TaskDTO, "id" | "title" | "priority" | "status">[];
 }
 
 /**
@@ -376,7 +375,7 @@ export interface WeeklyGoalWithSubtasksDTO extends WeeklyGoalDTO {
  */
 export type CreateWeeklyGoalCommand = Pick<
   WeeklyGoalInsert,
-  'plan_id' | 'long_term_goal_id' | 'milestone_id' | 'week_number' | 'title' | 'description' | 'position'
+  "plan_id" | "long_term_goal_id" | "milestone_id" | "week_number" | "title" | "description" | "position"
 >;
 
 /**
@@ -385,7 +384,7 @@ export type CreateWeeklyGoalCommand = Pick<
  * Can update associations (long_term_goal_id, milestone_id) independently
  */
 export type UpdateWeeklyGoalCommand = Partial<
-  Pick<WeeklyGoalUpdate, 'long_term_goal_id' | 'milestone_id' | 'title' | 'description' | 'position'>
+  Pick<WeeklyGoalUpdate, "long_term_goal_id" | "milestone_id" | "title" | "description" | "position">
 >;
 
 // ============================================================================
@@ -414,9 +413,9 @@ export interface DailyTasksDTO {
   date: string;
   week_number: number;
   due_day: number;
-  most_important: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status' | 'task_type'> | null;
-  secondary: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status' | 'task_type'>[];
-  additional: Pick<TaskDTO, 'id' | 'title' | 'priority' | 'status' | 'task_type'>[];
+  most_important: Pick<TaskDTO, "id" | "title" | "priority" | "status" | "task_type"> | null;
+  secondary: Pick<TaskDTO, "id" | "title" | "priority" | "status" | "task_type">[];
+  additional: Pick<TaskDTO, "id" | "title" | "priority" | "status" | "task_type">[];
 }
 
 /**
@@ -426,18 +425,18 @@ export interface DailyTasksDTO {
  */
 export type CreateTaskCommand = Pick<
   TaskInsert,
-  | 'plan_id'
-  | 'weekly_goal_id'
-  | 'long_term_goal_id'
-  | 'milestone_id'
-  | 'title'
-  | 'description'
-  | 'priority'
-  | 'status'
-  | 'task_type'
-  | 'week_number'
-  | 'due_day'
-  | 'position'
+  | "plan_id"
+  | "weekly_goal_id"
+  | "long_term_goal_id"
+  | "milestone_id"
+  | "title"
+  | "description"
+  | "priority"
+  | "status"
+  | "task_type"
+  | "week_number"
+  | "due_day"
+  | "position"
 >;
 
 /**
@@ -448,17 +447,17 @@ export type CreateTaskCommand = Pick<
 export type UpdateTaskCommand = Partial<
   Pick<
     TaskUpdate,
-    | 'weekly_goal_id'
-    | 'long_term_goal_id'
-    | 'milestone_id'
-    | 'title'
-    | 'description'
-    | 'priority'
-    | 'status'
-    | 'task_type'
-    | 'week_number'
-    | 'due_day'
-    | 'position'
+    | "weekly_goal_id"
+    | "long_term_goal_id"
+    | "milestone_id"
+    | "title"
+    | "description"
+    | "priority"
+    | "status"
+    | "task_type"
+    | "week_number"
+    | "due_day"
+    | "position"
   >
 >;
 
@@ -497,7 +496,7 @@ export type WeeklyReviewDTO = WeeklyReviewEntity;
  */
 export type CreateWeeklyReviewCommand = Pick<
   WeeklyReviewInsert,
-  'plan_id' | 'week_number' | 'what_worked' | 'what_did_not_work' | 'what_to_improve'
+  "plan_id" | "week_number" | "what_worked" | "what_did_not_work" | "what_to_improve"
 >;
 
 /**
@@ -505,7 +504,7 @@ export type CreateWeeklyReviewCommand = Pick<
  * All fields optional for partial updates (auto-save support)
  */
 export type UpdateWeeklyReviewCommand = Partial<
-  Pick<WeeklyReviewUpdate, 'what_worked' | 'what_did_not_work' | 'what_to_improve' | 'is_completed'>
+  Pick<WeeklyReviewUpdate, "what_worked" | "what_did_not_work" | "what_to_improve" | "is_completed">
 >;
 
 // ============================================================================
@@ -631,7 +630,7 @@ export interface ValidationErrorDetail {
  * Validation error response - 400 Bad Request
  */
 export interface ValidationErrorResponse {
-  error: 'Validation failed';
+  error: "Validation failed";
   details: ValidationErrorDetail[];
 }
 
@@ -647,7 +646,7 @@ export interface ErrorResponse {
  * Database constraint error response
  */
 export interface ConstraintErrorResponse {
-  error: 'Constraint violation';
+  error: "Constraint violation";
   message: string;
   constraint?: string;
 }
@@ -656,7 +655,7 @@ export interface ConstraintErrorResponse {
  * Rate limit error response - 429 Too Many Requests
  */
 export interface RateLimitErrorResponse {
-  error: 'Rate limit exceeded';
+  error: "Rate limit exceeded";
   message: string;
   retry_after: number;
 }
@@ -858,7 +857,7 @@ export interface PlanWizardState {
 /**
  * Task ViewModel - extends TaskDTO with UI-specific fields
  */
-export interface TaskViewModel extends Omit<TaskDTO, 'status' | 'priority' | 'task_type'> {
+export interface TaskViewModel extends Omit<TaskDTO, "status" | "priority" | "task_type"> {
   status: TaskStatus;
   priority: TaskPriority;
   task_type: TaskType;
@@ -918,16 +917,16 @@ export interface WeekViewMeta {
  * - secondary: up to 2 tasks with priority A/B
  * - additional: up to 7 tasks with priority A/B/C
  */
-export type DaySlot = 'most_important' | 'secondary' | 'additional';
+export type DaySlot = "most_important" | "secondary" | "additional";
 
 /**
  * Slot Limits - max number of tasks per slot
  */
-export type SlotLimits = {
+export interface SlotLimits {
   most_important: 1;
   secondary: 2;
   additional: 7;
-};
+}
 
 /**
  * Day Task ViewModel - extends TaskViewModel with slot information
@@ -956,12 +955,12 @@ export interface DayViewData {
 export interface DayViewMeta {
   longTermGoals: SimpleGoal[];
   milestones: SimpleMilestone[];
-  weeklyGoals: Array<{
+  weeklyGoals: {
     id: string;
     title: string;
     long_term_goal_id: string | null;
     milestone_id: string | null;
-  }>;
+  }[];
 }
 
 /**
@@ -980,7 +979,7 @@ export interface DayCopyMovePayload {
  * Weekly Review ViewModel - extends WeeklyReviewDTO with UI-specific fields
  * Supports lazy creation (id can be null if review doesn't exist yet)
  */
-export interface WeeklyReviewViewModel extends Omit<WeeklyReviewDTO, 'id'> {
+export interface WeeklyReviewViewModel extends Omit<WeeklyReviewDTO, "id"> {
   id: string | null; // Null if review doesn't exist in database yet
   isSaving: boolean;
   lastSavedAt: Date | null;

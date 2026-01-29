@@ -3,7 +3,7 @@
  * Handles business logic for plan-related operations
  */
 
-import type { SupabaseClient } from '../../db/supabase.client';
+import type { SupabaseClient } from "../../db/supabase.client";
 import type {
   PlanDTO,
   PlanListParams,
@@ -13,20 +13,20 @@ import type {
   PlanInsert,
   PlanUpdate,
   PlanDashboardResponse,
-  DashboardMetrics
-} from '../../types';
+  DashboardMetrics,
+} from "../../types";
 
 export class PlanService {
   constructor(private supabase: SupabaseClient) {}
 
   /**
    * Pobiera listę planerów dla danego użytkownika
-   * 
+   *
    * @param userId - ID użytkownika (z tokenu JWT)
    * @param params - Parametry zapytania (status, limit, offset)
    * @returns Promise z listą planerów i metadanymi paginacji
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const plans = await planService.getPlans(userId, {
@@ -36,22 +36,19 @@ export class PlanService {
    * });
    * ```
    */
-  async getPlans(
-    userId: string,
-    params: PlanListParams
-  ): Promise<PaginatedResponse<PlanDTO>> {
+  async getPlans(userId: string, params: PlanListParams): Promise<PaginatedResponse<PlanDTO>> {
     const { status, limit = 50, offset = 0 } = params;
 
     // Build base query with count
     let query = this.supabase
-      .from('plans')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .from("plans")
+      .select("*", { count: "exact" })
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     // Apply status filter if provided
     if (status) {
-      query = query.eq('status', status);
+      query = query.eq("status", status);
     }
 
     // Apply pagination
@@ -70,17 +67,17 @@ export class PlanService {
       data: data || [],
       count: count || 0,
       limit,
-      offset
+      offset,
     };
   }
 
   /**
    * Pobiera aktywny planer dla danego użytkownika
-   * 
+   *
    * @param userId - ID użytkownika (z tokenu JWT)
    * @returns Promise z aktywnym planerem lub null jeśli nie istnieje
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const activePlan = await planService.getActivePlan(userId);
@@ -92,10 +89,10 @@ export class PlanService {
   async getActivePlan(userId: string): Promise<PlanDTO | null> {
     // Query for active plan
     const { data, error } = await this.supabase
-      .from('plans')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
+      .from("plans")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")
       .maybeSingle();
 
     // Handle database errors
@@ -110,12 +107,12 @@ export class PlanService {
   /**
    * Pobiera konkretny planer po ID
    * Weryfikuje, że planer należy do danego użytkownika
-   * 
+   *
    * @param planId - UUID planera
    * @param userId - ID użytkownika (z tokenu JWT)
    * @returns Promise z planerem lub null jeśli nie istnieje/nie należy do użytkownika
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const plan = await planService.getPlanById(planId, userId);
@@ -127,10 +124,10 @@ export class PlanService {
   async getPlanById(planId: string, userId: string): Promise<PlanDTO | null> {
     // Query for plan by ID, filtered by user_id for security
     const { data, error } = await this.supabase
-      .from('plans')
-      .select('*')
-      .eq('id', planId)
-      .eq('user_id', userId)
+      .from("plans")
+      .select("*")
+      .eq("id", planId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     // Handle database errors
@@ -144,13 +141,13 @@ export class PlanService {
 
   /**
    * Tworzy nowy 12-tygodniowy planer
-   * 
+   *
    * @param userId - ID użytkownika (z tokenu JWT)
    * @param data - Dane planera (name, start_date)
    * @returns Promise z utworzonym planerem
    * @throws Error jeśli start_date nie jest poniedziałkiem (constraint violation)
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const plan = await planService.createPlan(userId, {
@@ -159,30 +156,24 @@ export class PlanService {
    * });
    * ```
    */
-  async createPlan(
-    userId: string,
-    data: CreatePlanCommand
-  ): Promise<PlanDTO> {
+  async createPlan(userId: string, data: CreatePlanCommand): Promise<PlanDTO> {
     // Prepare insert data with user_id
     const insertData: PlanInsert = {
       user_id: userId,
       name: data.name,
       start_date: data.start_date,
-      status: 'ready' // Default status
+      status: "ready", // Default status
     };
 
     // Execute insert
-    const { data: plan, error } = await this.supabase
-      .from('plans')
-      .insert(insertData)
-      .select()
-      .single();
+    const { data: plan, error } = await this.supabase.from("plans").insert(insertData).select().single();
 
     // Handle database errors
     if (error) {
       // Check for constraint violations
-      if (error.code === '23514') {  // CHECK constraint
-        throw new Error('Start date must be a Monday');
+      if (error.code === "23514") {
+        // CHECK constraint
+        throw new Error("Start date must be a Monday");
       }
       // Other database errors
       throw new Error(`Failed to create plan: ${error.message}`);
@@ -194,25 +185,25 @@ export class PlanService {
   /**
    * Aktualizuje istniejący planer (nazwa i/lub status)
    * Weryfikuje, że planer należy do użytkownika
-   * 
+   *
    * @param planId - UUID planera
    * @param userId - ID użytkownika (z tokenu JWT)
    * @param data - Dane do aktualizacji (name and/or status)
    * @returns Promise z zaktualizowanym planerem lub null jeśli nie istnieje
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * // Update name only
    * const plan = await planService.updatePlan(planId, userId, {
    *   name: 'Updated Q1 2025 Goals'
    * });
-   * 
+   *
    * // Activate plan
    * const plan = await planService.updatePlan(planId, userId, {
    *   status: 'active'
    * });
-   * 
+   *
    * // Update both
    * const plan = await planService.updatePlan(planId, userId, {
    *   name: 'My Active Plan',
@@ -220,37 +211,33 @@ export class PlanService {
    * });
    * ```
    */
-  async updatePlan(
-    planId: string,
-    userId: string,
-    data: UpdatePlanCommand
-  ): Promise<PlanDTO | null> {
+  async updatePlan(planId: string, userId: string, data: UpdatePlanCommand): Promise<PlanDTO | null> {
     // First verify plan exists and belongs to user
     const existingPlan = await this.getPlanById(planId, userId);
-    
+
     if (!existingPlan) {
       return null;
     }
 
     // Prepare update data with provided fields only
     const updateData: PlanUpdate = {};
-    
+
     if (data.name !== undefined) {
       updateData.name = data.name;
     }
-    
+
     if (data.status !== undefined) {
       updateData.status = data.status;
     }
-    
+
     // updated_at is automatically set by database trigger
 
     // Execute update
     const { data: plan, error } = await this.supabase
-      .from('plans')
+      .from("plans")
       .update(updateData)
-      .eq('id', planId)
-      .eq('user_id', userId)  // Security: ensure user owns the plan
+      .eq("id", planId)
+      .eq("user_id", userId) // Security: ensure user owns the plan
       .select()
       .single();
 
@@ -268,12 +255,12 @@ export class PlanService {
   /**
    * Archiwizuje planer (zmiana statusu na 'archived')
    * Weryfikuje, że planer należy do użytkownika
-   * 
+   *
    * @param planId - UUID planera
    * @param userId - ID użytkownika (z tokenu JWT)
    * @returns Promise z zarchiwizowanym planerem lub null jeśli nie istnieje
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const plan = await planService.archivePlan(planId, userId);
@@ -282,23 +269,20 @@ export class PlanService {
    * }
    * ```
    */
-  async archivePlan(
-    planId: string,
-    userId: string
-  ): Promise<PlanDTO | null> {
+  async archivePlan(planId: string, userId: string): Promise<PlanDTO | null> {
     // First verify plan exists and belongs to user
     const existingPlan = await this.getPlanById(planId, userId);
-    
+
     if (!existingPlan) {
       return null;
     }
 
     // Update status to archived
     const { data: plan, error } = await this.supabase
-      .from('plans')
-      .update({ status: 'archived' })
-      .eq('id', planId)
-      .eq('user_id', userId)  // Security: ensure user owns the plan
+      .from("plans")
+      .update({ status: "archived" })
+      .eq("id", planId)
+      .eq("user_id", userId) // Security: ensure user owns the plan
       .select()
       .single();
 
@@ -313,12 +297,12 @@ export class PlanService {
   /**
    * Trwale usuwa planer i wszystkie powiązane dane (hard delete)
    * Weryfikuje, że planer należy do użytkownika
-   * 
+   *
    * @param planId - UUID planera
    * @param userId - ID użytkownika (z tokenu JWT)
    * @returns Promise z true jeśli usunięto lub false jeśli plan nie istnieje
    * @throws Error jeśli zapytanie do bazy danych nie powiedzie się
-   * 
+   *
    * @example
    * ```typescript
    * const success = await planService.deletePlan(planId, userId);
@@ -327,23 +311,16 @@ export class PlanService {
    * }
    * ```
    */
-  async deletePlan(
-    planId: string,
-    userId: string
-  ): Promise<boolean> {
+  async deletePlan(planId: string, userId: string): Promise<boolean> {
     // First verify plan exists and belongs to user
     const existingPlan = await this.getPlanById(planId, userId);
-    
+
     if (!existingPlan) {
       return false;
     }
 
     // Execute delete - cascade will remove all related data
-    const { error } = await this.supabase
-      .from('plans')
-      .delete()
-      .eq('id', planId)
-      .eq('user_id', userId);  // Security: ensure user owns the plan
+    const { error } = await this.supabase.from("plans").delete().eq("id", planId).eq("user_id", userId); // Security: ensure user owns the plan
 
     // Handle database errors
     if (error) {
@@ -371,10 +348,7 @@ export class PlanService {
    * const dashboard = await planService.getDashboardData(planId, userId);
    * ```
    */
-  async getDashboardData(
-    planId: string,
-    userId: string
-  ): Promise<PlanDashboardResponse | null> {
+  async getDashboardData(planId: string, userId: string): Promise<PlanDashboardResponse | null> {
     // Step 1: Verify plan exists and belongs to user
     const plan = await this.getPlanById(planId, userId);
     if (!plan) {
@@ -384,22 +358,22 @@ export class PlanService {
     // Step 2: Execute parallel queries to fetch ALL data
     // No filtering on the backend - client will handle filtering based on UI state
     const goalsResult = await this.supabase
-      .from('long_term_goals')
-      .select('*')
-      .eq('plan_id', planId)
-      .order('position', { ascending: true });
+      .from("long_term_goals")
+      .select("*")
+      .eq("plan_id", planId)
+      .order("position", { ascending: true });
 
     if (goalsResult.error) throw goalsResult.error;
 
-    const goalIds = goalsResult.data?.map(g => g.id) || [];
+    const goalIds = goalsResult.data?.map((g) => g.id) || [];
 
     const [milestones, weeklyGoals, tasks] = await Promise.all([
       // Milestones query - get all milestones for goals in this plan
       this.supabase
-        .from('milestones')
-        .select('*')
-        .in('long_term_goal_id', goalIds)
-        .order('position', { ascending: true })
+        .from("milestones")
+        .select("*")
+        .in("long_term_goal_id", goalIds)
+        .order("position", { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
           return data;
@@ -407,10 +381,10 @@ export class PlanService {
 
       // Weekly goals query - get all weekly goals
       this.supabase
-        .from('weekly_goals')
-        .select('*')
-        .eq('plan_id', planId)
-        .order('position', { ascending: true })
+        .from("weekly_goals")
+        .select("*")
+        .eq("plan_id", planId)
+        .order("position", { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
           return data;
@@ -418,22 +392,22 @@ export class PlanService {
 
       // Tasks query - get all tasks
       this.supabase
-        .from('tasks')
-        .select('*')
-        .eq('plan_id', planId)
-        .order('position', { ascending: true })
+        .from("tasks")
+        .select("*")
+        .eq("plan_id", planId)
+        .order("position", { ascending: true })
         .then(({ data, error }) => {
           if (error) throw error;
           return data;
-        })
+        }),
     ]);
 
     // Step 3: Calculate metrics based on all data
     const metrics: DashboardMetrics = {
       total_goals: goalsResult.data?.length || 0,
-      completed_goals: goalsResult.data?.filter(g => g.progress_percentage === 100).length || 0,
+      completed_goals: goalsResult.data?.filter((g) => g.progress_percentage === 100).length || 0,
       total_tasks: tasks?.length || 0,
-      completed_tasks: tasks?.filter(t => t.status === 'completed').length || 0
+      completed_tasks: tasks?.filter((t) => t.status === "completed").length || 0,
     };
 
     // Step 4: Return dashboard response with all data
@@ -443,8 +417,7 @@ export class PlanService {
       milestones: milestones || [],
       weekly_goals: weeklyGoals || [],
       tasks: tasks || [],
-      metrics
+      metrics,
     };
   }
 }
-

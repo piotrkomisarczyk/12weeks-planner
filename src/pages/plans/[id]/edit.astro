@@ -1,20 +1,20 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { EditPlanView } from '@/components/plans/edit/EditPlanView';
+import Layout from "@/layouts/Layout.astro";
+import { EditPlanView } from "@/components/plans/edit/EditPlanView";
 
 // Extract planId from URL params
 const { id: planId } = Astro.params;
 
 // Validate planId exists
 if (!planId) {
-  return Astro.redirect('/plans');
+  return Astro.redirect("/plans");
 }
 
 // Get user session (middleware handles authentication)
 const userId = Astro.locals.user?.id;
 
 if (!userId) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 ---
 

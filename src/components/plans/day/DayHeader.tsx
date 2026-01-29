@@ -1,19 +1,19 @@
 /**
  * DayHeader Component
- * 
+ *
  * Navigation header for day view showing day number, date, week number, and navigation controls.
  * Includes date picker for jumping to specific dates.
  */
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import { cn, computeDayNumberFromDate, getPlanDateRange, normalizeDateToMidnight, parseDateString } from '@/lib/utils';
-import { DAY_NAMES } from '@/types';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { cn, computeDayNumberFromDate, getPlanDateRange, normalizeDateToMidnight, parseDateString } from "@/lib/utils";
+import { DAY_NAMES } from "@/types";
 
 interface DayHeaderProps {
   planName: string;
@@ -32,29 +32,29 @@ export function DayHeader({
   weekNumber,
   computedDate,
   planStartDate,
-  onNavigate
+  onNavigate,
 }: DayHeaderProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const currentDate = parseDateString(computedDate);
   const { start: planStart, end: planEnd } = getPlanDateRange(planStartDate);
-  
+
   // Format date for display
-  const formattedDate = currentDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const formattedDate = currentDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
-    
+
     const result = computeDayNumberFromDate(date, planStartDate);
     if (!result) {
       return; // Out of range
     }
-    
+
     // Navigate to the new day
     if (result.weekNumber !== weekNumber) {
       // Different week - navigate to that week and day
@@ -63,7 +63,7 @@ export function DayHeader({
       // Same week - just navigate to the day
       onNavigate(result.dayNumber);
     }
-    
+
     setDatePickerOpen(false);
   };
 
@@ -92,14 +92,10 @@ export function DayHeader({
   return (
     <Card className="rounded-lg">
       <CardContent>
-
-
         {/* Day Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold">
-              Day {dayNumber + (weekNumber - 1) * 7}
-            </h1>
+            <h1 className="text-3xl font-bold">Day {dayNumber + (weekNumber - 1) * 7}</h1>
 
             <Badge
               variant="default"
@@ -108,16 +104,13 @@ export function DayHeader({
             >
               Week {weekNumber}
             </Badge>
-            
+
             {/* Date Display with Picker */}
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn(
-                    "text-left font-normal",
-                    !currentDate && "text-muted-foreground"
-                  )}
+                  className={cn("text-left font-normal", !currentDate && "text-muted-foreground")}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {formattedDate}
@@ -138,8 +131,6 @@ export function DayHeader({
                 />
               </PopoverContent>
             </Popover>
-
-
           </div>
 
           <div className="flex items-center gap-2">
@@ -153,16 +144,9 @@ export function DayHeader({
               Previous Day
             </Button>
 
-            <div className="text-sm text-muted-foreground px-2">
-              Day {dayNumber} / 7
-            </div>
+            <div className="text-sm text-muted-foreground px-2">Day {dayNumber} / 7</div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNextDay}
-              disabled={weekNumber === 12 && dayNumber === 7}
-            >
+            <Button variant="outline" size="sm" onClick={handleNextDay} disabled={weekNumber === 12 && dayNumber === 7}>
               Next Day
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
@@ -177,12 +161,12 @@ export function DayHeader({
                 key={day}
                 onClick={() => onNavigate(day)}
                 className={cn(
-                  'flex-1 py-0.75 px-1 text-center rounded-md transition-all text-xs font-medium',
+                  "flex-1 py-0.75 px-1 text-center rounded-md transition-all text-xs font-medium",
                   day === dayNumber
-                    ? 'bg-primary text-primary-foreground'
+                    ? "bg-primary text-primary-foreground"
                     : day < dayNumber
-                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      ? "bg-primary/20 text-primary hover:bg-primary/30"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                 )}
                 title={DAY_NAMES[day - 1]}
               >
@@ -195,4 +179,3 @@ export function DayHeader({
     </Card>
   );
 }
-

@@ -1,7 +1,7 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { PlanWizardContainer } from '@/components/plans/wizard';
-import { Toaster } from '@/components/ui/sonner';
+import Layout from "@/layouts/Layout.astro";
+import { PlanWizardContainer } from "@/components/plans/wizard";
+import { Toaster } from "@/components/ui/sonner";
 
 export const prerender = false;
 ---
@@ -10,4 +10,3 @@ export const prerender = false;
   <PlanWizardContainer client:load />
   <Toaster client:only="react" />
 </Layout>
-

@@ -1,29 +1,18 @@
-import { MoreVertical, Play, Archive, Trash2, Edit } from 'lucide-react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardAction,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { MoreVertical, Play, Archive, Trash2, Edit } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import type { PlanViewModel } from '@/lib/plan-utils';
-import { formatDate } from '@/lib/plan-utils';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import type { PlanViewModel } from "@/lib/plan-utils";
+import { formatDate } from "@/lib/plan-utils";
+import { cn } from "@/lib/utils";
 
 export interface PlanActions {
   onActivate: (id: string) => void;
@@ -37,26 +26,26 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan, actions }: PlanCardProps) {
-  const showActivateButton = plan.status !== 'active' && plan.status !== 'completed';
-  const showArchiveButton = plan.status !== 'archived';
+  const showActivateButton = plan.status !== "active" && plan.status !== "completed";
+  const showArchiveButton = plan.status !== "archived";
 
   // Truncate plan name to 64 characters with ellipsis if longer
   const truncatedName = plan.name.length > 64 ? `${plan.name.slice(0, 64)}...` : plan.name;
 
   // Determine card styling based on status
   const cardVariant = {
-    active: 'border-primary bg-primary/5',
-    ready: '',
-    archived: 'bg-muted/50 opacity-75',
-    completed: 'bg-muted/30',
+    active: "border-primary bg-primary/5",
+    ready: "",
+    archived: "bg-muted/50 opacity-75",
+    completed: "bg-muted/30",
   }[plan.status];
 
   // Determine badge styling based on status
   const badgeVariant = {
-    active: 'default' as const,
-    ready: 'secondary' as const,
-    archived: 'outline' as const,
-    completed: 'secondary' as const,
+    active: "default" as const,
+    ready: "secondary" as const,
+    archived: "outline" as const,
+    completed: "secondary" as const,
   }[plan.status];
 
   const handleCardClick = () => {
@@ -64,20 +53,14 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
     window.location.href = `/plans/${plan.id}`;
   };
 
-  const handleActionClick = (
-    e: React.MouseEvent,
-    action: () => void
-  ) => {
+  const handleActionClick = (e: React.MouseEvent, action: () => void) => {
     e.stopPropagation(); // Prevent card click navigation
     action();
   };
 
   return (
     <Card
-      className={cn(
-        'cursor-pointer transition-all hover:shadow-md',
-        cardVariant
-      )}
+      className={cn("cursor-pointer transition-all hover:shadow-md", cardVariant)}
       onClick={handleCardClick}
       role="article"
       aria-label={`Plan: ${plan.name}`}
@@ -119,11 +102,7 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
               <DropdownMenuContent align="end">
                 {showActivateButton && (
                   <>
-                    <DropdownMenuItem
-                      onClick={(e) =>
-                        handleActionClick(e, () => actions.onActivate(plan.id))
-                      }
-                    >
+                    <DropdownMenuItem onClick={(e) => handleActionClick(e, () => actions.onActivate(plan.id))}>
                       <Play className="size-4" />
                       Activate
                     </DropdownMenuItem>
@@ -141,20 +120,14 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {showArchiveButton && (
-                  <DropdownMenuItem
-                    onClick={(e) =>
-                      handleActionClick(e, () => actions.onArchive(plan.id))
-                    }
-                  >
+                  <DropdownMenuItem onClick={(e) => handleActionClick(e, () => actions.onArchive(plan.id))}>
                     <Archive className="size-4" />
                     Archive
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={(e) =>
-                    handleActionClick(e, () => actions.onDelete(plan.id))
-                  }
+                  onClick={(e) => handleActionClick(e, () => actions.onDelete(plan.id))}
                 >
                   <Trash2 className="size-4" />
                   Delete
@@ -164,25 +137,16 @@ export function PlanCard({ plan, actions }: PlanCardProps) {
           </CardAction>
         </div>
       </CardHeader>
-      {plan.status === 'active' || plan.status === 'completed' && (
-      <CardContent>
-        <div className="space-y-2 text-sm">
-          {plan.currentWeek !== null && (
-            <div className="text-muted-foreground">
-              Week {plan.currentWeek} of 12
+      {plan.status === "active" ||
+        (plan.status === "completed" && (
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {plan.currentWeek !== null && <div className="text-muted-foreground">Week {plan.currentWeek} of 12</div>}
+              {plan.isOverdue && <div className="text-destructive font-medium">Overdue</div>}
+              {plan.status === "completed" && <div className="text-muted-foreground">Completed</div>}
             </div>
-          )}
-          {plan.isOverdue  && (
-            <div className="text-destructive font-medium">Overdue</div>
-          )}
-          {plan.status === 'completed' && (
-            <div className="text-muted-foreground">Completed</div>
-          )}
-
-          </div>
-        </CardContent>
-      )}
+          </CardContent>
+        ))}
     </Card>
   );
 }
-

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { WizardStepper } from '../wizard/WizardStepper';
-import { PlanDetailsStep } from './PlanDetailsStep';
-import { GoalsStep } from './GoalsStep';
-import { useEditPlan } from './hooks/useEditPlan';
+import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { WizardStepper } from "../wizard/WizardStepper";
+import { PlanDetailsStep } from "./PlanDetailsStep";
+import { GoalsStep } from "./GoalsStep";
+import { useEditPlan } from "./hooks/useEditPlan";
 
 interface EditPlanViewProps {
   planId: string;
@@ -36,7 +36,7 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
     clearFormErrors,
   } = useEditPlan(planId);
 
-  const [planName, setPlanName] = useState('');
+  const [planName, setPlanName] = useState("");
 
   // Update local plan name when plan data loads
   useEffect(() => {
@@ -54,9 +54,9 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
     // Validate plan name
     const errors: Record<string, string> = {};
     if (!planName.trim()) {
-      errors.name = 'Plan name is required';
+      errors.name = "Plan name is required";
     } else if (planName.length > 255) {
-      errors.name = 'Plan name must be less than 255 characters';
+      errors.name = "Plan name must be less than 255 characters";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -69,14 +69,14 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
       await updatePlanDetails(planName.trim());
     } catch (error) {
       // Error is handled in the hook
-      console.error('Failed to update plan details:', error);
+      console.error("Failed to update plan details:", error);
     }
   };
 
   const handleFinish = () => {
     // Validate minimum goals requirement
     if (goals.length === 0) {
-      setFormErrors({ goals: 'At least one goal is required' });
+      setFormErrors({ goals: "At least one goal is required" });
       return;
     }
 
@@ -125,9 +125,7 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
           </AlertDescription>
         </Alert>
         <div className="mt-4 text-center">
-          <Button onClick={() => window.location.href = '/plans'}>
-            Back to Plans
-          </Button>
+          <Button onClick={() => (window.location.href = "/plans")}>Back to Plans</Button>
         </div>
       </div>
     );
@@ -141,16 +139,14 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.location.href = '/plans'}
+            onClick={() => (window.location.href = "/plans")}
             aria-label="Back to plans"
           >
             <ArrowLeft className="size-4" />
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Edit Plan</h1>
-            <p className="text-muted-foreground">
-              Update your plan details and manage your goals
-            </p>
+            <p className="text-muted-foreground">Update your plan details and manage your goals</p>
           </div>
         </div>
 
@@ -170,12 +166,7 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
         )}
 
         {step === 2 && (
-          <GoalsStep
-            goals={goals}
-            onAddGoal={addGoal}
-            onUpdateGoal={updateGoal}
-            onDeleteGoal={deleteGoal}
-          />
+          <GoalsStep goals={goals} onAddGoal={addGoal} onUpdateGoal={updateGoal} onDeleteGoal={deleteGoal} />
         )}
       </div>
 
@@ -183,12 +174,7 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
       <div className="flex items-center justify-between border-t pt-6">
         <div>
           {step > 1 && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={prevStep}
-              disabled={isSaving}
-            >
+            <Button type="button" variant="outline" onClick={prevStep} disabled={isSaving}>
               <ArrowLeft className="size-4" />
               Back
             </Button>
@@ -200,7 +186,7 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => window.location.href = '/plans'}
+              onClick={() => (window.location.href = "/plans")}
               disabled={isSaving}
             >
               Cancel
@@ -208,22 +194,14 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
           )}
 
           {step === 1 && (
-            <Button
-              type="button"
-              onClick={handleNextFromDetails}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Next'}
+            <Button type="button" onClick={handleNextFromDetails} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Next"}
             </Button>
           )}
 
           {step === 2 && (
-            <Button
-              type="button"
-              onClick={handleFinish}
-              disabled={isSaving || goals.length === 0}
-            >
-              {isSaving ? 'Saving...' : 'Finish'}
+            <Button type="button" onClick={handleFinish} disabled={isSaving || goals.length === 0}>
+              {isSaving ? "Saving..." : "Finish"}
             </Button>
           )}
         </div>

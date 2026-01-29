@@ -3,16 +3,16 @@
  * Individual goal with slider and input for progress tracking
  */
 
-import React, { useState, useEffect } from 'react';
-import { Slider } from '../../ui/slider';
-import { Input } from '../../ui/input';
-import { Label } from '../../ui/label';
-import { Badge } from '../../ui/badge';
-import { Checkbox } from '../../ui/checkbox';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '../../../types';
-import { formatTextWithLineBreaks, getDisabledTooltip, isPlanReadOnly, isPlanReady } from '../../../lib/utils';
-import type { GoalCategory, GoalReviewViewModel, PlanStatus } from '../../../types';
+import React, { useState, useEffect } from "react";
+import { Slider } from "../../ui/slider";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
+import { Badge } from "../../ui/badge";
+import { Checkbox } from "../../ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "../../../types";
+import { formatTextWithLineBreaks, getDisabledTooltip, isPlanReadOnly, isPlanReady } from "../../../lib/utils";
+import type { GoalCategory, GoalReviewViewModel, PlanStatus } from "../../../types";
 
 interface GoalProgressItemProps {
   goal: GoalReviewViewModel;
@@ -21,12 +21,17 @@ interface GoalProgressItemProps {
   planStatus: PlanStatus;
 }
 
-export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneToggle, planStatus }: GoalProgressItemProps) {
+export default function GoalProgressItem({
+  goal,
+  onProgressUpdate,
+  onMilestoneToggle,
+  planStatus,
+}: GoalProgressItemProps) {
   const [localProgress, setLocalProgress] = useState(goal.progress_percentage);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const categoryKey = goal.category as GoalCategory | null;
   const categoryLabel = categoryKey
-    ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
+    ? (GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey)
     : null;
 
   // Compute read-only state for review (ready or completed/archived)
@@ -40,8 +45,8 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
   // Track theme changes for proper spinner styling
   useEffect(() => {
     const updateTheme = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setTheme(isDark ? 'dark' : 'light');
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "dark" : "light");
     };
 
     // Set initial theme
@@ -51,7 +56,7 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
     const observer = new MutationObserver(updateTheme);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class']
+      attributeFilter: ["class"],
     });
 
     return () => observer.disconnect();
@@ -78,7 +83,7 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleInputBlur();
     }
   };
@@ -96,15 +101,15 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
           )}
         </div>
         {categoryKey && categoryLabel && (
-          <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>
-            {categoryLabel}
-          </Badge>
+          <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>{categoryLabel}</Badge>
         )}
       </div>
 
       {goal.description && (
         <div>
-          <Label className="text-base font-medium text-foreground mb-1">Why is it important? / How will you measure your success?</Label>
+          <Label className="text-base font-medium text-foreground mb-1">
+            Why is it important? / How will you measure your success?
+          </Label>
           <p
             className="text-sm text-muted-foreground"
             dangerouslySetInnerHTML={{ __html: formatTextWithLineBreaks(goal.description) }}
@@ -124,21 +129,21 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
                     <div>
                       <Checkbox
                         checked={milestone.is_completed}
-                        onCheckedChange={(checked) =>
-                          onMilestoneToggle?.(milestone.id, checked as boolean)
-                        }
+                        onCheckedChange={(checked) => onMilestoneToggle?.(milestone.id, checked as boolean)}
                         disabled={!onMilestoneToggle || isReadOnly}
-                        aria-label={`Mark "${milestone.title}" as ${milestone.is_completed ? 'incomplete' : 'complete'}`}
+                        aria-label={`Mark "${milestone.title}" as ${milestone.is_completed ? "incomplete" : "complete"}`}
                       />
                     </div>
                   </TooltipTrigger>
                   {isReadOnly && (
                     <TooltipContent>
-                      <p>{getDisabledTooltip(planStatus, 'milestone')}</p>
+                      <p>{getDisabledTooltip(planStatus, "milestone")}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
-                <span className={`text-sm ${milestone.is_completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                <span
+                  className={`text-sm ${milestone.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}
+                >
                   {milestone.title}
                 </span>
               </div>
@@ -166,7 +171,7 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
             </TooltipTrigger>
             {isReadOnly && (
               <TooltipContent>
-                <p>{getDisabledTooltip(planStatus, 'progress')}</p>
+                <p>{getDisabledTooltip(planStatus, "progress")}</p>
               </TooltipContent>
             )}
           </Tooltip>
@@ -191,7 +196,7 @@ export default function GoalProgressItem({ goal, onProgressUpdate, onMilestoneTo
             </TooltipTrigger>
             {isReadOnly && (
               <TooltipContent>
-                <p>{getDisabledTooltip(planStatus, 'progress')}</p>
+                <p>{getDisabledTooltip(planStatus, "progress")}</p>
               </TooltipContent>
             )}
           </Tooltip>

@@ -1,7 +1,20 @@
-import { useState } from 'react';
-import { CircleX, BookOpen, ChevronRight, ChevronDown, Target, Flag, Calendar, CheckCircle, Circle, CircleSlash, CircleArrowRight, Square } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { HierarchyTreeNode, NodeType } from '@/types';
+import { useState } from "react";
+import {
+  CircleX,
+  BookOpen,
+  ChevronRight,
+  ChevronDown,
+  Target,
+  Flag,
+  Calendar,
+  CheckCircle,
+  Circle,
+  CircleSlash,
+  CircleArrowRight,
+  Square,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { HierarchyTreeNode, NodeType } from "@/types";
 
 interface HierarchyNodeProps {
   node: HierarchyTreeNode;
@@ -18,11 +31,11 @@ const ICONS: Record<NodeType, React.ComponentType<{ className?: string }>> = {
 };
 
 const STATUS_COLORS = {
-  todo: 'text-muted-foreground',
-  in_progress: 'text-blue-600 dark:text-blue-400 font-medium',
-  completed: 'text-green-700 dark:text-green-600 font-medium',
-  cancelled: 'text-muted-foreground line-through',
-  postponed: 'text-amber-600 dark:text-amber-400 font-medium',
+  todo: "text-muted-foreground",
+  in_progress: "text-blue-600 dark:text-blue-400 font-medium",
+  completed: "text-green-700 dark:text-green-600 font-medium",
+  cancelled: "text-muted-foreground line-through",
+  postponed: "text-amber-600 dark:text-amber-400 font-medium",
 };
 
 export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
@@ -30,7 +43,7 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
 
   const Icon = ICONS[node.type];
   const hasChildren = node.children.length > 0;
-  
+
   // Use inline style for indentation to support dynamic values
   // Each level gets 1.5rem (24px) of indentation
   const indentationStyle = { paddingLeft: `${node.indent * 1.5}rem` };
@@ -39,13 +52,13 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
     if (node.isCompleted) {
       return <CheckCircle className="text-green-700 dark:text-green-600" />;
     }
-    if (node.status === 'in_progress') {
+    if (node.status === "in_progress") {
       return <CircleSlash className="text-blue-500 dark:text-blue-400" />;
     }
-    if (node.status === 'cancelled') {
+    if (node.status === "cancelled") {
       return <CircleX className="text-muted-foreground" />;
     }
-    if (node.status === 'postponed') {
+    if (node.status === "postponed") {
       return <CircleArrowRight className="text-amber-500 dark:text-amber-400" />;
     }
     return <Circle className="text-muted-foreground" />;
@@ -55,7 +68,7 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
     if (node.status && STATUS_COLORS[node.status as keyof typeof STATUS_COLORS]) {
       return STATUS_COLORS[node.status as keyof typeof STATUS_COLORS];
     }
-    return 'text-foreground';
+    return "text-foreground";
   };
 
   const handleClick = () => {
@@ -97,16 +110,14 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
         </div>
 
         {/* Status Icon */}
-        <div className="w-4 h-4 mr-2 flex items-center justify-center">
-          {getStatusIcon()}
-        </div>
+        <div className="w-4 h-4 mr-2 flex items-center justify-center">{getStatusIcon()}</div>
 
         {/* Title */}
         <div
           className={cn(
-            'flex-1 text-sm font-medium truncate',
+            "flex-1 text-sm font-medium truncate",
             getStatusTextColor(),
-            !hasChildren && 'cursor-pointer hover:underline'
+            !hasChildren && "cursor-pointer hover:underline"
           )}
           onClick={handleTitleClick}
           title={node.title}
@@ -115,11 +126,7 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
         </div>
 
         {/* Progress for goals */}
-        {node.progress !== undefined && (
-          <div className="ml-2 text-xs text-muted-foreground">
-            {node.progress}%
-          </div>
-        )}
+        {node.progress !== undefined && <div className="ml-2 text-xs text-muted-foreground">{node.progress}%</div>}
 
         {/* Priority for tasks */}
         {node.metadata.priority && (
@@ -129,35 +136,23 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
         )}
 
         {/* Day name for tasks */}
-        {node.type === 'task' && node.metadata.date && (
-          <div className="ml-2 text-xs text-muted-foreground">
-            {node.metadata.date}
-          </div>
+        {node.type === "task" && node.metadata.date && (
+          <div className="ml-2 text-xs text-muted-foreground">{node.metadata.date}</div>
         )}
 
         {/* Week number */}
-        {node.weekNumber && (
-          <div className="ml-2 text-xs text-muted-foreground">
-            Week {node.weekNumber}
-          </div>
-        )}
-
-
+        {node.weekNumber && <div className="ml-2 text-xs text-muted-foreground">Week {node.weekNumber}</div>}
       </div>
 
       {/* Children */}
       {hasChildren && (
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isExpanded ? 'opacity-100' : 'max-h-0 opacity-0'
+            isExpanded ? "opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           {node.children.map((child) => (
-            <HierarchyNode
-              key={child.id}
-              node={child}
-              onNavigate={onNavigate}
-            />
+            <HierarchyNode key={child.id} node={child} onNavigate={onNavigate} />
           ))}
         </div>
       )}

@@ -3,22 +3,22 @@
  * Editable form for goal properties with auto-save
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { GoalCategory } from '@/types';
-import type { SaveStatus } from '@/types';
+} from "@/components/ui/dropdown-menu";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import type { GoalCategory } from "@/types";
+import type { SaveStatus } from "@/types";
 
 interface GoalFormProps {
   title: string;
@@ -36,9 +36,9 @@ interface GoalFormProps {
  */
 export function GoalForm({ title, category, description, onUpdate, disabled = false }: GoalFormProps) {
   const [localTitle, setLocalTitle] = useState(title);
-  const [localDescription, setLocalDescription] = useState(description || '');
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-  
+  const [localDescription, setLocalDescription] = useState(description || "");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+
   // Separate refs for title and description debounce timers
   const titleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const descriptionTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,7 +47,7 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
   // Sync with external changes
   useEffect(() => {
     setLocalTitle(title);
-    setLocalDescription(description || '');
+    setLocalDescription(description || "");
   }, [title, description]);
 
   // Cleanup timers on unmount
@@ -61,7 +61,7 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
 
   // Debounced save function
   const debouncedSave = useCallback(
-    async (field: 'title' | 'description', value: string, timerRef: React.MutableRefObject<NodeJS.Timeout | null>) => {
+    async (field: "title" | "description", value: string, timerRef: React.MutableRefObject<NodeJS.Timeout | null>) => {
       // Clear existing timer for this field
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -72,25 +72,25 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
         clearTimeout(saveStatusTimerRef.current);
       }
 
-      setSaveStatus('saving');
+      setSaveStatus("saving");
 
       // Set new timer (500ms debounce)
       timerRef.current = setTimeout(async () => {
         try {
           await onUpdate({ [field]: value || null });
-          setSaveStatus('saved');
-          
+          setSaveStatus("saved");
+
           // Auto-hide "saved" message after 2 seconds
           saveStatusTimerRef.current = setTimeout(() => {
-            setSaveStatus('idle');
+            setSaveStatus("idle");
           }, 2000);
         } catch (error) {
-          console.error('Failed to save:', error);
-          setSaveStatus('error');
-          
+          console.error("Failed to save:", error);
+          setSaveStatus("error");
+
           // Auto-hide error message after 3 seconds
           saveStatusTimerRef.current = setTimeout(() => {
-            setSaveStatus('idle');
+            setSaveStatus("idle");
           }, 3000);
         }
       }, 500);
@@ -101,26 +101,26 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
   // Handle title change
   const handleTitleChange = (value: string) => {
     setLocalTitle(value);
-    debouncedSave('title', value, titleTimerRef);
+    debouncedSave("title", value, titleTimerRef);
   };
 
   // Handle description change
   const handleDescriptionChange = (value: string) => {
     setLocalDescription(value);
-    debouncedSave('description', value, descriptionTimerRef);
+    debouncedSave("description", value, descriptionTimerRef);
   };
 
   // Handle category change (immediate save)
   const handleCategoryChange = async (value: string) => {
-    setSaveStatus('saving');
+    setSaveStatus("saving");
     try {
       await onUpdate({ category: value as GoalCategory });
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (error) {
-      console.error('Failed to save category:', error);
-      setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      console.error("Failed to save category:", error);
+      setSaveStatus("error");
+      setTimeout(() => setSaveStatus("idle"), 3000);
     }
   };
 
@@ -147,16 +147,9 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
         <Label htmlFor="goal-category">Category</Label>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button
-              id="goal-category"
-              variant="outline"
-              className="w-full justify-between"
-              disabled={disabled}
-            >
+            <Button id="goal-category" variant="outline" className="w-full justify-between" disabled={disabled}>
               {category ? (
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[category]}`}
-                >
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[category]}`}>
                   {GOAL_CATEGORIES.find((cat) => cat.value === category)?.label}
                 </span>
               ) : (
@@ -184,7 +177,8 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
       {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="goal-description">
-          Why is it important? / How will you measure your success? <span className="text-muted-foreground text-xs">(Optional)</span>
+          Why is it important? / How will you measure your success?{" "}
+          <span className="text-muted-foreground text-xs">(Optional)</span>
         </Label>
         <Textarea
           id="goal-description"
@@ -199,17 +193,10 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
 
       {/* Save Status Indicator */}
       <div className="flex items-center gap-2 text-xs">
-        {saveStatus === 'saving' && (
-          <span className="text-muted-foreground">Saving...</span>
-        )}
-        {saveStatus === 'saved' && (
-          <span className="text-green-600 dark:text-green-400">✓ Saved</span>
-        )}
-        {saveStatus === 'error' && (
-          <span className="text-destructive">Failed to save</span>
-        )}
+        {saveStatus === "saving" && <span className="text-muted-foreground">Saving...</span>}
+        {saveStatus === "saved" && <span className="text-green-600 dark:text-green-400">✓ Saved</span>}
+        {saveStatus === "error" && <span className="text-destructive">Failed to save</span>}
       </div>
     </div>
   );
 }
-

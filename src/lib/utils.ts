@@ -1,9 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { DAY_NAMES, type PlanStatus, type ErrorResponse } from "@/types"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { DAY_NAMES, type PlanStatus, type ErrorResponse } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -20,7 +20,7 @@ export function calculateCurrentWeek(plan: { start_date: string }): number {
   // Use UTC to calculate calendar days to avoid DST issues
   const utc1 = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
   const utc2 = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-  
+
   const diffDays = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
   let currentWeek = Math.floor(diffDays / 7) + 1;
 
@@ -47,8 +47,8 @@ export function calculateCurrentDay(): number {
  * This preserves line breaks when text is stored with newlines but displayed as HTML
  */
 export function formatTextWithLineBreaks(text: string | null | undefined): string {
-  if (!text) return '';
-  return text.replace(/\n/g, '<br>');
+  if (!text) return "";
+  return text.replace(/\n/g, "<br>");
 }
 
 /**
@@ -70,7 +70,7 @@ export function normalizeDateToMidnight(date: Date): Date {
  * @returns Date object in local timezone at midnight
  */
 export function parseDateString(dateString: string): Date {
-  const [year, month, day] = dateString.split('-').map(Number);
+  const [year, month, day] = dateString.split("-").map(Number);
   return new Date(year, month - 1, day, 0, 0, 0, 0);
 }
 
@@ -83,7 +83,7 @@ export function parseDateString(dateString: string): Date {
 export function getPlanDateRange(planStartDate: Date): { start: Date; end: Date } {
   const start = normalizeDateToMidnight(planStartDate);
   const end = new Date(start);
-  end.setDate(end.getDate() + (12 * 7) - 1);
+  end.setDate(end.getDate() + 12 * 7 - 1);
   end.setHours(23, 59, 59, 999);
   return { start, end };
 }
@@ -112,11 +112,11 @@ export function computePlanDate(planStartDate: Date, weekNumber: number, dayNumb
   const mondayOffset = getMondayOffset(date);
   const daysToAdd = (weekNumber - 1) * 7 + (dayNumber - 1) + mondayOffset;
   date.setDate(date.getDate() + daysToAdd);
-  
+
   // Format as YYYY-MM-DD in local timezone (don't use toISOString which converts to UTC)
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -140,11 +140,7 @@ export function computeDayNumberFromDate(
     normalizedPlanStart.getMonth(),
     normalizedPlanStart.getDate()
   );
-  const utc2 = Date.UTC(
-    normalizedDate.getFullYear(),
-    normalizedDate.getMonth(),
-    normalizedDate.getDate()
-  );
+  const utc2 = Date.UTC(normalizedDate.getFullYear(), normalizedDate.getMonth(), normalizedDate.getDate());
 
   const daysDiff = Math.floor((utc2 - utc1) / (1000 * 60 * 60 * 24));
 
@@ -179,7 +175,7 @@ export function getDayName(dayNumber: number): string | null {
  * Read-only mode applies to 'completed' and 'archived' plans
  */
 export function isPlanReadOnly(status: PlanStatus): boolean {
-  return status === 'completed' || status === 'archived';
+  return status === "completed" || status === "archived";
 }
 
 /**
@@ -187,7 +183,7 @@ export function isPlanReadOnly(status: PlanStatus): boolean {
  * Ready state applies to 'ready' plans
  */
 export function isPlanReady(status: PlanStatus): boolean {
-  return status === 'ready';
+  return status === "ready";
 }
 
 /**
@@ -195,7 +191,7 @@ export function isPlanReady(status: PlanStatus): boolean {
  * Task status can only be changed in 'active' plans
  */
 export function canChangeTaskStatus(status: PlanStatus): boolean {
-  return status === 'active';
+  return status === "active";
 }
 
 /**
@@ -204,7 +200,7 @@ export function canChangeTaskStatus(status: PlanStatus): boolean {
  * In 'ready' state, goal form fields remain editable but progress is disabled
  */
 export function canChangeGoalProgress(status: PlanStatus): boolean {
-  return status === 'active';
+  return status === "active";
 }
 
 /**
@@ -212,31 +208,34 @@ export function canChangeGoalProgress(status: PlanStatus): boolean {
  * @param status - The plan status
  * @param context - The context for the tooltip message
  */
-export function getDisabledTooltip(status: PlanStatus, context: 'task_status' | 'progress' | 'milestone' | 'reflection' | 'general'): string {
-  if (status === 'ready') {
+export function getDisabledTooltip(
+  status: PlanStatus,
+  context: "task_status" | "progress" | "milestone" | "reflection" | "general"
+): string {
+  if (status === "ready") {
     switch (context) {
-      case 'task_status':
-        return 'Task status cannot be changed - plan is in ready state';
-      case 'progress':
-        return 'Progress cannot be changed - plan is in ready state';
-      case 'milestone':
-        return 'Milestone completion cannot be changed - plan is in ready state';
-      case 'reflection':
-        return 'Reflection cannot be edited - plan is in ready state';
+      case "task_status":
+        return "Task status cannot be changed - plan is in ready state";
+      case "progress":
+        return "Progress cannot be changed - plan is in ready state";
+      case "milestone":
+        return "Milestone completion cannot be changed - plan is in ready state";
+      case "reflection":
+        return "Reflection cannot be edited - plan is in ready state";
       default:
-        return 'This action is disabled - plan is in ready state';
+        return "This action is disabled - plan is in ready state";
     }
   }
 
-  if (status === 'completed') {
-    return 'Plan is completed - editing disabled';
+  if (status === "completed") {
+    return "Plan is completed - editing disabled";
   }
 
-  if (status === 'archived') {
-    return 'Plan is archived - editing disabled';
+  if (status === "archived") {
+    return "Plan is archived - editing disabled";
   }
 
-  return '';
+  return "";
 }
 
 // ============================================================================
@@ -251,12 +250,12 @@ export function getDisabledTooltip(status: PlanStatus, context: 'task_status' | 
 export function GetUnauthorizedResponse(): Response {
   return new Response(
     JSON.stringify({
-      error: 'Unauthorized',
-      message: 'You must be logged in to access this resource'
+      error: "Unauthorized",
+      message: "You must be logged in to access this resource",
     } as ErrorResponse),
     {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     }
   );
 }

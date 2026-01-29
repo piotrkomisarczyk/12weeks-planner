@@ -3,11 +3,11 @@
  * Displayed when there are no goals
  */
 
-import { useCallback, useState } from 'react';
-import type { GoalCategory, PlanStatus } from '@/types';
-import { CreateGoalDialog } from './CreateGoalDialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { getDisabledTooltip } from '@/lib/utils';
+import { useCallback, useState } from "react";
+import type { GoalCategory, PlanStatus } from "@/types";
+import { CreateGoalDialog } from "./CreateGoalDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getDisabledTooltip } from "@/lib/utils";
 
 interface EmptyStateProps {
   onCreateGoal: (data: {
@@ -32,7 +32,7 @@ export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false, 
     setDialogOpen(true);
   }, []);
 
-  const tooltipMessage = disabled && planStatus ? getDisabledTooltip(planStatus, 'general') : '';
+  const tooltipMessage = disabled && planStatus ? getDisabledTooltip(planStatus, "general") : "";
 
   return (
     <div className="border-2 border-dashed rounded-lg p-12 text-center">
@@ -53,7 +53,7 @@ export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false, 
             />
           </svg>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-2">No goals yet</h3>
           <p className="text-sm text-muted-foreground">
@@ -91,4 +91,3 @@ export function EmptyState({ onCreateGoal, currentGoalsCount, disabled = false, 
     </div>
   );
 }
-

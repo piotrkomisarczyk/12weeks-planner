@@ -1,4 +1,4 @@
-import type { PlanDTO, PlanStatus } from '@/types';
+import type { PlanDTO, PlanStatus } from "@/types";
 
 /**
  * PlanViewModel extends PlanDTO with computed fields for frontend display
@@ -23,7 +23,7 @@ export function isMonday(date: Date): boolean {
  */
 function calculateEndDate(startDate: string): Date {
   // Parse date string safely to avoid timezone issues
-  const [year, month, day] = startDate.split('-').map(Number);
+  const [year, month, day] = startDate.split("-").map(Number);
   const start = new Date(year, month - 1, day);
   const end = new Date(start);
   end.setDate(end.getDate() + 12 * 7); // 12 weeks = 84 days
@@ -37,7 +37,7 @@ function calculateEndDate(startDate: string): Date {
  */
 function calculateCurrentWeek(startDate: string, endDate: Date): number | null {
   // Parse date string safely to avoid timezone issues
-  const [year, month, day] = startDate.split('-').map(Number);
+  const [year, month, day] = startDate.split("-").map(Number);
   const start = new Date(year, month - 1, day, 0, 0, 0, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time for accurate comparison
@@ -106,17 +106,17 @@ export function transformPlansToViewModels(plans: PlanDTO[]): PlanViewModel[] {
  */
 export function formatDate(date: Date | string): string {
   let dateObj: Date;
-  if (typeof date === 'string') {
+  if (typeof date === "string") {
     // Parse date string safely to avoid timezone issues
-    const [year, month, day] = date.split('-').map(Number);
+    const [year, month, day] = date.split("-").map(Number);
     dateObj = new Date(year, month - 1, day);
   } else {
     dateObj = date;
   }
-  return dateObj.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return dateObj.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 
@@ -127,7 +127,7 @@ export function formatDate(date: Date | string): string {
  */
 export function getCurrentWeekIndex(startDate: string, now: Date = new Date()): number {
   // Parse date string safely to avoid timezone issues
-  const [year, month, day] = startDate.split('-').map(Number);
+  const [year, month, day] = startDate.split("-").map(Number);
   const start = new Date(year, month - 1, day, 0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
 
@@ -162,7 +162,7 @@ export function getCurrentWeekIndex(startDate: string, now: Date = new Date()): 
  */
 export function getDayIndex(startDate: string, now: Date = new Date()): number {
   // Parse date string safely to avoid timezone issues
-  const [year, month, day] = startDate.split('-').map(Number);
+  const [year, month, day] = startDate.split("-").map(Number);
   const start = new Date(year, month - 1, day, 0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
 
@@ -182,8 +182,7 @@ export function getDayIndex(startDate: string, now: Date = new Date()): number {
 
   // Get day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
   const dayOfWeek = now.getDay();
-  
+
   // Convert to 1-7 format (1=Monday, 7=Sunday)
   return dayOfWeek === 0 ? 7 : dayOfWeek;
 }
-

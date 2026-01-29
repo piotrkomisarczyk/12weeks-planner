@@ -3,16 +3,16 @@
  * Form for adding new milestones with date validation
  */
 
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn, normalizeDateToMidnight } from '@/lib/utils';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn, normalizeDateToMidnight } from "@/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 
 interface MilestoneFormProps {
   onAdd: (data: { title: string; due_date: string | null; position: number }) => Promise<void>;
@@ -33,10 +33,10 @@ export function MilestoneForm({
   currentMilestonesCount,
   disabled = false,
 }: MilestoneFormProps) {
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [showCalendar, setShowCalendar] = useState(false);
 
   const canAddMilestone = currentMilestonesCount < 5;
@@ -47,28 +47,28 @@ export function MilestoneForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Prevent double submission
     if (isSubmitting) return;
-    
-    setError('');
+
+    setError("");
 
     // Validation
     if (!title.trim()) {
-      setError('Title is required');
+      setError("Title is required");
       return;
     }
 
     // Check milestone limit
     if (currentMilestonesCount >= 5) {
-      setError('Maximum 5 milestones reached');
+      setError("Maximum 5 milestones reached");
       return;
     }
 
     // Date validation
     if (dueDate) {
       if (dueDate < minDate || dueDate > maxDate) {
-        setError('Date must be within plan duration');
+        setError("Date must be within plan duration");
         return;
       }
     }
@@ -78,19 +78,19 @@ export function MilestoneForm({
     try {
       await onAdd({
         title: title.trim(),
-        due_date: dueDate ? format(dueDate, 'yyyy-MM-dd') : null,
+        due_date: dueDate ? format(dueDate, "yyyy-MM-dd") : null,
         position: currentMilestonesCount + 1,
       });
 
       // Reset form
-      setTitle('');
+      setTitle("");
       setDueDate(undefined);
-      setError('');
+      setError("");
     } catch (err) {
-      console.error('Failed to add milestone:', err);
+      console.error("Failed to add milestone:", err);
       // Keep the form data so user can correct the issue
       // Don't reset title field on validation errors
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add milestone';
+      const errorMessage = err instanceof Error ? err.message : "Failed to add milestone";
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -98,11 +98,7 @@ export function MilestoneForm({
   };
 
   if (!canAddMilestone) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Maximum of 5 milestones reached
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">Maximum of 5 milestones reached</p>;
   }
 
   return (
@@ -131,13 +127,10 @@ export function MilestoneForm({
               type="button"
               variant="outline"
               disabled={disabled || isSubmitting}
-              className={cn(
-                'h-9 w-[140px] justify-start text-left font-normal',
-                !dueDate && 'text-muted-foreground'
-              )}
+              className={cn("h-9 w-[140px] justify-start text-left font-normal", !dueDate && "text-muted-foreground")}
             >
               <CalendarIcon className="mr-2 size-4" />
-              {dueDate ? format(dueDate, 'MMM dd, yyyy') : 'Due date'}
+              {dueDate ? format(dueDate, "MMM dd, yyyy") : "Due date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -175,4 +168,3 @@ export function MilestoneForm({
     </form>
   );
 }
-

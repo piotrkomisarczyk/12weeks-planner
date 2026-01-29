@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 /**
  * Page Object Model for the Login Page
@@ -17,12 +17,12 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.getByTestId('login-email-input');
-    this.passwordInput = page.getByTestId('login-password-input');
-    this.loginButton = page.getByTestId('login-submit-button');
+    this.emailInput = page.getByTestId("login-email-input");
+    this.passwordInput = page.getByTestId("login-password-input");
+    this.loginButton = page.getByTestId("login-submit-button");
     this.errorMessage = page.locator('[role="alert"]');
-    this.emailError = page.locator('#email-error');
-    this.passwordError = page.locator('#password-error');
+    this.emailError = page.locator("#email-error");
+    this.passwordError = page.locator("#password-error");
     this.registerLink = page.locator('a[href="/register"]');
     this.forgotPasswordLink = page.locator('a[href="/forgot-password"]');
   }
@@ -31,7 +31,7 @@ export class LoginPage {
    * Navigate to the login page
    */
   async goto() {
-    await this.page.goto('/login');
+    await this.page.goto("/login");
   }
 
   /**
@@ -45,14 +45,14 @@ export class LoginPage {
     await this.emailInput.clear();
     await this.passwordInput.click();
     await this.passwordInput.clear();
-    
+
     // Use pressSequentially for more reliable input with controlled React components
     await this.emailInput.pressSequentially(email, { delay: 50 });
     await this.passwordInput.pressSequentially(password, { delay: 50 });
-    
+
     // Wait for React state to stabilize
     await this.page.waitForTimeout(300);
-    
+
     // Verify fields contain the expected values before submitting
     await this.page.waitForFunction(
       ({ email, password }) => {
@@ -63,7 +63,7 @@ export class LoginPage {
       { email, password },
       { timeout: 5000 }
     );
-    
+
     await this.loginButton.click();
   }
 
@@ -117,10 +117,10 @@ export class LoginPage {
     await this.emailInput.click();
     await this.emailInput.clear();
     await this.emailInput.pressSequentially(email, { delay: 50 });
-    
+
     // Wait for React state to update
     await this.page.waitForTimeout(200);
-    
+
     // Verify the value is set
     await this.page.waitForFunction(
       ({ email }) => {
@@ -140,10 +140,10 @@ export class LoginPage {
     await this.passwordInput.click();
     await this.passwordInput.clear();
     await this.passwordInput.pressSequentially(password, { delay: 50 });
-    
+
     // Wait for React state to update
     await this.page.waitForTimeout(200);
-    
+
     // Verify the value is set
     await this.page.waitForFunction(
       ({ password }) => {

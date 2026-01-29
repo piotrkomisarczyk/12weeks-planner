@@ -3,8 +3,8 @@
  * Modal dialog for creating a new goal
  */
 
-import { useCallback, useState } from 'react';
-import { Plus, ChevronDown } from 'lucide-react';
+import { useCallback, useState } from "react";
+import { Plus, ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,21 +13,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { GoalCategory } from '@/types';
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import type { GoalCategory } from "@/types";
 
 interface CreateGoalDialogProps {
   onCreateGoal: (data: {
@@ -59,9 +59,9 @@ export function CreateGoalDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    category: 'development' as GoalCategory,
-    description: '',
+    title: "",
+    category: "development" as GoalCategory,
+    description: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -78,19 +78,19 @@ export function CreateGoalDialog({
 
       setInternalOpen(nextOpen);
     },
-    [isControlled, onOpenChange],
+    [isControlled, onOpenChange]
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = "Title is required";
     }
     if (formData.title.length > 255) {
-      newErrors.title = 'Title must be less than 255 characters';
+      newErrors.title = "Title must be less than 255 characters";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -110,18 +110,18 @@ export function CreateGoalDialog({
         position: currentGoalsCount + 1,
       });
 
-      toast.success('Goal created successfully');
-      
+      toast.success("Goal created successfully");
+
       // Reset form and close dialog
       setFormData({
-        title: '',
-        category: 'development',
-        description: '',
+        title: "",
+        category: "development",
+        description: "",
       });
       setDialogOpen(false);
     } catch (error) {
-      console.error('Failed to create goal:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create goal');
+      console.error("Failed to create goal:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create goal");
     } finally {
       setIsSubmitting(false);
     }
@@ -160,9 +160,7 @@ export function CreateGoalDialog({
               aria-invalid={!!errors.title}
               autoFocus
             />
-            {errors.title && (
-              <p className="text-sm text-destructive">{errors.title}</p>
-            )}
+            {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </div>
 
           {/* Category */}
@@ -170,12 +168,7 @@ export function CreateGoalDialog({
             <Label htmlFor="new-goal-category">Category</Label>
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button
-                  id="new-goal-category"
-                  variant="outline"
-                  className="w-full justify-between"
-                  type="button"
-                >
+                <Button id="new-goal-category" variant="outline" className="w-full justify-between" type="button">
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[formData.category]}`}
                   >
@@ -187,9 +180,7 @@ export function CreateGoalDialog({
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]" align="start">
                 <DropdownMenuRadioGroup
                   value={formData.category}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, category: value as GoalCategory })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, category: value as GoalCategory })}
                 >
                   {GOAL_CATEGORIES.map((cat) => (
                     <DropdownMenuRadioItem key={cat.value} value={cat.value}>
@@ -221,16 +212,11 @@ export function CreateGoalDialog({
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setDialogOpen(false)}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Goal'}
+              {isSubmitting ? "Creating..." : "Create Goal"}
             </Button>
           </DialogFooter>
         </form>
@@ -238,4 +224,3 @@ export function CreateGoalDialog({
     </Dialog>
   );
 }
-

@@ -1,27 +1,20 @@
 /**
  * DayPageContainer Component
- * 
+ *
  * Main container for the day planning view with drag and drop support.
  * Manages state, data fetching, and coordinates all child components.
  * Organizes tasks into three priority-based slots: Most Important, Secondary, Additional.
  */
 
-import { useCallback, useRef, useEffect } from 'react';
-import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import { toast } from 'sonner';
-import { useDayPlan } from './hooks/useDayPlan';
-import { DayHeader } from './DayHeader';
-import { DailyTaskSlot } from './DailyTaskSlot';
-import type { DaySlot, DayTaskViewModel, TaskStatus, TaskPriority, PlanStatus } from '@/types';
-import { DAY_NAMES } from '@/types';
-import { isPlanReadOnly, canChangeTaskStatus } from '@/lib/utils';
+import { useCallback, useRef, useEffect } from "react";
+import { DndContext, PointerSensor, useSensor, useSensors, closestCorners, type DragEndEvent } from "@dnd-kit/core";
+import { toast } from "sonner";
+import { useDayPlan } from "./hooks/useDayPlan";
+import { DayHeader } from "./DayHeader";
+import { DailyTaskSlot } from "./DailyTaskSlot";
+import type { DaySlot, DayTaskViewModel, TaskStatus, TaskPriority, PlanStatus } from "@/types";
+import { DAY_NAMES } from "@/types";
+import { isPlanReadOnly, canChangeTaskStatus } from "@/lib/utils";
 
 interface DayPageContainerProps {
   planId: string;
@@ -64,13 +57,15 @@ export function DayPageContainer({
   const canChangeStatus = canChangeTaskStatus(planStatus);
 
   // Drag and Drop sensors - conditionally disabled for read-only plans
-  const sensors = isReadOnly ? [] : useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  const sensors = isReadOnly
+    ? []
+    : useSensors(
+        useSensor(PointerSensor, {
+          activationConstraint: {
+            distance: 8,
+          },
+        })
+      );
 
   // Cleanup debounce timeout on unmount
   useEffect(() => {
@@ -82,300 +77,317 @@ export function DayPageContainer({
   }, []);
 
   // Navigation handler
-  const handleNavigate = useCallback((newDayNumber: number) => {
-    // Validate day number range
-    if (newDayNumber < 1 || newDayNumber > 7) return;
-    window.location.href = `/plans/${planId}/week/${weekNumber}/day/${newDayNumber}`;
-  }, [planId, weekNumber]);
+  const handleNavigate = useCallback(
+    (newDayNumber: number) => {
+      // Validate day number range
+      if (newDayNumber < 1 || newDayNumber > 7) return;
+      window.location.href = `/plans/${planId}/week/${weekNumber}/day/${newDayNumber}`;
+    },
+    [planId, weekNumber]
+  );
 
   // Task handlers
-  const handleAddTask = useCallback(async (slot: DaySlot, title: string) => {
-    try {
-      await addTask(slot, title);
-      toast.success('Task created');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create task';
-      toast.error(errorMessage);
-      console.error(err);
-    }
-  }, [addTask]);
-
-  const handleUpdateTask = useCallback(async (
-    id: string,
-    updates: Partial<DayTaskViewModel>
-  ) => {
-    try {
-      await updateTask(id, updates);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
-      toast.error(errorMessage);
-      console.error(err);
-    }
-  }, [updateTask]);
-
-  const handleDeleteTask = useCallback(async (id: string) => {
-    try {
-      await deleteTask(id);
-      toast.success('Task deleted');
-    } catch (err) {
-      toast.error('Failed to delete task');
-      console.error(err);
-    }
-  }, [deleteTask]);
-
-  const handleStatusChange = useCallback(async (id: string, newStatus: TaskStatus) => {
-    // Check if status changes are allowed based on plan status
-    if (!canChangeStatus) {
-      toast.error('Cannot change task status - plan is in ready state');
-      return;
-    }
-
-    try {
-      await updateTask(id, { status: newStatus });
-    } catch (err) {
-      toast.error('Failed to update task status');
-      console.error(err);
-    }
-  }, [updateTask, canChangeStatus]);
-
-  const handlePriorityChange = useCallback((id: string, newPriority: TaskPriority) => {
-    // Clear any existing debounce timeout
-    if (priorityChangeTimeoutRef.current) {
-      clearTimeout(priorityChangeTimeoutRef.current);
-    }
-
-    // Debounce the entire priority change operation (1000ms)
-    priorityChangeTimeoutRef.current = setTimeout(async () => {
+  const handleAddTask = useCallback(
+    async (slot: DaySlot, title: string) => {
       try {
-        // Find the task to determine new slot
-        let task: DayTaskViewModel | null = null;
-        let currentSlot: DaySlot | null = null;
-        
-        if (data.slots.mostImportant?.id === id) {
-          task = data.slots.mostImportant;
-          currentSlot = 'most_important';
-        } else if (data.slots.secondary.find(t => t.id === id)) {
-          task = data.slots.secondary.find(t => t.id === id)!;
-          currentSlot = 'secondary';
-        } else if (data.slots.additional.find(t => t.id === id)) {
-          task = data.slots.additional.find(t => t.id === id)!;
-          currentSlot = 'additional';
-        }
-
-        if (!task || !currentSlot) return;
-
-        // Determine target slot based on new priority
-        let targetSlot: DaySlot;
-        if (newPriority === 'A') {
-          // Try most_important first, then secondary
-          if (!data.slots.mostImportant && currentSlot !== 'most_important') {
-            targetSlot = 'most_important';
-          } else if (data.slots.secondary.length < 2 || currentSlot === 'secondary') {
-            targetSlot = 'secondary';
-          } else {
-            targetSlot = 'additional';
-          }
-        } else if (newPriority === 'B') {
-          // Try secondary first
-          if (data.slots.secondary.length < 2 || currentSlot === 'secondary') {
-            targetSlot = 'secondary';
-          } else {
-            targetSlot = 'additional';
-          }
-        } else {
-          targetSlot = 'additional';
-        }
-
-        // Update priority and move to new slot if needed
-        if (targetSlot !== currentSlot) {
-          // Slot change required - use changeTaskSlot which updates priority and moves
-          await changeTaskSlot(id, targetSlot);
-        } else {
-          // Just update priority, no slot change
-          await updateTask(id, { priority: newPriority });
-        }
+        await addTask(slot, title);
+        toast.success("Task created");
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to change priority';
+        const errorMessage = err instanceof Error ? err.message : "Failed to create task";
         toast.error(errorMessage);
         console.error(err);
       }
-    }, 1000);
-  }, [data, updateTask, changeTaskSlot]);
+    },
+    [addTask]
+  );
 
-  const handleAssignDay = useCallback(async (id: string, day: number | null) => {
-    try {
-      if (day === null) {
-        // Clear day assignment
-        await updateTask(id, { due_day: null });
-        toast.success('Day assignment cleared');
-      } else {
-        // Move to specific day
-        await moveTask(id, weekNumber, day);
-        toast.success(`Task assigned to ${DAY_NAMES[day - 1]}`);
+  const handleUpdateTask = useCallback(
+    async (id: string, updates: Partial<DayTaskViewModel>) => {
+      try {
+        await updateTask(id, updates);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to update task";
+        toast.error(errorMessage);
+        console.error(err);
       }
-    } catch (err) {
-      toast.error('Failed to assign day');
-      console.error(err);
-    }
-  }, [updateTask, moveTask, weekNumber]);
+    },
+    [updateTask]
+  );
 
-  const handleCopyTask = useCallback(async (
-    id: string, 
-    targetWeek?: number, 
-    targetDay?: number
-  ) => {
-    // Don't allow copying completed/cancelled tasks
-    const task = [
-      data.slots.mostImportant,
-      ...data.slots.secondary,
-      ...data.slots.additional,
-    ].find(t => t?.id === id);
-    
-    if (task && (task.status === 'completed' || task.status === 'cancelled')) {
-      toast.error('Cannot copy completed or cancelled tasks');
-      return;
-    }
-
-    try {
-      await copyTask(id, targetWeek, targetDay);
-      toast.success('Task copied');
-    } catch (err) {
-      toast.error('Failed to copy task');
-      console.error(err);
-    }
-  }, [data, copyTask]);
-
-  const handleMoveTask = useCallback(async (
-    id: string, 
-    targetWeek?: number, 
-    targetDay?: number
-  ) => {
-    // Don't allow moving completed/cancelled tasks between days
-    const task = [
-      data.slots.mostImportant,
-      ...data.slots.secondary,
-      ...data.slots.additional,
-    ].find(t => t?.id === id);
-    
-    if (task && (task.status === 'completed' || task.status === 'cancelled')) {
-      if (targetWeek !== weekNumber || targetDay !== dayNumber) {
-        toast.error('Cannot move completed or cancelled tasks to different days');
-        return;
+  const handleDeleteTask = useCallback(
+    async (id: string) => {
+      try {
+        await deleteTask(id);
+        toast.success("Task deleted");
+      } catch (err) {
+        toast.error("Failed to delete task");
+        console.error(err);
       }
-    }
+    },
+    [deleteTask]
+  );
 
-    try {
-      await moveTask(id, targetWeek, targetDay);
-      if (targetWeek !== weekNumber || targetDay !== dayNumber) {
-        toast.success('Task moved');
-      }
-    } catch (err) {
-      toast.error('Failed to move task');
-      console.error(err);
-    }
-  }, [data, moveTask, weekNumber, dayNumber]);
-
-  const handleLinkGoalMilestone = useCallback(async (
-    taskId: string,
-    longTermGoalId: string | null,
-    milestoneId: string | null
-  ) => {
-    try {
-      await updateTask(taskId, {
-        long_term_goal_id: longTermGoalId,
-        milestone_id: milestoneId,
-      });
-      toast.success('Goal & milestone linked');
-    } catch (err) {
-      toast.error('Failed to link goal & milestone');
-      console.error(err);
-    }
-  }, [updateTask]);
-
-  const handleAssignToWeeklyGoal = useCallback(async (
-    taskId: string,
-    weeklyGoalId: string
-  ) => {
-    try {
-      // Check if weekly goal already has 10 tasks
-      const weeklyGoal = meta.weeklyGoals.find(wg => wg.id === weeklyGoalId);
-      if (!weeklyGoal) {
-        toast.error('Weekly goal not found');
+  const handleStatusChange = useCallback(
+    async (id: string, newStatus: TaskStatus) => {
+      // Check if status changes are allowed based on plan status
+      if (!canChangeStatus) {
+        toast.error("Cannot change task status - plan is in ready state");
         return;
       }
 
-      // Note: We should fetch the task count for the weekly goal from API
-      // For now, we'll attempt the update and handle server-side validation
-      await updateTask(taskId, {
-        weekly_goal_id: weeklyGoalId,
-        task_type: 'weekly_sub',
-        long_term_goal_id: weeklyGoal.long_term_goal_id,
-        milestone_id: weeklyGoal.milestone_id,
-      });
-      toast.success('Assigned to weekly goal');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to assign to weekly goal';
-      toast.error(errorMessage);
-      console.error(err);
-    }
-  }, [updateTask, meta.weeklyGoals]);
+      try {
+        await updateTask(id, { status: newStatus });
+      } catch (err) {
+        toast.error("Failed to update task status");
+        console.error(err);
+      }
+    },
+    [updateTask, canChangeStatus]
+  );
 
-  const handleUnassignFromWeeklyGoal = useCallback(async (taskId: string) => {
-    try {
-      await updateTask(taskId, {
-        weekly_goal_id: null,
-        task_type: 'ad_hoc',
-      });
-      toast.success('Unassigned from weekly goal');
-    } catch (err) {
-      toast.error('Failed to unassign from weekly goal');
-      console.error(err);
-    }
-  }, [updateTask]);
+  const handlePriorityChange = useCallback(
+    (id: string, newPriority: TaskPriority) => {
+      // Clear any existing debounce timeout
+      if (priorityChangeTimeoutRef.current) {
+        clearTimeout(priorityChangeTimeoutRef.current);
+      }
+
+      // Debounce the entire priority change operation (1000ms)
+      priorityChangeTimeoutRef.current = setTimeout(async () => {
+        try {
+          // Find the task to determine new slot
+          let task: DayTaskViewModel | null = null;
+          let currentSlot: DaySlot | null = null;
+
+          if (data.slots.mostImportant?.id === id) {
+            task = data.slots.mostImportant;
+            currentSlot = "most_important";
+          } else if (data.slots.secondary.find((t) => t.id === id)) {
+            task = data.slots.secondary.find((t) => t.id === id)!;
+            currentSlot = "secondary";
+          } else if (data.slots.additional.find((t) => t.id === id)) {
+            task = data.slots.additional.find((t) => t.id === id)!;
+            currentSlot = "additional";
+          }
+
+          if (!task || !currentSlot) return;
+
+          // Determine target slot based on new priority
+          let targetSlot: DaySlot;
+          if (newPriority === "A") {
+            // Try most_important first, then secondary
+            if (!data.slots.mostImportant && currentSlot !== "most_important") {
+              targetSlot = "most_important";
+            } else if (data.slots.secondary.length < 2 || currentSlot === "secondary") {
+              targetSlot = "secondary";
+            } else {
+              targetSlot = "additional";
+            }
+          } else if (newPriority === "B") {
+            // Try secondary first
+            if (data.slots.secondary.length < 2 || currentSlot === "secondary") {
+              targetSlot = "secondary";
+            } else {
+              targetSlot = "additional";
+            }
+          } else {
+            targetSlot = "additional";
+          }
+
+          // Update priority and move to new slot if needed
+          if (targetSlot !== currentSlot) {
+            // Slot change required - use changeTaskSlot which updates priority and moves
+            await changeTaskSlot(id, targetSlot);
+          } else {
+            // Just update priority, no slot change
+            await updateTask(id, { priority: newPriority });
+          }
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : "Failed to change priority";
+          toast.error(errorMessage);
+          console.error(err);
+        }
+      }, 1000);
+    },
+    [data, updateTask, changeTaskSlot]
+  );
+
+  const handleAssignDay = useCallback(
+    async (id: string, day: number | null) => {
+      try {
+        if (day === null) {
+          // Clear day assignment
+          await updateTask(id, { due_day: null });
+          toast.success("Day assignment cleared");
+        } else {
+          // Move to specific day
+          await moveTask(id, weekNumber, day);
+          toast.success(`Task assigned to ${DAY_NAMES[day - 1]}`);
+        }
+      } catch (err) {
+        toast.error("Failed to assign day");
+        console.error(err);
+      }
+    },
+    [updateTask, moveTask, weekNumber]
+  );
+
+  const handleCopyTask = useCallback(
+    async (id: string, targetWeek?: number, targetDay?: number) => {
+      // Don't allow copying completed/cancelled tasks
+      const task = [data.slots.mostImportant, ...data.slots.secondary, ...data.slots.additional].find(
+        (t) => t?.id === id
+      );
+
+      if (task && (task.status === "completed" || task.status === "cancelled")) {
+        toast.error("Cannot copy completed or cancelled tasks");
+        return;
+      }
+
+      try {
+        await copyTask(id, targetWeek, targetDay);
+        toast.success("Task copied");
+      } catch (err) {
+        toast.error("Failed to copy task");
+        console.error(err);
+      }
+    },
+    [data, copyTask]
+  );
+
+  const handleMoveTask = useCallback(
+    async (id: string, targetWeek?: number, targetDay?: number) => {
+      // Don't allow moving completed/cancelled tasks between days
+      const task = [data.slots.mostImportant, ...data.slots.secondary, ...data.slots.additional].find(
+        (t) => t?.id === id
+      );
+
+      if (task && (task.status === "completed" || task.status === "cancelled")) {
+        if (targetWeek !== weekNumber || targetDay !== dayNumber) {
+          toast.error("Cannot move completed or cancelled tasks to different days");
+          return;
+        }
+      }
+
+      try {
+        await moveTask(id, targetWeek, targetDay);
+        if (targetWeek !== weekNumber || targetDay !== dayNumber) {
+          toast.success("Task moved");
+        }
+      } catch (err) {
+        toast.error("Failed to move task");
+        console.error(err);
+      }
+    },
+    [data, moveTask, weekNumber, dayNumber]
+  );
+
+  const handleLinkGoalMilestone = useCallback(
+    async (taskId: string, longTermGoalId: string | null, milestoneId: string | null) => {
+      try {
+        await updateTask(taskId, {
+          long_term_goal_id: longTermGoalId,
+          milestone_id: milestoneId,
+        });
+        toast.success("Goal & milestone linked");
+      } catch (err) {
+        toast.error("Failed to link goal & milestone");
+        console.error(err);
+      }
+    },
+    [updateTask]
+  );
+
+  const handleAssignToWeeklyGoal = useCallback(
+    async (taskId: string, weeklyGoalId: string) => {
+      try {
+        // Check if weekly goal already has 10 tasks
+        const weeklyGoal = meta.weeklyGoals.find((wg) => wg.id === weeklyGoalId);
+        if (!weeklyGoal) {
+          toast.error("Weekly goal not found");
+          return;
+        }
+
+        // Note: We should fetch the task count for the weekly goal from API
+        // For now, we'll attempt the update and handle server-side validation
+        await updateTask(taskId, {
+          weekly_goal_id: weeklyGoalId,
+          task_type: "weekly_sub",
+          long_term_goal_id: weeklyGoal.long_term_goal_id,
+          milestone_id: weeklyGoal.milestone_id,
+        });
+        toast.success("Assigned to weekly goal");
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to assign to weekly goal";
+        toast.error(errorMessage);
+        console.error(err);
+      }
+    },
+    [updateTask, meta.weeklyGoals]
+  );
+
+  const handleUnassignFromWeeklyGoal = useCallback(
+    async (taskId: string) => {
+      try {
+        await updateTask(taskId, {
+          weekly_goal_id: null,
+          task_type: "ad_hoc",
+        });
+        toast.success("Unassigned from weekly goal");
+      } catch (err) {
+        toast.error("Failed to unassign from weekly goal");
+        console.error(err);
+      }
+    },
+    [updateTask]
+  );
 
   // Drag and drop handler (only within same slot)
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+      if (!over || active.id === over.id) return;
 
-    // Find which slot the dragged task belongs to
-    let sourceSlot: DaySlot | null = null;
-    let tasks: DayTaskViewModel[] = [];
+      // Find which slot the dragged task belongs to
+      let sourceSlot: DaySlot | null = null;
+      let tasks: DayTaskViewModel[] = [];
 
-    if (data.slots.mostImportant?.id === active.id) {
-      sourceSlot = 'most_important';
-      tasks = [data.slots.mostImportant];
-    } else if (data.slots.secondary.find(t => t.id === active.id)) {
-      sourceSlot = 'secondary';
-      tasks = [...data.slots.secondary];
-    } else if (data.slots.additional.find(t => t.id === active.id)) {
-      sourceSlot = 'additional';
-      tasks = [...data.slots.additional];
-    }
+      if (data.slots.mostImportant?.id === active.id) {
+        sourceSlot = "most_important";
+        tasks = [data.slots.mostImportant];
+      } else if (data.slots.secondary.find((t) => t.id === active.id)) {
+        sourceSlot = "secondary";
+        tasks = [...data.slots.secondary];
+      } else if (data.slots.additional.find((t) => t.id === active.id)) {
+        sourceSlot = "additional";
+        tasks = [...data.slots.additional];
+      }
 
-    if (!sourceSlot) return;
+      if (!sourceSlot) return;
 
-    // Reorder within the same slot
-    const oldIndex = tasks.findIndex(t => t.id === active.id);
-    const newIndex = tasks.findIndex(t => t.id === over.id);
+      // Reorder within the same slot
+      const oldIndex = tasks.findIndex((t) => t.id === active.id);
+      const newIndex = tasks.findIndex((t) => t.id === over.id);
 
-    if (oldIndex === -1 || newIndex === -1) return;
+      if (oldIndex === -1 || newIndex === -1) return;
 
-    // Create new order
-    const reorderedTasks = [...tasks];
-    const [movedTask] = reorderedTasks.splice(oldIndex, 1);
-    reorderedTasks.splice(newIndex, 0, movedTask);
+      // Create new order
+      const reorderedTasks = [...tasks];
+      const [movedTask] = reorderedTasks.splice(oldIndex, 1);
+      reorderedTasks.splice(newIndex, 0, movedTask);
 
-    // Update backend
-    reorderInSlot(sourceSlot, reorderedTasks).catch(err => {
-      toast.error('Failed to reorder tasks');
-      console.error(err);
-    });
-  }, [data, reorderInSlot]);
+      // Update backend
+      reorderInSlot(sourceSlot, reorderedTasks).catch((err) => {
+        toast.error("Failed to reorder tasks");
+        console.error(err);
+      });
+    },
+    [data, reorderInSlot]
+  );
 
   // Loading state
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -391,7 +403,7 @@ export function DayPageContainer({
   }
 
   // Error state
-  if (status === 'error') {
+  if (status === "error") {
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -411,11 +423,7 @@ export function DayPageContainer({
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragEnd={handleDragEnd}
-    >
+    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
@@ -432,83 +440,83 @@ export function DayPageContainer({
 
             {/* Priority Slots - Vertical Layout */}
             <div className="space-y-6">
-            {/* Most Important */}
-            <DailyTaskSlot
-              slot="most_important"
-              title="Most Important Tasks"
-              limit={1}
-              tasks={data.slots.mostImportant ? [data.slots.mostImportant] : []}
-              availableLongTermGoals={meta.longTermGoals}
-              availableMilestones={meta.milestones}
-              availableWeeklyGoals={meta.weeklyGoals}
-              onAddTask={(title) => handleAddTask('most_important', title)}
-              onUpdateTask={handleUpdateTask}
-              onDeleteTask={handleDeleteTask}
-              onStatusChange={handleStatusChange}
-              onPriorityChange={handlePriorityChange}
-              onAssignDay={handleAssignDay}
-              onCopyTask={handleCopyTask}
-              onMoveTask={handleMoveTask}
-              onLinkGoalMilestone={handleLinkGoalMilestone}
-              onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
-              onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
-              weekNumber={weekNumber}
-              dayNumber={dayNumber}
-              planStatus={planStatus}
-              isReadOnly={isReadOnly}
-            />
+              {/* Most Important */}
+              <DailyTaskSlot
+                slot="most_important"
+                title="Most Important Tasks"
+                limit={1}
+                tasks={data.slots.mostImportant ? [data.slots.mostImportant] : []}
+                availableLongTermGoals={meta.longTermGoals}
+                availableMilestones={meta.milestones}
+                availableWeeklyGoals={meta.weeklyGoals}
+                onAddTask={(title) => handleAddTask("most_important", title)}
+                onUpdateTask={handleUpdateTask}
+                onDeleteTask={handleDeleteTask}
+                onStatusChange={handleStatusChange}
+                onPriorityChange={handlePriorityChange}
+                onAssignDay={handleAssignDay}
+                onCopyTask={handleCopyTask}
+                onMoveTask={handleMoveTask}
+                onLinkGoalMilestone={handleLinkGoalMilestone}
+                onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
+                onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
+                weekNumber={weekNumber}
+                dayNumber={dayNumber}
+                planStatus={planStatus}
+                isReadOnly={isReadOnly}
+              />
 
-            {/* Secondary */}
-            <DailyTaskSlot
-              slot="secondary"
-              title="Secondary Tasks"
-              limit={2}
-              tasks={data.slots.secondary}
-              availableLongTermGoals={meta.longTermGoals}
-              availableMilestones={meta.milestones}
-              availableWeeklyGoals={meta.weeklyGoals}
-              onAddTask={(title) => handleAddTask('secondary', title)}
-              onUpdateTask={handleUpdateTask}
-              onDeleteTask={handleDeleteTask}
-              onStatusChange={handleStatusChange}
-              onPriorityChange={handlePriorityChange}
-              onAssignDay={handleAssignDay}
-              onCopyTask={handleCopyTask}
-              onMoveTask={handleMoveTask}
-              onLinkGoalMilestone={handleLinkGoalMilestone}
-              onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
-              onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
-              weekNumber={weekNumber}
-              dayNumber={dayNumber}
-              planStatus={planStatus}
-              isReadOnly={isReadOnly}
-            />
+              {/* Secondary */}
+              <DailyTaskSlot
+                slot="secondary"
+                title="Secondary Tasks"
+                limit={2}
+                tasks={data.slots.secondary}
+                availableLongTermGoals={meta.longTermGoals}
+                availableMilestones={meta.milestones}
+                availableWeeklyGoals={meta.weeklyGoals}
+                onAddTask={(title) => handleAddTask("secondary", title)}
+                onUpdateTask={handleUpdateTask}
+                onDeleteTask={handleDeleteTask}
+                onStatusChange={handleStatusChange}
+                onPriorityChange={handlePriorityChange}
+                onAssignDay={handleAssignDay}
+                onCopyTask={handleCopyTask}
+                onMoveTask={handleMoveTask}
+                onLinkGoalMilestone={handleLinkGoalMilestone}
+                onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
+                onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
+                weekNumber={weekNumber}
+                dayNumber={dayNumber}
+                planStatus={planStatus}
+                isReadOnly={isReadOnly}
+              />
 
-            {/* Additional */}
-            <DailyTaskSlot
-              slot="additional"
-              title="Additional Tasks"
-              limit={7}
-              tasks={data.slots.additional}
-              availableLongTermGoals={meta.longTermGoals}
-              availableMilestones={meta.milestones}
-              availableWeeklyGoals={meta.weeklyGoals}
-              onAddTask={(title) => handleAddTask('additional', title)}
-              onUpdateTask={handleUpdateTask}
-              onDeleteTask={handleDeleteTask}
-              onStatusChange={handleStatusChange}
-              onPriorityChange={handlePriorityChange}
-              onAssignDay={handleAssignDay}
-              onCopyTask={handleCopyTask}
-              onMoveTask={handleMoveTask}
-              onLinkGoalMilestone={handleLinkGoalMilestone}
-              onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
-              onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
-              weekNumber={weekNumber}
-              dayNumber={dayNumber}
-              planStatus={planStatus}
-              isReadOnly={isReadOnly}
-            />
+              {/* Additional */}
+              <DailyTaskSlot
+                slot="additional"
+                title="Additional Tasks"
+                limit={7}
+                tasks={data.slots.additional}
+                availableLongTermGoals={meta.longTermGoals}
+                availableMilestones={meta.milestones}
+                availableWeeklyGoals={meta.weeklyGoals}
+                onAddTask={(title) => handleAddTask("additional", title)}
+                onUpdateTask={handleUpdateTask}
+                onDeleteTask={handleDeleteTask}
+                onStatusChange={handleStatusChange}
+                onPriorityChange={handlePriorityChange}
+                onAssignDay={handleAssignDay}
+                onCopyTask={handleCopyTask}
+                onMoveTask={handleMoveTask}
+                onLinkGoalMilestone={handleLinkGoalMilestone}
+                onAssignToWeeklyGoal={handleAssignToWeeklyGoal}
+                onUnassignFromWeeklyGoal={handleUnassignFromWeeklyGoal}
+                weekNumber={weekNumber}
+                dayNumber={dayNumber}
+                planStatus={planStatus}
+                isReadOnly={isReadOnly}
+              />
             </div>
           </div>
 
@@ -524,4 +532,3 @@ export function DayPageContainer({
     </DndContext>
   );
 }
-

@@ -11,28 +11,31 @@ const { href, icon, label, isActive } = Astro.props;
 // Map icon names to lucide-react icon names
 // These will be rendered as SVG paths
 const iconPaths: Record<string, string> = {
-  Home: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
-  ListTree: 'M21 12h-8 M21 6H8 M21 18H8 M3 6h.01 M3 12h.01 M3 18h.01',
-  Target: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M12 12h.01',
-  Calendar: 'M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
-  Sun: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
-  CalendarCheck: 'M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M9 14l2 2 4-4',
-  ClipboardList: 'M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z M9 12h6 M9 16h6',
-  Clock: 'M12 6v6l4 2 M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z',
+  Home: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
+  ListTree: "M21 12h-8 M21 6H8 M21 18H8 M3 6h.01 M3 12h.01 M3 18h.01",
+  Target:
+    "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M12 12h.01",
+  Calendar: "M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
+  Sun: "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z",
+  CalendarCheck:
+    "M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M9 14l2 2 4-4",
+  ClipboardList:
+    "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z M9 12h6 M9 16h6",
+  Clock: "M12 6v6l4 2 M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z",
   BookOpen:
-    'M12 7v14 M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z',
+    "M12 7v14 M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z",
 };
 
 const iconPath = iconPaths[icon] || iconPaths.Home;
 
 const colorClasses: Record<string, string> = {
-  Plans: 'hover:bg-stone-300 text-stone-600 dark:hover:bg-stone-900/80 dark:text-stone-500',
-  Dashboard: 'hover:bg-gray-400 text-black-600 dark:hover:bg-gray-900/80 dark:text-gray-500',
-  Goals: 'hover:bg-purple-100 text-purple-700 dark:hover:bg-violet-950/40 dark:text-purple-500',
-  Hierarchy: 'hover:bg-teal-100 text-teal-700 dark:hover:bg-teal-950/40 dark:text-teal-500',
-  Week: 'hover:bg-blue-100 text-blue-700 dark:hover:bg-blue-950/40 dark:text-blue-500',
-  Today: 'hover:bg-green-100 text-green-700 dark:hover:bg-green-950/40 dark:text-green-500',  
-  Review: 'hover:bg-orange-100 text-orange-700 dark:hover:bg-orange-950/40 dark:text-orange-500',
+  Plans: "hover:bg-stone-300 text-stone-600 dark:hover:bg-stone-900/80 dark:text-stone-500",
+  Dashboard: "hover:bg-gray-400 text-black-600 dark:hover:bg-gray-900/80 dark:text-gray-500",
+  Goals: "hover:bg-purple-100 text-purple-700 dark:hover:bg-violet-950/40 dark:text-purple-500",
+  Hierarchy: "hover:bg-teal-100 text-teal-700 dark:hover:bg-teal-950/40 dark:text-teal-500",
+  Week: "hover:bg-blue-100 text-blue-700 dark:hover:bg-blue-950/40 dark:text-blue-500",
+  Today: "hover:bg-green-100 text-green-700 dark:hover:bg-green-950/40 dark:text-green-500",
+  Review: "hover:bg-orange-100 text-orange-700 dark:hover:bg-orange-950/40 dark:text-orange-500",
 };
 
 const colorClass = colorClasses[label];
@@ -42,17 +45,17 @@ const colorClass = colorClasses[label];
   href={href}
   data-test-id={`nav-link-${label.toLowerCase()}`}
   class:list={[
-    'relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
-    colorClass ?? 'hover:bg-accent hover:text-accent-foreground border-transparent',
+    "relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring",
+    colorClass ?? "hover:bg-accent hover:text-accent-foreground border-transparent",
     {
       [colorClass]: !!colorClass,
-      'bg-accent text-accent-foreground border-transparent': isActive && !colorClass,
-      'text-muted-foreground': !isActive && !colorClass,
-      'font-semibold': isActive && !!colorClass,
+      "bg-accent text-accent-foreground border-transparent": isActive && !colorClass,
+      "text-muted-foreground": !isActive && !colorClass,
+      "font-semibold": isActive && !!colorClass,
     },
   ]}
-  aria-current={isActive ? 'page' : undefined}
+  aria-current={isActive ? "page" : undefined}
 >
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -67,15 +70,8 @@ const colorClass = colorClasses[label];
     class="size-4"
     aria-hidden="true"
   >
-    {iconPath.split(' M').map((path, i) => (
-      <path d={i === 0 ? path : 'M' + path} />
-    ))}
+    {iconPath.split(" M").map((path, i) => <path d={i === 0 ? path : "M" + path} />)}
   </svg>
   <span>{label}</span>
-  {isActive && (
-    <span
-      class="absolute bottom-0 left-2 right-2 h-0.75 rounded-full bg-current"
-      aria-hidden="true"
-    />
-  )}
+  {isActive && <span class="absolute bottom-0 left-2 right-2 h-0.75 rounded-full bg-current" aria-hidden="true" />}
 </a>

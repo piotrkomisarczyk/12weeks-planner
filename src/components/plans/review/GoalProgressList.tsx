@@ -3,9 +3,9 @@
  * Displays list of goals with progress sliders for weekly review
  */
 
-import React from 'react';
-import GoalProgressItem from './GoalProgressItem';
-import type { GoalReviewViewModel, PlanStatus } from '../../../types';
+import React from "react";
+import GoalProgressItem from "./GoalProgressItem";
+import type { GoalReviewViewModel, PlanStatus } from "../../../types";
 
 interface GoalProgressListProps {
   goals: GoalReviewViewModel[];
@@ -14,7 +14,12 @@ interface GoalProgressListProps {
   planStatus: PlanStatus;
 }
 
-export default function GoalProgressList({ goals, onProgressUpdate, onMilestoneToggle, planStatus }: GoalProgressListProps) {
+export default function GoalProgressList({
+  goals,
+  onProgressUpdate,
+  onMilestoneToggle,
+  planStatus,
+}: GoalProgressListProps) {
   if (goals.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">

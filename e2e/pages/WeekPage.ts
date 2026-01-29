@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 /**
  * Page Object Model for the Week Planning Page
@@ -12,15 +12,15 @@ export class WeekPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.addWeeklyGoalButton = page.getByTestId('add-weekly-goal-button');
-    this.otherTasksSection = page.getByTestId('other-tasks-section');
-    this.addAdHocTaskButton = page.getByTestId('add-adhoc-task-button');
+    this.addWeeklyGoalButton = page.getByTestId("add-weekly-goal-button");
+    this.otherTasksSection = page.getByTestId("other-tasks-section");
+    this.addAdHocTaskButton = page.getByTestId("add-adhoc-task-button");
   }
 
   /**
    * Navigate to the week page for a specific plan and week number
    */
-  async goto(planId: string, weekNumber: number = 1) {
+  async goto(planId: string, weekNumber = 1) {
     await this.page.goto(`/plans/${planId}/week/${weekNumber}`);
   }
 
@@ -30,7 +30,7 @@ export class WeekPage {
    */
   async waitForPageLoad() {
     // Wait for the "Add Weekly Goal" button to be visible, which indicates loading is complete
-    await this.addWeeklyGoalButton.waitFor({ state: 'visible', timeout: 10000 });
+    await this.addWeeklyGoalButton.waitFor({ state: "visible", timeout: 10000 });
   }
 
   /**
@@ -38,7 +38,7 @@ export class WeekPage {
    */
   async clickAddWeeklyGoal() {
     // Wait for button to be visible and enabled before clicking
-    await this.addWeeklyGoalButton.waitFor({ state: 'visible' });
+    await this.addWeeklyGoalButton.waitFor({ state: "visible" });
     await this.addWeeklyGoalButton.click();
   }
 
@@ -75,9 +75,9 @@ export class WeekPage {
    * Fill in task title in the inline add task form and submit
    */
   async addTaskInline(title: string) {
-    const taskInput = this.page.getByTestId('inline-task-title-input');
-    const submitButton = this.page.getByTestId('inline-task-submit-button');
-    
+    const taskInput = this.page.getByTestId("inline-task-title-input");
+    const submitButton = this.page.getByTestId("inline-task-submit-button");
+
     await taskInput.fill(title);
     await submitButton.click();
   }
@@ -87,7 +87,7 @@ export class WeekPage {
    */
   async waitForTask(title: string) {
     const task = this.getTaskByTitle(title);
-    await task.waitFor({ state: 'visible' });
+    await task.waitFor({ state: "visible" });
   }
 
   /**
@@ -113,11 +113,11 @@ export class WeekPage {
     // Open the task menu by hovering over the task first to make menu visible
     const taskItem = this.getTaskByTitle(taskTitle);
     await taskItem.hover();
-    
+
     // Click the task menu button
     const menuButton = this.page.getByTestId(`task-menu-${taskTitle}`);
     await menuButton.click();
-    
+
     // Click the delete menu item
     const deleteMenuItem = this.page.getByTestId(`task-delete-menu-item-${taskTitle}`);
     await deleteMenuItem.click();
@@ -138,7 +138,7 @@ export class WeekPage {
     // Click the weekly goal menu button
     const menuButton = this.page.getByTestId(`weekly-goal-menu-${goalTitle}`);
     await menuButton.click();
-    
+
     // Click the delete menu item
     const deleteMenuItem = this.page.getByTestId(`weekly-goal-delete-menu-item-${goalTitle}`);
     await deleteMenuItem.click();
@@ -159,14 +159,14 @@ export class WeekPage {
     // Find all elements with data-test-id that start with "weekly-goal-title-"
     const goalElements = await this.page.locator('[data-test-id^="weekly-goal-title-"]').all();
     const titles: string[] = [];
-    
+
     for (const element of goalElements) {
       const text = await element.textContent();
       if (text) {
         titles.push(text.trim());
       }
     }
-    
+
     return titles;
   }
 
@@ -177,24 +177,24 @@ export class WeekPage {
     // First, expand the goal if it's collapsed
     const goalTitleElement = this.getWeeklyGoalByTitle(goalTitle);
     await goalTitleElement.click();
-    
+
     // Wait a bit for the accordion to expand
     await this.page.waitForTimeout(500);
-    
+
     // Get all task items within the goal's accordion
     const goalCard = goalTitleElement.locator('xpath=ancestor::div[contains(@class, "bg-card")]');
     const taskElements = await goalCard.locator('[data-test-id^="task-item-"]').all();
-    
+
     const titles: string[] = [];
     for (const element of taskElements) {
-      const testId = await element.getAttribute('data-test-id');
+      const testId = await element.getAttribute("data-test-id");
       if (testId) {
         // Extract task title from data-test-id="task-item-{title}"
-        const title = testId.replace('task-item-', '');
+        const title = testId.replace("task-item-", "");
         titles.push(title);
       }
     }
-    
+
     return titles;
   }
 
@@ -205,26 +205,28 @@ export class WeekPage {
     // First, expand the "Other Tasks" section if collapsed
     const otherTasksSection = this.otherTasksSection;
     const isVisible = await otherTasksSection.isVisible();
-    
+
     if (isVisible) {
       await otherTasksSection.click();
       await this.page.waitForTimeout(500);
     }
-    
+
     // Find all task items in the ad-hoc section
-    const adHocSection = this.page.locator('[data-test-id="other-tasks-section"]').locator('xpath=ancestor::div[contains(@class, "bg-card")]');
+    const adHocSection = this.page
+      .locator('[data-test-id="other-tasks-section"]')
+      .locator('xpath=ancestor::div[contains(@class, "bg-card")]');
     const taskElements = await adHocSection.locator('[data-test-id^="task-item-"]').all();
-    
+
     const titles: string[] = [];
     for (const element of taskElements) {
-      const testId = await element.getAttribute('data-test-id');
+      const testId = await element.getAttribute("data-test-id");
       if (testId) {
         // Extract task title from data-test-id="task-item-{title}"
-        const title = testId.replace('task-item-', '');
+        const title = testId.replace("task-item-", "");
         titles.push(title);
       }
     }
-    
+
     return titles;
   }
 

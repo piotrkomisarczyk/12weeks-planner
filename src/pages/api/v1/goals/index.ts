@@ -1,14 +1,14 @@
 /**
  * API Endpoints: /api/v1/goals
- * 
+ *
  * GET - Retrieves goals for authenticated user with optional filtering
  * POST - Creates a new long-term goal
- * 
+ *
  * GET Query Parameters:
  * - plan_id: UUID (optional) - filter by plan
  * - limit: integer (optional, 1-100, default: 50)
  * - offset: integer (optional, >= 0, default: 0)
- * 
+ *
  * POST Request Body:
  * - plan_id: UUID (required)
  * - title: string (required, 1-255 characters)
@@ -16,7 +16,7 @@
  * - category: enum (optional) - work, finance, hobby, relationships, health, development
  * - progress_percentage: integer (0-100, default: 0)
  * - position: integer (1-6, default: 1)
- * 
+ *
  * Responses:
  * - 200: OK (GET)
  * - 201: Created (POST)
@@ -25,17 +25,17 @@
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../../lib/services/goal.service';
-import { CreateGoalBodySchema, GetGoalsQuerySchema } from '../../../../lib/validation/goal.validation';
-import { GetUnauthorizedResponse } from '../../../../lib/utils';
-import type { 
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../../lib/services/goal.service";
+import { CreateGoalBodySchema, GetGoalsQuerySchema } from "../../../../lib/validation/goal.validation";
+import { GetUnauthorizedResponse } from "../../../../lib/utils";
+import type {
   ErrorResponse,
   ValidationErrorResponse,
   ItemResponse,
   GoalDTO,
-  PaginatedResponse
-} from '../../../../types';
+  PaginatedResponse,
+} from "../../../../types";
 
 export const prerender = false;
 
@@ -47,31 +47,31 @@ export const GET: APIRoute = async ({ locals, url }) => {
   try {
     // Step 1: Authentication
     const userId = locals.user?.id;
-    
+
     if (!userId) {
       return GetUnauthorizedResponse();
     }
 
     // Step 2: Parse and validate query parameters
     const queryParams = {
-      plan_id: url.searchParams.get('plan_id'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset')
+      plan_id: url.searchParams.get("plan_id"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     const validationResult = GetGoalsQuerySchema.safeParse(queryParams);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Step 3: Call service
@@ -79,24 +79,21 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const result = await goalService.getGoals(userId, validationResult.data);
 
     // Step 4: Return success
-    return new Response(
-      JSON.stringify(result),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/goals:', error);
+    console.error("Error in GET /api/v1/goals:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };
@@ -109,7 +106,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
   try {
     // Step 1: Authentication
     const userId = locals.user?.id;
-    
+
     if (!userId) {
       return GetUnauthorizedResponse();
     }
@@ -121,12 +118,12 @@ export const POST: APIRoute = async ({ locals, request }) => {
     } catch {
       return new Response(
         JSON.stringify({
-          error: 'Invalid JSON',
-          message: 'Request body must be valid JSON'
+          error: "Invalid JSON",
+          message: "Request body must be valid JSON",
         } as ErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -135,90 +132,85 @@ export const POST: APIRoute = async ({ locals, request }) => {
     const validationResult = CreateGoalBodySchema.safeParse(body);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details
+          error: "Validation failed",
+          details,
         } as ValidationErrorResponse),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
 
     // Step 4: Call service to create goal
     const goalService = new GoalService(locals.supabase);
-    
+
     try {
       const goal = await goalService.createGoal(userId, validationResult.data);
 
       // Step 5: Return successful response
-      return new Response(
-        JSON.stringify({ data: goal } as ItemResponse<GoalDTO>),
-        {
-          status: 201,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Content-Type-Options': 'nosniff'
-          }
-        }
-      );
+      return new Response(JSON.stringify({ data: goal } as ItemResponse<GoalDTO>), {
+        status: 201,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
     } catch (serviceError) {
       // Handle specific service errors
-      const errorMessage = serviceError instanceof Error 
-        ? serviceError.message 
-        : 'Unknown error';
-      
+      const errorMessage = serviceError instanceof Error ? serviceError.message : "Unknown error";
+
       // Plan not found or doesn't belong to user
-      if (errorMessage.includes('not found') || errorMessage.includes('does not belong')) {
+      if (errorMessage.includes("not found") || errorMessage.includes("does not belong")) {
         return new Response(
           JSON.stringify({
-            error: 'Plan not found',
-            message: 'Plan does not exist or does not belong to user'
+            error: "Plan not found",
+            message: "Plan does not exist or does not belong to user",
           } as ErrorResponse),
           {
             status: 404,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { "Content-Type": "application/json" },
           }
         );
       }
-      
+
       // Maximum 6 goals exceeded
-      if (errorMessage.includes('Maximum 6 goals')) {
+      if (errorMessage.includes("Maximum 6 goals")) {
         return new Response(
           JSON.stringify({
-            error: 'Constraint violation',
-            message: errorMessage
+            error: "Constraint violation",
+            message: errorMessage,
           } as ErrorResponse),
           {
             status: 400,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { "Content-Type": "application/json" },
           }
         );
       }
-      
+
       // Re-throw for general error handler
       throw serviceError;
     }
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error('Error in POST /api/v1/goals:', error);
-    
+    console.error("Error in POST /api/v1/goals:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }

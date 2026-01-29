@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { Plus, Edit, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,11 +11,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { GoalFormDialog } from './GoalFormDialog';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import { formatTextWithLineBreaks } from '@/lib/utils';
-import type { GoalDTO, GoalCategory, CreateGoalCommand, UpdateGoalCommand } from '@/types';
+} from "@/components/ui/alert-dialog";
+import { GoalFormDialog } from "./GoalFormDialog";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import { formatTextWithLineBreaks } from "@/lib/utils";
+import type { GoalDTO, GoalCategory, CreateGoalCommand, UpdateGoalCommand } from "@/types";
 
 interface GoalsStepProps {
   goals: GoalDTO[];
@@ -28,12 +28,7 @@ interface GoalsStepProps {
  * Goals Step for Edit Plan View
  * Displays existing goals with edit/delete actions and add goal functionality
  */
-export function GoalsStep({
-  goals,
-  onAddGoal,
-  onUpdateGoal,
-  onDeleteGoal,
-}: GoalsStepProps) {
+export function GoalsStep({ goals, onAddGoal, onUpdateGoal, onDeleteGoal }: GoalsStepProps) {
   const [showGoalDialog, setShowGoalDialog] = useState(false);
   const [editingGoal, setEditingGoal] = useState<GoalDTO | null>(null);
   const [deletingGoalId, setDeletingGoalId] = useState<string | null>(null);
@@ -59,7 +54,7 @@ export function GoalsStep({
         // Create new goal
         await onAddGoal({
           ...data,
-          plan_id: goals[0]?.plan_id || '', // Use plan_id from existing goals
+          plan_id: goals[0]?.plan_id || "", // Use plan_id from existing goals
           position: goals.length + 1,
         } as CreateGoalCommand);
       }
@@ -85,7 +80,7 @@ export function GoalsStep({
 
   const getCategoryInfo = (category: GoalCategory | null) => {
     if (!category) return null;
-    const catInfo = GOAL_CATEGORIES.find(c => c.value === category);
+    const catInfo = GOAL_CATEGORIES.find((c) => c.value === category);
     return catInfo ? { label: catInfo.label, color: GOAL_CATEGORY_COLORS[category] } : null;
   };
 
@@ -107,18 +102,11 @@ export function GoalsStep({
             goals.map((goal) => {
               const categoryInfo = getCategoryInfo(goal.category as GoalCategory);
               return (
-                <div
-                  key={goal.id}
-                  className="flex items-center justify-between p-4 border rounded-lg bg-muted/30"
-                >
+                <div key={goal.id} className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="font-medium truncate">{goal.title}</h3>
-                      {categoryInfo && (
-                        <Badge className={categoryInfo.color}>
-                          {categoryInfo.label}
-                        </Badge>
-                      )}
+                      {categoryInfo && <Badge className={categoryInfo.color}>{categoryInfo.label}</Badge>}
                     </div>
                     {goal.description && (
                       <p
@@ -166,20 +154,12 @@ export function GoalsStep({
 
         {/* Add Goal Button */}
         <div className="mt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAddGoal}
-            disabled={!canAddGoal}
-            className="w-full"
-          >
+          <Button type="button" variant="outline" onClick={handleAddGoal} disabled={!canAddGoal} className="w-full">
             <Plus className="size-4" />
             Add Goal {goals.length < 6 && `(${goals.length}/6)`}
           </Button>
           {!canAddGoal && (
-            <p className="text-muted-foreground mt-2 text-xs">
-              Maximum 6 goals reached. Delete a goal to add another.
-            </p>
+            <p className="text-muted-foreground mt-2 text-xs">Maximum 6 goals reached. Delete a goal to add another.</p>
           )}
         </div>
       </div>
