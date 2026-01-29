@@ -104,8 +104,8 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       const allMilestones = milestonesData.data || [];
 
       // Filter milestones to only include those belonging to this plan's goals
-      const goalIds = new Set(longTermGoals.map((g: any) => g.id));
-      const milestones = allMilestones.filter((m: any) => goalIds.has(m.long_term_goal_id));
+      const goalIds = new Set(longTermGoals.map((g: { id: string }) => g.id));
+      const milestones = allMilestones.filter((m: { long_term_goal_id: string }) => goalIds.has(m.long_term_goal_id));
 
       // Separate tasks into weekly goal subtasks and ad-hoc tasks
       const tasksByGoal = new Map<string, TaskViewModel[]>();
@@ -123,7 +123,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
       });
 
       // Build weekly goal view models with nested tasks
-      const weeklyGoalViewModels: WeeklyGoalViewModel[] = weeklyGoals.map((goal: any) => ({
+      const weeklyGoalViewModels: WeeklyGoalViewModel[] = weeklyGoals.map((goal: { id: string }) => ({
         ...goal,
         tasks: (tasksByGoal.get(goal.id) || []).sort((a, b) => a.position - b.position),
       }));
@@ -140,17 +140,19 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
 
       // Set metadata
       setMeta({
-        longTermGoals: longTermGoals.map((g: any) => ({
+        longTermGoals: longTermGoals.map((g: { id: string; title: string; category: string }) => ({
           id: g.id,
           title: g.title,
           category: g.category,
         })),
-        milestones: milestones.map((m: any) => ({
-          id: m.id,
-          title: m.title,
-          long_term_goal_id: m.long_term_goal_id,
-          due_date: m.due_date,
-        })),
+        milestones: milestones.map(
+          (m: { id: string; title: string; long_term_goal_id: string; due_date: string | null }) => ({
+            id: m.id,
+            title: m.title,
+            long_term_goal_id: m.long_term_goal_id,
+            due_date: m.due_date,
+          })
+        ),
       });
 
       setStatus("success");
@@ -215,7 +217,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           const errorData = await response.json();
           // If validation failed, show specific validation messages
           if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
-            const messages = errorData.details.map((detail: any) => detail.message).join(", ");
+            const messages = errorData.details.map((detail: { message: string }) => detail.message).join(", ");
             throw new Error(messages);
           }
           throw new Error(errorData.error || errorData.message || "Failed to create weekly goal");
@@ -485,7 +487,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           const errorData = await response.json();
           // If validation failed, show specific validation messages
           if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
-            const messages = errorData.details.map((detail: any) => detail.message).join(", ");
+            const messages = errorData.details.map((detail: { message: string }) => detail.message).join(", ");
             throw new Error(messages);
           }
           throw new Error(errorData.error || "Failed to create task");
@@ -563,7 +565,7 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           const errorData = await response.json();
           // If validation failed, show specific validation messages
           if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
-            const messages = errorData.details.map((detail: any) => detail.message).join(", ");
+            const messages = errorData.details.map((detail: { message: string }) => detail.message).join(", ");
             throw new Error(messages);
           }
           throw new Error(errorData.error || "Failed to update task");

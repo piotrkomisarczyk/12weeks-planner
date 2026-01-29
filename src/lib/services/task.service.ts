@@ -126,9 +126,16 @@ export class TaskService {
       const dateString = taskDate.toISOString().split("T")[0];
 
       // Categorize by priority
-      const mostImportant = tasks.find((t: { priority: string }) => t.priority === "A") || null;
-      const secondary = tasks.filter((t: { priority: string }) => t.priority === "B");
-      const additional = tasks.filter((t: { priority: string }) => t.priority === "C");
+      interface TaskWithPriority {
+        priority: string;
+        id: string;
+        title: string;
+        status: string;
+        task_type: string;
+      }
+      const mostImportant = tasks.find((t: TaskWithPriority) => t.priority === "A") || null;
+      const secondary = tasks.filter((t: TaskWithPriority) => t.priority === "B");
+      const additional = tasks.filter((t: TaskWithPriority) => t.priority === "C");
 
       const dailyTasks: DailyTasksDTO = {
         date: dateString,
@@ -552,7 +559,13 @@ export class TaskService {
         throw new Error("Failed to fetch direct tasks");
       }
 
-      let allTasks: any[] = directTasks || [];
+      type TaskWithDirectJoinData = TaskDTO & { long_term_goals?: unknown };
+      type TaskWithMilestoneJoinData = TaskDTO & { milestones?: unknown };
+      
+      let allTasks: TaskDTO[] = (directTasks || []).map((task) => {
+        const { long_term_goals: _long_term_goals, ...cleanTask } = task as TaskWithDirectJoinData;
+        return cleanTask as TaskDTO;
+      });
 
       // Fetch milestone tasks if requested
       if (params.include_milestone_tasks) {
@@ -589,30 +602,21 @@ export class TaskService {
             throw new Error("Failed to fetch milestone tasks");
           }
 
+          // Clean milestone tasks and merge with direct tasks
+          const cleanedMilestoneTasks = (milestoneTasks || []).map((task) => {
+            const { milestones: _milestones, ...cleanTask } = task as TaskWithMilestoneJoinData;
+            return cleanTask as TaskDTO;
+          });
+
           // Merge and deduplicate tasks (a task could have both long_term_goal_id AND milestone_id)
           const taskMap = new Map<string, TaskDTO>();
-
-          // Process all tasks and remove joined data
-          [...allTasks, ...(milestoneTasks || [])].forEach((task) => {
-            // Remove the joined data from response
-            const { milestones, long_term_goals, ...cleanTask } = task as any;
-            taskMap.set(cleanTask.id, cleanTask as TaskDTO);
+          
+          [...allTasks, ...cleanedMilestoneTasks].forEach((task) => {
+            taskMap.set(task.id, task);
           });
 
           allTasks = Array.from(taskMap.values());
-        } else {
-          // No milestones for this goal, just clean direct tasks
-          allTasks = allTasks.map((task) => {
-            const { long_term_goals, ...cleanTask } = task as any;
-            return cleanTask as TaskDTO;
-          });
         }
-      } else {
-        // Remove joined data from direct tasks only
-        allTasks = allTasks.map((task) => {
-          const { long_term_goals, ...cleanTask } = task as any;
-          return cleanTask as TaskDTO;
-        });
       }
 
       // Sort by week_number and position

@@ -39,7 +39,7 @@ export class WeekPage {
   async clickAddWeeklyGoal() {
     // Wait for button to be visible and enabled before clicking
     await this.addWeeklyGoalButton.waitFor({ state: "visible" });
-    
+
     // Wait for button to be enabled (not disabled)
     // This ensures React has finished hydration and state updates
     await this.page.waitForFunction(
@@ -50,7 +50,7 @@ export class WeekPage {
       "add-weekly-goal-button",
       { timeout: 5000 }
     );
-    
+
     await this.addWeeklyGoalButton.click();
   }
 

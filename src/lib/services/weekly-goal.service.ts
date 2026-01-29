@@ -186,7 +186,7 @@ export class WeeklyGoalService {
 
     // Remove nested plans data before returning
     if (data) {
-      const { plans, ...weeklyGoal } = data as any;
+      const { plans: _plans, ...weeklyGoal } = data as { plans?: unknown };
       return weeklyGoal as WeeklyGoalDTO;
     }
 
@@ -474,7 +474,7 @@ export class WeeklyGoalService {
       }
 
       // Remove the joined data from response
-      return (data || []).map(({ long_term_goals, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
+      return (data || []).map(({ long_term_goals: _long_term_goals, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
     } catch (error) {
       throw error;
     }

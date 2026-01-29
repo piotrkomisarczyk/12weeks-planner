@@ -197,7 +197,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
           details: error.errors.map((err) => ({
             field: err.path.join(".") || "body",
             message: err.message,
-            received: (err as any).input,
+            received: "input" in err ? (err as { input: unknown }).input : undefined,
           })),
         };
         return new Response(JSON.stringify(validationError), {

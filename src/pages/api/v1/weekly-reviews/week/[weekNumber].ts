@@ -92,7 +92,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
           details: error.errors.map((err) => ({
             field: err.path.join("."),
             message: err.message,
-            received: "input" in err ? (err as any).input : undefined,
+            received: "input" in err ? (err as { input: unknown }).input : undefined,
           })),
         };
         return new Response(JSON.stringify(validationError), {

@@ -33,7 +33,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
 
   const handleAddGoal = async (data: {
     title: string;
-    category: any;
+    category: string | null;
     description: string | null;
     progress_percentage: number;
     position: number;
@@ -46,7 +46,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     }
   };
 
-  const handleUpdateGoal = async (id: string, data: any) => {
+  const handleUpdateGoal = async (id: string, data: Partial<{ title: string; description: string | null }>) => {
     try {
       await updateGoal(id, data);
     } catch (error) {
