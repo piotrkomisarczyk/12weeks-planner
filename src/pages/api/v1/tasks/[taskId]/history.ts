@@ -106,7 +106,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

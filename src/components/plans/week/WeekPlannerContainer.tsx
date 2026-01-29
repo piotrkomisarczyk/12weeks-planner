@@ -96,7 +96,7 @@ export function WeekPlannerContainer({
     async (id: string, updates: Partial<WeeklyGoalViewModel>) => {
       try {
         await updateWeeklyGoal(id, updates);
-      } catch (err) {
+      } catch {
         toast.error("Failed to update weekly goal");
       }
     },
@@ -108,7 +108,7 @@ export function WeekPlannerContainer({
       try {
         await deleteWeeklyGoal(id);
         toast.success("Weekly goal deleted");
-      } catch (err) {
+      } catch {
         toast.error("Failed to delete weekly goal");
       }
     },
@@ -141,7 +141,7 @@ export function WeekPlannerContainer({
         // Refetch to update UI with new associations
         await refetch();
         toast.success("Goal & milestone linked, tasks updated");
-      } catch (err) {
+      } catch {
         toast.error("Failed to link goal & milestone");
       }
     },
@@ -152,7 +152,7 @@ export function WeekPlannerContainer({
     async (id: string) => {
       try {
         await moveWeeklyGoalUp(id);
-      } catch (err) {
+      } catch {
         toast.error("Failed to move goal up");
       }
     },
@@ -163,7 +163,7 @@ export function WeekPlannerContainer({
     async (id: string) => {
       try {
         await moveWeeklyGoalDown(id);
-      } catch (err) {
+      } catch {
         toast.error("Failed to move goal down");
       }
     },
@@ -201,7 +201,7 @@ export function WeekPlannerContainer({
       try {
         await deleteTask(taskId);
         toast.success("Task deleted");
-      } catch (err) {
+      } catch {
         toast.error("Failed to delete task");
       }
     },
@@ -243,7 +243,7 @@ export function WeekPlannerContainer({
       try {
         await updateTask(taskId, { due_day: day });
         toast.success(day ? `Task assigned to ${DAY_NAMES[day - 1]}` : "Day cleared");
-      } catch (err) {
+      } catch {
         toast.error("Failed to assign day");
       }
     },
@@ -276,7 +276,7 @@ export function WeekPlannerContainer({
         // Refetch to move task from ad-hoc to weekly goal list
         await refetch();
         toast.success("Task assigned to weekly goal");
-      } catch (err) {
+      } catch {
         toast.error("Failed to assign task");
       }
     },
@@ -296,7 +296,7 @@ export function WeekPlannerContainer({
         // Refetch to move task from weekly goal to ad-hoc list
         await refetch();
         toast.success("Task unassigned from weekly goal");
-      } catch (err) {
+      } catch {
         toast.error("Failed to unassign task");
       }
     },
@@ -325,7 +325,7 @@ export function WeekPlannerContainer({
 
           try {
             await reorderWeeklyGoals(reordered);
-          } catch (err) {
+          } catch {
             toast.error("Failed to reorder goals");
           }
         }
@@ -387,7 +387,7 @@ export function WeekPlannerContainer({
 
         try {
           await moveTask(active.id as string, sourceContainerId, destContainerId, newIndex);
-        } catch (err) {
+        } catch {
           toast.error("Failed to reorder task");
         }
       }

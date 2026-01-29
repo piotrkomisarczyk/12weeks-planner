@@ -32,7 +32,7 @@ export class UserService {
       }
 
       return { data: data as UserMetricsDTO };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }

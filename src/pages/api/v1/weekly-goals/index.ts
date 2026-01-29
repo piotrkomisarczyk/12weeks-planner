@@ -133,7 +133,7 @@ export const GET: APIRoute = async ({ locals, request }) => {
       // Re-throw for general error handler
       throw serviceError;
     }
-  } catch (error) {
+  } catch {
     // Global error handler for unexpected errors
 
     return new Response(
@@ -306,7 +306,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
       // Re-throw for general error handler
       throw serviceError;
     }
-  } catch (error) {
+  } catch {
     // Global error handler for unexpected errors
 
     return new Response(

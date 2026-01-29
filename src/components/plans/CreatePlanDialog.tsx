@@ -74,7 +74,7 @@ export function CreatePlanDialog({ onCreatePlan, trigger }: CreatePlanDialogProp
       // Reset form and close dialog on success
       setFormData({ name: "", start_date: "" });
       setOpen(false);
-    } catch (error) {
+    } catch {
       // Error handling is done in the parent component (toast notification)
     } finally {
       setIsSubmitting(false);

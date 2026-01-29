@@ -79,8 +79,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
         "Cache-Control": "private, max-age=10",
       },
     });
-  } catch (error) {
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

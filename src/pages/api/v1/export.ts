@@ -70,7 +70,7 @@ export const GET: APIRoute = async ({ locals }) => {
         "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
-  } catch (error) {
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

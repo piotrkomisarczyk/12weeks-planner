@@ -69,7 +69,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         },
       }
     );
-  } catch (error) {
+  } catch {
     return new Response(
       JSON.stringify({
         error: "An unexpected error occurred. Please try again.",

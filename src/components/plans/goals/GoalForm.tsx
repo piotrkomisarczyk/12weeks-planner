@@ -84,7 +84,7 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
           saveStatusTimerRef.current = setTimeout(() => {
             setSaveStatus("idle");
           }, 2000);
-        } catch (error) {
+        } catch {
           setSaveStatus("error");
 
           // Auto-hide error message after 3 seconds
@@ -116,7 +116,7 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
       await onUpdate({ category: value as GoalCategory });
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
-    } catch (error) {
+    } catch {
       setSaveStatus("error");
       setTimeout(() => setSaveStatus("idle"), 3000);
     }

@@ -77,8 +77,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -192,8 +191,7 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -273,8 +271,7 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
         },
       }
     );
-  } catch (error) {
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

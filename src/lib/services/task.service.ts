@@ -87,7 +87,7 @@ export class TaskService {
         data: data as TaskDTO[],
         count: count ?? undefined,
       };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -140,7 +140,7 @@ export class TaskService {
       };
 
       return { data: dailyTasks };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -178,7 +178,7 @@ export class TaskService {
       };
 
       return { data: taskWithHistory };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -258,7 +258,7 @@ export class TaskService {
       }
 
       return { data: newTask as TaskDTO };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -338,7 +338,7 @@ export class TaskService {
       // Trigger log_task_status_change will automatically log status changes
 
       return { data: updatedTask as TaskDTO };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -394,7 +394,7 @@ export class TaskService {
         data: copiedTask,
         message: "Task copied successfully",
       };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -427,7 +427,7 @@ export class TaskService {
       }
 
       return { message: "Task deleted successfully" };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -455,7 +455,7 @@ export class TaskService {
       return {
         data: data as TaskHistoryDTO[],
       };
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -475,7 +475,7 @@ export class TaskService {
       }
 
       return new Date(data.start_date);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

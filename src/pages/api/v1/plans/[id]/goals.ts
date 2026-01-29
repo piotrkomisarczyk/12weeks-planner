@@ -75,7 +75,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

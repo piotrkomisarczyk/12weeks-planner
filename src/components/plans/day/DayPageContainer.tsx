@@ -117,7 +117,7 @@ export function DayPageContainer({
       try {
         await deleteTask(id);
         toast.success("Task deleted");
-      } catch (err) {
+      } catch {
         toast.error("Failed to delete task");
       }
     },
@@ -134,7 +134,7 @@ export function DayPageContainer({
 
       try {
         await updateTask(id, { status: newStatus });
-      } catch (err) {
+      } catch {
         toast.error("Failed to update task status");
       }
     },
@@ -219,7 +219,7 @@ export function DayPageContainer({
           await moveTask(id, weekNumber, day);
           toast.success(`Task assigned to ${DAY_NAMES[day - 1]}`);
         }
-      } catch (err) {
+      } catch {
         toast.error("Failed to assign day");
       }
     },
@@ -241,7 +241,7 @@ export function DayPageContainer({
       try {
         await copyTask(id, targetWeek, targetDay);
         toast.success("Task copied");
-      } catch (err) {
+      } catch {
         toast.error("Failed to copy task");
       }
     },
@@ -267,7 +267,7 @@ export function DayPageContainer({
         if (targetWeek !== weekNumber || targetDay !== dayNumber) {
           toast.success("Task moved");
         }
-      } catch (err) {
+      } catch {
         toast.error("Failed to move task");
       }
     },
@@ -282,7 +282,7 @@ export function DayPageContainer({
           milestone_id: milestoneId,
         });
         toast.success("Goal & milestone linked");
-      } catch (err) {
+      } catch {
         toast.error("Failed to link goal & milestone");
       }
     },
@@ -324,7 +324,7 @@ export function DayPageContainer({
           task_type: "ad_hoc",
         });
         toast.success("Unassigned from weekly goal");
-      } catch (err) {
+      } catch {
         toast.error("Failed to unassign from weekly goal");
       }
     },
@@ -367,7 +367,7 @@ export function DayPageContainer({
       reorderedTasks.splice(newIndex, 0, movedTask);
 
       // Update backend
-      reorderInSlot(sourceSlot, reorderedTasks).catch((err) => {
+      reorderInSlot(sourceSlot, reorderedTasks).catch(() => {
         toast.error("Failed to reorder tasks");
       });
     },

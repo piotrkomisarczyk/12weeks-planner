@@ -101,7 +101,7 @@ export function GoalFormDialog({ open, onOpenChange, goal, onSubmit }: GoalFormD
         progress_percentage: formData.progress_percentage,
         ...(isEditing ? {} : { position: 1 }), // Position will be set by parent for new goals
       });
-    } catch (error) {
+    } catch {
       // Error handling is done by parent component
     } finally {
       setIsSubmitting(false);

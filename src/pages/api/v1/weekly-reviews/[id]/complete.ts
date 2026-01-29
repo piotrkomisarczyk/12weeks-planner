@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
 
     // Return generic error response

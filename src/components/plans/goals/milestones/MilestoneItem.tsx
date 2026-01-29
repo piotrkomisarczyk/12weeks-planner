@@ -98,7 +98,8 @@ export function MilestoneItem({
     setIsToggling(true);
     try {
       await onToggle(milestone.id, !milestone.is_completed);
-    } catch (error) {
+    } catch {
+      // Error handling is done by the parent component
     } finally {
       setIsToggling(false);
     }

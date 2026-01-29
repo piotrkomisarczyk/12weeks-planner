@@ -95,7 +95,7 @@ export class ExportService {
       };
 
       return exportData;
-    } catch (error) {
+    } catch {
       return { error: "Internal server error" };
     }
   }

@@ -143,7 +143,7 @@ export function useWeeklyReview({
               lastSavedAt: new Date(),
             },
           }));
-        } catch (error) {
+        } catch {
           setState((prev) => ({
             ...prev,
             review: { ...prev.review, isSaving: false },
@@ -193,8 +193,7 @@ export function useWeeklyReview({
           ...prev,
           goals: prev.goals.map((g) => (g.id === goalId ? { ...g, isUpdating: false } : g)),
         }));
-      } catch (error) {
-
+      } catch {
         // Rollback optimistic update
         setState((prev) => ({
           ...prev,
@@ -263,8 +262,7 @@ export function useWeeklyReview({
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to update milestone");
         }
-      } catch (error) {
-
+      } catch {
         // Rollback optimistic update
         setState((prev) => ({
           ...prev,
@@ -319,7 +317,7 @@ export function useWeeklyReview({
       }));
 
       toast.success(result.message || "Review completion status updated");
-    } catch (error) {
+    } catch {
       setState((prev) => ({
         ...prev,
         error: "Failed to update completion status",

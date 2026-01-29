@@ -187,7 +187,6 @@ export class MilestoneService {
     const { data, error } = await this.supabase.from("milestones").insert([insertData]).select().single();
 
     if (error) {
-
       // Check for max milestones constraint
       if (error.message.includes("Cannot add more than 5 milestones")) {
         throw new Error("Cannot add more than 5 milestones to a goal");

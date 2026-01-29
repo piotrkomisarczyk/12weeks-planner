@@ -97,7 +97,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
 
     // Return generic error response
@@ -243,7 +243,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
 
     // Return generic error response
@@ -335,7 +335,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
 
     // Return generic error response

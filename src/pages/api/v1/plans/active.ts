@@ -70,7 +70,7 @@ export const GET: APIRoute = async ({ locals }) => {
         },
       }
     );
-  } catch (error) {
+  } catch {
     // Global error handler for unexpected errors
 
     return new Response(

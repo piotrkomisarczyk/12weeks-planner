@@ -192,8 +192,7 @@ export function PlanWizardContainer() {
 
         await fetch(`/api/v1/plans/${planId}`, {
           method: "DELETE",
-        }).catch((deleteError) => {
-        });
+        }).catch((deleteError) => {});
 
         throw new Error("Error creating goals. The planner creation was rolled back.");
       }

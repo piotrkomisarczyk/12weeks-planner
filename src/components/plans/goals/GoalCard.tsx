@@ -74,7 +74,7 @@ export function GoalCard({
     try {
       await onDelete(goal.id);
       setShowDeleteDialog(false);
-    } catch (error) {
+    } catch {
       setIsDeleting(false);
     }
   };
