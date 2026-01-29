@@ -158,12 +158,18 @@ export function DayPageContainer({
           if (data.slots.mostImportant?.id === id) {
             task = data.slots.mostImportant;
             currentSlot = "most_important";
-          } else if (data.slots.secondary.find((t) => t.id === id)) {
-            task = data.slots.secondary.find((t) => t.id === id)!;
-            currentSlot = "secondary";
-          } else if (data.slots.additional.find((t) => t.id === id)) {
-            task = data.slots.additional.find((t) => t.id === id)!;
-            currentSlot = "additional";
+          } else {
+            const secondaryTask = data.slots.secondary.find((t) => t.id === id);
+            if (secondaryTask) {
+              task = secondaryTask;
+              currentSlot = "secondary";
+            } else {
+              const additionalTask = data.slots.additional.find((t) => t.id === id);
+              if (additionalTask) {
+                task = additionalTask;
+                currentSlot = "additional";
+              }
+            }
           }
 
           if (!task || !currentSlot) return;

@@ -328,17 +328,20 @@ export function TaskCard({
       {variant === "day" && (
         <div className="flex items-center gap-1.5">
           {/* Category Badge */}
-          {task.long_term_goal_id && getLongTermGoalCategory(task.long_term_goal_id) && (
-            <Badge
-              className={cn(
-                "text-xs uppercase font-semibold",
-                GOAL_CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] ||
-                  "bg-gray-500 text-white dark:bg-gray-600"
-              )}
-            >
-              {getCategoryLabel(getLongTermGoalCategory(task.long_term_goal_id)!)}
-            </Badge>
-          )}
+          {(() => {
+            const category = task.long_term_goal_id ? getLongTermGoalCategory(task.long_term_goal_id) : null;
+            if (!category) return null;
+            return (
+              <Badge
+                className={cn(
+                  "text-xs uppercase font-semibold",
+                  GOAL_CATEGORY_COLORS[category] || "bg-gray-500 text-white dark:bg-gray-600"
+                )}
+              >
+                {getCategoryLabel(category)}
+              </Badge>
+            );
+          })()}
 
           {/* Long-Term Goal */}
           {task.long_term_goal_id && (

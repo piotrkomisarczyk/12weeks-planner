@@ -271,7 +271,7 @@ export function useWeeklyReview({
               ? {
                   ...goal,
                   milestones: goal.milestones.map((milestone, mIndex) =>
-                    mIndex === milestoneIndex ? { ...milestone, is_completed: originalCompleted! } : milestone
+                    mIndex === milestoneIndex ? { ...milestone, is_completed: originalCompleted ?? false } : milestone
                   ),
                 }
               : goal

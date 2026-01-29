@@ -138,9 +138,13 @@ export function PlanWizardContainer() {
 
     try {
       // Step 1: Create the plan
+      if (!wizardState.details.startDate) {
+        throw new Error("Start date is required");
+      }
+
       const planCommand: CreatePlanCommand = {
         name: wizardState.details.name,
-        start_date: formatDateLocal(wizardState.details.startDate!),
+        start_date: formatDateLocal(wizardState.details.startDate),
       };
 
       const planResponse = await fetch("/api/v1/plans", {

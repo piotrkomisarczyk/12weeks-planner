@@ -534,12 +534,18 @@ export function useDayPlan(
       if (data.slots.mostImportant?.id === taskId) {
         task = data.slots.mostImportant;
         sourceSlot = "most_important";
-      } else if (data.slots.secondary.find((t) => t.id === taskId)) {
-        task = data.slots.secondary.find((t) => t.id === taskId)!;
-        sourceSlot = "secondary";
-      } else if (data.slots.additional.find((t) => t.id === taskId)) {
-        task = data.slots.additional.find((t) => t.id === taskId)!;
-        sourceSlot = "additional";
+      } else {
+        const secondaryTask = data.slots.secondary.find((t) => t.id === taskId);
+        if (secondaryTask) {
+          task = secondaryTask;
+          sourceSlot = "secondary";
+        } else {
+          const additionalTask = data.slots.additional.find((t) => t.id === taskId);
+          if (additionalTask) {
+            task = additionalTask;
+            sourceSlot = "additional";
+          }
+        }
       }
 
       if (!task || !sourceSlot) return;

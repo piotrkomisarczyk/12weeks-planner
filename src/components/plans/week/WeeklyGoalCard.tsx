@@ -247,16 +247,16 @@ export function WeeklyGoalCard({
                   {/* Category, Long-term Goal & Milestone Links - shown when collapsed */}
                   {expandedValue !== goal.id && (
                     <div className="flex flex-wrap gap-2">
-                      {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
-                        <Badge
-                          className={
-                            GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] ||
-                            "bg-gray-500 text-white"
-                          }
-                        >
-                          {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
-                        </Badge>
-                      )}
+                      {(() => {
+                        if (!goal.long_term_goal_id) return null;
+                        const category = getLongTermGoalCategory(goal.long_term_goal_id);
+                        if (!category) return null;
+                        return (
+                          <Badge className={GOAL_CATEGORY_COLORS[category] || "bg-gray-500 text-white"}>
+                            {getCategoryLabel(category)}
+                          </Badge>
+                        );
+                      })()}
                       {goal.long_term_goal_id && (
                         <Badge variant="outline" className="text-xs gap-1">
                           <Target className="h-3 w-3" />
@@ -370,15 +370,16 @@ export function WeeklyGoalCard({
             <div className="space-y-4 pt-4">
               {/* Category, Long-term Goal & Milestone Links - shown when expanded */}
               <div className="flex flex-wrap gap-2">
-                {goal.long_term_goal_id && getLongTermGoalCategory(goal.long_term_goal_id) && (
-                  <Badge
-                    className={
-                      GOAL_CATEGORY_COLORS[getLongTermGoalCategory(goal.long_term_goal_id)!] || "bg-gray-500 text-white"
-                    }
-                  >
-                    {getCategoryLabel(getLongTermGoalCategory(goal.long_term_goal_id)!)}
-                  </Badge>
-                )}
+                {(() => {
+                  if (!goal.long_term_goal_id) return null;
+                  const category = getLongTermGoalCategory(goal.long_term_goal_id);
+                  if (!category) return null;
+                  return (
+                    <Badge className={GOAL_CATEGORY_COLORS[category] || "bg-gray-500 text-white"}>
+                      {getCategoryLabel(category)}
+                    </Badge>
+                  );
+                })()}
                 {goal.long_term_goal_id && (
                   <Badge variant="outline" className="text-xs gap-1">
                     <Target className="h-3 w-3" />
