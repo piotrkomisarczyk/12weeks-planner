@@ -1,13 +1,13 @@
 /**
  * InlineAddTask Component
- * 
+ *
  * Simple inline input for quickly adding tasks to a weekly goal or ad-hoc section.
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Plus, X } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Plus, X } from "lucide-react";
 
 interface InlineAddTaskProps {
   onAdd: (title: string) => void;
@@ -15,12 +15,8 @@ interface InlineAddTaskProps {
   placeholder?: string;
 }
 
-export function InlineAddTask({
-  onAdd,
-  onCancel,
-  placeholder = 'Enter task title...',
-}: InlineAddTaskProps) {
-  const [value, setValue] = useState('');
+export function InlineAddTask({ onAdd, onCancel, placeholder = "Enter task title..." }: InlineAddTaskProps) {
+  const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,16 +25,16 @@ export function InlineAddTask({
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    
+
     if (value.trim()) {
       onAdd(value.trim());
-      setValue('');
+      setValue("");
       inputRef.current?.focus();
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       onCancel();
     }
   };
@@ -55,7 +51,7 @@ export function InlineAddTask({
         maxLength={255}
         data-test-id="inline-task-title-input"
       />
-      
+
       <Button
         type="submit"
         size="sm"
@@ -65,17 +61,10 @@ export function InlineAddTask({
       >
         <Plus className="h-4 w-4" />
       </Button>
-      
-      <Button
-        type="button"
-        size="sm"
-        variant="ghost"
-        onClick={onCancel}
-        className="shrink-0"
-      >
+
+      <Button type="button" size="sm" variant="ghost" onClick={onCancel} className="shrink-0">
         <X className="h-4 w-4" />
       </Button>
     </form>
   );
 }
-

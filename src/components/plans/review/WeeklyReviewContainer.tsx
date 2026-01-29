@@ -3,23 +3,14 @@
  * Main container component managing state and business logic for weekly review functionality
  */
 
-import type {
-  WeeklyReviewViewModel,
-  GoalReviewViewModel,
-  PlanStatus
-} from '../../../types';
-import { useWeeklyReview } from './hooks/useWeeklyReview';
-import ReviewHeader from './ReviewHeader';
-import GoalProgressList from './GoalProgressList';
-import ReflectionForm from './ReflectionForm';
-import ReviewCompletionStatus from './ReviewCompletionStatus';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '../../ui/accordion';
-import { isPlanReadOnly, isPlanReady } from '../../../lib/utils';
+import type { WeeklyReviewViewModel, GoalReviewViewModel, PlanStatus } from "../../../types";
+import { useWeeklyReview } from "./hooks/useWeeklyReview";
+import ReviewHeader from "./ReviewHeader";
+import GoalProgressList from "./GoalProgressList";
+import ReflectionForm from "./ReflectionForm";
+import ReviewCompletionStatus from "./ReviewCompletionStatus";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../ui/accordion";
+import { isPlanReadOnly, isPlanReady } from "../../../lib/utils";
 
 interface WeeklyReviewContainerProps {
   planId: string;
@@ -34,26 +25,19 @@ export default function WeeklyReviewContainer({
   weekNumber,
   initialReview,
   initialGoals,
-  planStatus
+  planStatus,
 }: WeeklyReviewContainerProps) {
   // Compute flags from plan status
   const isReadOnly = isPlanReadOnly(planStatus) || isPlanReady(planStatus);
 
   // Use custom hook for state management and business logic
-  const {
-    review,
-    goals,
-    error,
-    updateReflection,
-    updateGoalProgress,
-    toggleMilestone,
-    toggleCompletion
-  } = useWeeklyReview({
-    planId,
-    weekNumber,
-    initialReview,
-    initialGoals
-  });
+  const { review, goals, error, updateReflection, updateGoalProgress, toggleMilestone, toggleCompletion } =
+    useWeeklyReview({
+      planId,
+      weekNumber,
+      initialReview,
+      initialGoals,
+    });
 
   // ============================================================================
   // RENDER
@@ -62,13 +46,15 @@ export default function WeeklyReviewContainer({
   return (
     <div className="space-y-6">
       {/* Header with navigation */}
-      <ReviewHeader
-        planId={planId}
-        weekNumber={weekNumber}
-      />
+      <ReviewHeader planId={planId} weekNumber={weekNumber} />
 
       {/* Goal Progress Section */}
-      <Accordion type="single" collapsible defaultValue="goal-progress" className="bg-card rounded-lg border border-border">
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue="goal-progress"
+        className="bg-card rounded-lg border border-border"
+      >
         <AccordionItem value="goal-progress">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
             <h2 className="text-xl font-semibold">Update progress for your goals</h2>
@@ -85,7 +71,12 @@ export default function WeeklyReviewContainer({
       </Accordion>
 
       {/* Reflection Form */}
-      <Accordion type="single" collapsible defaultValue="weekly-reflection" className="bg-card rounded-lg border border-border">
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue="weekly-reflection"
+        className="bg-card rounded-lg border border-border"
+      >
         <AccordionItem value="weekly-reflection">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
             <h2 className="text-xl font-semibold">Reflect on last week</h2>

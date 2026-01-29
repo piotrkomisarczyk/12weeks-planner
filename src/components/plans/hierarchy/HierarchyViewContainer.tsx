@@ -1,26 +1,25 @@
-import { useEffect, useState, useMemo } from 'react';
-import { usePlanDashboard } from '../hooks/usePlanDashboard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { WeekHeader } from '../shared/WeekHeader';
-import { HierarchyControls } from './HierarchyControls';
-import { HierarchyTree } from './HierarchyTree';
-import { Legend } from './Legend';
-import { buildHierarchyTree } from '@/lib/dashboard-utils';
-import { calculateCurrentWeek } from '@/lib/utils';
-import type { DashboardFilterState } from '@/types';
+import { useEffect, useState, useMemo } from "react";
+import { usePlanDashboard } from "../hooks/usePlanDashboard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WeekHeader } from "../shared/WeekHeader";
+import { HierarchyControls } from "./HierarchyControls";
+import { HierarchyTree } from "./HierarchyTree";
+import { Legend } from "./Legend";
+import { buildHierarchyTree } from "@/lib/dashboard-utils";
+import { calculateCurrentWeek } from "@/lib/utils";
+import type { DashboardFilterState } from "@/types";
 
 interface HierarchyViewContainerProps {
   planId: string;
   onNavigate?: (url: string) => void;
 }
 
-
 export function HierarchyViewContainer({ planId, onNavigate }: HierarchyViewContainerProps) {
   const { data, isLoading, error, fetchDashboard } = usePlanDashboard();
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   const [filters, setFilters] = useState<DashboardFilterState>({
     showCompleted: false, // Default: hide completed
-    showAllWeeks: false,  // Default: show only current week
+    showAllWeeks: false, // Default: show only current week
   });
 
   const handleNavigate = (url: string) => {
@@ -107,18 +106,12 @@ export function HierarchyViewContainer({ planId, onNavigate }: HierarchyViewCont
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Plan Hierarchy</span>
-            <HierarchyControls
-              filters={filters}
-              onFilterChange={handleFilterChange}
-            />
+            <HierarchyControls filters={filters} onFilterChange={handleFilterChange} />
           </CardTitle>
         </CardHeader>
 
         <CardContent>
-          <HierarchyTree
-            nodes={hierarchyTree}
-            onNavigate={handleNavigate}
-          />
+          <HierarchyTree nodes={hierarchyTree} onNavigate={handleNavigate} />
         </CardContent>
       </Card>
     </div>

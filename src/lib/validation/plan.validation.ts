@@ -3,28 +3,34 @@
  * Uses Zod for runtime type validation and type inference
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Query parameters schema for GET /api/v1/plans
- * 
+ *
  * Validates:
  * - status: must be one of 'ready', 'active', 'completed', 'archived' (optional)
  * - limit: positive integer, max 100, defaults to 50
  * - offset: non-negative integer, defaults to 0
  */
-export const GetPlansQuerySchema = z.object({
-  status: z.enum(['ready', 'active', 'completed', 'archived']).nullish(),
-  limit: z.string().nullish()
-    .transform((val) => val === null || val === undefined ? '50' : val)
-    .pipe(z.coerce.number().int().positive().max(100)),
-  offset: z.string().nullish()
-    .transform((val) => val === null || val === undefined ? '0' : val)
-    .pipe(z.coerce.number().int().min(0))
-}).transform((data) => ({
-  ...data,
-  status: data.status ?? undefined
-}));
+export const GetPlansQuerySchema = z
+  .object({
+    status: z.enum(["ready", "active", "completed", "archived"]).nullish(),
+    limit: z
+      .string()
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? "50" : val))
+      .pipe(z.coerce.number().int().positive().max(100)),
+    offset: z
+      .string()
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? "0" : val))
+      .pipe(z.coerce.number().int().min(0)),
+  })
+  .transform((data) => ({
+    ...data,
+    status: data.status ?? undefined,
+  }));
 
 /**
  * Inferred TypeScript type from GetPlansQuerySchema
@@ -36,7 +42,7 @@ export type GetPlansQuery = z.infer<typeof GetPlansQuerySchema>;
  * Validates UUID format for plan ID parameter
  */
 export const GetPlanByIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid plan ID format' })
+  id: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 /**
@@ -47,37 +53,42 @@ export type GetPlanByIdParams = z.infer<typeof GetPlanByIdParamsSchema>;
 /**
  * Request body schema for POST /api/v1/plans
  * Validates plan creation data
- * 
+ *
  * Validates:
  * - name: required string, 1-255 characters, trimmed
  * - start_date: required string in YYYY-MM-DD format, must be a valid date
- * 
+ *
  * Note: Monday validation is handled by database trigger
  */
 export const CreatePlanBodySchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .trim()
-    .min(1, { message: 'Name is required' })
-    .max(255, { message: 'Name must not exceed 255 characters' }),
-  start_date: z.string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Start date must be in YYYY-MM-DD format' })
-    .refine((dateStr) => {
-      // Check if date string can be parsed
-      const parsed = new Date(dateStr);
-      if (isNaN(parsed.getTime())) {
-        return false;
-      }
-      
-      // Verify that parsing the date back to ISO string matches input
-      // This catches invalid dates like "2025-02-30" which JavaScript silently converts
-      const [year, month, day] = dateStr.split('-').map(Number);
-      return (
-        parsed.getFullYear() === year &&
-        parsed.getMonth() === month - 1 && // getMonth() is 0-indexed
-        parsed.getDate() === day
-      );
-    }, { message: 'Invalid date' })
-    // Note: Monday validation is handled by database trigger
+    .min(1, { message: "Name is required" })
+    .max(255, { message: "Name must not exceed 255 characters" }),
+  start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Start date must be in YYYY-MM-DD format" })
+    .refine(
+      (dateStr) => {
+        // Check if date string can be parsed
+        const parsed = new Date(dateStr);
+        if (isNaN(parsed.getTime())) {
+          return false;
+        }
+
+        // Verify that parsing the date back to ISO string matches input
+        // This catches invalid dates like "2025-02-30" which JavaScript silently converts
+        const [year, month, day] = dateStr.split("-").map(Number);
+        return (
+          parsed.getFullYear() === year &&
+          parsed.getMonth() === month - 1 && // getMonth() is 0-indexed
+          parsed.getDate() === day
+        );
+      },
+      { message: "Invalid date" }
+    ),
+  // Note: Monday validation is handled by database trigger
 });
 
 /**
@@ -88,26 +99,29 @@ export type CreatePlanBody = z.infer<typeof CreatePlanBodySchema>;
 /**
  * Request body schema for PATCH /api/v1/plans/:id
  * Validates plan update data (both fields optional, but at least one required)
- * 
+ *
  * Validates:
  * - name: optional string, 1-255 characters, trimmed
  * - status: optional enum ('ready', 'active', 'completed', 'archived')
  * - At least one field must be provided
  */
-export const UpdatePlanBodySchema = z.object({
-  name: z.string()
-    .min(1, { message: 'Name must not be empty' })
-    .max(255, { message: 'Name must not exceed 255 characters' })
-    .trim()
-    .optional(),
-  status: z.enum(['ready', 'active', 'completed', 'archived'], {
-    errorMap: () => ({ message: 'Status must be one of: ready, active, completed, archived' })
+export const UpdatePlanBodySchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { message: "Name must not be empty" })
+      .max(255, { message: "Name must not exceed 255 characters" })
+      .trim()
+      .optional(),
+    status: z
+      .enum(["ready", "active", "completed", "archived"], {
+        errorMap: () => ({ message: "Status must be one of: ready, active, completed, archived" }),
+      })
+      .optional(),
   })
-    .optional()
-}).refine(
-  (data) => data.name !== undefined || data.status !== undefined,
-  { message: 'At least one field (name or status) must be provided' }
-);
+  .refine((data) => data.name !== undefined || data.status !== undefined, {
+    message: "At least one field (name or status) must be provided",
+  });
 
 /**
  * Inferred TypeScript type from UpdatePlanBodySchema
@@ -119,7 +133,7 @@ export type UpdatePlanBody = z.infer<typeof UpdatePlanBodySchema>;
  * Validates UUID format for plan ID
  */
 export const PlanIdParamsSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid plan ID format' })
+  id: z.string().uuid({ message: "Invalid plan ID format" }),
 });
 
 /**
@@ -137,18 +151,26 @@ export type PlanIdParams = z.infer<typeof PlanIdParamsSchema>;
  * - status_view: must be 'active' or 'all' (optional, defaults to 'all')
  * - week_number: integer 1-12 (optional, only used when week_view='current')
  */
-export const GetDashboardQuerySchema = z.object({
-  week_view: z.enum(['current', 'all']).nullish()
-    .transform((val) => val === null || val === undefined ? 'current' : val),
-  status_view: z.enum(['active', 'all']).nullish()
-    .transform((val) => val === null || val === undefined ? 'all' : val),
-  week_number: z.string().nullish()
-    .transform((val) => val === null || val === undefined ? undefined : val)
-    .pipe(z.coerce.number().int().min(1).max(12).optional())
-}).transform((data) => ({
-  ...data,
-  week_number: data.week_number ?? undefined
-}));
+export const GetDashboardQuerySchema = z
+  .object({
+    week_view: z
+      .enum(["current", "all"])
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? "current" : val)),
+    status_view: z
+      .enum(["active", "all"])
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? "all" : val)),
+    week_number: z
+      .string()
+      .nullish()
+      .transform((val) => (val === null || val === undefined ? undefined : val))
+      .pipe(z.coerce.number().int().min(1).max(12).optional()),
+  })
+  .transform((data) => ({
+    ...data,
+    week_number: data.week_number ?? undefined,
+  }));
 
 /**
  * Inferred TypeScript type from GetDashboardQuerySchema

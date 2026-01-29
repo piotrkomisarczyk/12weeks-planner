@@ -4,14 +4,9 @@
  * Uses accordion for expand/collapse functionality
  */
 
-import { useState } from 'react';
-import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+import { useState } from "react";
+import { Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Dialog,
   DialogContent,
@@ -20,17 +15,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { GoalForm } from './GoalForm';
-import { GoalProgress } from './GoalProgress';
-import { MilestoneManager } from './milestones/MilestoneManager';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { GoalDTO, GoalCategory, PlanStatus } from '@/types';
-import type { PlanContext } from '@/types';
-import { isPlanReadOnly, isPlanReady, canChangeGoalProgress, getDisabledTooltip } from '@/lib/utils';
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { GoalForm } from "./GoalForm";
+import { GoalProgress } from "./GoalProgress";
+import { MilestoneManager } from "./milestones/MilestoneManager";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import type { GoalDTO, GoalCategory, PlanStatus } from "@/types";
+import type { PlanContext } from "@/types";
+import { isPlanReadOnly, isPlanReady, canChangeGoalProgress, getDisabledTooltip } from "@/lib/utils";
 
 interface GoalCardProps {
   goal: GoalDTO;
@@ -48,13 +43,22 @@ interface GoalCardProps {
  * Collapsed: Shows title, category, progress bar
  * Expanded: Shows full form, progress slider, and milestones
  */
-export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst = false, isLast = false }: GoalCardProps) {
+export function GoalCard({
+  goal,
+  planContext,
+  onUpdate,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+  isFirst = false,
+  isLast = false,
+}: GoalCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const [expandedValue, setExpandedValue] = useState<string>('');
+  const [expandedValue, setExpandedValue] = useState<string>("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const categoryKey = goal.category as GoalCategory | null;
   const categoryLabel = categoryKey
-    ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
+    ? (GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey)
     : null;
 
   const handleProgressChange = async (progress: number) => {
@@ -71,7 +75,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
       await onDelete(goal.id);
       setShowDeleteDialog(false);
     } catch (error) {
-      console.error('Failed to delete goal:', error);
+      console.error("Failed to delete goal:", error);
       setIsDeleting(false);
     }
   };
@@ -104,9 +108,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                 {/* Category Badge inside AccordionTrigger */}
                 <div className="flex items-center gap-2 shrink-0">
                   {expandedValue !== goal.id && categoryKey && categoryLabel && (
-                    <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>
-                      {categoryLabel}
-                    </Badge>
+                    <Badge className={` ${GOAL_CATEGORY_COLORS[categoryKey]}`}>{categoryLabel}</Badge>
                   )}
                 </div>
               </AccordionTrigger>
@@ -133,7 +135,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                   </TooltipTrigger>
                   {isReadOnly && (
                     <TooltipContent>
-                      <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                      <p>{getDisabledTooltip(planStatus, "general")}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -158,7 +160,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                   </TooltipTrigger>
                   {isReadOnly && (
                     <TooltipContent>
-                      <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                      <p>{getDisabledTooltip(planStatus, "general")}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -182,7 +184,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                   </TooltipTrigger>
                   {isReadOnly && (
                     <TooltipContent>
-                      <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                      <p>{getDisabledTooltip(planStatus, "general")}</p>
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -190,15 +192,12 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                   <DialogHeader>
                     <DialogTitle>Delete Goal</DialogTitle>
                     <DialogDescription>
-                      Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones. This action cannot be undone.
+                      Are you sure you want to delete "{goal.title}"? This will also delete all associated milestones.
+                      This action cannot be undone.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowDeleteDialog(false)}
-                      disabled={isDeleting}
-                    >
+                    <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>
                       Cancel
                     </Button>
                     <Button
@@ -206,7 +205,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                       disabled={isDeleting}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {isDeleting ? 'Deleting...' : 'Delete'}
+                      {isDeleting ? "Deleting..." : "Delete"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -233,14 +232,14 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
           {/* Expanded Content */}
           <AccordionContent>
             <div className="space-y-6 pt-4">
-          {/* Goal Form */}
-          <GoalForm
-            title={goal.title}
-            category={goal.category as GoalCategory | null}
-            description={goal.description}
-            onUpdate={handleFormUpdate}
-            disabled={isReadOnly}
-          />
+              {/* Goal Form */}
+              <GoalForm
+                title={goal.title}
+                category={goal.category as GoalCategory | null}
+                description={goal.description}
+                onUpdate={handleFormUpdate}
+                disabled={isReadOnly}
+              />
 
               {/* Progress Slider */}
               <Tooltip>
@@ -255,7 +254,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
                 </TooltipTrigger>
                 {!canChangeProgress && (
                   <TooltipContent>
-                    <p>{getDisabledTooltip(planStatus, 'progress')}</p>
+                    <p>{getDisabledTooltip(planStatus, "progress")}</p>
                   </TooltipContent>
                 )}
               </Tooltip>
@@ -264,11 +263,7 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
               <div className="border-t" />
 
               {/* Milestones Section */}
-              <MilestoneManager
-                goalId={goal.id}
-                planContext={planContext}
-                isGoalExpanded={expandedValue === goal.id}
-              />
+              <MilestoneManager goalId={goal.id} planContext={planContext} isGoalExpanded={expandedValue === goal.id} />
             </div>
           </AccordionContent>
         </div>
@@ -276,4 +271,3 @@ export function GoalCard({ goal, planContext, onUpdate, onDelete, onMoveUp, onMo
     </Accordion>
   );
 }
-

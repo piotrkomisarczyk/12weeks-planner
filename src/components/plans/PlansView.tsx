@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { Plus, AlertCircle, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Plus, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,25 +9,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { PlanCard } from './PlanCard';
-import { usePlans } from './hooks/usePlans';
-import { transformPlansToViewModels, type PlanViewModel } from '@/lib/plan-utils';
+} from "@/components/ui/dialog";
+import { PlanCard } from "./PlanCard";
+import { usePlans } from "./hooks/usePlans";
+import { transformPlansToViewModels, type PlanViewModel } from "@/lib/plan-utils";
 
 interface ConfirmDialogState {
   isOpen: boolean;
   title: string;
   description: string;
   onConfirm: () => void;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
 }
 
 export function PlansView() {
   const { plans, isLoading, error, fetchPlans, activatePlan, archivePlan, deletePlan } = usePlans();
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     onConfirm: () => {},
   });
 
@@ -40,18 +40,18 @@ export function PlansView() {
   const viewModels = transformPlansToViewModels(plans);
 
   // Categorize plans by status
-  const activePlan = viewModels.find((p) => p.status === 'active');
-  const readyPlans = viewModels.filter((p) => p.status === 'ready');
-  const completedPlans = viewModels.filter((p) => p.status === 'completed');
-  const archivedPlans = viewModels.filter((p) => p.status === 'archived');
+  const activePlan = viewModels.find((p) => p.status === "active");
+  const readyPlans = viewModels.filter((p) => p.status === "ready");
+  const completedPlans = viewModels.filter((p) => p.status === "completed");
+  const archivedPlans = viewModels.filter((p) => p.status === "archived");
 
   // Handler for navigating to create plan wizard
   const handleCreatePlan = () => {
-    window.location.href = '/plans/new';
+    window.location.href = "/plans/new";
   };
 
   // Helper function to truncate plan names for modal display
-  const truncatePlanName = (name: string, maxLength: number = 50) => {
+  const truncatePlanName = (name: string, maxLength = 50) => {
     return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
   };
 
@@ -62,14 +62,14 @@ export function PlansView() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Activate Plan',
+      title: "Activate Plan",
       description: `Are you sure you want to activate "${truncatePlanName(plan.name)}"? This will deactivate your current active plan.`,
       onConfirm: async () => {
         try {
           await activatePlan(id);
-          toast.success('Plan activated successfully');
+          toast.success("Plan activated successfully");
         } catch (error) {
-          toast.error('Failed to activate plan');
+          toast.error("Failed to activate plan");
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
@@ -83,14 +83,14 @@ export function PlansView() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Archive Plan',
+      title: "Archive Plan",
       description: `Are you sure you want to archive "${truncatePlanName(plan.name)}"? This will hide the plan from the main view.`,
       onConfirm: async () => {
         try {
           await archivePlan(id);
-          toast.success('Plan archived successfully');
+          toast.success("Plan archived successfully");
         } catch (error) {
-          toast.error('Failed to archive plan');
+          toast.error("Failed to archive plan");
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
@@ -104,15 +104,15 @@ export function PlansView() {
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Delete Plan',
+      title: "Delete Plan",
       description: `Are you sure you want to delete "${truncatePlanName(plan.name)}"? This action cannot be undone.`,
-      variant: 'destructive',
+      variant: "destructive",
       onConfirm: async () => {
         try {
           await deletePlan(id);
-          toast.success('Plan deleted successfully');
+          toast.success("Plan deleted successfully");
         } catch (error) {
-          toast.error('Failed to delete plan');
+          toast.error("Failed to delete plan");
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
@@ -132,9 +132,7 @@ export function PlansView() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">My Plans</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your 12-week planning cycles
-            </p>
+            <p className="text-muted-foreground mt-2">Manage your 12-week planning cycles</p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -154,9 +152,7 @@ export function PlansView() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">My Plans</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your 12-week planning cycles
-            </p>
+            <p className="text-muted-foreground mt-2">Manage your 12-week planning cycles</p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -181,9 +177,7 @@ export function PlansView() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">My Plans</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your 12-week planning cycles
-            </p>
+            <p className="text-muted-foreground mt-2">Manage your 12-week planning cycles</p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -193,8 +187,7 @@ export function PlansView() {
             </div>
             <h2 className="mt-4 text-lg font-semibold">No plans yet</h2>
             <p className="text-muted-foreground mt-2 max-w-sm">
-              Get started by creating your first 12-week plan to track your
-              long-term goals.
+              Get started by creating your first 12-week plan to track your long-term goals.
             </p>
             <Button className="mt-6" size="lg" onClick={handleCreatePlan}>
               <Plus className="size-4" />
@@ -213,9 +206,7 @@ export function PlansView() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Plans</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your 12-week planning cycles
-          </p>
+          <p className="text-muted-foreground mt-2">Manage your 12-week planning cycles</p>
         </div>
         <Button size="lg" onClick={handleCreatePlan}>
           <Plus className="size-4" />
@@ -227,10 +218,7 @@ export function PlansView() {
         {/* Active Plan Section */}
         {activePlan && (
           <section aria-labelledby="active-plan-heading">
-            <h2
-              id="active-plan-heading"
-              className="mb-4 text-xl font-semibold tracking-tight"
-            >
+            <h2 id="active-plan-heading" className="mb-4 text-xl font-semibold tracking-tight">
               Active Plan
             </h2>
             <PlanCard plan={activePlan} actions={planActions} />
@@ -240,10 +228,7 @@ export function PlansView() {
         {/* Ready Plans Section */}
         {readyPlans.length > 0 && (
           <section aria-labelledby="ready-plans-heading">
-            <h2
-              id="ready-plans-heading"
-              className="mb-4 text-xl font-semibold tracking-tight"
-            >
+            <h2 id="ready-plans-heading" className="mb-4 text-xl font-semibold tracking-tight">
               Ready to Start
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -257,10 +242,7 @@ export function PlansView() {
         {/* Completed Plans Section */}
         {completedPlans.length > 0 && (
           <section aria-labelledby="completed-plans-heading">
-            <h2
-              id="completed-plans-heading"
-              className="mb-4 text-xl font-semibold tracking-tight"
-            >
+            <h2 id="completed-plans-heading" className="mb-4 text-xl font-semibold tracking-tight">
               Completed
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -274,10 +256,7 @@ export function PlansView() {
         {/* Archived Plans Section */}
         {archivedPlans.length > 0 && (
           <section aria-labelledby="archived-plans-heading">
-            <h2
-              id="archived-plans-heading"
-              className="mb-4 text-xl font-semibold tracking-tight text-muted-foreground"
-            >
+            <h2 id="archived-plans-heading" className="mb-4 text-xl font-semibold tracking-tight text-muted-foreground">
               Archived
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
@@ -292,9 +271,7 @@ export function PlansView() {
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.isOpen}
-        onOpenChange={(open) =>
-          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
-        }
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, isOpen: open }))}
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -302,16 +279,11 @@ export function PlansView() {
             <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
-              }
-            >
+            <Button variant="outline" onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}>
               Cancel
             </Button>
             <Button
-              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              variant={confirmDialog.variant === "destructive" ? "destructive" : "default"}
               onClick={confirmDialog.onConfirm}
             >
               Confirm
@@ -322,4 +294,3 @@ export function PlansView() {
     </div>
   );
 }
-

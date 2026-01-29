@@ -2,17 +2,17 @@
 /**
  * Week Planning View Page
  * Route: /plans/[id]/week/[weekNumber]
- * 
+ *
  * Allows users to plan their week with weekly goals and tasks
  * Server-side: Fetches plan data for context and validation
  * Client-side: React island for interactive week planning
  */
 
-import { PlanService } from '@/lib/services/plan.service';
-import Layout from '@/layouts/Layout.astro';
-import { WeekPlannerContainer } from '@/components/plans/week';
-import { Toaster } from '@/components/ui/sonner';
-import type { PlanStatus } from '@/types';
+import { PlanService } from "@/lib/services/plan.service";
+import Layout from "@/layouts/Layout.astro";
+import { WeekPlannerContainer } from "@/components/plans/week";
+import { Toaster } from "@/components/ui/sonner";
+import type { PlanStatus } from "@/types";
 
 export const prerender = false;
 
@@ -21,10 +21,10 @@ const { id: planId, weekNumber: weekNumberParam } = Astro.params;
 
 // Validate params
 if (!planId) {
-  return Astro.redirect('/plans');
+  return Astro.redirect("/plans");
 }
 
-const weekNumber = parseInt(weekNumberParam || '1', 10);
+const weekNumber = parseInt(weekNumberParam || "1", 10);
 
 // Validate week number (1-12)
 if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
@@ -35,7 +35,7 @@ if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
 const userId = Astro.locals.user?.id;
 
 if (!userId) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 
 // Fetch plan data on server
@@ -45,27 +45,25 @@ let plan;
 try {
   plan = await planService.getPlanById(planId, userId);
 } catch (error) {
-  console.error('Error fetching plan:', error);
+  console.error("Error fetching plan:", error);
 }
 
 // Redirect if plan not found
 if (!plan) {
-  return Astro.redirect('/plans');
+  return Astro.redirect("/plans");
 }
-
 
 // Parse start date
 const startDate = new Date(plan.start_date);
 
 // Calculate end date (12 weeks from start)
 const endDate = new Date(startDate);
-endDate.setDate(startDate.getDate() + (12 * 7) - 1);
+endDate.setDate(startDate.getDate() + 12 * 7 - 1);
 
 // Check if the requested week is valid based on plan dates
 const currentDate = new Date();
 const weekStartDate = new Date(startDate);
 weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
-
 ---
 
 <Layout title={`${plan.name} - Week ${weekNumber}`}>
@@ -79,4 +77,3 @@ weekStartDate.setDate(weekStartDate.getDate() + (weekNumber - 1) * 7);
   />
   <Toaster client:load position="bottom-right" />
 </Layout>
-

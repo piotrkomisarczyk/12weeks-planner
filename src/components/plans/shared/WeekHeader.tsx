@@ -1,13 +1,13 @@
 /**
  * WeekHeader Component
- * 
+ *
  * Navigation header for week view showing week number, date range, and navigation controls.
  */
 
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface WeekHeaderProps {
   weekNumber: number;
@@ -19,15 +19,15 @@ interface WeekHeaderProps {
 function getWeekDateRange(startDate: Date, weekNumber: number): { start: Date; end: Date } {
   const weekStart = new Date(startDate);
   weekStart.setDate(weekStart.getDate() + (weekNumber - 1) * 7);
-  
+
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
-  
+
   return { start: weekStart, end: weekEnd };
 }
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: WeekHeaderProps) {
@@ -38,39 +38,24 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
   return (
     <Card className="rounded-lg">
       <CardContent>
-
         {/* Week Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold">
-              Week {weekNumber}
-            </h1>
+            <h1 className="text-3xl font-bold">Week {weekNumber}</h1>
             <div className="text-base text-muted-foreground">
               {formatDate(start)} - {formatDate(end)}
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigate(weekNumber - 1)}
-              disabled={!canGoPrev}
-            >
+            <Button variant="outline" size="sm" onClick={() => onNavigate(weekNumber - 1)} disabled={!canGoPrev}>
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </Button>
-            
-            <div className="text-sm text-muted-foreground px-2">
-              {weekNumber} / 12
-            </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigate(weekNumber + 1)}
-              disabled={!canGoNext}
-            >
+
+            <div className="text-sm text-muted-foreground px-2">{weekNumber} / 12</div>
+
+            <Button variant="outline" size="sm" onClick={() => onNavigate(weekNumber + 1)} disabled={!canGoNext}>
               Next
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
@@ -85,12 +70,12 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
                 key={week}
                 onClick={() => onNavigate(week)}
                 className={cn(
-                  'flex-1 py-0.75 px-1 text-center rounded-md transition-all text-xs font-medium',
+                  "flex-1 py-0.75 px-1 text-center rounded-md transition-all text-xs font-medium",
                   week === weekNumber
-                    ? 'bg-primary text-primary-foreground'
+                    ? "bg-primary text-primary-foreground"
                     : week < weekNumber
-                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      ? "bg-primary/20 text-primary hover:bg-primary/30"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                 )}
                 title={`Week ${week}`}
               >
@@ -103,4 +88,3 @@ export function WeekHeader({ weekNumber, startDate, planName, onNavigate }: Week
     </Card>
   );
 }
-

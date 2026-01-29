@@ -1,7 +1,7 @@
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DatePicker } from '../DatePicker';
-import type { PlanDetailsData } from '@/types';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DatePicker } from "../DatePicker";
+import type { PlanDetailsData } from "@/types";
 
 interface PlanDetailsFormProps {
   data: PlanDetailsData;
@@ -33,8 +33,7 @@ export function PlanDetailsForm({ data, onChange, errors }: PlanDetailsFormProps
       <div className="rounded-lg border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">Plan Details</h2>
         <p className="text-muted-foreground mb-6 text-sm">
-          Set a name for your 12-week plan and choose when it should start. The plan must
-          start on a Monday.
+          Set a name for your 12-week plan and choose when it should start. The plan must start on a Monday.
         </p>
 
         <div className="space-y-4">
@@ -50,14 +49,12 @@ export function PlanDetailsForm({ data, onChange, errors }: PlanDetailsFormProps
               onChange={handleNameChange}
               placeholder="e.g., Q1 2026 Goals"
               maxLength={255}
-              aria-invalid={!!errors['details.name']}
-              aria-describedby={
-                errors['details.name'] ? 'plan-name-error' : undefined
-              }
+              aria-invalid={!!errors["details.name"]}
+              aria-describedby={errors["details.name"] ? "plan-name-error" : undefined}
             />
-            {errors['details.name'] && (
+            {errors["details.name"] && (
               <p id="plan-name-error" className="text-sm text-destructive">
-                {errors['details.name']}
+                {errors["details.name"]}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
@@ -70,19 +67,14 @@ export function PlanDetailsForm({ data, onChange, errors }: PlanDetailsFormProps
             <Label htmlFor="start-date">
               Start Date <span className="text-destructive">*</span>
             </Label>
-            <DatePicker
-              value={data.startDate}
-              onChange={handleDateChange}
-              error={errors['details.startDate']}
-            />
-            {errors['details.startDate'] && (
+            <DatePicker value={data.startDate} onChange={handleDateChange} error={errors["details.startDate"]} />
+            {errors["details.startDate"] && (
               <p id="start-date-error" className="text-sm text-destructive">
-                {errors['details.startDate']}
+                {errors["details.startDate"]}
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              Select a Monday as the start date for your 12-week plan. Only Mondays can
-              be selected.
+              Select a Monday as the start date for your 12-week plan. Only Mondays can be selected.
             </p>
           </div>
         </div>
@@ -90,4 +82,3 @@ export function PlanDetailsForm({ data, onChange, errors }: PlanDetailsFormProps
     </div>
   );
 }
-

@@ -4,9 +4,9 @@
  * Includes confetti animation when reaching 100%
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Slider } from '@/components/ui/slider';
-import confetti from 'canvas-confetti';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { Slider } from "@/components/ui/slider";
+import confetti from "canvas-confetti";
 
 interface GoalProgressProps {
   progress: number;
@@ -49,7 +49,7 @@ export function GoalProgress({ progress, onChange, disabled = false }: GoalProgr
       return Math.random() * (max - min) + min;
     }
 
-    const interval = setInterval(function() {
+    const interval = setInterval(function () {
       const timeLeft = animationEnd - Date.now();
 
       if (timeLeft <= 0) {
@@ -57,51 +57,52 @@ export function GoalProgress({ progress, onChange, disabled = false }: GoalProgr
       }
 
       const particleCount = 50 * (timeLeft / duration);
-      
+
       confetti({
         ...defaults,
         particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
       });
       confetti({
         ...defaults,
         particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
       });
     }, 250);
   }, []);
 
   // Handle slider change with debounce
-  const handleSliderChange = useCallback((values: number[]) => {
-    const newProgress = values[0];
-    setLocalProgress(newProgress);
+  const handleSliderChange = useCallback(
+    (values: number[]) => {
+      const newProgress = values[0];
+      setLocalProgress(newProgress);
 
-    // Trigger confetti when reaching 100% for the first time
-    if (newProgress === 100 && !hasShownConfetti) {
-      triggerConfetti();
-      setHasShownConfetti(true);
-    }
+      // Trigger confetti when reaching 100% for the first time
+      if (newProgress === 100 && !hasShownConfetti) {
+        triggerConfetti();
+        setHasShownConfetti(true);
+      }
 
-    // Clear previous timeout
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+      // Clear previous timeout
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
 
-    // Debounced update to parent (500ms)
-    debounceTimerRef.current = setTimeout(() => {
-      onChange(newProgress);
-    }, 500);
-  }, [onChange, hasShownConfetti, triggerConfetti]);
+      // Debounced update to parent (500ms)
+      debounceTimerRef.current = setTimeout(() => {
+        onChange(newProgress);
+      }, 500);
+    },
+    [onChange, hasShownConfetti, triggerConfetti]
+  );
 
   return (
     <div className="space-y-3 p-1">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">Progress</span>
-        <span className="text-sm font-semibold text-primary">
-          {localProgress}%
-        </span>
+        <span className="text-sm font-semibold text-primary">{localProgress}%</span>
       </div>
-      
+
       <Slider
         value={[localProgress]}
         onValueChange={handleSliderChange}
@@ -114,4 +115,3 @@ export function GoalProgress({ progress, onChange, disabled = false }: GoalProgr
     </div>
   );
 }
-

@@ -2,18 +2,18 @@
 /**
  * Day Planning View Page
  * Route: /plans/[id]/week/[weekNumber]/day/[dayNumber]
- * 
+ *
  * Allows users to plan their day with priority-based task slots
  * Server-side: Fetches plan data for context and validation
  * Client-side: React island for interactive day planning
  */
 
-import { PlanService } from '@/lib/services/plan.service';
-import Layout from '@/layouts/Layout.astro';
-import { DayPageContainer } from '@/components/plans/day';
-import { Toaster } from '@/components/ui/sonner';
-import { getMondayOffset } from '@/lib/utils';
-import type { PlanStatus } from '@/types';
+import { PlanService } from "@/lib/services/plan.service";
+import Layout from "@/layouts/Layout.astro";
+import { DayPageContainer } from "@/components/plans/day";
+import { Toaster } from "@/components/ui/sonner";
+import { getMondayOffset } from "@/lib/utils";
+import type { PlanStatus } from "@/types";
 
 export const prerender = false;
 
@@ -22,11 +22,11 @@ const { id: planId, weekNumber: weekNumberParam, dayNumber: dayNumberParam } = A
 
 // Validate params
 if (!planId) {
-  return Astro.redirect('/plans');
+  return Astro.redirect("/plans");
 }
 
-const weekNumber = parseInt(weekNumberParam || '1', 10);
-const dayNumber = parseInt(dayNumberParam || '1', 10);
+const weekNumber = parseInt(weekNumberParam || "1", 10);
+const dayNumber = parseInt(dayNumberParam || "1", 10);
 
 // Validate week number (1-12)
 if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
@@ -42,7 +42,7 @@ if (isNaN(dayNumber) || dayNumber < 1 || dayNumber > 7) {
 const userId = Astro.locals.user?.id;
 
 if (!userId) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 
 // Fetch plan data on server
@@ -52,17 +52,16 @@ let plan;
 try {
   plan = await planService.getPlanById(planId, userId);
 } catch (error) {
-  console.error('Error fetching plan:', error);
+  console.error("Error fetching plan:", error);
 }
 
 // Redirect if plan not found
 if (!plan) {
-  return Astro.redirect('/plans');
+  return Astro.redirect("/plans");
 }
 
-
 // Parse start date - use timezone-safe parsing by splitting the date string
-const [year, month, day] = plan.start_date.split('-').map(Number);
+const [year, month, day] = plan.start_date.split("-").map(Number);
 const startDate = new Date(year, month - 1, day);
 
 // Calculate week start date (Monday of the week containing plan start)
@@ -72,7 +71,7 @@ weekStartDate.setDate(weekStartDate.getDate() + mondayOffset);
 
 // Calculate end date (12 weeks from week start)
 const endDate = new Date(weekStartDate);
-endDate.setDate(weekStartDate.getDate() + (12 * 7) - 1);
+endDate.setDate(weekStartDate.getDate() + 12 * 7 - 1);
 
 // Check if the requested week/day is valid based on plan dates
 const currentDate = new Date();
@@ -84,13 +83,12 @@ if (dayDate > endDate) {
   return Astro.redirect(`/plans/${planId}/week/12/day/7`);
 }
 
-
 // Compute display date for the day
-const displayDate = dayDate.toLocaleDateString('en-US', { 
-  weekday: 'long', 
-  year: 'numeric', 
-  month: 'long', 
-  day: 'numeric' 
+const displayDate = dayDate.toLocaleDateString("en-US", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
 });
 ---
 
@@ -108,4 +106,3 @@ const displayDate = dayDate.toLocaleDateString('en-US', {
     <Toaster client:load position="bottom-right" />
   </div>
 </Layout>
-

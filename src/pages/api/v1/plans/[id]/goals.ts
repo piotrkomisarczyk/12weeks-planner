@@ -1,10 +1,10 @@
 /**
  * API Endpoints: /api/v1/plans/:planId/goals
  * GET - Retrieves all goals for a specific plan
- * 
+ *
  * URL Parameters:
  * - planId: UUID (required)
- * 
+ *
  * Responses:
  * - 200: OK with goals array
  * - 400: Invalid plan ID format
@@ -12,17 +12,12 @@
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { GoalService } from '../../../../../lib/services/goal.service';
-import { PlanService } from '../../../../../lib/services/plan.service';
-import { PlanIdParamsSchema } from '../../../../../lib/validation/plan.validation';
-import { GetUnauthorizedResponse } from '../../../../../lib/utils';
-import type { 
-  ErrorResponse,
-  ValidationErrorResponse, 
-  ListResponse, 
-  GoalDTO 
-} from '../../../../../types';
+import type { APIRoute } from "astro";
+import { GoalService } from "../../../../../lib/services/goal.service";
+import { PlanService } from "../../../../../lib/services/plan.service";
+import { PlanIdParamsSchema } from "../../../../../lib/validation/plan.validation";
+import { GetUnauthorizedResponse } from "../../../../../lib/utils";
+import type { ErrorResponse, ValidationErrorResponse, ListResponse, GoalDTO } from "../../../../../types";
 
 export const prerender = false;
 
@@ -34,7 +29,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
   try {
     // Step 1: Authentication
     const userId = locals.user?.id;
-    
+
     if (!userId) {
       return GetUnauthorizedResponse();
     }
@@ -43,16 +38,16 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const validationResult = PlanIdParamsSchema.safeParse(params);
 
     if (!validationResult.success) {
-      const details = validationResult.error.issues.map(issue => ({
-        field: issue.path.join('.'),
+      const details = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join("."),
         message: issue.message,
-        received: 'input' in issue ? issue.input : undefined
+        received: "input" in issue ? issue.input : undefined,
       }));
 
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details } as ValidationErrorResponse),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Validation failed", details } as ValidationErrorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { id: planId } = validationResult.data;
@@ -62,10 +57,10 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const plan = await planService.getPlanById(planId, userId);
 
     if (!plan) {
-      return new Response(
-        JSON.stringify({ error: 'Not found', message: 'Plan not found' } as ErrorResponse),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Not found", message: "Plan not found" } as ErrorResponse), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Step 4: Get goals for plan
@@ -73,24 +68,21 @@ export const GET: APIRoute = async ({ locals, params }) => {
     const goals = await goalService.getGoalsByPlanId(planId, userId);
 
     // Step 5: Return success
-    return new Response(
-      JSON.stringify({ data: goals } as ListResponse<GoalDTO>),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
-      }
-    );
+    return new Response(JSON.stringify({ data: goals } as ListResponse<GoalDTO>), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
-    console.error('Error in GET /api/v1/plans/:planId/goals:', error);
+    console.error("Error in GET /api/v1/plans/:planId/goals:", error);
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };

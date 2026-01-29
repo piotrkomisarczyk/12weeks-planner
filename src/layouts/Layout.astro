@@ -1,10 +1,10 @@
 ---
 import "../styles/global.css";
-import type { PlanSummary, PlanStatus } from '@/types';
-import { createServerClient } from '@supabase/ssr';
-import { PlanService } from '@/lib/services/plan.service';
-import TopNavigation from '@/components/navigation/TopNavigation.astro';
-import { Toaster } from '@/components/ui/sonner';
+import type { PlanSummary, PlanStatus } from "@/types";
+import { createServerClient } from "@supabase/ssr";
+import { PlanService } from "@/lib/services/plan.service";
+import TopNavigation from "@/components/navigation/TopNavigation.astro";
+import { Toaster } from "@/components/ui/sonner";
 
 interface Props {
   title?: string;
@@ -13,40 +13,38 @@ interface Props {
 const { title = "12 Weeks Planner" } = Astro.props;
 
 // Initialize Supabase server client
-const supabase = createServerClient(
-  import.meta.env.SUPABASE_URL,
-  import.meta.env.SUPABASE_KEY,
-  {
-    cookies: {
-      get(key) {
-        return Astro.cookies.get(key)?.value;
-      },
-      set(key, value, options) {
-        Astro.cookies.set(key, value, options);
-      },
-      remove(key, options) {
-        Astro.cookies.delete(key, options);
-      },
+const supabase = createServerClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_KEY, {
+  cookies: {
+    get(key) {
+      return Astro.cookies.get(key)?.value;
     },
-  }
-);
+    set(key, value, options) {
+      Astro.cookies.set(key, value, options);
+    },
+    remove(key, options) {
+      Astro.cookies.delete(key, options);
+    },
+  },
+});
 
 // Get current user - middleware should have already verified authentication
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 const userId = user?.id;
 
 // Extract plan ID from URL if we're in a plan context
-const urlParts = Astro.url.pathname.split('/').filter(Boolean);
+const urlParts = Astro.url.pathname.split("/").filter(Boolean);
 let plan: PlanSummary | null = null;
 
 // Check if we're on a plan-specific page: /plans/[id]/...
-if (userId && urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
+if (userId && urlParts[0] === "plans" && urlParts.length >= 2 && urlParts[1].match(/^[a-f0-9-]{36}$/i)) {
   const planId = urlParts[1];
-  
+
   try {
     const planService = new PlanService(supabase);
     const fullPlan = await planService.getPlanById(planId, userId);
-    
+
     if (fullPlan) {
       // Create a minimal PlanSummary for navigation
       plan = {
@@ -57,12 +55,12 @@ if (userId && urlParts[0] === 'plans' && urlParts.length >= 2 && urlParts[1].mat
       };
     }
   } catch (error) {
-    console.error('Failed to fetch plan for navigation:', error);
+    console.error("Failed to fetch plan for navigation:", error);
     // Continue without plan data - TopNavigation will handle null plan
   }
 }
 
-const userEmail = user?.email || 'dev@example.com';
+const userEmail = user?.email || "dev@example.com";
 ---
 
 <!doctype html>
@@ -75,11 +73,11 @@ const userEmail = user?.email || 'dev@example.com';
     <script is:inline>
       (() => {
         try {
-          const stored = localStorage.getItem('theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const shouldUseDark = stored === 'dark' || (!stored && prefersDark);
-          document.documentElement.classList.toggle('dark', shouldUseDark);
-          document.documentElement.style.colorScheme = shouldUseDark ? 'dark' : 'light';
+          const stored = localStorage.getItem("theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const shouldUseDark = stored === "dark" || (!stored && prefersDark);
+          document.documentElement.classList.toggle("dark", shouldUseDark);
+          document.documentElement.style.colorScheme = shouldUseDark ? "dark" : "light";
         } catch {
           // If localStorage is unavailable, fall back to CSS defaults.
         }

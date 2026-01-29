@@ -1,16 +1,16 @@
-import { Plus, Trash2, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Plus, Trash2, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { GoalFormData, GoalCategory } from '@/types';
+} from "@/components/ui/dropdown-menu";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import type { GoalFormData, GoalCategory } from "@/types";
 
 interface PlanGoalsFormProps {
   goals: GoalFormData[];
@@ -28,9 +28,9 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
 
     const newGoal: GoalFormData = {
       id: crypto.randomUUID(),
-      title: '',
-      category: 'development',
-      description: '',
+      title: "",
+      category: "development",
+      description: "",
     };
 
     onChange([...goals, newGoal]);
@@ -42,11 +42,7 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
   };
 
   const handleGoalChange = (id: string, field: keyof GoalFormData, value: string) => {
-    onChange(
-      goals.map((goal) =>
-        goal.id === id ? { ...goal, [field]: value } : goal
-      )
-    );
+    onChange(goals.map((goal) => (goal.id === id ? { ...goal, [field]: value } : goal)));
   };
 
   return (
@@ -54,24 +50,21 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
       <div className="rounded-lg border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">Long-Term Goals</h2>
         <p className="text-muted-foreground mb-6 text-sm">
-          Define 1 to 6 long-term goals you want to achieve during this 12-week period.
-          Each goal should be specific and meaningful.
+          Define 1 to 6 long-term goals you want to achieve during this 12-week period. Each goal should be specific and
+          meaningful.
         </p>
 
         {/* General error */}
-        {errors['goals'] && (
+        {errors["goals"] && (
           <div className="mb-4 rounded-md border border-destructive bg-destructive/10 p-3">
-            <p className="text-sm text-destructive">{errors['goals']}</p>
+            <p className="text-sm text-destructive">{errors["goals"]}</p>
           </div>
         )}
 
         {/* Goals List */}
         <div className="space-y-6">
           {goals.map((goal, index) => (
-            <div
-              key={goal.id}
-              className="relative space-y-4 rounded-md border bg-muted/30 p-4"
-            >
+            <div key={goal.id} className="relative space-y-4 rounded-md border bg-muted/30 p-4">
               {/* Goal Header */}
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">Goal {index + 1}</h3>
@@ -96,23 +89,14 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
                   id={`goal-title-${goal.id}`}
                   type="text"
                   value={goal.title}
-                  onChange={(e) =>
-                    handleGoalChange(goal.id, 'title', e.target.value)
-                  }
+                  onChange={(e) => handleGoalChange(goal.id, "title", e.target.value)}
                   maxLength={255}
                   placeholder="e.g., Launch new product"
                   aria-invalid={!!errors[`goals.${index}.title`]}
-                  aria-describedby={
-                    errors[`goals.${index}.title`]
-                      ? `goal-title-error-${goal.id}`
-                      : undefined
-                  }
+                  aria-describedby={errors[`goals.${index}.title`] ? `goal-title-error-${goal.id}` : undefined}
                 />
                 {errors[`goals.${index}.title`] && (
-                  <p
-                    id={`goal-title-error-${goal.id}`}
-                    className="text-sm text-destructive"
-                  >
+                  <p id={`goal-title-error-${goal.id}`} className="text-sm text-destructive">
                     {errors[`goals.${index}.title`]}
                   </p>
                 )}
@@ -140,9 +124,7 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
                   <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]" align="start">
                     <DropdownMenuRadioGroup
                       value={goal.category}
-                      onValueChange={(value) =>
-                        handleGoalChange(goal.id, 'category', value as GoalCategory)
-                      }
+                      onValueChange={(value) => handleGoalChange(goal.id, "category", value as GoalCategory)}
                     >
                       {GOAL_CATEGORIES.map((cat) => (
                         <DropdownMenuRadioItem key={cat.value} value={cat.value}>
@@ -161,15 +143,14 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
               {/* Goal Description */}
               <div className="space-y-2">
                 <Label htmlFor={`goal-description-${goal.id}`}>
-                  Description (Why do you want to achieve this goal?) <span className="text-muted-foreground">(Optional)</span>
+                  Description (Why do you want to achieve this goal?){" "}
+                  <span className="text-muted-foreground">(Optional)</span>
                 </Label>
                 <Input
                   id={`goal-description-${goal.id}`}
                   type="text"
                   value={goal.description}
-                  onChange={(e) =>
-                    handleGoalChange(goal.id, 'description', e.target.value)
-                  }
+                  onChange={(e) => handleGoalChange(goal.id, "description", e.target.value)}
                   placeholder="Add details about why is it important for you"
                 />
               </div>
@@ -199,4 +180,3 @@ export function PlanGoalsForm({ goals, onChange, errors }: PlanGoalsFormProps) {
     </div>
   );
 }
-

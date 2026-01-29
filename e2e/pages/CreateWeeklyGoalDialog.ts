@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 /**
  * Page Object Model for the Create Weekly Goal Dialog
@@ -14,18 +14,18 @@ export class CreateWeeklyGoalDialog {
 
   constructor(page: Page) {
     this.page = page;
-    this.dialog = page.getByTestId('create-weekly-goal-dialog');
-    this.titleInput = page.getByTestId('weekly-goal-title-input');
-    this.longTermGoalSelect = page.getByTestId('weekly-goal-longterm-select');
-    this.submitButton = page.getByTestId('create-weekly-goal-submit-button');
-    this.cancelButton = page.getByTestId('create-weekly-goal-cancel-button');
+    this.dialog = page.getByTestId("create-weekly-goal-dialog");
+    this.titleInput = page.getByTestId("weekly-goal-title-input");
+    this.longTermGoalSelect = page.getByTestId("weekly-goal-longterm-select");
+    this.submitButton = page.getByTestId("create-weekly-goal-submit-button");
+    this.cancelButton = page.getByTestId("create-weekly-goal-cancel-button");
   }
 
   /**
    * Wait for the dialog to be visible
    */
   async waitForDialog() {
-    await this.dialog.waitFor({ state: 'visible' });
+    await this.dialog.waitFor({ state: "visible" });
   }
 
   /**
@@ -41,10 +41,10 @@ export class CreateWeeklyGoalDialog {
   async selectLongTermGoal(goalTitle: string) {
     // Click the select trigger to open the dropdown
     await this.longTermGoalSelect.click();
-    
+
     // Wait for the dropdown to be visible and select the option
     const option = this.page.getByTestId(`longterm-goal-option-${goalTitle}`);
-    await option.waitFor({ state: 'visible' });
+    await option.waitFor({ state: "visible" });
     await option.click();
   }
 
@@ -53,7 +53,7 @@ export class CreateWeeklyGoalDialog {
    */
   async selectNoLongTermGoal() {
     await this.longTermGoalSelect.click();
-    const noneOption = this.page.getByTestId('longterm-goal-option-none');
+    const noneOption = this.page.getByTestId("longterm-goal-option-none");
     await noneOption.click();
   }
 
@@ -77,14 +77,14 @@ export class CreateWeeklyGoalDialog {
   async createGoal(title: string, longTermGoalTitle?: string) {
     await this.waitForDialog();
     await this.fillTitle(title);
-    
+
     if (longTermGoalTitle) {
       await this.selectLongTermGoal(longTermGoalTitle);
     }
-    
+
     await this.submit();
-    
+
     // Wait for dialog to close
-    await this.dialog.waitFor({ state: 'hidden' });
+    await this.dialog.waitFor({ state: "hidden" });
   }
 }

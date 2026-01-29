@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Calendar, Target, Clock, ClipboardList, ListTree } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
-import type { PlanDTO, DashboardMetrics, GoalDTO, GoalCategory } from '@/types';
+import { Button } from "@/components/ui/button";
+import { Calendar, Target, Clock, ClipboardList, ListTree } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
+import type { PlanDTO, DashboardMetrics, GoalDTO, GoalCategory } from "@/types";
 
 interface DashboardOverviewCardProps {
   plan: PlanDTO;
@@ -15,44 +15,49 @@ interface DashboardOverviewCardProps {
 
 const quickActions = [
   {
-    id: 'goals',
-    label: 'Goals View',
-    description: 'Manage your long-term goals',
+    id: "goals",
+    label: "Goals View",
+    description: "Manage your long-term goals",
     icon: Target,
-    url: 'goals',
-    color: 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 dark:bg-purple-950/40 dark:hover:bg-purple-950/60 dark:text-purple-200 dark:border-purple-900/60 dark:focus-visible:ring-purple-400',
+    url: "goals",
+    color:
+      "bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 dark:bg-purple-950/40 dark:hover:bg-purple-950/60 dark:text-purple-200 dark:border-purple-900/60 dark:focus-visible:ring-purple-400",
   },
   {
-    id: 'hierarchy-tree',
-    label: 'Hierarchy Tree',
-    description: 'See tasks hierarchy',
+    id: "hierarchy-tree",
+    label: "Hierarchy Tree",
+    description: "See tasks hierarchy",
     icon: ListTree,
-    url: 'hierarchy',
-    color: 'bg-teal-50 hover:bg-teal-100 text-teal-700 border-teal-200 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:bg-teal-950/40 dark:hover:bg-teal-950/60 dark:text-teal-200 dark:border-teal-900/60 dark:focus-visible:ring-teal-400',
+    url: "hierarchy",
+    color:
+      "bg-teal-50 hover:bg-teal-100 text-teal-700 border-teal-200 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:bg-teal-950/40 dark:hover:bg-teal-950/60 dark:text-teal-200 dark:border-teal-900/60 dark:focus-visible:ring-teal-400",
   },
   {
-    id: 'current-week',
-    label: 'Current Week',
-    description: 'Plan this week\'s activities',
+    id: "current-week",
+    label: "Current Week",
+    description: "Plan this week's activities",
     icon: Calendar,
-    url: 'week',
-    color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900/60 dark:focus-visible:ring-blue-400',
+    url: "week",
+    color:
+      "bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 dark:text-blue-200 dark:border-blue-900/60 dark:focus-visible:ring-blue-400",
   },
   {
-    id: 'today',
-    label: 'Today',
-    description: 'View today\'s tasks',
+    id: "today",
+    label: "Today",
+    description: "View today's tasks",
     icon: Clock,
-    url: 'day',
-    color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:bg-green-950/40 dark:hover:bg-green-950/60 dark:text-green-200 dark:border-green-900/60 dark:focus-visible:ring-green-400',
+    url: "day",
+    color:
+      "bg-green-50 hover:bg-green-100 text-green-700 border-green-200 focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:bg-green-950/40 dark:hover:bg-green-950/60 dark:text-green-200 dark:border-green-900/60 dark:focus-visible:ring-green-400",
   },
   {
-    id: 'summary',
-    label: 'Review',
-    description: 'View review for this week',
+    id: "summary",
+    label: "Review",
+    description: "View review for this week",
     icon: ClipboardList,
-    url: 'summary',
-    color: 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:bg-orange-950/40 dark:hover:bg-orange-950/60 dark:text-orange-200 dark:border-orange-900/60 dark:focus-visible:ring-orange-400',
+    url: "summary",
+    color:
+      "bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:bg-orange-950/40 dark:hover:bg-orange-950/60 dark:text-orange-200 dark:border-orange-900/60 dark:focus-visible:ring-orange-400",
   },
 ];
 
@@ -62,7 +67,7 @@ export function DashboardOverviewCard({
   goals,
   currentWeek,
   currentDay,
-  onNavigate
+  onNavigate,
 }: DashboardOverviewCardProps) {
   const handleActionClick = (url: string) => {
     if (onNavigate) {
@@ -70,16 +75,13 @@ export function DashboardOverviewCard({
     }
   };
 
-  const progressPercentage = metrics.total_goals > 0
-    ? Math.round((metrics.completed_goals / metrics.total_goals) * 100)
-    : 0;
+  const progressPercentage =
+    metrics.total_goals > 0 ? Math.round((metrics.completed_goals / metrics.total_goals) * 100) : 0;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-foreground">
-          Dashboard
-        </CardTitle>
+        <CardTitle className="text-2xl font-bold text-foreground">Dashboard</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -90,19 +92,19 @@ export function DashboardOverviewCard({
             let url: string;
 
             switch (action.url) {
-              case 'week':
+              case "week":
                 url = `/plans/${plan.id}/week/${currentWeek}`;
                 break;
-              case 'day':
+              case "day":
                 url = `/plans/${plan.id}/week/${currentWeek}/day/${currentDay}`;
                 break;
-              case 'hierarchy':
+              case "hierarchy":
                 url = `/plans/${plan.id}/hierarchy`;
                 break;
-              case 'goals':
+              case "goals":
                 url = `/plans/${plan.id}/goals`;
                 break;
-              case 'summary':
+              case "summary":
                 url = `/plans/${plan.id}/review/1`;
                 break;
               default:
@@ -140,7 +142,7 @@ export function DashboardOverviewCard({
           <div className="text-center p-4 bg-blue-50 rounded-lg dark:bg-blue-950/40">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-200">
               {metrics.total_tasks === 0
-                ? '0.0%'
+                ? "0.0%"
                 : `${((metrics.completed_tasks * 100) / metrics.total_tasks).toFixed(1)} %`}
             </div>
             <div className="text-sm text-blue-700 dark:text-blue-300">Task Progress</div>
@@ -162,38 +164,37 @@ export function DashboardOverviewCard({
         {/* Goals Overview */}
         {goals.length > 0 && (
           <div className="space-y-4">
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
               {goals.slice(0, 6).map((goal) => {
                 const categoryKey = goal.category as GoalCategory | null;
                 const categoryLabel = categoryKey
-                  ? GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey
+                  ? (GOAL_CATEGORIES.find((category) => category.value === categoryKey)?.label ?? categoryKey)
                   : null;
 
                 return (
-                <div key={goal.id} className="bg-card p-4 rounded-lg border border-border hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-foreground truncate min-w-0" title={goal.title}>
-                      {goal.title}
-                    </h4>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {categoryKey && categoryLabel && (
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[categoryKey]}`}
-                        >
-                          {categoryLabel}
-                        </span>
-                      )}
-                      <span className="text-sm text-muted-foreground">{goal.progress_percentage}%</span>
+                  <div
+                    key={goal.id}
+                    className="bg-card p-4 rounded-lg border border-border hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-foreground truncate min-w-0" title={goal.title}>
+                        {goal.title}
+                      </h4>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {categoryKey && categoryLabel && (
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 ${GOAL_CATEGORY_COLORS[categoryKey]}`}
+                          >
+                            {categoryLabel}
+                          </span>
+                        )}
+                        <span className="text-sm text-muted-foreground">{goal.progress_percentage}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2 mb-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: `${goal.progress_percentage}%` }} />
                     </div>
                   </div>
-                  <div className="w-full bg-muted rounded-full h-2 mb-2">
-                    <div
-                      className="bg-primary h-2 rounded-full"
-                      style={{ width: `${goal.progress_percentage}%` }}
-                    />
-                  </div>
-                </div>
                 );
               })}
             </div>

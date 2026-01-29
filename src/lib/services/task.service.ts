@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '../../db/supabase.client';
+import type { SupabaseClient } from "../../db/supabase.client";
 import type {
   TaskDTO,
   TaskWithHistoryDTO,
@@ -9,24 +9,24 @@ import type {
   SuccessResponse,
   ErrorResponse,
   TasksByGoalParams,
-} from '../../types';
+} from "../../types";
 import type {
   ListTasksParams,
   DailyTasksParams,
   CreateTaskData,
   UpdateTaskData,
   CopyTaskData,
-} from '../validation/task.validation';
+} from "../validation/task.validation";
 
 /**
  * Task Service
- * 
+ *
  * Handles all business logic for task management including:
  * - Listing tasks with advanced filtering
  * - Getting daily tasks with A/B/C categorization
  * - CRUD operations for tasks
  * - Task copying functionality
- * 
+ *
  * All methods include proper error handling and validation.
  */
 export class TaskService {
@@ -35,41 +35,38 @@ export class TaskService {
   /**
    * List tasks with filtering and pagination
    * GET /api/v1/tasks
-   * 
+   *
    * @param params - Query parameters for filtering
    * @returns List of tasks with total count
    */
   async listTasks(params: ListTasksParams): Promise<ListResponse<TaskDTO> | ErrorResponse> {
     try {
-      let query = this.supabase
-        .from('tasks')
-        .select('*', { count: 'exact' })
-        .eq('plan_id', params.plan_id);
+      let query = this.supabase.from("tasks").select("*", { count: "exact" }).eq("plan_id", params.plan_id);
 
       // Apply optional filters
       if (params.week_number !== undefined && params.week_number !== null) {
-        query = query.eq('week_number', params.week_number);
+        query = query.eq("week_number", params.week_number);
       }
       if (params.due_day !== undefined && params.due_day !== null) {
-        query = query.eq('due_day', params.due_day);
+        query = query.eq("due_day", params.due_day);
       }
       if (params.task_type) {
-        query = query.eq('task_type', params.task_type);
+        query = query.eq("task_type", params.task_type);
       }
       if (params.weekly_goal_id) {
-        query = query.eq('weekly_goal_id', params.weekly_goal_id);
+        query = query.eq("weekly_goal_id", params.weekly_goal_id);
       }
       if (params.long_term_goal_id) {
-        query = query.eq('long_term_goal_id', params.long_term_goal_id);
+        query = query.eq("long_term_goal_id", params.long_term_goal_id);
       }
       if (params.milestone_id) {
-        query = query.eq('milestone_id', params.milestone_id);
+        query = query.eq("milestone_id", params.milestone_id);
       }
       if (params.status) {
-        query = query.eq('status', params.status);
+        query = query.eq("status", params.status);
       }
       if (params.priority) {
-        query = query.eq('priority', params.priority);
+        query = query.eq("priority", params.priority);
       }
 
       // Apply pagination
@@ -78,13 +75,13 @@ export class TaskService {
       query = query.range(offset, offset + limit - 1);
 
       // Order by position (default ordering)
-      query = query.order('position', { ascending: true });
+      query = query.order("position", { ascending: true });
 
       const { data, error, count } = await query;
 
       if (error) {
-        console.error('Error listing tasks:', error);
-        return { error: 'Failed to fetch tasks' };
+        console.error("Error listing tasks:", error);
+        return { error: "Failed to fetch tasks" };
       }
 
       return {
@@ -92,15 +89,15 @@ export class TaskService {
         count: count ?? undefined,
       };
     } catch (error) {
-      console.error('Unexpected error in listTasks:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in listTasks:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Get daily tasks with A/B/C categorization
    * GET /api/v1/tasks/daily
-   * 
+   *
    * @param params - Query parameters (plan_id, week_number, due_day)
    * @param planStartDate - Start date of the plan (for date calculation)
    * @returns Categorized tasks for the specified day
@@ -111,17 +108,17 @@ export class TaskService {
   ): Promise<ItemResponse<DailyTasksDTO> | ErrorResponse> {
     try {
       const { data: tasks, error } = await this.supabase
-        .from('tasks')
-        .select('id, title, priority, status, task_type')
-        .eq('plan_id', params.plan_id)
-        .eq('week_number', params.week_number)
-        .eq('due_day', params.due_day)
-        .order('priority', { ascending: true }) // A, B, C
-        .order('position', { ascending: true });
+        .from("tasks")
+        .select("id, title, priority, status, task_type")
+        .eq("plan_id", params.plan_id)
+        .eq("week_number", params.week_number)
+        .eq("due_day", params.due_day)
+        .order("priority", { ascending: true }) // A, B, C
+        .order("position", { ascending: true });
 
       if (error) {
-        console.error('Error fetching daily tasks:', error);
-        return { error: 'Failed to fetch daily tasks' };
+        console.error("Error fetching daily tasks:", error);
+        return { error: "Failed to fetch daily tasks" };
       }
 
       // Calculate actual date
@@ -129,12 +126,12 @@ export class TaskService {
       const dayOffset = params.due_day - 1;
       const taskDate = new Date(planStartDate);
       taskDate.setDate(taskDate.getDate() + weekOffset * 7 + dayOffset);
-      const dateString = taskDate.toISOString().split('T')[0];
+      const dateString = taskDate.toISOString().split("T")[0];
 
       // Categorize by priority
-      const mostImportant = tasks.find((t: { priority: string }) => t.priority === 'A') || null;
-      const secondary = tasks.filter((t: { priority: string }) => t.priority === 'B');
-      const additional = tasks.filter((t: { priority: string }) => t.priority === 'C');
+      const mostImportant = tasks.find((t: { priority: string }) => t.priority === "A") || null;
+      const secondary = tasks.filter((t: { priority: string }) => t.priority === "B");
+      const additional = tasks.filter((t: { priority: string }) => t.priority === "C");
 
       const dailyTasks: DailyTasksDTO = {
         date: dateString,
@@ -147,41 +144,37 @@ export class TaskService {
 
       return { data: dailyTasks };
     } catch (error) {
-      console.error('Unexpected error in getDailyTasks:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in getDailyTasks:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Get task by ID with history
    * GET /api/v1/tasks/:id
-   * 
+   *
    * @param taskId - Task UUID
    * @returns Task with history or error if not found
    */
   async getTaskById(taskId: string): Promise<ItemResponse<TaskWithHistoryDTO> | ErrorResponse> {
     try {
       // Fetch task
-      const { data: task, error: taskError } = await this.supabase
-        .from('tasks')
-        .select('*')
-        .eq('id', taskId)
-        .single();
+      const { data: task, error: taskError } = await this.supabase.from("tasks").select("*").eq("id", taskId).single();
 
       if (taskError || !task) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // Fetch history
       const { data: history, error: historyError } = await this.supabase
-        .from('task_history')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('changed_at', { ascending: true });
+        .from("task_history")
+        .select("*")
+        .eq("task_id", taskId)
+        .order("changed_at", { ascending: true });
 
       if (historyError) {
-        console.error('Error fetching task history:', historyError);
-        return { error: 'Failed to fetch task history' };
+        console.error("Error fetching task history:", historyError);
+        return { error: "Failed to fetch task history" };
       }
 
       const taskWithHistory: TaskWithHistoryDTO = {
@@ -191,15 +184,15 @@ export class TaskService {
 
       return { data: taskWithHistory };
     } catch (error) {
-      console.error('Unexpected error in getTaskById:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in getTaskById:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Create a new task
    * POST /api/v1/tasks
-   * 
+   *
    * @param taskData - Task creation data
    * @returns Created task or error
    */
@@ -207,184 +200,178 @@ export class TaskService {
     try {
       // Verify plan exists (RLS will also check ownership)
       const { data: plan, error: planError } = await this.supabase
-        .from('plans')
-        .select('id')
-        .eq('id', taskData.plan_id)
+        .from("plans")
+        .select("id")
+        .eq("id", taskData.plan_id)
         .single();
 
       if (planError || !plan) {
-        return { error: 'Plan not found' };
+        return { error: "Plan not found" };
       }
 
       // If weekly_goal_id provided, verify it exists
       if (taskData.weekly_goal_id) {
         const { data: weeklyGoal, error: goalError } = await this.supabase
-          .from('weekly_goals')
-          .select('id')
-          .eq('id', taskData.weekly_goal_id)
+          .from("weekly_goals")
+          .select("id")
+          .eq("id", taskData.weekly_goal_id)
           .single();
 
         if (goalError || !weeklyGoal) {
-          return { error: 'Weekly goal not found' };
+          return { error: "Weekly goal not found" };
         }
       }
 
       // If long_term_goal_id provided, verify it exists
       if (taskData.long_term_goal_id) {
         const { data: longTermGoal, error: goalError } = await this.supabase
-          .from('long_term_goals')
-          .select('id')
-          .eq('id', taskData.long_term_goal_id)
+          .from("long_term_goals")
+          .select("id")
+          .eq("id", taskData.long_term_goal_id)
           .single();
 
         if (goalError || !longTermGoal) {
-          return { error: 'Long-term goal not found' };
+          return { error: "Long-term goal not found" };
         }
       }
 
       // If milestone_id provided, verify it exists
       if (taskData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
-          .from('milestones')
-          .select('id')
-          .eq('id', taskData.milestone_id)
+          .from("milestones")
+          .select("id")
+          .eq("id", taskData.milestone_id)
           .single();
 
         if (milestoneError || !milestone) {
-          return { error: 'Milestone not found' };
+          return { error: "Milestone not found" };
         }
       }
 
       // Insert task
       const { data: newTask, error: insertError } = await this.supabase
-        .from('tasks')
+        .from("tasks")
         .insert(taskData)
         .select()
         .single();
 
       if (insertError) {
         // Check for constraint violations (triggers)
-        if (insertError.message.includes('Cannot add more than')) {
+        if (insertError.message.includes("Cannot add more than")) {
           return { error: insertError.message };
         }
-        console.error('Error creating task:', insertError);
-        return { error: 'Failed to create task' };
+        console.error("Error creating task:", insertError);
+        return { error: "Failed to create task" };
       }
 
       return { data: newTask as TaskDTO };
     } catch (error) {
-      console.error('Unexpected error in createTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in createTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Update task
    * PATCH /api/v1/tasks/:id
-   * 
+   *
    * @param taskId - Task UUID
    * @param updateData - Fields to update
    * @returns Updated task or error
    */
-  async updateTask(
-    taskId: string,
-    updateData: UpdateTaskData
-  ): Promise<ItemResponse<TaskDTO> | ErrorResponse> {
+  async updateTask(taskId: string, updateData: UpdateTaskData): Promise<ItemResponse<TaskDTO> | ErrorResponse> {
     try {
       // Check if task exists
       const { data: existingTask, error: fetchError } = await this.supabase
-        .from('tasks')
-        .select('id')
-        .eq('id', taskId)
+        .from("tasks")
+        .select("id")
+        .eq("id", taskId)
         .single();
 
       if (fetchError || !existingTask) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // If weekly_goal_id provided, verify it exists
       if (updateData.weekly_goal_id) {
         const { data: weeklyGoal, error: goalError } = await this.supabase
-          .from('weekly_goals')
-          .select('id')
-          .eq('id', updateData.weekly_goal_id)
+          .from("weekly_goals")
+          .select("id")
+          .eq("id", updateData.weekly_goal_id)
           .single();
 
         if (goalError || !weeklyGoal) {
-          return { error: 'Weekly goal not found' };
+          return { error: "Weekly goal not found" };
         }
       }
 
       // If long_term_goal_id provided, verify it exists
       if (updateData.long_term_goal_id) {
         const { data: longTermGoal, error: goalError } = await this.supabase
-          .from('long_term_goals')
-          .select('id')
-          .eq('id', updateData.long_term_goal_id)
+          .from("long_term_goals")
+          .select("id")
+          .eq("id", updateData.long_term_goal_id)
           .single();
 
         if (goalError || !longTermGoal) {
-          return { error: 'Long-term goal not found' };
+          return { error: "Long-term goal not found" };
         }
       }
 
       // If milestone_id provided, verify it exists
       if (updateData.milestone_id) {
         const { data: milestone, error: milestoneError } = await this.supabase
-          .from('milestones')
-          .select('id')
-          .eq('id', updateData.milestone_id)
+          .from("milestones")
+          .select("id")
+          .eq("id", updateData.milestone_id)
           .single();
 
         if (milestoneError || !milestone) {
-          return { error: 'Milestone not found' };
+          return { error: "Milestone not found" };
         }
       }
 
       // Update task
       const { data: updatedTask, error: updateError } = await this.supabase
-        .from('tasks')
+        .from("tasks")
         .update(updateData)
-        .eq('id', taskId)
+        .eq("id", taskId)
         .select()
         .single();
 
       if (updateError) {
-        console.error('Error updating task:', updateError);
-        return { error: 'Failed to update task' };
+        console.error("Error updating task:", updateError);
+        return { error: "Failed to update task" };
       }
 
       // Trigger log_task_status_change will automatically log status changes
 
       return { data: updatedTask as TaskDTO };
     } catch (error) {
-      console.error('Unexpected error in updateTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in updateTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Copy task to another week/day
    * POST /api/v1/tasks/:id/copy
-   * 
+   *
    * @param taskId - Task UUID to copy
    * @param copyData - New week_number and/or due_day
    * @returns Copied task or error
    */
-  async copyTask(
-    taskId: string,
-    copyData: CopyTaskData
-  ): Promise<SuccessResponse | ErrorResponse> {
+  async copyTask(taskId: string, copyData: CopyTaskData): Promise<SuccessResponse | ErrorResponse> {
     try {
       // Fetch original task
       const { data: originalTask, error: fetchError } = await this.supabase
-        .from('tasks')
-        .select('*')
-        .eq('id', taskId)
+        .from("tasks")
+        .select("*")
+        .eq("id", taskId)
         .single();
 
       if (fetchError || !originalTask) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // Create new task with copied data
@@ -396,7 +383,7 @@ export class TaskService {
         title: originalTask.title,
         description: originalTask.description,
         priority: originalTask.priority,
-        status: 'todo' as const, // Reset status
+        status: "todo" as const, // Reset status
         task_type: originalTask.task_type,
         week_number: copyData.week_number ?? originalTask.week_number,
         due_day: copyData.due_day ?? originalTask.due_day,
@@ -404,30 +391,30 @@ export class TaskService {
       };
 
       const { data: copiedTask, error: insertError } = await this.supabase
-        .from('tasks')
+        .from("tasks")
         .insert(newTaskData)
         .select()
         .single();
 
       if (insertError) {
-        console.error('Error copying task:', insertError);
-        return { error: 'Failed to copy task' };
+        console.error("Error copying task:", insertError);
+        return { error: "Failed to copy task" };
       }
 
       return {
         data: copiedTask,
-        message: 'Task copied successfully',
+        message: "Task copied successfully",
       };
     } catch (error) {
-      console.error('Unexpected error in copyTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in copyTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Delete task
    * DELETE /api/v1/tasks/:id
-   * 
+   *
    * @param taskId - Task UUID
    * @returns Success message or error
    */
@@ -435,37 +422,34 @@ export class TaskService {
     try {
       // Check if task exists
       const { data: existingTask, error: fetchError } = await this.supabase
-        .from('tasks')
-        .select('id')
-        .eq('id', taskId)
+        .from("tasks")
+        .select("id")
+        .eq("id", taskId)
         .single();
 
       if (fetchError || !existingTask) {
-        return { error: 'Task not found' };
+        return { error: "Task not found" };
       }
 
       // Delete task (cascades to task_history)
-      const { error: deleteError } = await this.supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId);
+      const { error: deleteError } = await this.supabase.from("tasks").delete().eq("id", taskId);
 
       if (deleteError) {
-        console.error('Error deleting task:', deleteError);
-        return { error: 'Failed to delete task' };
+        console.error("Error deleting task:", deleteError);
+        return { error: "Failed to delete task" };
       }
 
-      return { message: 'Task deleted successfully' };
+      return { message: "Task deleted successfully" };
     } catch (error) {
-      console.error('Unexpected error in deleteTask:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in deleteTask:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Get status change history for a task
    * GET /api/v1/tasks/:taskId/history
-   * 
+   *
    * @param taskId - Task UUID
    * @returns Array of task history entries ordered by changed_at
    */
@@ -473,38 +457,34 @@ export class TaskService {
     try {
       // Query task_history table
       const { data, error } = await this.supabase
-        .from('task_history')
-        .select('*')
-        .eq('task_id', taskId)
-        .order('changed_at', { ascending: true });
+        .from("task_history")
+        .select("*")
+        .eq("task_id", taskId)
+        .order("changed_at", { ascending: true });
 
       if (error) {
-        console.error('Error fetching task history:', error);
-        return { error: 'Failed to fetch task history' };
+        console.error("Error fetching task history:", error);
+        return { error: "Failed to fetch task history" };
       }
 
       return {
         data: data as TaskHistoryDTO[],
       };
     } catch (error) {
-      console.error('Unexpected error in getTaskHistory:', error);
-      return { error: 'Internal server error' };
+      console.error("Unexpected error in getTaskHistory:", error);
+      return { error: "Internal server error" };
     }
   }
 
   /**
    * Helper: Get plan start date (needed for getDailyTasks)
-   * 
+   *
    * @param planId - Plan UUID
    * @returns Plan start date or null if not found
    */
   async getPlanStartDate(planId: string): Promise<Date | null> {
     try {
-      const { data, error } = await this.supabase
-        .from('plans')
-        .select('start_date')
-        .eq('id', planId)
-        .single();
+      const { data, error } = await this.supabase.from("plans").select("start_date").eq("id", planId).single();
 
       if (error || !data) {
         return null;
@@ -512,7 +492,7 @@ export class TaskService {
 
       return new Date(data.start_date);
     } catch (error) {
-      console.error('Error fetching plan start date:', error);
+      console.error("Error fetching plan start date:", error);
       return null;
     }
   }
@@ -520,34 +500,31 @@ export class TaskService {
   /**
    * Helper: Get milestone IDs for a specific goal
    * Private method used by getTasksByGoalId
-   * 
+   *
    * @param goalId - Long-term goal UUID
    * @returns Array of milestone IDs
    */
   private async getMilestoneIdsByGoalId(goalId: string): Promise<string[]> {
-    const { data, error } = await this.supabase
-      .from('milestones')
-      .select('id')
-      .eq('long_term_goal_id', goalId);
+    const { data, error } = await this.supabase.from("milestones").select("id").eq("long_term_goal_id", goalId);
 
     if (error) {
-      console.error('Error fetching milestone IDs:', error);
-      throw new Error('Failed to fetch milestone IDs');
+      console.error("Error fetching milestone IDs:", error);
+      throw new Error("Failed to fetch milestone IDs");
     }
 
-    return (data || []).map(m => m.id);
+    return (data || []).map((m) => m.id);
   }
 
   /**
    * Get all tasks associated with a specific long-term goal
    * Includes both direct tasks (long_term_goal_id) and indirect tasks (via milestones)
    * GET /api/v1/goals/:goalId/tasks
-   * 
+   *
    * @param goalId - Long-term goal UUID
    * @param userId - User ID for security verification
    * @param params - Query parameters (status, week_number, include_milestone_tasks, limit, offset)
    * @returns Tasks with count
-   * 
+   *
    * @example
    * ```typescript
    * const result = await taskService.getTasksByGoalId(goalId, userId, {
@@ -569,27 +546,29 @@ export class TaskService {
       // Build base query for direct tasks (long_term_goal_id = goalId)
       // Use INNER JOIN with long_term_goals to verify user ownership at database level
       let directQuery = this.supabase
-        .from('tasks')
-        .select(`
+        .from("tasks")
+        .select(
+          `
           *,
           long_term_goals!inner(user_id)
-        `)
-        .eq('long_term_goal_id', goalId)
-        .eq('long_term_goals.user_id', userId);
+        `
+        )
+        .eq("long_term_goal_id", goalId)
+        .eq("long_term_goals.user_id", userId);
 
       // Apply optional filters to direct query
       if (params.status) {
-        directQuery = directQuery.eq('status', params.status);
+        directQuery = directQuery.eq("status", params.status);
       }
       if (params.week_number !== undefined) {
-        directQuery = directQuery.eq('week_number', params.week_number);
+        directQuery = directQuery.eq("week_number", params.week_number);
       }
 
       const { data: directTasks, error: directError } = await directQuery;
 
       if (directError) {
-        console.error('Error fetching direct tasks:', directError);
-        throw new Error('Failed to fetch direct tasks');
+        console.error("Error fetching direct tasks:", directError);
+        throw new Error("Failed to fetch direct tasks");
       }
 
       let allTasks: any[] = directTasks || [];
@@ -602,37 +581,39 @@ export class TaskService {
           // Build query for indirect tasks (via milestones)
           // Use INNER JOIN to verify user ownership through milestone -> goal -> user chain
           let milestoneQuery = this.supabase
-            .from('tasks')
-            .select(`
+            .from("tasks")
+            .select(
+              `
               *,
               milestones!inner(
                 long_term_goal_id,
                 long_term_goals!inner(user_id)
               )
-            `)
-            .in('milestone_id', milestoneIds)
-            .eq('milestones.long_term_goals.user_id', userId);
+            `
+            )
+            .in("milestone_id", milestoneIds)
+            .eq("milestones.long_term_goals.user_id", userId);
 
           // Apply same filters to milestone query
           if (params.status) {
-            milestoneQuery = milestoneQuery.eq('status', params.status);
+            milestoneQuery = milestoneQuery.eq("status", params.status);
           }
           if (params.week_number !== undefined) {
-            milestoneQuery = milestoneQuery.eq('week_number', params.week_number);
+            milestoneQuery = milestoneQuery.eq("week_number", params.week_number);
           }
 
           const { data: milestoneTasks, error: milestoneError } = await milestoneQuery;
 
           if (milestoneError) {
-            console.error('Error fetching milestone tasks:', milestoneError);
-            throw new Error('Failed to fetch milestone tasks');
+            console.error("Error fetching milestone tasks:", milestoneError);
+            throw new Error("Failed to fetch milestone tasks");
           }
 
           // Merge and deduplicate tasks (a task could have both long_term_goal_id AND milestone_id)
           const taskMap = new Map<string, TaskDTO>();
-          
+
           // Process all tasks and remove joined data
-          [...allTasks, ...(milestoneTasks || [])].forEach(task => {
+          [...allTasks, ...(milestoneTasks || [])].forEach((task) => {
             // Remove the joined data from response
             const { milestones, long_term_goals, ...cleanTask } = task as any;
             taskMap.set(cleanTask.id, cleanTask as TaskDTO);
@@ -672,12 +653,11 @@ export class TaskService {
 
       return {
         data: paginatedTasks,
-        count: totalCount
+        count: totalCount,
       };
     } catch (error) {
-      console.error('Error in getTasksByGoalId:', error);
+      console.error("Error in getTasksByGoalId:", error);
       throw error;
     }
   }
 }
-

@@ -1,24 +1,19 @@
 /**
  * AdHocSection Component
- * 
+ *
  * Displays standalone tasks that are not associated with any weekly goal.
  */
 
-import { useState } from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { TaskItem } from './TaskItem';
-import { InlineAddTask } from './InlineAddTask';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus } from 'lucide-react';
-import type { TaskViewModel, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal, PlanStatus } from '@/types';
-import { getDisabledTooltip } from '@/lib/utils';
+import { useState } from "react";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { TaskItem } from "./TaskItem";
+import { InlineAddTask } from "./InlineAddTask";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus } from "lucide-react";
+import type { TaskViewModel, SimpleMilestone, WeeklyGoalViewModel, SimpleGoal, PlanStatus } from "@/types";
+import { getDisabledTooltip } from "@/lib/utils";
 
 interface AdHocSectionProps {
   tasks: TaskViewModel[];
@@ -54,7 +49,7 @@ export function AdHocSection({
   onAssignToWeeklyGoal,
 }: AdHocSectionProps) {
   const [isAddingTask, setIsAddingTask] = useState(false);
-  const [expandedValue, setExpandedValue] = useState<string>('other-tasks');
+  const [expandedValue, setExpandedValue] = useState<string>("other-tasks");
   const isAtTaskLimit = tasks.length >= MAX_AD_HOC_TASKS;
 
   const handleAddTask = (title: string) => {
@@ -77,10 +72,12 @@ export function AdHocSection({
             <div className="flex-1 min-w-0">
               <AccordionTrigger className="hover:no-underline p-0">
                 <div className="text-left space-y-1 w-full">
-                  <h3 className="font-semibold text-base" data-test-id="other-tasks-section">Other Tasks</h3>
-                  {expandedValue !== 'other-tasks' && (
+                  <h3 className="font-semibold text-base" data-test-id="other-tasks-section">
+                    Other Tasks
+                  </h3>
+                  {expandedValue !== "other-tasks" && (
                     <p className="text-sm text-muted-foreground">
-                      {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                      {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
                     </p>
                   )}
                 </div>
@@ -89,21 +86,17 @@ export function AdHocSection({
           </div>
 
           {/* Task count when collapsed */}
-          {expandedValue !== 'other-tasks' && tasks.length > 0 && (
-            <div className="mt-2 text-sm text-muted-foreground">
-              Standalone tasks not linked to weekly goals
-            </div>
+          {expandedValue !== "other-tasks" && tasks.length > 0 && (
+            <div className="mt-2 text-sm text-muted-foreground">Standalone tasks not linked to weekly goals</div>
           )}
 
           {/* Expanded Content */}
           <AccordionContent>
             <div className="space-y-4 pt-4">
-              <p className="text-sm text-muted-foreground">
-                Standalone tasks not linked to weekly goals
-              </p>
+              <p className="text-sm text-muted-foreground">Standalone tasks not linked to weekly goals</p>
 
               {/* Task List */}
-              <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                   {tasks.map((task) => (
                     <TaskItem
@@ -158,8 +151,8 @@ export function AdHocSection({
                       {(isReadOnly || isAtTaskLimit) && (
                         <TooltipContent>
                           <p>
-                            {isReadOnly 
-                              ? getDisabledTooltip(planStatus, 'general') 
+                            {isReadOnly
+                              ? getDisabledTooltip(planStatus, "general")
                               : `Maximum ${MAX_AD_HOC_TASKS} ad-hoc tasks reached`}
                           </p>
                         </TooltipContent>
@@ -182,4 +175,3 @@ export function AdHocSection({
     </Accordion>
   );
 }
-

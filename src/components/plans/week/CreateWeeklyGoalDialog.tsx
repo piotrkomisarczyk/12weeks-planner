@@ -1,18 +1,18 @@
 /**
  * CreateWeeklyGoalDialog Component
- * 
+ *
  * Dialog for creating a new weekly goal with optional link to long-term goal.
  */
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SimpleGoal } from '@/types';
-import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from '@/types';
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { SimpleGoal } from "@/types";
+import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
 
 interface CreateWeeklyGoalDialogProps {
   open: boolean;
@@ -25,7 +25,7 @@ interface CreateWeeklyGoalDialogProps {
  * Get the display label for a goal category
  */
 const getCategoryLabel = (category: string): string => {
-  const categoryItem = GOAL_CATEGORIES.find(cat => cat.value === category);
+  const categoryItem = GOAL_CATEGORIES.find((cat) => cat.value === category);
   return categoryItem?.label || category;
 };
 
@@ -35,28 +35,28 @@ export function CreateWeeklyGoalDialog({
   onSubmit,
   availableLongTermGoals,
 }: CreateWeeklyGoalDialogProps) {
-  const [title, setTitle] = useState('');
-  const [selectedGoalId, setSelectedGoalId] = useState<string>('__none__');
+  const [title, setTitle] = useState("");
+  const [selectedGoalId, setSelectedGoalId] = useState<string>("__none__");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim()) return;
 
     // Convert __none__ sentinel value to undefined
-    const goalId = selectedGoalId === '__none__' ? undefined : selectedGoalId;
+    const goalId = selectedGoalId === "__none__" ? undefined : selectedGoalId;
     onSubmit(title.trim(), goalId);
-    
+
     // Reset form
-    setTitle('');
-    setSelectedGoalId('__none__');
+    setTitle("");
+    setSelectedGoalId("__none__");
   };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Reset form when closing
-      setTitle('');
-      setSelectedGoalId('__none__');
+      setTitle("");
+      setSelectedGoalId("__none__");
     }
     onOpenChange(newOpen);
   };
@@ -102,11 +102,13 @@ export function CreateWeeklyGoalDialog({
                     <SelectValue placeholder="Select a long-term goal (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__" data-test-id="longterm-goal-option-none">None</SelectItem>
+                    <SelectItem value="__none__" data-test-id="longterm-goal-option-none">
+                      None
+                    </SelectItem>
                     {availableLongTermGoals.map((goal) => (
                       <SelectItem key={goal.id} value={goal.id} data-test-id={`longterm-goal-option-${goal.title}`}>
                         <div className="flex items-center gap-2">
-                          <Badge className={GOAL_CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'}>
+                          <Badge className={GOAL_CATEGORY_COLORS[goal.category] || "bg-gray-500 text-white"}>
                             {getCategoryLabel(goal.category)}
                           </Badge>
                           <span>{goal.title}</span>
@@ -120,7 +122,12 @@ export function CreateWeeklyGoalDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} data-test-id="create-weekly-goal-cancel-button">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              data-test-id="create-weekly-goal-cancel-button"
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={!title.trim()} data-test-id="create-weekly-goal-submit-button">
@@ -132,4 +139,3 @@ export function CreateWeeklyGoalDialog({
     </Dialog>
   );
 }
-

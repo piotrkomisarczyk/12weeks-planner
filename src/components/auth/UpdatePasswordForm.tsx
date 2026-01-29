@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { supabaseClient } from '@/db/supabase.client';
+import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { supabaseClient } from "@/db/supabase.client";
 
 interface UpdatePasswordFormProps {
   isLoggedIn?: boolean;
@@ -16,8 +16,8 @@ interface UpdatePasswordFormProps {
  */
 export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormProps) {
   const [formData, setFormData] = useState({
-    password: '',
-    confirmPassword: '',
+    password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,23 +36,23 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
   const checkResetToken = async () => {
     try {
       const { data, error } = await supabaseClient.auth.getSession();
-      
+
       if (error || !data.session) {
         // No valid session/token - redirect to forgot password
-        toast.error('Your reset password link has expired. Please request a new one.');
+        toast.error("Your reset password link has expired. Please request a new one.");
         setTimeout(() => {
-          window.location.href = '/forgot-password';
+          window.location.href = "/forgot-password";
         }, 3000);
         setHasValidToken(false);
         return;
       }
-      
+
       setHasValidToken(true);
     } catch (error) {
-      console.error('Token validation error:', error);
-      toast.error(`Error validating reset link: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("Token validation error:", error);
+      toast.error(`Error validating reset link: ${error instanceof Error ? error.message : "Unknown error"}`);
       setTimeout(() => {
-        window.location.href = '/forgot-password';
+        window.location.href = "/forgot-password";
       }, 3000);
       setHasValidToken(false);
     }
@@ -61,16 +61,16 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
   // Validate password strength
   const validatePasswordStrength = (password: string): string | null => {
     if (password.length < 8) {
-      return 'Password must be at least 8 characters long';
+      return "Password must be at least 8 characters long";
     }
     if (!/[A-Z]/.test(password)) {
-      return 'Password must contain at least one uppercase letter';
+      return "Password must contain at least one uppercase letter";
     }
     if (!/[a-z]/.test(password)) {
-      return 'Password must contain at least one lowercase letter';
+      return "Password must contain at least one lowercase letter";
     }
     if (!/[0-9]/.test(password)) {
-      return 'Password must contain at least one number';
+      return "Password must contain at least one number";
     }
     return null;
   };
@@ -80,7 +80,7 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
     const newErrors: Record<string, string> = {};
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else {
       const strengthError = validatePasswordStrength(formData.password);
       if (strengthError) {
@@ -89,9 +89,9 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -99,22 +99,25 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
   }, [formData]);
 
   // Handle input changes
-  const handleChange = useCallback((field: 'password' | 'confirmPassword') => {
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[field];
-          return newErrors;
-        });
-      }
-    };
-  }, [errors]);
+  const handleChange = useCallback(
+    (field: "password" | "confirmPassword") => {
+      return (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: e.target.value,
+        }));
+        // Clear error when user starts typing
+        if (errors[field]) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[field];
+            return newErrors;
+          });
+        }
+      };
+    },
+    [errors]
+  );
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,10 +131,10 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
 
     try {
       // Call server-side API to update password
-      const response = await fetch('/api/auth/update-password', {
-        method: 'POST',
+      const response = await fetch("/api/auth/update-password", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           password: formData.password,
@@ -141,26 +144,26 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update password');
+        throw new Error(data.error || "Failed to update password");
       }
-      
-      toast.success('Password updated successfully');
-      
+
+      toast.success("Password updated successfully");
+
       // Redirect based on context
       if (isLoggedIn) {
         // For logged-in users, redirect to plans
         setTimeout(() => {
-          window.location.href = '/plans';
+          window.location.href = "/plans";
         }, 1500);
       } else {
         // For password reset flow, redirect to login
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = "/login";
         }, 1500);
       }
     } catch (error) {
-      console.error('Password update error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update password. Please try again.';
+      console.error("Password update error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update password. Please try again.";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -193,12 +196,12 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
     <Card className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">
-          {isLoggedIn ? 'Change your password' : 'Set new password'}
+          {isLoggedIn ? "Change your password" : "Set new password"}
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">
           {isLoggedIn
-            ? 'Enter a new password for your account'
-            : 'Create a new password to regain access to your account'}
+            ? "Enter a new password for your account"
+            : "Create a new password to regain access to your account"}
         </p>
       </div>
 
@@ -212,11 +215,11 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
             id="password"
             type="password"
             value={formData.password}
-            onChange={handleChange('password')}
+            onChange={handleChange("password")}
             placeholder="Create a strong password"
             autoComplete="new-password"
             aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'password-error password-hint' : 'password-hint'}
+            aria-describedby={errors.password ? "password-error password-hint" : "password-hint"}
           />
           {errors.password && (
             <p id="password-error" className="text-sm text-destructive">
@@ -237,11 +240,11 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
             id="confirmPassword"
             type="password"
             value={formData.confirmPassword}
-            onChange={handleChange('confirmPassword')}
+            onChange={handleChange("confirmPassword")}
             placeholder="Confirm your password"
             autoComplete="new-password"
             aria-invalid={!!errors.confirmPassword}
-            aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
+            aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
           />
           {errors.confirmPassword && (
             <p id="confirm-password-error" className="text-sm text-destructive">
@@ -251,12 +254,8 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Updating...' : 'Update password'}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Updating..." : "Update password"}
         </Button>
       </form>
 

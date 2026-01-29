@@ -7,17 +7,12 @@
  * Loads initial data (weekly review and goals) and passes to WeeklyReviewContainer.
  */
 
-
-import Layout from '@/layouts/Layout.astro';
-import WeeklyReviewContainer from '@/components/plans/review/WeeklyReviewContainer.tsx';
-import { WeeklyReviewService } from '@/lib/services/weekly-review.service';
-import { GoalService } from '@/lib/services/goal.service';
-import { PlanService } from '@/lib/services/plan.service';
-import type {
-  WeeklyReviewViewModel,
-  GoalReviewViewModel,
-  PlanStatus
-} from '@/types';
+import Layout from "@/layouts/Layout.astro";
+import WeeklyReviewContainer from "@/components/plans/review/WeeklyReviewContainer.tsx";
+import { WeeklyReviewService } from "@/lib/services/weekly-review.service";
+import { GoalService } from "@/lib/services/goal.service";
+import { PlanService } from "@/lib/services/plan.service";
+import type { WeeklyReviewViewModel, GoalReviewViewModel, PlanStatus } from "@/types";
 
 // ============================================================================
 // DATA LOADING (SSR)
@@ -28,10 +23,10 @@ const { id: planId, weekNumber: weekNumberParam } = Astro.params;
 
 // Validate params
 if (!planId) {
-  return Astro.redirect('/plans');
+  return Astro.redirect("/plans");
 }
 
-const weekNumber = parseInt(weekNumberParam || '1', 10);
+const weekNumber = parseInt(weekNumberParam || "1", 10);
 
 // Validate week number (1-12)
 if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
@@ -42,13 +37,13 @@ if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 12) {
 const userId = Astro.locals.user?.id;
 
 if (!userId) {
-  return Astro.redirect('/login');
+  return Astro.redirect("/login");
 }
 
 // Get Supabase client from Astro context
 const supabase = Astro.locals.supabase;
 if (!supabase) {
-  throw new Error('Supabase client not available');
+  throw new Error("Supabase client not available");
 }
 
 // Initialize services
@@ -66,30 +61,28 @@ try {
   plan = await planService.getPlanById(planId, userId);
 
   // Load weekly review (may not exist - lazy creation)
-  const reviewData = await weeklyReviewService.getWeeklyReviewByWeek(
-    planId,
-    weekNumber,
-    userId
-  );
+  const reviewData = await weeklyReviewService.getWeeklyReviewByWeek(planId, weekNumber, userId);
 
   // Convert to ViewModel (handle null case for lazy creation)
-  weeklyReview = reviewData ? {
-    ...reviewData,
-    isSaving: false,
-    lastSavedAt: null
-  } : {
-    id: null,
-    plan_id: planId,
-    week_number: weekNumber,
-    what_worked: '',
-    what_did_not_work: '',
-    what_to_improve: '',
-    is_completed: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    isSaving: false,
-    lastSavedAt: null
-  };
+  weeklyReview = reviewData
+    ? {
+        ...reviewData,
+        isSaving: false,
+        lastSavedAt: null,
+      }
+    : {
+        id: null,
+        plan_id: planId,
+        week_number: weekNumber,
+        what_worked: "",
+        what_did_not_work: "",
+        what_to_improve: "",
+        is_completed: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        isSaving: false,
+        lastSavedAt: null,
+      };
 
   // Load goals for the plan with milestones
   const goalsData = await goalService.getGoalsByPlanId(planId, userId);
@@ -101,18 +94,17 @@ try {
       return {
         ...goal,
         isUpdating: false,
-        milestones: goalWithMilestones?.milestones || []
+        milestones: goalWithMilestones?.milestones || [],
       };
     })
   );
 
   goals = goalsWithMilestones;
-
 } catch (error) {
-  console.error('Error loading weekly review data:', error);
+  console.error("Error loading weekly review data:", error);
 
   // Handle plan not found or access denied
-  if (error instanceof Error && (error.message?.includes('not found') || error.message?.includes('does not belong'))) {
+  if (error instanceof Error && (error.message?.includes("not found") || error.message?.includes("does not belong"))) {
     throw new Error(`Plan with ID ${planId} not found or access denied`);
   }
 
@@ -128,7 +120,6 @@ try {
 if (!plan) {
   throw new Error(`Plan with ID ${planId} not found or access denied`);
 }
-
 ---
 
 <Layout title={`Weekly Review - Week ${weekNumber}`}>

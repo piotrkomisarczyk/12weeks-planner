@@ -1,15 +1,15 @@
-import type { APIRoute } from 'astro';
-import { TaskService } from '../../../../lib/services/task.service';
-import { listTasksSchema, createTaskSchema } from '../../../../lib/validation/task.validation';
-import { GetUnauthorizedResponse } from '../../../../lib/utils';
+import type { APIRoute } from "astro";
+import { TaskService } from "../../../../lib/services/task.service";
+import { listTasksSchema, createTaskSchema } from "../../../../lib/validation/task.validation";
+import { GetUnauthorizedResponse } from "../../../../lib/utils";
 
 export const prerender = false;
 
 /**
  * GET /api/v1/tasks
- * 
+ *
  * List tasks with advanced filtering and pagination.
- * 
+ *
  * Query Parameters:
  * - plan_id (required): UUID of the plan
  * - week_number (optional): Filter by week number (1-12)
@@ -22,7 +22,7 @@ export const prerender = false;
  * - priority (optional): Filter by priority (A/B/C)
  * - limit (optional): Number of results (default: 50, max: 100)
  * - offset (optional): Pagination offset (default: 0)
- * 
+ *
  * Returns:
  * - 200: { data: TaskDTO[], count: number }
  * - 400: Validation error
@@ -39,17 +39,17 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     // Parse query parameters
     const params = {
-      plan_id: url.searchParams.get('plan_id'),
-      week_number: url.searchParams.get('week_number'),
-      due_day: url.searchParams.get('due_day'),
-      task_type: url.searchParams.get('task_type'),
-      weekly_goal_id: url.searchParams.get('weekly_goal_id'),
-      long_term_goal_id: url.searchParams.get('long_term_goal_id'),
-      milestone_id: url.searchParams.get('milestone_id'),
-      status: url.searchParams.get('status'),
-      priority: url.searchParams.get('priority'),
-      limit: url.searchParams.get('limit'),
-      offset: url.searchParams.get('offset'),
+      plan_id: url.searchParams.get("plan_id"),
+      week_number: url.searchParams.get("week_number"),
+      due_day: url.searchParams.get("due_day"),
+      task_type: url.searchParams.get("task_type"),
+      weekly_goal_id: url.searchParams.get("weekly_goal_id"),
+      long_term_goal_id: url.searchParams.get("long_term_goal_id"),
+      milestone_id: url.searchParams.get("milestone_id"),
+      status: url.searchParams.get("status"),
+      priority: url.searchParams.get("priority"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
     };
 
     // Validate query parameters
@@ -57,14 +57,14 @@ export const GET: APIRoute = async ({ url, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
-            received: err.code === 'invalid_type' ? params[err.path[0] as keyof typeof params] : undefined,
+            received: err.code === "invalid_type" ? params[err.path[0] as keyof typeof params] : undefined,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -72,31 +72,31 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.listTasks(validation.data);
 
-    if ('error' in result) {
+    if ("error" in result) {
       return new Response(JSON.stringify({ error: result.error }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in GET /api/v1/tasks:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in GET /api/v1/tasks:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
 
 /**
  * POST /api/v1/tasks
- * 
+ *
  * Create a new task.
- * 
+ *
  * Request Body:
  * - plan_id (required): UUID of the plan
  * - weekly_goal_id (optional): UUID of weekly goal
@@ -110,7 +110,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
  * - week_number (optional): Week number (1-12)
  * - due_day (optional): Day of week (1-7)
  * - position (optional): Position in list (default: 1)
- * 
+ *
  * Returns:
  * - 201: { data: TaskDTO }
  * - 400: Validation error or constraint violation
@@ -134,13 +134,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!validation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
+          error: "Validation failed",
           details: validation.error.errors.map((err) => ({
-            field: err.path.join('.'),
+            field: err.path.join("."),
             message: err.message,
           })),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -148,35 +148,33 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const taskService = new TaskService(supabase);
     const result = await taskService.createTask(validation.data);
 
-    if ('error' in result) {
+    if ("error" in result) {
       // Determine status code based on error type
       const status =
-        result.error === 'Plan not found' ||
-        result.error === 'Weekly goal not found' ||
-        result.error === 'Long-term goal not found' ||
-        result.error === 'Milestone not found'
+        result.error === "Plan not found" ||
+        result.error === "Weekly goal not found" ||
+        result.error === "Long-term goal not found" ||
+        result.error === "Milestone not found"
           ? 404
-          : result.error.includes('Cannot add more than')
-          ? 400
-          : 500;
+          : result.error.includes("Cannot add more than")
+            ? 400
+            : 500;
 
       return new Response(JSON.stringify({ error: result.error }), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify(result), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error in POST /api/v1/tasks:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error("Error in POST /api/v1/tasks:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 };
-
-

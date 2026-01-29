@@ -1,9 +1,9 @@
 /**
  * API Endpoint: GET /api/v1/plans/active
- * 
+ *
  * Returns the currently active plan for the authenticated user.
  * A user can have only one active plan at a time (status='active').
- * 
+ *
  * Responses:
  * - 200: Success with active plan data
  * - 401: Unauthorized (missing or invalid token)
@@ -11,9 +11,9 @@
  * - 500: Internal server error
  */
 
-import type { APIRoute } from 'astro';
-import { PlanService } from '../../../../lib/services/plan.service';
-import type { ErrorResponse, ItemResponse, PlanDTO } from '../../../../types';
+import type { APIRoute } from "astro";
+import { PlanService } from "../../../../lib/services/plan.service";
+import type { ErrorResponse, ItemResponse, PlanDTO } from "../../../../types";
 
 export const prerender = false;
 
@@ -21,20 +21,20 @@ export const GET: APIRoute = async ({ locals }) => {
   try {
     // Step 1: Authentication - Get user from locals (set by middleware)
     const user = locals.user;
-    
+
     if (!user) {
       return new Response(
         JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Authentication required'
+          error: "Unauthorized",
+          message: "Authentication required",
         } as ErrorResponse),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
-    
+
     const userId = user.id;
 
     // Step 2: No validation needed (no parameters)
@@ -47,12 +47,12 @@ export const GET: APIRoute = async ({ locals }) => {
     if (!activePlan) {
       return new Response(
         JSON.stringify({
-          error: 'Not found',
-          message: 'No active plan found'
+          error: "Not found",
+          message: "No active plan found",
         } as ErrorResponse),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
     }
@@ -60,30 +60,29 @@ export const GET: APIRoute = async ({ locals }) => {
     // Step 5: Return successful response
     return new Response(
       JSON.stringify({
-        data: activePlan
+        data: activePlan,
       } as ItemResponse<PlanDTO>),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'X-Content-Type-Options': 'nosniff'
-        }
+          "Content-Type": "application/json",
+          "X-Content-Type-Options": "nosniff",
+        },
       }
     );
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error('Error in GET /api/v1/plans/active:', error);
-    
+    console.error("Error in GET /api/v1/plans/active:", error);
+
     return new Response(
       JSON.stringify({
-        error: 'Internal server error',
-        message: 'An unexpected error occurred'
+        error: "Internal server error",
+        message: "An unexpected error occurred",
       } as ErrorResponse),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     );
   }
 };
-

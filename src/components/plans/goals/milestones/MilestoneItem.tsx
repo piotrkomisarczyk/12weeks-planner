@@ -3,21 +3,21 @@
  * Individual milestone row with checkbox and delete action
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Trash2, CalendarIcon, Edit3, RotateCcw } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { format } from 'date-fns';
-import { cn, normalizeDateToMidnight } from '@/lib/utils';
-import { DragHandle } from '../../week/DragHandle';
-import type { MilestoneDTO, PlanStatus } from '@/types';
-import { getDisabledTooltip } from '@/lib/utils';
+import { useState, useRef, useEffect } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Trash2, CalendarIcon, Edit3, RotateCcw } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { format } from "date-fns";
+import { cn, normalizeDateToMidnight } from "@/lib/utils";
+import { DragHandle } from "../../week/DragHandle";
+import type { MilestoneDTO, PlanStatus } from "@/types";
+import { getDisabledTooltip } from "@/lib/utils";
 
 interface MilestoneItemProps {
   milestone: MilestoneDTO;
@@ -46,7 +46,7 @@ export function MilestoneItem({
   disabled = false,
   isDeleting = false,
   dragDisabled = false,
-  planStatus
+  planStatus,
 }: MilestoneItemProps) {
   const [isToggling, setIsToggling] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -56,19 +56,14 @@ export function MilestoneItem({
     milestone.due_date ? new Date(milestone.due_date) : undefined
   );
   const [showCalendar, setShowCalendar] = useState(false);
-  const [editError, setEditError] = useState<string>('');
+  const [editError, setEditError] = useState<string>("");
   const milestoneRef = useRef<HTMLDivElement>(null);
 
   // Sortable hook for drag and drop
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    setActivatorNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: milestone.id, disabled: dragDisabled || disabled });
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: milestone.id,
+    disabled: dragDisabled || disabled,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -84,11 +79,11 @@ export function MilestoneItem({
     };
 
     if (isEditing) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isEditing]);
 
@@ -96,7 +91,7 @@ export function MilestoneItem({
     if (isToggling || isDeleting) return;
 
     // Check if toggling is allowed based on plan status
-    if (planStatus === 'ready' || planStatus === 'completed' || planStatus === 'archived') {
+    if (planStatus === "ready" || planStatus === "completed" || planStatus === "archived") {
       return; // Silently prevent toggle
     }
 
@@ -104,7 +99,7 @@ export function MilestoneItem({
     try {
       await onToggle(milestone.id, !milestone.is_completed);
     } catch (error) {
-      console.error('Failed to toggle milestone:', error);
+      console.error("Failed to toggle milestone:", error);
     } finally {
       setIsToggling(false);
     }
@@ -115,24 +110,24 @@ export function MilestoneItem({
     setIsEditing(true);
     setEditTitle(milestone.title);
     setEditDueDate(milestone.due_date ? new Date(milestone.due_date) : undefined);
-    setEditError('');
+    setEditError("");
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditTitle(milestone.title);
     setEditDueDate(milestone.due_date ? new Date(milestone.due_date) : undefined);
-    setEditError('');
+    setEditError("");
   };
 
   const handleUpdate = async () => {
     if (isUpdating) return;
 
-    setEditError('');
+    setEditError("");
 
     // Validation
     if (!editTitle.trim()) {
-      setEditError('Title is required');
+      setEditError("Title is required");
       return;
     }
 
@@ -141,7 +136,7 @@ export function MilestoneItem({
       const minDate = new Date(planStartDate);
       const maxDate = new Date(planEndDate);
       if (editDueDate < minDate || editDueDate > maxDate) {
-        setEditError('Date must be within plan duration');
+        setEditError("Date must be within plan duration");
         return;
       }
     }
@@ -151,13 +146,13 @@ export function MilestoneItem({
     try {
       await onUpdate(milestone.id, {
         title: editTitle.trim(),
-        due_date: editDueDate ? format(editDueDate, 'yyyy-MM-dd') : null,
+        due_date: editDueDate ? format(editDueDate, "yyyy-MM-dd") : null,
       });
       setIsEditing(false);
-      setEditError('');
+      setEditError("");
     } catch (error) {
-      console.error('Failed to update milestone:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update milestone';
+      console.error("Failed to update milestone:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to update milestone";
       setEditError(errorMessage);
     } finally {
       setIsUpdating(false);
@@ -173,7 +168,7 @@ export function MilestoneItem({
   };
 
   const isDisabled = disabled || isToggling || isDeleting || isUpdating;
-  const canToggleMilestone = planStatus === 'active';
+  const canToggleMilestone = planStatus === "active";
   const checkboxDisabled = isDisabled || !canToggleMilestone;
 
   const minDate = new Date(planStartDate);
@@ -187,9 +182,9 @@ export function MilestoneItem({
       }}
       style={style}
       className={cn(
-        'flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors group',
-        milestone.is_completed && 'opacity-60',
-        isDragging && 'opacity-50 shadow-lg ring-2 ring-primary'
+        "flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors group",
+        milestone.is_completed && "opacity-60",
+        isDragging && "opacity-50 shadow-lg ring-2 ring-primary"
       )}
     >
       {/* Drag Handle */}
@@ -209,13 +204,13 @@ export function MilestoneItem({
               checked={milestone.is_completed}
               onCheckedChange={handleToggle}
               disabled={checkboxDisabled}
-              aria-label={`Mark "${milestone.title}" as ${milestone.is_completed ? 'incomplete' : 'complete'}`}
+              aria-label={`Mark "${milestone.title}" as ${milestone.is_completed ? "incomplete" : "complete"}`}
             />
           </div>
         </TooltipTrigger>
         {!canToggleMilestone && (
           <TooltipContent>
-            <p>{getDisabledTooltip(planStatus, 'milestone')}</p>
+            <p>{getDisabledTooltip(planStatus, "milestone")}</p>
           </TooltipContent>
         )}
       </Tooltip>
@@ -243,12 +238,12 @@ export function MilestoneItem({
                 variant="outline"
                 disabled={isDisabled}
                 className={cn(
-                  'h-8 w-[120px] justify-start text-left font-normal text-xs',
-                  !editDueDate && 'text-muted-foreground'
+                  "h-8 w-[120px] justify-start text-left font-normal text-xs",
+                  !editDueDate && "text-muted-foreground"
                 )}
               >
                 <CalendarIcon className="mr-1 size-3" />
-                {editDueDate ? format(editDueDate, 'MMM dd, yyyy') : 'Due date'}
+                {editDueDate ? format(editDueDate, "MMM dd, yyyy") : "Due date"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -284,12 +279,7 @@ export function MilestoneItem({
         <>
           {/* Title */}
           <div className="flex-1 min-w-0">
-            <p
-              className={cn(
-                'text-sm truncate',
-                milestone.is_completed && 'line-through text-muted-foreground'
-              )}
-            >
+            <p className={cn("text-sm truncate", milestone.is_completed && "line-through text-muted-foreground")}>
               {milestone.title}
             </p>
           </div>
@@ -298,7 +288,7 @@ export function MilestoneItem({
           {milestone.due_date && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
               <CalendarIcon className="size-3" />
-              <span>{format(new Date(milestone.due_date), 'dd MMM yyyy')}</span>
+              <span>{format(new Date(milestone.due_date), "dd MMM yyyy")}</span>
             </div>
           )}
 
@@ -318,9 +308,9 @@ export function MilestoneItem({
                   <Edit3 className="size-3.5" />
                 </Button>
               </TooltipTrigger>
-              {isDisabled && (planStatus === 'completed' || planStatus === 'archived') && (
+              {isDisabled && (planStatus === "completed" || planStatus === "archived") && (
                 <TooltipContent>
-                  <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                  <p>{getDisabledTooltip(planStatus, "general")}</p>
                 </TooltipContent>
               )}
             </Tooltip>
@@ -339,9 +329,9 @@ export function MilestoneItem({
                   <Trash2 className="size-3.5" />
                 </Button>
               </TooltipTrigger>
-              {isDisabled && (planStatus === 'completed' || planStatus === 'archived') && (
+              {isDisabled && (planStatus === "completed" || planStatus === "archived") && (
                 <TooltipContent>
-                  <p>{getDisabledTooltip(planStatus, 'general')}</p>
+                  <p>{getDisabledTooltip(planStatus, "general")}</p>
                 </TooltipContent>
               )}
             </Tooltip>
@@ -350,10 +340,7 @@ export function MilestoneItem({
       )}
 
       {/* Error Message */}
-      {editError && (
-        <p className="text-xs text-destructive mt-1 col-span-full">{editError}</p>
-      )}
+      {editError && <p className="text-xs text-destructive mt-1 col-span-full">{editError}</p>}
     </div>
   );
 }
-

@@ -3,21 +3,14 @@
  * Manages milestones for a goal with lazy loading
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import { useMilestones } from '../hooks/useMilestones';
-import { MilestoneList } from './MilestoneList';
-import { MilestoneForm } from './MilestoneForm';
-import type { PlanContext, PlanStatus } from '@/types';
-import { toast } from 'sonner';
-import { isPlanReadOnly, isPlanReady } from '@/lib/utils';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DndContext, PointerSensor, useSensor, useSensors, closestCorners, type DragEndEvent } from "@dnd-kit/core";
+import { useMilestones } from "../hooks/useMilestones";
+import { MilestoneList } from "./MilestoneList";
+import { MilestoneForm } from "./MilestoneForm";
+import type { PlanContext, PlanStatus } from "@/types";
+import { toast } from "sonner";
+import { isPlanReadOnly, isPlanReady } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -25,15 +18,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogState {
   isOpen: boolean;
   title: string;
   description: string;
   onConfirm: () => void;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
 }
 
 interface MilestoneManagerProps {
@@ -62,8 +55,8 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     onConfirm: () => {},
   });
 
@@ -75,13 +68,15 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   const isReady = isPlanReady(planStatus);
 
   // Drag and Drop sensors - conditionally disabled for read-only plans
-  const sensors = isReadOnly ? [] : useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  const sensors = isReadOnly
+    ? []
+    : useSensors(
+        useSensor(PointerSensor, {
+          activationConstraint: {
+            distance: 8,
+          },
+        })
+      );
 
   // Track if milestones have been fetched for this goal
   const hasFetchedRef = useRef(false);
@@ -94,14 +89,10 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     }
   }, [isGoalExpanded, fetchMilestones, isLoading]);
 
-  const handleAddMilestone = async (data: {
-    title: string;
-    due_date: string | null;
-    position: number;
-  }) => {
+  const handleAddMilestone = async (data: { title: string; due_date: string | null; position: number }) => {
     try {
       await addMilestone(data);
-      toast.success('Milestone added');
+      toast.success("Milestone added");
     } catch (error) {
       // Let the form component handle error display for validation errors
       // Only show toast for unexpected errors (not validation-related)
@@ -112,11 +103,11 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   const handleToggleMilestone = async (id: string, isCompleted: boolean) => {
     // Prevent operations if no milestones exist
     if (milestones.length === 0) return;
-    
+
     try {
       await toggleMilestone(id, isCompleted);
     } catch (error) {
-      toast.error('Failed to update milestone');
+      toast.error("Failed to update milestone");
       throw error;
     }
   };
@@ -127,7 +118,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
     try {
       await updateMilestone(id, data);
-      toast.success('Milestone updated');
+      toast.success("Milestone updated");
     } catch (error) {
       // Let the form component handle error display for validation errors
       // Only show toast for unexpected errors (not validation-related)
@@ -142,9 +133,9 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     setDeletingMilestoneId(id);
     try {
       await deleteMilestone(id);
-      toast.success('Milestone deleted');
+      toast.success("Milestone deleted");
     } catch (error) {
-      toast.error('Failed to delete milestone');
+      toast.error("Failed to delete milestone");
       throw error;
     } finally {
       setDeletingMilestoneId(null);
@@ -156,15 +147,15 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     if (!milestone) return;
 
     // Helper function to truncate milestone titles for modal display
-    const truncateTitle = (title: string, maxLength: number = 50) => {
+    const truncateTitle = (title: string, maxLength = 50) => {
       return title.length > maxLength ? `${title.slice(0, maxLength)}...` : title;
     };
 
     setConfirmDialog({
       isOpen: true,
-      title: 'Delete Milestone',
+      title: "Delete Milestone",
       description: `Are you sure you want to delete "${truncateTitle(milestone.title)}"? This action cannot be undone.`,
-      variant: 'destructive',
+      variant: "destructive",
       onConfirm: async () => {
         try {
           await handleConfirmDeleteMilestone(id);
@@ -177,28 +168,31 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   };
 
   // Handle milestone reordering via drag and drop
-  const handleReorderMilestones = useCallback(async (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleReorderMilestones = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+      if (!over || active.id === over.id) return;
 
-    const oldIndex = milestones.findIndex(m => m.id === active.id);
-    const newIndex = milestones.findIndex(m => m.id === over.id);
+      const oldIndex = milestones.findIndex((m) => m.id === active.id);
+      const newIndex = milestones.findIndex((m) => m.id === over.id);
 
-    if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
 
-    // Create new order
-    const reorderedMilestones = [...milestones];
-    const [movedMilestone] = reorderedMilestones.splice(oldIndex, 1);
-    reorderedMilestones.splice(newIndex, 0, movedMilestone);
+      // Create new order
+      const reorderedMilestones = [...milestones];
+      const [movedMilestone] = reorderedMilestones.splice(oldIndex, 1);
+      reorderedMilestones.splice(newIndex, 0, movedMilestone);
 
-    try {
-      await reorderMilestones(reorderedMilestones);
-    } catch (error) {
-      console.error('Failed to reorder milestones:', error);
-      toast.error('Failed to reorder milestones');
-    }
-  }, [milestones, reorderMilestones]);
+      try {
+        await reorderMilestones(reorderedMilestones);
+      } catch (error) {
+        console.error("Failed to reorder milestones:", error);
+        toast.error("Failed to reorder milestones");
+      }
+    },
+    [milestones, reorderMilestones]
+  );
 
   const isDisabled = planContext.isArchived;
 
@@ -209,9 +203,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
         {/* Loading State */}
         {isLoading && milestones.length === 0 && (
-          <div className="py-4 text-center text-sm text-muted-foreground">
-            Loading milestones...
-          </div>
+          <div className="py-4 text-center text-sm text-muted-foreground">Loading milestones...</div>
         )}
 
         {/* Error State */}
@@ -224,11 +216,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
         {/* Milestone List */}
         {!isLoading && !error && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragEnd={handleReorderMilestones}
-          >
+          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleReorderMilestones}>
             <MilestoneList
               milestones={milestones}
               onToggle={handleToggleMilestone}
@@ -257,16 +245,12 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
       )}
 
       {/* Milestone Count */}
-      <div className="text-xs text-muted-foreground">
-        {milestones.length} / 5 milestones
-      </div>
+      <div className="text-xs text-muted-foreground">{milestones.length} / 5 milestones</div>
 
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog.isOpen}
-        onOpenChange={(open) =>
-          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
-        }
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, isOpen: open }))}
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -274,16 +258,11 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
             <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
-              }
-            >
+            <Button variant="outline" onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}>
               Cancel
             </Button>
             <Button
-              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              variant={confirmDialog.variant === "destructive" ? "destructive" : "default"}
               onClick={confirmDialog.onConfirm}
             >
               Confirm
@@ -294,4 +273,3 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     </div>
   );
 }
-

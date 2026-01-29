@@ -1,42 +1,45 @@
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useState, useCallback } from "react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 /**
  * Forgot password form component
  * Handles password reset email request
  */
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Validate email
   const validate = useCallback((): boolean => {
     if (!email) {
-      setError('Email is required');
+      setError("Email is required");
       return false;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return false;
     }
-    setError('');
+    setError("");
     return true;
   }, [email]);
 
   // Handle input change
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (error) {
-      setError('');
-    }
-  }, [error]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEmail(e.target.value);
+      if (error) {
+        setError("");
+      }
+    },
+    [error]
+  );
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,10 +52,10 @@ export function ForgotPasswordForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
@@ -60,14 +63,14 @@ export function ForgotPasswordForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send reset email');
+        throw new Error(data.error || "Failed to send reset email");
       }
-      
+
       setShowSuccess(true);
-      toast.success('Password reset email sent');
+      toast.success("Password reset email sent");
     } catch (error) {
-      console.error('Password reset error:', error);
-      toast.error('Failed to send reset email. Please try again.');
+      console.error("Password reset error:", error);
+      toast.error("Failed to send reset email. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -78,12 +81,7 @@ export function ForgotPasswordForm() {
       <Card className="p-6">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-            <svg
-              className="h-6 w-6 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -94,8 +92,8 @@ export function ForgotPasswordForm() {
           </div>
           <h2 className="mb-2 text-xl font-bold">Check your email</h2>
           <p className="text-muted-foreground mb-6 text-sm">
-            We've sent a password reset link to <strong>{email}</strong>.
-            Please check your inbox and click the link to reset your password.
+            We've sent a password reset link to <strong>{email}</strong>. Please check your inbox and click the link to
+            reset your password.
           </p>
           <Alert>
             <AlertDescription>
@@ -103,17 +101,10 @@ export function ForgotPasswordForm() {
             </AlertDescription>
           </Alert>
           <div className="mt-6 space-y-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setShowSuccess(false)}
-            >
+            <Button variant="outline" className="w-full" onClick={() => setShowSuccess(false)}>
               Send another email
             </Button>
-            <a
-              href="/login"
-              className="block text-sm text-primary hover:underline"
-            >
+            <a href="/login" className="block text-sm text-primary hover:underline">
               Back to login
             </a>
           </div>
@@ -145,7 +136,7 @@ export function ForgotPasswordForm() {
             placeholder="you@example.com"
             autoComplete="email"
             aria-invalid={!!error}
-            aria-describedby={error ? 'email-error' : undefined}
+            aria-describedby={error ? "email-error" : undefined}
           />
           {error && (
             <p id="email-error" className="text-sm text-destructive">
@@ -155,12 +146,8 @@ export function ForgotPasswordForm() {
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Sending...' : 'Send reset link'}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Sending..." : "Send reset link"}
         </Button>
       </form>
 

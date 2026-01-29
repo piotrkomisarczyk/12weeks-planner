@@ -3,16 +3,10 @@
  * Navigation controls for switching between weeks in weekly review
  */
 
-import React from 'react';
-import { Button } from '../../ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../ui/select';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from "react";
+import { Button } from "../../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ReviewNavigationProps {
   currentWeek: number;
@@ -53,10 +47,7 @@ export default function ReviewNavigation({ currentWeek, planId }: ReviewNavigati
         Previous
       </Button>
 
-      <Select
-        value={currentWeek.toString()}
-        onValueChange={(value) => handleWeekChange(parseInt(value))}
-      >
+      <Select value={currentWeek.toString()} onValueChange={(value) => handleWeekChange(parseInt(value))}>
         <SelectTrigger className="w-32">
           <SelectValue placeholder="Week" />
         </SelectTrigger>

@@ -1,6 +1,6 @@
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "lucide-react";
 
 interface PlanDetailsStepProps {
   name: string;
@@ -13,18 +13,13 @@ interface PlanDetailsStepProps {
  * Edit Plan Details Step
  * Allows editing the plan name, displays read-only start date
  */
-export function PlanDetailsStep({
-  name,
-  startDate,
-  onNameChange,
-  errors,
-}: PlanDetailsStepProps) {
+export function PlanDetailsStep({ name, startDate, onNameChange, errors }: PlanDetailsStepProps) {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -49,7 +44,7 @@ export function PlanDetailsStep({
               onChange={(e) => onNameChange(e.target.value)}
               placeholder="e.g., Q1 2026 Goals"
               aria-invalid={!!errors.name}
-              aria-describedby={errors.name ? 'plan-name-error' : undefined}
+              aria-describedby={errors.name ? "plan-name-error" : undefined}
               maxLength={255}
             />
             {errors.name && (
@@ -67,13 +62,9 @@ export function PlanDetailsStep({
             <Label htmlFor="start-date">Start Date</Label>
             <div className="flex items-center space-x-2 rounded-md border bg-muted px-3 py-2">
               <Calendar className="size-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {formatDate(startDate)}
-              </span>
+              <span className="text-sm text-muted-foreground">{formatDate(startDate)}</span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              The start date cannot be changed once the plan is created.
-            </p>
+            <p className="text-xs text-muted-foreground">The start date cannot be changed once the plan is created.</p>
           </div>
         </div>
       </div>

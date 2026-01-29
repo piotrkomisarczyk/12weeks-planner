@@ -1,9 +1,5 @@
-import { useState, useCallback } from 'react';
-import type {
-  PlanDashboardResponse,
-  ErrorResponse,
-  ValidationErrorResponse,
-} from '@/types';
+import { useState, useCallback } from "react";
+import type { PlanDashboardResponse, ErrorResponse, ValidationErrorResponse } from "@/types";
 
 interface UsePlanDashboardState {
   data: PlanDashboardResponse | null;
@@ -35,12 +31,12 @@ export function usePlanDashboard(): UsePlanDashboardReturn {
       const response = await fetch(url);
 
       if (!response.ok) {
-        let errorMessage = 'Failed to fetch dashboard data';
+        let errorMessage = "Failed to fetch dashboard data";
         try {
           const errorData: ErrorResponse | ValidationErrorResponse = await response.json();
-          if ('error' in errorData) {
+          if ("error" in errorData) {
             errorMessage = errorData.error;
-            if ('message' in errorData && errorData.message) {
+            if ("message" in errorData && errorData.message) {
               errorMessage += `: ${errorData.message}`;
             }
           }
@@ -56,8 +52,7 @@ export function usePlanDashboard(): UsePlanDashboardReturn {
       setState({ data, isLoading: false, error: null });
       setLastPlanId(planId);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to load dashboard data';
+      const errorMessage = error instanceof Error ? error.message : "Failed to load dashboard data";
       setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
       throw error;
     }

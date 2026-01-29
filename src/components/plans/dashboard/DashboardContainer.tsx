@@ -1,16 +1,14 @@
-import { useEffect, useState } from 'react';
-import { usePlanDashboard } from '../hooks/usePlanDashboard';
-import { DashboardOverviewCard } from './DashboardOverviewCard';
-import { EmptyState } from './EmptyState';
-import { calculateCurrentWeek, calculateCurrentDay } from '@/lib/utils';
-import type { PlanStatus } from '@/types';
+import { useEffect, useState } from "react";
+import { usePlanDashboard } from "../hooks/usePlanDashboard";
+import { DashboardOverviewCard } from "./DashboardOverviewCard";
+import { EmptyState } from "./EmptyState";
+import { calculateCurrentWeek, calculateCurrentDay } from "@/lib/utils";
+import type { PlanStatus } from "@/types";
 
 interface DashboardContainerProps {
   planId: string;
   onNavigate?: (url: string) => void;
 }
-
-
 
 export function DashboardContainer({ planId, onNavigate }: DashboardContainerProps) {
   const { data, isLoading, error, fetchDashboard } = usePlanDashboard();
@@ -65,13 +63,12 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
 
   // Check if dashboard is empty
   const isEmpty = data.goals.length === 0 && data.tasks.length === 0;
-  
+
   // Calculate current week for display
   const displayWeek = calculateCurrentWeek(data.plan);
 
   return (
     <div className="space-y-6">
-
       {/* Dashboard Overview Card */}
       <DashboardOverviewCard
         plan={data.plan}
@@ -84,11 +81,11 @@ export function DashboardContainer({ planId, onNavigate }: DashboardContainerPro
 
       {/* Main Content */}
       {isEmpty && (
-        <EmptyState 
-          planId={planId} 
-          planName={data.plan.name} 
+        <EmptyState
+          planId={planId}
+          planName={data.plan.name}
           planStatus={data.plan.status as PlanStatus}
-          onNavigate={handleNavigate} 
+          onNavigate={handleNavigate}
         />
       )}
     </div>

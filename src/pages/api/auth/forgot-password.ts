@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -8,13 +8,13 @@ export const prerender = false;
  * Validates email format
  */
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().email("Please enter a valid email address"),
 });
 
 /**
  * POST /api/auth/forgot-password
  * Sends password reset email to user
- * 
+ *
  * @returns 200 with success message (even if email doesn't exist for security)
  * @returns 400 on validation error
  * @returns 500 on server error
@@ -28,15 +28,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!validationResult.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation error',
+          error: "Validation error",
           details: validationResult.error.errors,
         }),
         {
           status: 400,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -54,34 +54,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // For security reasons, always return success even if email doesn't exist
     // This prevents email enumeration attacks
     if (error) {
-      console.error('Password reset email error:', error);
+      console.error("Password reset email error:", error);
       // Still return success to user
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'If an account exists with this email, you will receive a password reset link.',
+        message: "If an account exists with this email, you will receive a password reset link.",
       }),
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error("Forgot password error:", error);
     return new Response(
       JSON.stringify({
-        error: 'An unexpected error occurred. Please try again.',
+        error: "An unexpected error occurred. Please try again.",
       }),
       {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
   }
 };

@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 /**
  * Login form component
@@ -11,8 +11,8 @@ import { Card } from '@/components/ui/card';
  */
 export function LoginForm() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,25 +20,25 @@ export function LoginForm() {
   // Check for URL parameters (verification status, errors)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const verified = params.get('verified');
-    const error = params.get('error');
+    const verified = params.get("verified");
+    const error = params.get("error");
 
-    if (verified === 'true') {
-      toast.success('Email verified successfully! You can now log in.');
+    if (verified === "true") {
+      toast.success("Email verified successfully! You can now log in.");
       // Clean URL
-      window.history.replaceState({}, '', '/login');
+      window.history.replaceState({}, "", "/login");
     }
 
     if (error) {
       const errorMessages: Record<string, string> = {
-        invalid_callback: 'Invalid verification link. Please try again.',
-        link_expired: 'Verification link has expired. Please request a new one.',
-        verification_failed: 'Email verification failed. Please try again.',
-        unexpected: 'An unexpected error occurred. Please try again.',
+        invalid_callback: "Invalid verification link. Please try again.",
+        link_expired: "Verification link has expired. Please request a new one.",
+        verification_failed: "Email verification failed. Please try again.",
+        unexpected: "An unexpected error occurred. Please try again.",
       };
-      toast.error(errorMessages[error] || 'An error occurred.');
+      toast.error(errorMessages[error] || "An error occurred.");
       // Clean URL
-      window.history.replaceState({}, '', '/login');
+      window.history.replaceState({}, "", "/login");
     }
   }, []);
 
@@ -47,13 +47,13 @@ export function LoginForm() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     }
 
     setErrors(newErrors);
@@ -61,32 +61,34 @@ export function LoginForm() {
   }, [formData]);
 
   // Handle input changes
-  const handleChange = useCallback((field: 'email' | 'password') => {
-    return (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[field];
-          return newErrors;
-        });
-      }
-    };
-  }, [errors]);
+  const handleChange = useCallback(
+    (field: "email" | "password") => {
+      return (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: e.target.value,
+        }));
+        // Clear error when user starts typing
+        if (errors[field]) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[field];
+            return newErrors;
+          });
+        }
+      };
+    },
+    [errors]
+  );
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
     const isValid = validate();
-    
+
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -94,10 +96,10 @@ export function LoginForm() {
 
     try {
       // Call login API endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
@@ -120,7 +122,7 @@ export function LoginForm() {
         }
 
         // Handle email not verified (403)
-        if (response.status === 403 && data.code === 'EMAIL_NOT_VERIFIED') {
+        if (response.status === 403 && data.code === "EMAIL_NOT_VERIFIED") {
           toast.error(data.error, {
             duration: 6000,
           });
@@ -128,16 +130,16 @@ export function LoginForm() {
         }
 
         // Handle authentication errors (401) and other errors
-        toast.error(data.error || 'An error occurred. Please try again.');
+        toast.error(data.error || "An error occurred. Please try again.");
         return;
       }
 
       // Success - redirect to home page
       // toast.success('Login successful');
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+      console.error("Login error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -147,9 +149,7 @@ export function LoginForm() {
     <Card className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Welcome</h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Sign in to your account to continue
-        </p>
+        <p className="text-muted-foreground mt-2 text-sm">Sign in to your account to continue</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" data-test-id="login-form" noValidate>
@@ -162,11 +162,11 @@ export function LoginForm() {
             id="email"
             type="email"
             value={formData.email}
-            onChange={handleChange('email')}
+            onChange={handleChange("email")}
             placeholder="you@example.com"
             autoComplete="email"
             aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
+            aria-describedby={errors.email ? "email-error" : undefined}
             data-test-id="login-email-input"
           />
           {errors.email && (
@@ -185,11 +185,11 @@ export function LoginForm() {
             id="password"
             type="password"
             value={formData.password}
-            onChange={handleChange('password')}
+            onChange={handleChange("password")}
             placeholder="Enter your password"
             autoComplete="current-password"
             aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'password-error' : undefined}
+            aria-describedby={errors.password ? "password-error" : undefined}
             data-test-id="login-password-input"
           />
           {errors.password && (
@@ -201,22 +201,14 @@ export function LoginForm() {
 
         {/* Forgot Password Link */}
         <div className="flex justify-start">
-          <a
-            href="/forgot-password"
-            className="text-sm text-primary hover:underline"
-          >
+          <a href="/forgot-password" className="text-sm text-primary hover:underline">
             Forgot password?
           </a>
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-          data-test-id="login-submit-button"
-        >
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+        <Button type="submit" className="w-full" disabled={isSubmitting} data-test-id="login-submit-button">
+          {isSubmitting ? "Signing in..." : "Sign in"}
         </Button>
       </form>
 

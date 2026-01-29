@@ -4,15 +4,15 @@
  * Manages goal list display and creation
  */
 
-import { ArrowLeft } from 'lucide-react';
-import { useGoals } from './hooks/useGoals';
-import { GoalCard } from './GoalCard';
-import { CreateGoalDialog } from './CreateGoalDialog';
-import { EmptyState } from './EmptyState';
-import { toast } from 'sonner';
-import type { PlanContext, PlanStatus } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { isPlanReadOnly } from '@/lib/utils';
+import { ArrowLeft } from "lucide-react";
+import { useGoals } from "./hooks/useGoals";
+import { GoalCard } from "./GoalCard";
+import { CreateGoalDialog } from "./CreateGoalDialog";
+import { EmptyState } from "./EmptyState";
+import { toast } from "sonner";
+import type { PlanContext, PlanStatus } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { isPlanReadOnly } from "@/lib/utils";
 
 interface GoalsManagerProps {
   planContext: PlanContext;
@@ -21,11 +21,13 @@ interface GoalsManagerProps {
 /**
  * Main container component for goals management
  * Displays list of goals and allows adding new goals
- * 
+ *
  * @param planContext - Plan metadata for validation and display
  */
 export default function GoalsManager({ planContext }: GoalsManagerProps) {
-  const { goals, isLoading, error, addGoal, updateGoal, deleteGoal, moveGoalUp, moveGoalDown, canAddGoal } = useGoals(planContext.id);
+  const { goals, isLoading, error, addGoal, updateGoal, deleteGoal, moveGoalUp, moveGoalDown, canAddGoal } = useGoals(
+    planContext.id
+  );
 
   // Compute flags from plan status
   const isReadOnly = isPlanReadOnly(planContext.status as PlanStatus);
@@ -49,7 +51,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     try {
       await updateGoal(id, data);
     } catch (error) {
-      toast.error('Failed to update goal');
+      toast.error("Failed to update goal");
       throw error;
     }
   };
@@ -57,9 +59,9 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
   const handleDeleteGoal = async (id: string) => {
     try {
       await deleteGoal(id);
-      toast.success('Goal deleted');
+      toast.success("Goal deleted");
     } catch (error) {
-      toast.error('Failed to delete goal');
+      toast.error("Failed to delete goal");
       throw error;
     }
   };
@@ -68,7 +70,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     try {
       await moveGoalUp(id);
     } catch (error) {
-      toast.error('Failed to move goal up');
+      toast.error("Failed to move goal up");
       console.error(error);
     }
   };
@@ -77,7 +79,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     try {
       await moveGoalDown(id);
     } catch (error) {
-      toast.error('Failed to move goal down');
+      toast.error("Failed to move goal down");
       console.error(error);
     }
   };
@@ -112,7 +114,6 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-    
       {/* Goals Section */}
       <div className="space-y-6">
         {/* <div className="flex items-center justify-between"> */}
@@ -121,17 +122,11 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">Long-Term Goals</h2>
-                <div className="text-sm text-muted-foreground mt-1">
-                  {goals.length} of 6 goals created
-                </div>
+                <div className="text-sm text-muted-foreground mt-1">{goals.length} of 6 goals created</div>
               </div>
 
               {goals.length > 0 && (
-                <CreateGoalDialog
-                  onCreateGoal={handleAddGoal}
-                  disabled={isReadOnly}
-                  currentGoalsCount={goals.length}
-                />
+                <CreateGoalDialog onCreateGoal={handleAddGoal} disabled={isReadOnly} currentGoalsCount={goals.length} />
               )}
             </div>
           </CardContent>
@@ -172,8 +167,6 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
           </p>
         )}
       </div>
-
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
+import type { APIRoute } from "astro";
+import { z } from "zod";
 
 export const prerender = false;
 
@@ -8,14 +8,14 @@ export const prerender = false;
  * Validates email format and password presence
  */
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 /**
  * POST /api/auth/login
  * Authenticates user with email and password
- * 
+ *
  * @returns 200 with user data on success
  * @returns 400 on validation error
  * @returns 401 on authentication failure
@@ -29,15 +29,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!validationResult.success) {
       return new Response(
         JSON.stringify({
-          error: 'Validation error',
+          error: "Validation error",
           details: validationResult.error.errors,
         }),
         {
           status: 400,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -54,14 +54,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
       // Don't reveal whether email exists or password is wrong
       return new Response(
         JSON.stringify({
-          error: 'Invalid email or password. Please try again.',
+          error: "Invalid email or password. Please try again.",
         }),
         {
           status: 401,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -69,18 +69,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!data.user.email_confirmed_at) {
       // Sign out the user immediately
       await locals.supabase.auth.signOut();
-      
+
       return new Response(
         JSON.stringify({
-          error: 'Please verify your email address before logging in. Check your inbox for the verification link.',
-          code: 'EMAIL_NOT_VERIFIED',
+          error: "Please verify your email address before logging in. Check your inbox for the verification link.",
+          code: "EMAIL_NOT_VERIFIED",
         }),
         {
           status: 403,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        },
+        }
       );
     }
 
@@ -96,22 +96,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return new Response(
       JSON.stringify({
-        error: 'An unexpected error occurred. Please try again.',
+        error: "An unexpected error occurred. Please try again.",
       }),
       {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
   }
 };

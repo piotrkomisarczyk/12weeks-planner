@@ -5,9 +5,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { Badge } from '@/components/ui/badge';
-import type { PlanStatus } from '@/types';
+} from "@/components/ui/breadcrumb";
+import { Badge } from "@/components/ui/badge";
+import type { PlanStatus } from "@/types";
 
 interface BreadcrumbsProps {
   planTitle?: string;
@@ -19,7 +19,7 @@ interface BreadcrumbSegment {
   label: string;
   href?: string;
   isActive: boolean;
-  type?: 'plan';
+  type?: "plan";
   planStatus?: PlanStatus;
 }
 
@@ -28,16 +28,16 @@ interface BreadcrumbSegment {
  */
 function getStatusBadgeVariant(status: PlanStatus) {
   switch (status) {
-    case 'ready':
-      return 'secondary';
-    case 'active':
-      return 'default';
-    case 'completed':
-      return 'secondary';
-    case 'archived':
-      return 'outline';
+    case "ready":
+      return "secondary";
+    case "active":
+      return "default";
+    case "completed":
+      return "secondary";
+    case "archived":
+      return "outline";
     default:
-      return 'outline';
+      return "outline";
   }
 }
 
@@ -53,56 +53,56 @@ function formatStatus(status: PlanStatus): string {
  */
 function parsePath(path: string, planTitle?: string, planStatus?: PlanStatus): BreadcrumbSegment[] {
   const segments: BreadcrumbSegment[] = [];
-  const parts = path.split('/').filter(Boolean);
+  const parts = path.split("/").filter(Boolean);
 
   // Handle root path
   if (parts.length === 0) {
-    return [{ label: 'Home', href: '/', isActive: true }];
+    return [{ label: "Home", href: "/", isActive: true }];
   }
 
   // Build breadcrumbs based on path structure
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
     const isLast = i === parts.length - 1;
-    const pathUpToHere = '/' + parts.slice(0, i + 1).join('/');
+    const pathUpToHere = "/" + parts.slice(0, i + 1).join("/");
 
     // Handle different path segments
-    if (part === 'plans') {
+    if (part === "plans") {
       segments.push({
-        label: 'Plans',
-        href: isLast ? undefined : '/plans',
+        label: "Plans",
+        href: isLast ? undefined : "/plans",
         isActive: isLast,
       });
-    } else if (i > 0 && parts[i - 1] === 'plans' && part.match(/^[a-f0-9-]{36}$/i)) {
+    } else if (i > 0 && parts[i - 1] === "plans" && part.match(/^[a-f0-9-]{36}$/i)) {
       // This is a plan ID, use plan title if available
-      const title = planTitle || 'Plan';
-      const truncatedTitle = title.length > 64 ? title.slice(0, 64) + '...' : title;
+      const title = planTitle || "Plan";
+      const truncatedTitle = title.length > 64 ? title.slice(0, 64) + "..." : title;
       segments.push({
         label: truncatedTitle,
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
-        type: 'plan',
+        type: "plan",
         planStatus,
       });
-    } else if (part === 'dashboard') {
+    } else if (part === "dashboard") {
       segments.push({
-        label: 'Dashboard',
+        label: "Dashboard",
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
       });
-    } else if (part === 'hierarchy') {
+    } else if (part === "hierarchy") {
       segments.push({
-        label: 'Hierarchy',
+        label: "Hierarchy",
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
       });
-    } else if (part === 'goals') {
+    } else if (part === "goals") {
       segments.push({
-        label: 'Goals',
+        label: "Goals",
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
       });
-    } else if (part === 'week') {
+    } else if (part === "week") {
       // Week segment - might be followed by week number
       if (i + 1 < parts.length && parts[i + 1].match(/^\d+$/)) {
         const weekNum = parts[i + 1];
@@ -114,12 +114,12 @@ function parsePath(path: string, planTitle?: string, planStatus?: PlanStatus): B
         i++; // Skip the next iteration as we've processed the week number
       } else {
         segments.push({
-          label: 'Week',
+          label: "Week",
           href: isLast ? undefined : pathUpToHere,
           isActive: isLast,
         });
       }
-    } else if (part === 'day') {
+    } else if (part === "day") {
       // Day segment - might be followed by day number
       if (i + 1 < parts.length && parts[i + 1].match(/^\d+$/)) {
         const dayNum = parts[i + 1];
@@ -131,12 +131,12 @@ function parsePath(path: string, planTitle?: string, planStatus?: PlanStatus): B
         i++; // Skip the next iteration
       } else {
         segments.push({
-          label: 'Day',
+          label: "Day",
           href: isLast ? undefined : pathUpToHere,
           isActive: isLast,
         });
       }
-    } else if (part === 'review') {
+    } else if (part === "review") {
       // Review segment - might be followed by week number
       if (i + 1 < parts.length && parts[i + 1].match(/^\d+$/)) {
         const weekNum = parts[i + 1];
@@ -148,20 +148,20 @@ function parsePath(path: string, planTitle?: string, planStatus?: PlanStatus): B
         i++; // Skip the next iteration
       } else {
         segments.push({
-          label: 'Review',
+          label: "Review",
           href: isLast ? undefined : pathUpToHere,
           isActive: isLast,
         });
       }
-    } else if (part === 'wizard') {
+    } else if (part === "wizard") {
       segments.push({
-        label: 'Create Plan',
+        label: "Create Plan",
         href: isLast ? undefined : pathUpToHere,
         isActive: isLast,
       });
     } else if (!part.match(/^\d+$/) && !part.match(/^[a-f0-9-]{36}$/i)) {
       // Generic segment (not a number or UUID)
-      const label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ');
+      const label = part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, " ");
       segments.push({
         label,
         href: isLast ? undefined : pathUpToHere,
@@ -187,22 +187,18 @@ export function Breadcrumbs({ planTitle, planStatus, currentPath }: BreadcrumbsP
           <div key={index} className="contents">
             <BreadcrumbItem>
               {crumb.isActive ? (
-                crumb.type === 'plan' && crumb.planStatus ? (
+                crumb.type === "plan" && crumb.planStatus ? (
                   <BreadcrumbPage className="flex items-center gap-2">
                     <span>{crumb.label}</span>
-                    <Badge variant={getStatusBadgeVariant(crumb.planStatus)}>
-                      {formatStatus(crumb.planStatus)}
-                    </Badge>
+                    <Badge variant={getStatusBadgeVariant(crumb.planStatus)}>{formatStatus(crumb.planStatus)}</Badge>
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                 )
-              ) : crumb.type === 'plan' && crumb.planStatus ? (
+              ) : crumb.type === "plan" && crumb.planStatus ? (
                 <BreadcrumbLink href={crumb.href} className="flex items-center gap-2">
                   <span>{crumb.label}</span>
-                  <Badge variant={getStatusBadgeVariant(crumb.planStatus)}>
-                    {formatStatus(crumb.planStatus)}
-                  </Badge>
+                  <Badge variant={getStatusBadgeVariant(crumb.planStatus)}>{formatStatus(crumb.planStatus)}</Badge>
                 </BreadcrumbLink>
               ) : (
                 <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>

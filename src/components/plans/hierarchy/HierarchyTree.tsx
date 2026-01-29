@@ -1,5 +1,5 @@
-import { HierarchyNode } from './HierarchyNode';
-import type { HierarchyTreeNode } from '@/types';
+import { HierarchyNode } from "./HierarchyNode";
+import type { HierarchyTreeNode } from "@/types";
 
 interface HierarchyTreeProps {
   nodes: HierarchyTreeNode[];
@@ -18,11 +18,7 @@ export function HierarchyTree({ nodes, onNavigate }: HierarchyTreeProps) {
   return (
     <div className="space-y-1">
       {nodes.map((node) => (
-        <HierarchyNode
-          key={node.id}
-          node={node}
-          onNavigate={onNavigate}
-        />
+        <HierarchyNode key={node.id} node={node} onNavigate={onNavigate} />
       ))}
     </div>
   );

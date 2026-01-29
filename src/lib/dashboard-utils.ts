@@ -5,16 +5,16 @@ import type {
   DashboardFilterState,
   PlanStatus,
   TaskStatus,
-} from '@/types';
-import { getDayName } from '@/lib/utils';
+} from "@/types";
+import { getDayName } from "@/lib/utils";
 
 /**
  * Builds a hierarchical tree structure from flat dashboard data
  * Applies filtering based on the provided filter state
- * 
+ *
  * Hierarchy structure (indent levels):
  * Level 0: Plan (root)
- * Level 1: 
+ * Level 1:
  *   - Long-term Goals
  *   - Weekly Goals (no long-term goal)
  *   - Other Tasks group (ad-hoc)
@@ -30,7 +30,7 @@ import { getDayName } from '@/lib/utils';
  *   - Tasks (under weekly goals from level 2)
  * Level 4:
  *   - Tasks (under weekly goals from level 3)
- * 
+ *
  * @param data - Dashboard data from API
  * @param filters - Filter state (showCompleted, showAllWeeks)
  * @param selectedWeek - Currently selected week number for filtering (when showAllWeeks is false)
@@ -68,7 +68,7 @@ export function buildHierarchyTree(
   const shouldInclude = (
     status?: string | boolean,
     weekNumber?: number | null,
-    itemType?: 'goal' | 'milestone' | 'task' | 'weekly_goal'
+    itemType?: "goal" | "milestone" | "task" | "weekly_goal"
   ): boolean => {
     // Filter by completion status
     if (!showCompleted) {
@@ -76,20 +76,20 @@ export function buildHierarchyTree(
       // For milestones: only hide if is_completed is true (boolean)
       // For tasks: only hide if status is 'completed' or 'cancelled'
       // For weekly_goals: never hide based on completion (they don't have completion status)
-      
-      if (itemType === 'milestone') {
+
+      if (itemType === "milestone") {
         // For milestones, status is a boolean (is_completed)
-        if (typeof status === 'boolean' && status === true) {
+        if (typeof status === "boolean" && status === true) {
           return false;
         }
-      } else if (itemType === 'task') {
+      } else if (itemType === "task") {
         // For tasks, check task status
-        if (status === 'completed' || status === 'cancelled') {
+        if (status === "completed" || status === "cancelled") {
           return false;
         }
-      } else if (itemType === 'goal') {
+      } else if (itemType === "goal") {
         // For goals, status will be 'completed' only if progress is 100%
-        if (status === 'completed') {
+        if (status === "completed") {
           return false;
         }
       }
@@ -113,12 +113,12 @@ export function buildHierarchyTree(
     title: string,
     linkUrl: string,
     status?: string,
-    isCompleted: boolean = false,
+    isCompleted = false,
     progress?: number,
     weekNumber?: number,
     priority?: string,
     date?: string,
-    indent: number = 0
+    indent = 0
   ): HierarchyTreeNode => ({
     id,
     type,
@@ -139,7 +139,7 @@ export function buildHierarchyTree(
 
   // Helper function to get task status display
   const getTaskStatus = (task: any): string => {
-    return task.status || 'todo';
+    return task.status || "todo";
   };
 
   // Build the tree structure
@@ -148,11 +148,11 @@ export function buildHierarchyTree(
   // 1. Add plan node (root)
   const planNode = createNode(
     data.plan.id,
-    'plan',
+    "plan",
     data.plan.name,
     `/plans/${data.plan.id}/dashboard`,
     data.plan.status,
-    data.plan.status === 'completed',
+    data.plan.status === "completed",
     undefined,
     undefined,
     undefined,
@@ -163,16 +163,16 @@ export function buildHierarchyTree(
 
   // 2. Process goals and their children
   for (const goal of data.goals) {
-    if (!shouldInclude(goal.progress_percentage === 100 ? 'completed' : 'in_progress', undefined, 'goal')) {
+    if (!shouldInclude(goal.progress_percentage === 100 ? "completed" : "in_progress", undefined, "goal")) {
       continue;
     }
 
     const goalNode = createNode(
       goal.id,
-      'goal',
+      "goal",
       goal.title,
       `/plans/${data.plan.id}/goals`,
-      goal.progress_percentage === 100 ? 'completed' : undefined,
+      goal.progress_percentage === 100 ? "completed" : undefined,
       goal.progress_percentage === 100,
       goal.progress_percentage,
       undefined,
@@ -184,16 +184,16 @@ export function buildHierarchyTree(
     // Find milestones for this goal
     const goalMilestones = data.milestones.filter((m: any) => m.long_term_goal_id === goal.id);
     for (const milestone of goalMilestones) {
-      if (!shouldInclude(milestone.is_completed, undefined, 'milestone')) {
+      if (!shouldInclude(milestone.is_completed, undefined, "milestone")) {
         continue;
       }
 
       const milestoneNode = createNode(
         milestone.id,
-        'milestone',
+        "milestone",
         milestone.title,
         `/plans/${data.plan.id}/goals`,
-        milestone.is_completed ? 'completed' : undefined,
+        milestone.is_completed ? "completed" : undefined,
         milestone.is_completed,
         undefined,
         undefined,
@@ -203,17 +203,15 @@ export function buildHierarchyTree(
       );
 
       // Find weekly goals for this milestone
-      const milestoneWeeklyGoals = sortedWeeklyGoals.filter(
-        (wg: any) => wg.milestone_id === milestone.id
-      );
+      const milestoneWeeklyGoals = sortedWeeklyGoals.filter((wg: any) => wg.milestone_id === milestone.id);
       for (const weeklyGoal of milestoneWeeklyGoals) {
-        if (!shouldInclude(undefined, weeklyGoal.week_number, 'weekly_goal')) {
+        if (!shouldInclude(undefined, weeklyGoal.week_number, "weekly_goal")) {
           continue;
         }
 
         const weeklyGoalNode = createNode(
           weeklyGoal.id,
-          'weekly_goal',
+          "weekly_goal",
           weeklyGoal.title,
           `/plans/${data.plan.id}/week/${weeklyGoal.week_number}`,
           undefined,
@@ -226,25 +224,25 @@ export function buildHierarchyTree(
         );
 
         // Find tasks for this weekly goal
-        const weeklyGoalTasks = sortedTasks.filter(
-          (t: any) => t.weekly_goal_id === weeklyGoal.id
-        );
+        const weeklyGoalTasks = sortedTasks.filter((t: any) => t.weekly_goal_id === weeklyGoal.id);
         for (const task of weeklyGoalTasks) {
-          if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
+          if (!shouldInclude(getTaskStatus(task), task.week_number, "task")) {
             continue;
           }
 
           const taskNode = createNode(
             task.id,
-            'task',
+            "task",
             task.title,
-            task.due_day ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}` : `/plans/${data.plan.id}/week/${task.week_number}`,
+            task.due_day
+              ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}`
+              : `/plans/${data.plan.id}/week/${task.week_number}`,
             getTaskStatus(task),
-            getTaskStatus(task) === 'completed',
+            getTaskStatus(task) === "completed",
             undefined,
             task.week_number || undefined,
             task.priority,
-            task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
+            task.due_day ? (getDayName(task.due_day) ?? undefined) : undefined,
             4
           );
 
@@ -256,25 +254,25 @@ export function buildHierarchyTree(
       }
 
       // Add tasks directly under milestone (without weekly goal)
-      const milestoneTasks = sortedTasks.filter(
-        (t: any) => t.milestone_id === milestone.id && !t.weekly_goal_id
-      );
+      const milestoneTasks = sortedTasks.filter((t: any) => t.milestone_id === milestone.id && !t.weekly_goal_id);
       for (const task of milestoneTasks) {
-        if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
+        if (!shouldInclude(getTaskStatus(task), task.week_number, "task")) {
           continue;
         }
 
         const taskNode = createNode(
           task.id,
-          'task',
+          "task",
           task.title,
-          task.due_day ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}` : `/plans/${data.plan.id}/week/${task.week_number}`,
+          task.due_day
+            ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}`
+            : `/plans/${data.plan.id}/week/${task.week_number}`,
           getTaskStatus(task),
-          getTaskStatus(task) === 'completed',
+          getTaskStatus(task) === "completed",
           undefined,
           task.week_number || undefined,
           task.priority,
-          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
+          task.due_day ? (getDayName(task.due_day) ?? undefined) : undefined,
           3
         );
 
@@ -286,17 +284,15 @@ export function buildHierarchyTree(
     }
 
     // Add weekly goals directly under goal (without milestone)
-    const goalWeeklyGoals = sortedWeeklyGoals.filter(
-      (wg: any) => wg.long_term_goal_id === goal.id && !wg.milestone_id
-    );
+    const goalWeeklyGoals = sortedWeeklyGoals.filter((wg: any) => wg.long_term_goal_id === goal.id && !wg.milestone_id);
     for (const weeklyGoal of goalWeeklyGoals) {
-      if (!shouldInclude(undefined, weeklyGoal.week_number, 'weekly_goal')) {
+      if (!shouldInclude(undefined, weeklyGoal.week_number, "weekly_goal")) {
         continue;
       }
 
       const weeklyGoalNode = createNode(
         weeklyGoal.id,
-        'weekly_goal',
+        "weekly_goal",
         weeklyGoal.title,
         `/plans/${data.plan.id}/week/${weeklyGoal.week_number}`,
         undefined,
@@ -309,25 +305,25 @@ export function buildHierarchyTree(
       );
 
       // Find tasks for this weekly goal
-      const weeklyGoalTasks = data.tasks.filter(
-        (t: any) => t.weekly_goal_id === weeklyGoal.id
-      );
+      const weeklyGoalTasks = data.tasks.filter((t: any) => t.weekly_goal_id === weeklyGoal.id);
       for (const task of weeklyGoalTasks) {
-        if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
+        if (!shouldInclude(getTaskStatus(task), task.week_number, "task")) {
           continue;
         }
 
         const taskNode = createNode(
           task.id,
-          'task',
+          "task",
           task.title,
-          task.due_day ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}` : `/plans/${data.plan.id}/week/${task.week_number}`,
+          task.due_day
+            ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}`
+            : `/plans/${data.plan.id}/week/${task.week_number}`,
           getTaskStatus(task),
-          getTaskStatus(task) === 'completed',
+          getTaskStatus(task) === "completed",
           undefined,
           task.week_number || undefined,
           task.priority,
-          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
+          task.due_day ? (getDayName(task.due_day) ?? undefined) : undefined,
           3
         );
 
@@ -343,21 +339,23 @@ export function buildHierarchyTree(
       (t: any) => t.long_term_goal_id === goal.id && !t.milestone_id && !t.weekly_goal_id
     );
     for (const task of goalTasks) {
-      if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
+      if (!shouldInclude(getTaskStatus(task), task.week_number, "task")) {
         continue;
       }
 
       const taskNode = createNode(
         task.id,
-        'task',
+        "task",
         task.title,
-        task.due_day ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}` : `/plans/${data.plan.id}/week/${task.week_number}`,
+        task.due_day
+          ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}`
+          : `/plans/${data.plan.id}/week/${task.week_number}`,
         getTaskStatus(task),
-        getTaskStatus(task) === 'completed',
+        getTaskStatus(task) === "completed",
         undefined,
         task.week_number || undefined,
         task.priority,
-          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
+        task.due_day ? (getDayName(task.due_day) ?? undefined) : undefined,
         2
       );
 
@@ -369,18 +367,16 @@ export function buildHierarchyTree(
   }
 
   // 2a. Add weekly goals directly under plan (without long-term goal)
-  const planWeeklyGoals = sortedWeeklyGoals.filter(
-    (wg: any) => !wg.long_term_goal_id && !wg.milestone_id
-  );
-  
+  const planWeeklyGoals = sortedWeeklyGoals.filter((wg: any) => !wg.long_term_goal_id && !wg.milestone_id);
+
   for (const weeklyGoal of planWeeklyGoals) {
-    if (!shouldInclude(undefined, weeklyGoal.week_number, 'weekly_goal')) {
+    if (!shouldInclude(undefined, weeklyGoal.week_number, "weekly_goal")) {
       continue;
     }
 
     const weeklyGoalNode = createNode(
       weeklyGoal.id,
-      'weekly_goal',
+      "weekly_goal",
       weeklyGoal.title,
       `/plans/${data.plan.id}/week/${weeklyGoal.week_number}`,
       undefined,
@@ -393,26 +389,26 @@ export function buildHierarchyTree(
     );
 
     // Find tasks for this weekly goal
-    const weeklyGoalTasks = data.tasks.filter(
-      (t: any) => t.weekly_goal_id === weeklyGoal.id
-    );
-    
+    const weeklyGoalTasks = data.tasks.filter((t: any) => t.weekly_goal_id === weeklyGoal.id);
+
     for (const task of weeklyGoalTasks) {
-      if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
+      if (!shouldInclude(getTaskStatus(task), task.week_number, "task")) {
         continue;
       }
 
       const taskNode = createNode(
         task.id,
-        'task',
+        "task",
         task.title,
-        task.due_day ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}` : `/plans/${data.plan.id}/week/${task.week_number}`,
+        task.due_day
+          ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}`
+          : `/plans/${data.plan.id}/week/${task.week_number}`,
         getTaskStatus(task),
-        getTaskStatus(task) === 'completed',
+        getTaskStatus(task) === "completed",
         undefined,
         task.week_number || undefined,
         task.priority,
-          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
+        task.due_day ? (getDayName(task.due_day) ?? undefined) : undefined,
         2 // Level 2: tasks under weekly goal at level 1
       );
 
@@ -424,15 +420,13 @@ export function buildHierarchyTree(
   }
 
   // 3. Add ad-hoc tasks (tasks not linked to any goal/milestone/weekly goal)
-  const adHocTasks = sortedTasks.filter(
-    (t: any) => !t.long_term_goal_id && !t.milestone_id && !t.weekly_goal_id
-  );
+  const adHocTasks = sortedTasks.filter((t: any) => !t.long_term_goal_id && !t.milestone_id && !t.weekly_goal_id);
 
   if (adHocTasks.length > 0) {
     const adHocGroupNode = createNode(
-      'ad-hoc-group',
-      'ad_hoc_group',
-      'Other Tasks',
+      "ad-hoc-group",
+      "ad_hoc_group",
+      "Other Tasks",
       `/plans/${data.plan.id}/week/${selectedWeek}`,
       undefined,
       false,
@@ -444,21 +438,23 @@ export function buildHierarchyTree(
     );
 
     for (const task of adHocTasks) {
-      if (!shouldInclude(getTaskStatus(task), task.week_number, 'task')) {
+      if (!shouldInclude(getTaskStatus(task), task.week_number, "task")) {
         continue;
       }
 
       const taskNode = createNode(
         task.id,
-        'task',
+        "task",
         task.title,
-        task.due_day ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}` : `/plans/${data.plan.id}/week/${task.week_number}`,
+        task.due_day
+          ? `/plans/${data.plan.id}/week/${task.week_number}/day/${task.due_day}`
+          : `/plans/${data.plan.id}/week/${task.week_number}`,
         getTaskStatus(task),
-        getTaskStatus(task) === 'completed',
+        getTaskStatus(task) === "completed",
         undefined,
         task.week_number || undefined,
         task.priority,
-          task.due_day ? getDayName(task.due_day) ?? undefined : undefined,
+        task.due_day ? (getDayName(task.due_day) ?? undefined) : undefined,
         2
       );
 

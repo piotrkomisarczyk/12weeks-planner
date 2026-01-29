@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 /**
  * Page Object Model for the Navigation Bar
@@ -16,13 +16,13 @@ export class NavigationBar {
 
   constructor(page: Page) {
     this.page = page;
-    this.plansLink = page.getByTestId('nav-link-plans');
-    this.dashboardLink = page.getByTestId('nav-link-dashboard');
-    this.goalsLink = page.getByTestId('nav-link-goals');
-    this.hierarchyLink = page.getByTestId('nav-link-hierarchy');
-    this.weekLink = page.getByTestId('nav-link-week');
-    this.todayLink = page.getByTestId('nav-link-today');
-    this.reviewLink = page.getByTestId('nav-link-review');
+    this.plansLink = page.getByTestId("nav-link-plans");
+    this.dashboardLink = page.getByTestId("nav-link-dashboard");
+    this.goalsLink = page.getByTestId("nav-link-goals");
+    this.hierarchyLink = page.getByTestId("nav-link-hierarchy");
+    this.weekLink = page.getByTestId("nav-link-week");
+    this.todayLink = page.getByTestId("nav-link-today");
+    this.reviewLink = page.getByTestId("nav-link-review");
   }
 
   /**

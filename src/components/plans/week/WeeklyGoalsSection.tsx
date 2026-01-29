@@ -1,23 +1,19 @@
 /**
  * WeeklyGoalsSection Component
- * 
+ *
  * Displays all weekly goals for the current week with drag and drop support.
  */
 
-import { useState } from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { WeeklyGoalCard } from './WeeklyGoalCard';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, PlanStatus } from '@/types';
-import { CreateWeeklyGoalDialog } from './CreateWeeklyGoalDialog';
-import { getDisabledTooltip } from '@/lib/utils';
+import { useState } from "react";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { WeeklyGoalCard } from "./WeeklyGoalCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import type { WeeklyGoalViewModel, TaskViewModel, SimpleGoal, SimpleMilestone, PlanStatus } from "@/types";
+import { CreateWeeklyGoalDialog } from "./CreateWeeklyGoalDialog";
+import { getDisabledTooltip } from "@/lib/utils";
 
 interface WeeklyGoalsSectionProps {
   goals: WeeklyGoalViewModel[];
@@ -84,7 +80,7 @@ export function WeeklyGoalsSection({
                 Plan your goals for this week {isAtGoalLimit && `(${goals.length}/${MAX_WEEKLY_GOALS})`}
               </div>
             </div>
-            {(isAtGoalLimit || isReadOnly) ? (
+            {isAtGoalLimit || isReadOnly ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="inline-flex">
@@ -100,7 +96,7 @@ export function WeeklyGoalsSection({
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isReadOnly ? getDisabledTooltip(planStatus, 'general') : disabledTooltipText}</p>
+                  <p>{isReadOnly ? getDisabledTooltip(planStatus, "general") : disabledTooltipText}</p>
                 </TooltipContent>
               </Tooltip>
             ) : (
@@ -114,7 +110,7 @@ export function WeeklyGoalsSection({
       </Card>
 
       {/* Goals List */}
-      <SortableContext items={goals.map(g => g.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={goals.map((g) => g.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-6">
           {goals.map((goal, index) => (
             <WeeklyGoalCard
