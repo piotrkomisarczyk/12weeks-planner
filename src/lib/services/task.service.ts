@@ -561,7 +561,7 @@ export class TaskService {
 
       type TaskWithDirectJoinData = TaskDTO & { long_term_goals?: unknown };
       type TaskWithMilestoneJoinData = TaskDTO & { milestones?: unknown };
-      
+
       let allTasks: TaskDTO[] = (directTasks || []).map((task) => {
         const { long_term_goals: _long_term_goals, ...cleanTask } = task as TaskWithDirectJoinData;
         return cleanTask as TaskDTO;
@@ -610,7 +610,7 @@ export class TaskService {
 
           // Merge and deduplicate tasks (a task could have both long_term_goal_id AND milestone_id)
           const taskMap = new Map<string, TaskDTO>();
-          
+
           [...allTasks, ...cleanedMilestoneTasks].forEach((task) => {
             taskMap.set(task.id, task);
           });

@@ -187,12 +187,12 @@ export function PlanWizardContainer() {
         // Success! Show toast and redirect
         toast.success("Planner created successfully");
         window.location.href = "/plans";
-      } catch (goalError) {
+      } catch {
         // Rollback: Delete the plan if goal creation failed
 
         await fetch(`/api/v1/plans/${planId}`, {
           method: "DELETE",
-        }).catch((deleteError) => {});
+        }).catch(() => {});
 
         throw new Error("Error creating goals. The planner creation was rolled back.");
       }

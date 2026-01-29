@@ -10,7 +10,7 @@ import { MilestoneList } from "./MilestoneList";
 import { MilestoneForm } from "./MilestoneForm";
 import type { PlanContext, PlanStatus } from "@/types";
 import { toast } from "sonner";
-import { isPlanReadOnly, isPlanReady } from "@/lib/utils";
+import { isPlanReadOnly } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,

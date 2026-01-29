@@ -92,7 +92,7 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
         },
       }
     );
-  } catch (error) {
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

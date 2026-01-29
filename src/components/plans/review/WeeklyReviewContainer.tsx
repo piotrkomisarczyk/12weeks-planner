@@ -10,7 +10,6 @@ import GoalProgressList from "./GoalProgressList";
 import ReflectionForm from "./ReflectionForm";
 import ReviewCompletionStatus from "./ReviewCompletionStatus";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../ui/accordion";
-import { isPlanReadOnly, isPlanReady } from "../../../lib/utils";
 
 interface WeeklyReviewContainerProps {
   planId: string;

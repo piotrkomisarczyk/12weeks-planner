@@ -474,7 +474,7 @@ export class WeeklyGoalService {
       }
 
       // Remove the joined data from response
-      return (data || []).map(({ long_term_goals: _long_term_goals, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
+      return (data || []).map(({ long_term_goals: _, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
     } catch (error) {
       throw error;
     }

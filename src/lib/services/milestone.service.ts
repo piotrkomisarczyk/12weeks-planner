@@ -45,7 +45,10 @@ export class MilestoneService {
    * }, userId);
    * ```
    */
-  async listMilestones(filters: ListMilestonesQuery, userId: string): Promise<{ data: MilestoneDTO[]; count: number }> {
+  async listMilestones(
+    filters: ListMilestonesQuery,
+    _userId: string
+  ): Promise<{ data: MilestoneDTO[]; count: number }> {
     let query = this.supabase.from("milestones").select("*", { count: "exact" });
 
     // Apply filters
@@ -88,7 +91,7 @@ export class MilestoneService {
    * const milestones = await milestoneService.getMilestonesByGoalId(goalId, userId);
    * ```
    */
-  async getMilestonesByGoalId(goalId: string, userId: string): Promise<MilestoneDTO[]> {
+  async getMilestonesByGoalId(goalId: string, _userId: string): Promise<MilestoneDTO[]> {
     // First check if goal exists and belongs to user
     const { data: goal, error: goalError } = await this.supabase
       .from("long_term_goals")
@@ -129,7 +132,7 @@ export class MilestoneService {
    * const milestone = await milestoneService.getMilestoneById(id, userId);
    * ```
    */
-  async getMilestoneById(id: string, userId: string): Promise<MilestoneDTO> {
+  async getMilestoneById(id: string, _userId: string): Promise<MilestoneDTO> {
     const { data, error } = await this.supabase.from("milestones").select("*").eq("id", id).single();
 
     if (error || !data) {
@@ -162,7 +165,7 @@ export class MilestoneService {
    * }, userId);
    * ```
    */
-  async createMilestone(milestoneData: CreateMilestoneCommand, userId: string): Promise<MilestoneDTO> {
+  async createMilestone(milestoneData: CreateMilestoneCommand, _userId: string): Promise<MilestoneDTO> {
     // Verify goal exists and belongs to user
     const { data: goal, error: goalError } = await this.supabase
       .from("long_term_goals")
@@ -217,7 +220,7 @@ export class MilestoneService {
    * }, userId);
    * ```
    */
-  async updateMilestone(id: string, updateData: UpdateMilestoneCommand, userId: string): Promise<MilestoneDTO> {
+  async updateMilestone(id: string, updateData: UpdateMilestoneCommand, _userId: string): Promise<MilestoneDTO> {
     // Prepare update data with only provided fields
     const update: MilestoneUpdate = {};
 
@@ -269,7 +272,7 @@ export class MilestoneService {
    * await milestoneService.deleteMilestone(id, userId);
    * ```
    */
-  async deleteMilestone(id: string, userId: string): Promise<void> {
+  async deleteMilestone(id: string, _userId: string): Promise<void> {
     const { error } = await this.supabase.from("milestones").delete().eq("id", id);
 
     if (error) {
@@ -296,7 +299,7 @@ export class MilestoneService {
    * const weeklyGoals = await milestoneService.getWeeklyGoalsByMilestoneId(milestoneId, userId);
    * ```
    */
-  async getWeeklyGoalsByMilestoneId(milestoneId: string, userId: string): Promise<WeeklyGoalDTO[]> {
+  async getWeeklyGoalsByMilestoneId(milestoneId: string, _userId: string): Promise<WeeklyGoalDTO[]> {
     // First check if milestone exists and belongs to user
     const { data: milestone, error: milestoneError } = await this.supabase
       .from("milestones")
@@ -348,7 +351,7 @@ export class MilestoneService {
   async getTasksByMilestoneId(
     milestoneId: string,
     filters: ListTasksByMilestoneQuery,
-    userId: string
+    _userId: string
   ): Promise<{ data: TaskDTO[]; count: number }> {
     // First check if milestone exists and belongs to user
     const { data: milestone, error: milestoneError } = await this.supabase
