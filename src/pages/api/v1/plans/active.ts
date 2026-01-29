@@ -70,9 +70,8 @@ export const GET: APIRoute = async ({ locals }) => {
         },
       }
     );
-  } catch (error) {
+  } catch {
     // Global error handler for unexpected errors
-    console.error("Error in GET /api/v1/plans/active:", error);
 
     return new Response(
       JSON.stringify({

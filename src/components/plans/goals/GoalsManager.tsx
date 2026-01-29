@@ -68,18 +68,16 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
   const handleMoveGoalUp = async (id: string) => {
     try {
       await moveGoalUp(id);
-    } catch (error) {
+    } catch {
       toast.error("Failed to move goal up");
-      console.error(error);
     }
   };
 
   const handleMoveGoalDown = async (id: string) => {
     try {
       await moveGoalDown(id);
-    } catch (error) {
+    } catch {
       toast.error("Failed to move goal down");
-      console.error(error);
     }
   };
 

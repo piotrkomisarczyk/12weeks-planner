@@ -77,7 +77,6 @@ export class ExportService {
       ].filter(Boolean);
 
       if (errors.length > 0) {
-        console.error("Error exporting user data:", errors[0]);
         return { error: "Failed to export user data" };
       }
 
@@ -96,8 +95,7 @@ export class ExportService {
       };
 
       return exportData;
-    } catch (error) {
-      console.error("Unexpected error in exportUserData:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }

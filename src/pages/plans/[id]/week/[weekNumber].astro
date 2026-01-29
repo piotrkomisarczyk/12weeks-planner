@@ -44,8 +44,8 @@ const planService = new PlanService(Astro.locals.supabase);
 let plan;
 try {
   plan = await planService.getPlanById(planId, userId);
-} catch (error) {
-  console.error("Error fetching plan:", error);
+} catch {
+  // Plan not found or error loading - will redirect below
 }
 
 // Redirect if plan not found

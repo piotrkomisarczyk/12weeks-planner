@@ -105,9 +105,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
-    console.error("Error in GET /api/v1/weekly-reviews/:id:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {
@@ -254,9 +253,8 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
-    console.error("Error in PATCH /api/v1/weekly-reviews/:id:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {
@@ -347,9 +345,8 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
+  } catch {
     // Log error for debugging
-    console.error("Error in DELETE /api/v1/weekly-reviews/:id:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {

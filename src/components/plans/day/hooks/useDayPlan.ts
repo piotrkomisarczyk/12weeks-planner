@@ -222,7 +222,6 @@ export function useDayPlan(
 
       setStatus("success");
     } catch (err) {
-      console.error("Error fetching day plan data:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
       setStatus("error");
     }
@@ -345,7 +344,6 @@ export function useDayPlan(
           }));
         }
       } catch (err) {
-        console.error("Error creating task:", err);
         // Rollback optimistic update
         setData(previousData);
         throw err;
@@ -417,7 +415,6 @@ export function useDayPlan(
           return newData;
         });
       } catch (err) {
-        console.error("Error updating task:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -456,7 +453,6 @@ export function useDayPlan(
           throw new Error("Failed to delete task");
         }
       } catch (err) {
-        console.error("Error deleting task:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -505,7 +501,6 @@ export function useDayPlan(
           )
         );
       } catch (err) {
-        console.error("Error reordering tasks:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -591,7 +586,6 @@ export function useDayPlan(
           body: JSON.stringify({ priority: newPriority }),
         });
       } catch (err) {
-        console.error("Error changing task slot:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -636,7 +630,6 @@ export function useDayPlan(
           await fetchData();
         }
       } catch (err) {
-        console.error("Error copying task:", err);
         throw err;
       } finally {
         setIsSaving(false);
@@ -685,7 +678,6 @@ export function useDayPlan(
           await fetchData();
         }
       } catch (err) {
-        console.error("Error moving task:", err);
         // Rollback if moved away but failed
         setData(previousData);
         throw err;

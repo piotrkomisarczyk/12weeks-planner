@@ -63,7 +63,6 @@ export const GET: APIRoute = async ({ locals, params }) => {
       },
     });
   } catch (error) {
-    console.error("Error in GET /api/v1/goals/:goalId/weekly-goals:", {
       error: error instanceof Error ? error.message : "Unknown error",
       goalId: params.goalId,
       timestamp: new Date().toISOString(),

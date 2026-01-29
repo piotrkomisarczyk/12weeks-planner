@@ -79,9 +79,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
         "Cache-Control": "private, max-age=10",
       },
     });
-  } catch (error) {
-    console.error("Error in GET /api/v1/plans/:id/dashboard:", error);
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

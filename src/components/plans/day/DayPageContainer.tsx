@@ -95,7 +95,6 @@ export function DayPageContainer({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to create task";
         toast.error(errorMessage);
-        console.error(err);
       }
     },
     [addTask]
@@ -108,7 +107,6 @@ export function DayPageContainer({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to update task";
         toast.error(errorMessage);
-        console.error(err);
       }
     },
     [updateTask]
@@ -119,9 +117,8 @@ export function DayPageContainer({
       try {
         await deleteTask(id);
         toast.success("Task deleted");
-      } catch (err) {
+      } catch {
         toast.error("Failed to delete task");
-        console.error(err);
       }
     },
     [deleteTask]
@@ -137,9 +134,8 @@ export function DayPageContainer({
 
       try {
         await updateTask(id, { status: newStatus });
-      } catch (err) {
+      } catch {
         toast.error("Failed to update task status");
-        console.error(err);
       }
     },
     [updateTask, canChangeStatus]
@@ -205,7 +201,6 @@ export function DayPageContainer({
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : "Failed to change priority";
           toast.error(errorMessage);
-          console.error(err);
         }
       }, 1000);
     },
@@ -224,9 +219,8 @@ export function DayPageContainer({
           await moveTask(id, weekNumber, day);
           toast.success(`Task assigned to ${DAY_NAMES[day - 1]}`);
         }
-      } catch (err) {
+      } catch {
         toast.error("Failed to assign day");
-        console.error(err);
       }
     },
     [updateTask, moveTask, weekNumber]
@@ -247,9 +241,8 @@ export function DayPageContainer({
       try {
         await copyTask(id, targetWeek, targetDay);
         toast.success("Task copied");
-      } catch (err) {
+      } catch {
         toast.error("Failed to copy task");
-        console.error(err);
       }
     },
     [data, copyTask]
@@ -274,9 +267,8 @@ export function DayPageContainer({
         if (targetWeek !== weekNumber || targetDay !== dayNumber) {
           toast.success("Task moved");
         }
-      } catch (err) {
+      } catch {
         toast.error("Failed to move task");
-        console.error(err);
       }
     },
     [data, moveTask, weekNumber, dayNumber]
@@ -290,9 +282,8 @@ export function DayPageContainer({
           milestone_id: milestoneId,
         });
         toast.success("Goal & milestone linked");
-      } catch (err) {
+      } catch {
         toast.error("Failed to link goal & milestone");
-        console.error(err);
       }
     },
     [updateTask]
@@ -320,7 +311,6 @@ export function DayPageContainer({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to assign to weekly goal";
         toast.error(errorMessage);
-        console.error(err);
       }
     },
     [updateTask, meta.weeklyGoals]
@@ -334,9 +324,8 @@ export function DayPageContainer({
           task_type: "ad_hoc",
         });
         toast.success("Unassigned from weekly goal");
-      } catch (err) {
+      } catch {
         toast.error("Failed to unassign from weekly goal");
-        console.error(err);
       }
     },
     [updateTask]
@@ -378,9 +367,8 @@ export function DayPageContainer({
       reorderedTasks.splice(newIndex, 0, movedTask);
 
       // Update backend
-      reorderInSlot(sourceSlot, reorderedTasks).catch((err) => {
+      reorderInSlot(sourceSlot, reorderedTasks).catch(() => {
         toast.error("Failed to reorder tasks");
-        console.error(err);
       });
     },
     [data, reorderInSlot]

@@ -83,7 +83,6 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     // Other errors
-    console.error("Error in GET /api/v1/goals/:goalId/milestones:", error);
     const errorResponse: ErrorResponse = {
       error: "Internal Server Error",
       message: "An unexpected error occurred",

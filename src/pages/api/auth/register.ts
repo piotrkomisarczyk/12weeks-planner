@@ -102,8 +102,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         },
       }
     );
-  } catch (error) {
-    console.error("Registration error:", error);
+  } catch {
     return new Response(
       JSON.stringify({
         error: "An unexpected error occurred. Please try again.",

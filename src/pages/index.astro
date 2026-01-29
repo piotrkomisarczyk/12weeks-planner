@@ -28,8 +28,7 @@ try {
     // No active planner - redirect to planners list
     return Astro.redirect("/plans");
   }
-} catch (error) {
-  console.error("Error checking active plan:", error);
+} catch {
   // On error, default to planners list
   return Astro.redirect("/plans");
 }

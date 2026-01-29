@@ -137,8 +137,7 @@ export function LoginForm() {
       // Success - redirect to home page
       // toast.success('Login successful');
       window.location.href = "/";
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);

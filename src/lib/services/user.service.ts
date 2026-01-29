@@ -28,13 +28,11 @@ export class UserService {
         if (error.code === "PGRST116") {
           return { error: "User metrics not found" };
         }
-        console.error("Error fetching user metrics:", error);
         return { error: "Failed to fetch user metrics" };
       }
 
       return { data: data as UserMetricsDTO };
-    } catch (error) {
-      console.error("Unexpected error in getUserMetrics:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }

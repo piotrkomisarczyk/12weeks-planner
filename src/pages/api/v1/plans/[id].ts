@@ -77,9 +77,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
-    console.error("Error in GET /api/v1/plans/:id:", error);
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -193,9 +191,7 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
-    console.error("Error in PATCH /api/v1/plans/:id:", error);
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -275,9 +271,7 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
         },
       }
     );
-  } catch (error) {
-    console.error("Error in DELETE /api/v1/plans/:id:", error);
-
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",

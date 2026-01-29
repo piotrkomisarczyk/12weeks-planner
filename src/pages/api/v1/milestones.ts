@@ -91,7 +91,6 @@ export const GET: APIRoute = async ({ request, locals }) => {
     }
 
     // Other errors
-    console.error("Error in GET /api/v1/milestones:", error);
     const errorResponse: ErrorResponse = {
       error: "Internal Server Error",
       message: "An unexpected error occurred",
@@ -194,7 +193,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // Other errors
-    console.error("Error in POST /api/v1/milestones:", error);
     const errorResponse: ErrorResponse = {
       error: "Internal Server Error",
       message: "An unexpected error occurred",

@@ -80,8 +80,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch (error) {
-    console.error("Error in GET /api/v1/goals:", error);
+  } catch {
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -193,9 +192,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
       // Re-throw for general error handler
       throw serviceError;
     }
-  } catch (error) {
+  } catch {
     // Global error handler for unexpected errors
-    console.error("Error in POST /api/v1/goals:", error);
 
     return new Response(
       JSON.stringify({

@@ -155,7 +155,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
 
       setStatus("success");
     } catch (err) {
-      console.error("Error fetching week plan data:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
       setStatus("error");
     }
@@ -231,7 +230,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           weeklyGoals: prev.weeklyGoals.map((g) => (g.id === tempId ? { ...newGoal, tasks: [] } : g)),
         }));
       } catch (err) {
-        console.error("Error creating weekly goal:", err);
         // Rollback optimistic update
         setData((prev) => ({
           ...prev,
@@ -275,7 +273,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           weeklyGoals: prev.weeklyGoals.map((g) => (g.id === id ? { ...g, ...updatedGoal } : g)),
         }));
       } catch (err) {
-        console.error("Error updating weekly goal:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -305,7 +302,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           throw new Error("Failed to delete weekly goal");
         }
       } catch (err) {
-        console.error("Error deleting weekly goal:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -344,7 +340,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           )
         );
       } catch (err) {
-        console.error("Error reordering weekly goals:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -374,7 +369,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
         // Refetch to ensure consistency
         await fetchData();
       } catch (err) {
-        console.error("Error moving weekly goal up:", err);
         setData(previousData);
         throw err;
       }
@@ -403,7 +397,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
         // Refetch to ensure consistency
         await fetchData();
       } catch (err) {
-        console.error("Error moving weekly goal down:", err);
         setData(previousData);
         throw err;
       }
@@ -516,7 +509,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           }));
         }
       } catch (err) {
-        console.error("Error creating task:", err);
         // Rollback optimistic update
         if (weeklyGoalId) {
           setData((prev) => ({
@@ -590,7 +582,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           adHocTasks: prev.adHocTasks.map((t) => (t.id === id ? updatedTask : t)),
         }));
       } catch (err) {
-        console.error("Error updating task:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -625,7 +616,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
           throw new Error("Failed to delete task");
         }
       } catch (err) {
-        console.error("Error deleting task:", err);
         // Rollback
         setData(previousData);
         throw err;
@@ -726,7 +716,6 @@ export function useWeekPlan(planId: string, weekNumber: number): UseWeekPlanRetu
             )
         );
       } catch (err) {
-        console.error("Error moving task:", err);
         // Rollback
         setData(previousData);
         throw err;

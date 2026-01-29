@@ -87,7 +87,6 @@ export function WeekPlannerContainer({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to create weekly goal";
         toast.error(errorMessage);
-        console.error(err);
       }
     },
     [addWeeklyGoal, data.weeklyGoals.length]
@@ -97,9 +96,8 @@ export function WeekPlannerContainer({
     async (id: string, updates: Partial<WeeklyGoalViewModel>) => {
       try {
         await updateWeeklyGoal(id, updates);
-      } catch (err) {
+      } catch {
         toast.error("Failed to update weekly goal");
-        console.error(err);
       }
     },
     [updateWeeklyGoal]
@@ -110,9 +108,8 @@ export function WeekPlannerContainer({
       try {
         await deleteWeeklyGoal(id);
         toast.success("Weekly goal deleted");
-      } catch (err) {
+      } catch {
         toast.error("Failed to delete weekly goal");
-        console.error(err);
       }
     },
     [deleteWeeklyGoal]
@@ -144,9 +141,8 @@ export function WeekPlannerContainer({
         // Refetch to update UI with new associations
         await refetch();
         toast.success("Goal & milestone linked, tasks updated");
-      } catch (err) {
+      } catch {
         toast.error("Failed to link goal & milestone");
-        console.error(err);
       }
     },
     [updateWeeklyGoal, updateTask, data.weeklyGoals, refetch]
@@ -156,9 +152,8 @@ export function WeekPlannerContainer({
     async (id: string) => {
       try {
         await moveWeeklyGoalUp(id);
-      } catch (err) {
+      } catch {
         toast.error("Failed to move goal up");
-        console.error(err);
       }
     },
     [moveWeeklyGoalUp]
@@ -168,9 +163,8 @@ export function WeekPlannerContainer({
     async (id: string) => {
       try {
         await moveWeeklyGoalDown(id);
-      } catch (err) {
+      } catch {
         toast.error("Failed to move goal down");
-        console.error(err);
       }
     },
     [moveWeeklyGoalDown]
@@ -185,7 +179,6 @@ export function WeekPlannerContainer({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to create task";
         toast.error(errorMessage);
-        console.error(err);
       }
     },
     [addTask]
@@ -198,7 +191,6 @@ export function WeekPlannerContainer({
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to update task";
         toast.error(errorMessage);
-        console.error(err);
       }
     },
     [updateTask]
@@ -209,9 +201,8 @@ export function WeekPlannerContainer({
       try {
         await deleteTask(taskId);
         toast.success("Task deleted");
-      } catch (err) {
+      } catch {
         toast.error("Failed to delete task");
-        console.error(err);
       }
     },
     [deleteTask]
@@ -252,9 +243,8 @@ export function WeekPlannerContainer({
       try {
         await updateTask(taskId, { due_day: day });
         toast.success(day ? `Task assigned to ${DAY_NAMES[day - 1]}` : "Day cleared");
-      } catch (err) {
+      } catch {
         toast.error("Failed to assign day");
-        console.error(err);
       }
     },
     [updateTask, data.weeklyGoals, data.adHocTasks]
@@ -286,9 +276,8 @@ export function WeekPlannerContainer({
         // Refetch to move task from ad-hoc to weekly goal list
         await refetch();
         toast.success("Task assigned to weekly goal");
-      } catch (err) {
+      } catch {
         toast.error("Failed to assign task");
-        console.error(err);
       }
     },
     [data.weeklyGoals, updateTask, refetch]
@@ -307,9 +296,8 @@ export function WeekPlannerContainer({
         // Refetch to move task from weekly goal to ad-hoc list
         await refetch();
         toast.success("Task unassigned from weekly goal");
-      } catch (err) {
+      } catch {
         toast.error("Failed to unassign task");
-        console.error(err);
       }
     },
     [updateTask, refetch]
@@ -337,9 +325,8 @@ export function WeekPlannerContainer({
 
           try {
             await reorderWeeklyGoals(reordered);
-          } catch (err) {
+          } catch {
             toast.error("Failed to reorder goals");
-            console.error(err);
           }
         }
       } else {
@@ -400,9 +387,8 @@ export function WeekPlannerContainer({
 
         try {
           await moveTask(active.id as string, sourceContainerId, destContainerId, newIndex);
-        } catch (err) {
+        } catch {
           toast.error("Failed to reorder task");
-          console.error(err);
         }
       }
     },

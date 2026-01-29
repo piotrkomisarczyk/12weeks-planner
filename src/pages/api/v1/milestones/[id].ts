@@ -98,7 +98,6 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     // Other errors
-    console.error("Error in GET /api/v1/milestones/:id:", error);
     const errorResponse: ErrorResponse = {
       error: "Internal Server Error",
       message: "An unexpected error occurred",
@@ -191,7 +190,6 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Other errors
-    console.error("Error in PATCH /api/v1/milestones/:id:", error);
     const errorResponse: ErrorResponse = {
       error: "Internal Server Error",
       message: "An unexpected error occurred",
@@ -265,7 +263,6 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     }
 
     // Other errors
-    console.error("Error in DELETE /api/v1/milestones/:id:", error);
     const errorResponse: ErrorResponse = {
       error: "Internal Server Error",
       message: "An unexpected error occurred",

@@ -55,8 +55,7 @@ export function RegisterForm() {
       setRegisteredEmail(data.email);
       setShowSuccess(true);
       toast.success("Registration successful! Please check your email to verify your account.");
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch {
       toast.error("An unexpected error occurred. Please try again.");
     }
   };

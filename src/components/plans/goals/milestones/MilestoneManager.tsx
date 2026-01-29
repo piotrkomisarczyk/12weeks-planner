@@ -149,7 +149,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
       onConfirm: async () => {
         try {
           await handleConfirmDeleteMilestone(id);
-        } catch (error) {
+        } catch {
           // Error handling is done in handleConfirmDeleteMilestone
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
@@ -176,8 +176,7 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
       try {
         await reorderMilestones(reorderedMilestones);
-      } catch (error) {
-        console.error("Failed to reorder milestones:", error);
+      } catch {
         toast.error("Failed to reorder milestones");
       }
     },

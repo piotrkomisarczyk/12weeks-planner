@@ -161,9 +161,8 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
       // Re-throw for general error handler
       throw serviceError;
     }
-  } catch (error) {
+  } catch {
     // Log error for debugging
-    console.error("Error in GET /api/v1/weekly-reviews/week/:weekNumber:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {

@@ -80,7 +80,6 @@ export class TaskService {
       const { data, error, count } = await query;
 
       if (error) {
-        console.error("Error listing tasks:", error);
         return { error: "Failed to fetch tasks" };
       }
 
@@ -88,8 +87,7 @@ export class TaskService {
         data: data as TaskDTO[],
         count: count ?? undefined,
       };
-    } catch (error) {
-      console.error("Unexpected error in listTasks:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -117,7 +115,6 @@ export class TaskService {
         .order("position", { ascending: true });
 
       if (error) {
-        console.error("Error fetching daily tasks:", error);
         return { error: "Failed to fetch daily tasks" };
       }
 
@@ -143,8 +140,7 @@ export class TaskService {
       };
 
       return { data: dailyTasks };
-    } catch (error) {
-      console.error("Unexpected error in getDailyTasks:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -173,7 +169,6 @@ export class TaskService {
         .order("changed_at", { ascending: true });
 
       if (historyError) {
-        console.error("Error fetching task history:", historyError);
         return { error: "Failed to fetch task history" };
       }
 
@@ -183,8 +178,7 @@ export class TaskService {
       };
 
       return { data: taskWithHistory };
-    } catch (error) {
-      console.error("Unexpected error in getTaskById:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -260,13 +254,11 @@ export class TaskService {
         if (insertError.message.includes("Cannot add more than")) {
           return { error: insertError.message };
         }
-        console.error("Error creating task:", insertError);
         return { error: "Failed to create task" };
       }
 
       return { data: newTask as TaskDTO };
-    } catch (error) {
-      console.error("Unexpected error in createTask:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -340,15 +332,13 @@ export class TaskService {
         .single();
 
       if (updateError) {
-        console.error("Error updating task:", updateError);
         return { error: "Failed to update task" };
       }
 
       // Trigger log_task_status_change will automatically log status changes
 
       return { data: updatedTask as TaskDTO };
-    } catch (error) {
-      console.error("Unexpected error in updateTask:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -397,7 +387,6 @@ export class TaskService {
         .single();
 
       if (insertError) {
-        console.error("Error copying task:", insertError);
         return { error: "Failed to copy task" };
       }
 
@@ -405,8 +394,7 @@ export class TaskService {
         data: copiedTask,
         message: "Task copied successfully",
       };
-    } catch (error) {
-      console.error("Unexpected error in copyTask:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -435,13 +423,11 @@ export class TaskService {
       const { error: deleteError } = await this.supabase.from("tasks").delete().eq("id", taskId);
 
       if (deleteError) {
-        console.error("Error deleting task:", deleteError);
         return { error: "Failed to delete task" };
       }
 
       return { message: "Task deleted successfully" };
-    } catch (error) {
-      console.error("Unexpected error in deleteTask:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -463,15 +449,13 @@ export class TaskService {
         .order("changed_at", { ascending: true });
 
       if (error) {
-        console.error("Error fetching task history:", error);
         return { error: "Failed to fetch task history" };
       }
 
       return {
         data: data as TaskHistoryDTO[],
       };
-    } catch (error) {
-      console.error("Unexpected error in getTaskHistory:", error);
+    } catch {
       return { error: "Internal server error" };
     }
   }
@@ -491,8 +475,7 @@ export class TaskService {
       }
 
       return new Date(data.start_date);
-    } catch (error) {
-      console.error("Error fetching plan start date:", error);
+    } catch {
       return null;
     }
   }
@@ -508,7 +491,6 @@ export class TaskService {
     const { data, error } = await this.supabase.from("milestones").select("id").eq("long_term_goal_id", goalId);
 
     if (error) {
-      console.error("Error fetching milestone IDs:", error);
       throw new Error("Failed to fetch milestone IDs");
     }
 
@@ -567,7 +549,6 @@ export class TaskService {
       const { data: directTasks, error: directError } = await directQuery;
 
       if (directError) {
-        console.error("Error fetching direct tasks:", directError);
         throw new Error("Failed to fetch direct tasks");
       }
 
@@ -605,7 +586,6 @@ export class TaskService {
           const { data: milestoneTasks, error: milestoneError } = await milestoneQuery;
 
           if (milestoneError) {
-            console.error("Error fetching milestone tasks:", milestoneError);
             throw new Error("Failed to fetch milestone tasks");
           }
 
@@ -656,7 +636,6 @@ export class TaskService {
         count: totalCount,
       };
     } catch (error) {
-      console.error("Error in getTasksByGoalId:", error);
       throw error;
     }
   }

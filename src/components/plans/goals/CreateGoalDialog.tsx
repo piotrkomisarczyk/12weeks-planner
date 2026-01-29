@@ -120,7 +120,6 @@ export function CreateGoalDialog({
       });
       setDialogOpen(false);
     } catch (error) {
-      console.error("Failed to create goal:", error);
       toast.error(error instanceof Error ? error.message : "Failed to create goal");
     } finally {
       setIsSubmitting(false);

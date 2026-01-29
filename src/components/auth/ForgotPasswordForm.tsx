@@ -68,8 +68,7 @@ export function ForgotPasswordForm() {
 
       setShowSuccess(true);
       toast.success("Password reset email sent");
-    } catch (error) {
-      console.error("Password reset error:", error);
+    } catch {
       toast.error("Failed to send reset email. Please try again.");
     } finally {
       setIsSubmitting(false);
