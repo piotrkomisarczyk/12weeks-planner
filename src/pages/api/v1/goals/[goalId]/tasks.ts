@@ -93,16 +93,6 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
       }
     );
   } catch (error) {
-      error: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined,
-      goalId: params.goalId,
-      queryParams: {
-        status: url.searchParams.get("status"),
-        week_number: url.searchParams.get("week_number"),
-        include_milestone_tasks: url.searchParams.get("include_milestone_tasks"),
-      },
-      timestamp: new Date().toISOString(),
-    });
 
     return new Response(
       JSON.stringify({

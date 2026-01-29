@@ -63,10 +63,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
       },
     });
   } catch (error) {
-      error: error instanceof Error ? error.message : "Unknown error",
-      goalId: params.goalId,
-      timestamp: new Date().toISOString(),
-    });
+
 
     return new Response(
       JSON.stringify({
