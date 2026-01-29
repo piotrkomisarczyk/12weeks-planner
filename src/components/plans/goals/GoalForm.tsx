@@ -85,7 +85,6 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
             setSaveStatus("idle");
           }, 2000);
         } catch (error) {
-          console.error("Failed to save:", error);
           setSaveStatus("error");
 
           // Auto-hide error message after 3 seconds
@@ -118,7 +117,6 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (error) {
-      console.error("Failed to save category:", error);
       setSaveStatus("error");
       setTimeout(() => setSaveStatus("idle"), 3000);
     }

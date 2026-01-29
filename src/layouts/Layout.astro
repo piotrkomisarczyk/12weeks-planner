@@ -55,7 +55,6 @@ if (userId && urlParts[0] === "plans" && urlParts.length >= 2 && urlParts[1].mat
       };
     }
   } catch (error) {
-    console.error("Failed to fetch plan for navigation:", error);
     // Continue without plan data - TopNavigation will handle null plan
   }
 }

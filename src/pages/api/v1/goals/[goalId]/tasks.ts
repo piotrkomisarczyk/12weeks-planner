@@ -93,7 +93,6 @@ export const GET: APIRoute = async ({ locals, params, url }) => {
       }
     );
   } catch (error) {
-    console.error("Error in GET /api/v1/goals/:goalId/tasks:", {
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       goalId: params.goalId,

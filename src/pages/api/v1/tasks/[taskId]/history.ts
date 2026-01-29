@@ -107,7 +107,6 @@ export const GET: APIRoute = async ({ params, locals }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error fetching task history:", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",

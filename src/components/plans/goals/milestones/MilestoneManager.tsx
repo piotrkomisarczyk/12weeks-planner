@@ -177,7 +177,6 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
       try {
         await reorderMilestones(reorderedMilestones);
       } catch (error) {
-        console.error("Failed to reorder milestones:", error);
         toast.error("Failed to reorder milestones");
       }
     },

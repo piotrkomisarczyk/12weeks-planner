@@ -87,7 +87,6 @@ export function MilestoneForm({
       setDueDate(undefined);
       setError("");
     } catch (err) {
-      console.error("Failed to add milestone:", err);
       // Keep the form data so user can correct the issue
       // Don't reset title field on validation errors
       const errorMessage = err instanceof Error ? err.message : "Failed to add milestone";

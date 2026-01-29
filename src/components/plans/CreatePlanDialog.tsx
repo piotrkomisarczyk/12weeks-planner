@@ -76,7 +76,6 @@ export function CreatePlanDialog({ onCreatePlan, trigger }: CreatePlanDialogProp
       setOpen(false);
     } catch (error) {
       // Error handling is done in the parent component (toast notification)
-      console.error("Failed to create plan:", error);
     } finally {
       setIsSubmitting(false);
     }

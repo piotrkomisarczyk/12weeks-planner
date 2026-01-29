@@ -49,7 +49,6 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
 
       setHasValidToken(true);
     } catch (error) {
-      console.error("Token validation error:", error);
       toast.error(`Error validating reset link: ${error instanceof Error ? error.message : "Unknown error"}`);
       setTimeout(() => {
         window.location.href = "/forgot-password";
@@ -162,7 +161,6 @@ export function UpdatePasswordForm({ isLoggedIn = false }: UpdatePasswordFormPro
         }, 1500);
       }
     } catch (error) {
-      console.error("Password update error:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to update password. Please try again.";
       toast.error(errorMessage);
     } finally {

@@ -99,7 +99,6 @@ export const GET: APIRoute = async ({ params, locals }) => {
     });
   } catch (error) {
     // Log error for debugging
-    console.error("Error in GET /api/v1/goals/:id:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {
@@ -246,7 +245,6 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     });
   } catch (error) {
     // Log error for debugging
-    console.error("Error in PATCH /api/v1/goals/:id:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {
@@ -339,7 +337,6 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     });
   } catch (error) {
     // Log error for debugging
-    console.error("Error in DELETE /api/v1/goals/:id:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {

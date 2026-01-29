@@ -189,18 +189,15 @@ export function PlanWizardContainer() {
         window.location.href = "/plans";
       } catch (goalError) {
         // Rollback: Delete the plan if goal creation failed
-        console.error("Goal creation failed, rolling back plan:", goalError);
 
         await fetch(`/api/v1/plans/${planId}`, {
           method: "DELETE",
         }).catch((deleteError) => {
-          console.error("Failed to rollback plan:", deleteError);
         });
 
         throw new Error("Error creating goals. The planner creation was rolled back.");
       }
     } catch (error) {
-      console.error("Wizard submission error:", error);
       const message = error instanceof Error ? error.message : "Failed to create planner. Please try again.";
       toast.error(message);
       setWizardState((prev) => ({ ...prev, isSubmitting: false }));

@@ -68,7 +68,6 @@ export function EditPlanView({ planId }: EditPlanViewProps) {
       await updatePlanDetails(planName.trim());
     } catch (error) {
       // Error is handled in the hook
-      console.error("Failed to update plan details:", error);
     }
   };
 

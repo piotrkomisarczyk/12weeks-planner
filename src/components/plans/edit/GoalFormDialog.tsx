@@ -103,7 +103,6 @@ export function GoalFormDialog({ open, onOpenChange, goal, onSubmit }: GoalFormD
       });
     } catch (error) {
       // Error handling is done by parent component
-      console.error("Failed to save goal:", error);
     } finally {
       setIsSubmitting(false);
     }

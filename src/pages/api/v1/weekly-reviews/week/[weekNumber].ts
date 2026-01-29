@@ -163,7 +163,6 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
     }
   } catch (error) {
     // Log error for debugging
-    console.error("Error in GET /api/v1/weekly-reviews/week/:weekNumber:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {

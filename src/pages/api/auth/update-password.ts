@@ -74,7 +74,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
 
     if (error) {
-      console.error("Password update error:", error);
       return new Response(
         JSON.stringify({
           error: error.message || "Failed to update password. Please try again.",
@@ -101,7 +100,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     );
   } catch (error) {
-    console.error("Update password error:", error);
     return new Response(
       JSON.stringify({
         error: "An unexpected error occurred. Please try again.",

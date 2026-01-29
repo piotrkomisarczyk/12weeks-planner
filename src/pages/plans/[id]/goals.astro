@@ -36,7 +36,6 @@ let plan;
 try {
   plan = await planService.getPlanById(planId, userId);
 } catch (error) {
-  console.error("Error fetching plan:", error);
 }
 
 // Redirect if plan not found

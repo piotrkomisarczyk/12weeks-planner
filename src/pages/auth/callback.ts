@@ -30,11 +30,9 @@ export const GET: APIRoute = async ({ url, locals, redirect }) => {
       const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
-        console.error("PKCE code exchange error:", error);
         return redirect("/forgot-password?error=invalid_code");
       }
 
-      console.log("PKCE code exchange successful");
 
       // Determine where to redirect based on the 'next' parameter or user metadata
       // If 'next' parameter is provided, use it
@@ -47,14 +45,12 @@ export const GET: APIRoute = async ({ url, locals, redirect }) => {
       // For password reset, redirect to update-password page
       return redirect("/update-password");
     } catch (error) {
-      console.error("PKCE callback error:", error);
       return redirect("/forgot-password?error=unexpected");
     }
   }
 
   // Handle OTP flow (email verification with token_hash)
   if (!token_hash || !type) {
-    console.error("Missing required parameters in callback URL");
     return redirect("/login?error=invalid_callback");
   }
 
@@ -66,7 +62,6 @@ export const GET: APIRoute = async ({ url, locals, redirect }) => {
     });
 
     if (error) {
-      console.error("Token verification error:", error);
 
       // Handle specific errors
       if (error.message.includes("expired")) {
@@ -91,7 +86,6 @@ export const GET: APIRoute = async ({ url, locals, redirect }) => {
         return redirect("/login");
     }
   } catch (error) {
-    console.error("Callback error:", error);
     return redirect("/login?error=unexpected");
   }
 };

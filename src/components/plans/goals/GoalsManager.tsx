@@ -70,7 +70,6 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
       await moveGoalUp(id);
     } catch (error) {
       toast.error("Failed to move goal up");
-      console.error(error);
     }
   };
 
@@ -79,7 +78,6 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
       await moveGoalDown(id);
     } catch (error) {
       toast.error("Failed to move goal down");
-      console.error(error);
     }
   };
 

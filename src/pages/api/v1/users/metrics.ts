@@ -71,7 +71,6 @@ export const GET: APIRoute = async ({ locals }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error fetching user metrics:", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",

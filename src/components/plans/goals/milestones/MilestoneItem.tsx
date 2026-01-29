@@ -99,7 +99,6 @@ export function MilestoneItem({
     try {
       await onToggle(milestone.id, !milestone.is_completed);
     } catch (error) {
-      console.error("Failed to toggle milestone:", error);
     } finally {
       setIsToggling(false);
     }
@@ -151,7 +150,6 @@ export function MilestoneItem({
       setIsEditing(false);
       setEditError("");
     } catch (error) {
-      console.error("Failed to update milestone:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to update milestone";
       setEditError(errorMessage);
     } finally {

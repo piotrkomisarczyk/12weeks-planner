@@ -225,7 +225,6 @@ export function useGoals(planId: string): UseGoalsReturn {
           )
         );
       } catch (err) {
-        console.error("Error reordering goals:", err);
         // Rollback
         setState(previousData);
         throw err;
@@ -253,7 +252,6 @@ export function useGoals(planId: string): UseGoalsReturn {
         // Refetch to ensure consistency
         await fetchGoals();
       } catch (err) {
-        console.error("Error moving goal up:", err);
         setState(previousData);
         throw err;
       }
@@ -280,7 +278,6 @@ export function useGoals(planId: string): UseGoalsReturn {
         // Refetch to ensure consistency
         await fetchGoals();
       } catch (err) {
-        console.error("Error moving goal down:", err);
         setState(previousData);
         throw err;
       }

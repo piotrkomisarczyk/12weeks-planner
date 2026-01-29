@@ -470,14 +470,12 @@ export class WeeklyGoalService {
         .order("position", { ascending: true });
 
       if (error) {
-        console.error("Error fetching weekly goals by goal ID:", error);
         throw new Error("Failed to fetch weekly goals");
       }
 
       // Remove the joined data from response
       return (data || []).map(({ long_term_goals, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
     } catch (error) {
-      console.error("Error in getWeeklyGoalsByGoalId:", error);
       throw error;
     }
   }

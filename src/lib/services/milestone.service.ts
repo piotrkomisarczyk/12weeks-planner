@@ -63,7 +63,6 @@ export class MilestoneService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error listing milestones:", error);
       throw new Error(`Failed to list milestones: ${error.message}`);
     }
 
@@ -109,7 +108,6 @@ export class MilestoneService {
       .order("position", { ascending: true });
 
     if (error) {
-      console.error("Error fetching milestones by goal:", error);
       throw new Error(`Failed to fetch milestones: ${error.message}`);
     }
 
@@ -189,7 +187,6 @@ export class MilestoneService {
     const { data, error } = await this.supabase.from("milestones").insert([insertData]).select().single();
 
     if (error) {
-      console.error("Error creating milestone:", error);
 
       // Check for max milestones constraint
       if (error.message.includes("Cannot add more than 5 milestones")) {
@@ -251,7 +248,6 @@ export class MilestoneService {
       if (error?.code === "PGRST116") {
         throw new Error("Milestone not found or access denied");
       }
-      console.error("Error updating milestone:", error);
       throw new Error(`Failed to update milestone: ${error?.message || "Unknown error"}`);
     }
 
@@ -281,7 +277,6 @@ export class MilestoneService {
       if (error.code === "PGRST116") {
         throw new Error("Milestone not found or access denied");
       }
-      console.error("Error deleting milestone:", error);
       throw new Error(`Failed to delete milestone: ${error.message}`);
     }
   }
@@ -323,7 +318,6 @@ export class MilestoneService {
       .order("position", { ascending: true });
 
     if (error) {
-      console.error("Error fetching weekly goals by milestone:", error);
       throw new Error(`Failed to fetch weekly goals: ${error.message}`);
     }
 
@@ -390,7 +384,6 @@ export class MilestoneService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error fetching tasks by milestone:", error);
       throw new Error(`Failed to fetch tasks: ${error.message}`);
     }
 

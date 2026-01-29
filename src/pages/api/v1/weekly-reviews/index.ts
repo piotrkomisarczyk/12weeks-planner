@@ -132,7 +132,6 @@ export const GET: APIRoute = async ({ locals, request }) => {
     }
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error("Error in GET /api/v1/weekly-reviews:", error);
 
     return new Response(
       JSON.stringify({
@@ -250,7 +249,6 @@ export const POST: APIRoute = async ({ locals, request }) => {
     }
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error("Error in POST /api/v1/weekly-reviews:", error);
 
     return new Response(
       JSON.stringify({

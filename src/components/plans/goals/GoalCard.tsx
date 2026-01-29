@@ -75,7 +75,6 @@ export function GoalCard({
       await onDelete(goal.id);
       setShowDeleteDialog(false);
     } catch (error) {
-      console.error("Failed to delete goal:", error);
       setIsDeleting(false);
     }
   };

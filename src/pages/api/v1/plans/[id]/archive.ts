@@ -86,7 +86,6 @@ export const POST: APIRoute = async ({ locals, params }) => {
       }
     );
   } catch (error) {
-    console.error("Error in POST /api/v1/plans/:id/archive:", error);
 
     return new Response(
       JSON.stringify({

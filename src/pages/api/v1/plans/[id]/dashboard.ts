@@ -80,7 +80,6 @@ export const GET: APIRoute = async ({ locals, params }) => {
       },
     });
   } catch (error) {
-    console.error("Error in GET /api/v1/plans/:id/dashboard:", error);
 
     return new Response(
       JSON.stringify({

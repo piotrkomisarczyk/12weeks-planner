@@ -109,7 +109,6 @@ export const POST: APIRoute = async ({ params, locals }) => {
     });
   } catch (error) {
     // Log error for debugging
-    console.error("Error in POST /api/v1/weekly-reviews/:id/complete:", error);
 
     // Return generic error response
     const errorResponse: ErrorResponse = {

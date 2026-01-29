@@ -81,7 +81,6 @@ export const GET: APIRoute = async ({ locals, url }) => {
       },
     });
   } catch (error) {
-    console.error("Error in GET /api/v1/goals:", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -195,7 +194,6 @@ export const POST: APIRoute = async ({ locals, request }) => {
     }
   } catch (error) {
     // Global error handler for unexpected errors
-    console.error("Error in POST /api/v1/goals:", error);
 
     return new Response(
       JSON.stringify({

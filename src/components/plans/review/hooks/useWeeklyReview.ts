@@ -144,7 +144,6 @@ export function useWeeklyReview({
             },
           }));
         } catch (error) {
-          console.error("Error saving reflection:", error);
           setState((prev) => ({
             ...prev,
             review: { ...prev.review, isSaving: false },
@@ -195,7 +194,6 @@ export function useWeeklyReview({
           goals: prev.goals.map((g) => (g.id === goalId ? { ...g, isUpdating: false } : g)),
         }));
       } catch (error) {
-        console.error("Error updating goal progress:", error);
 
         // Rollback optimistic update
         setState((prev) => ({
@@ -266,7 +264,6 @@ export function useWeeklyReview({
           throw new Error(errorData.error || "Failed to update milestone");
         }
       } catch (error) {
-        console.error("Error updating milestone:", error);
 
         // Rollback optimistic update
         setState((prev) => ({
@@ -323,7 +320,6 @@ export function useWeeklyReview({
 
       toast.success(result.message || "Review completion status updated");
     } catch (error) {
-      console.error("Error toggling completion:", error);
       setState((prev) => ({
         ...prev,
         error: "Failed to update completion status",

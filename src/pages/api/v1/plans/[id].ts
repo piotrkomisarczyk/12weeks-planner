@@ -78,7 +78,6 @@ export const GET: APIRoute = async ({ locals, params }) => {
       },
     });
   } catch (error) {
-    console.error("Error in GET /api/v1/plans/:id:", error);
 
     return new Response(
       JSON.stringify({
@@ -194,7 +193,6 @@ export const PATCH: APIRoute = async ({ locals, params, request }) => {
       },
     });
   } catch (error) {
-    console.error("Error in PATCH /api/v1/plans/:id:", error);
 
     return new Response(
       JSON.stringify({
@@ -276,7 +274,6 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
       }
     );
   } catch (error) {
-    console.error("Error in DELETE /api/v1/plans/:id:", error);
 
     return new Response(
       JSON.stringify({

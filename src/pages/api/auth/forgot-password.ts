@@ -54,7 +54,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // For security reasons, always return success even if email doesn't exist
     // This prevents email enumeration attacks
     if (error) {
-      console.error("Password reset email error:", error);
       // Still return success to user
     }
 
@@ -71,7 +70,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     );
   } catch (error) {
-    console.error("Forgot password error:", error);
     return new Response(
       JSON.stringify({
         error: "An unexpected error occurred. Please try again.",
