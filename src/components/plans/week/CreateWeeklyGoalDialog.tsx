@@ -63,7 +63,7 @@ export function CreateWeeklyGoalDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" data-test-id="create-weekly-goal-dialog">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create Weekly Goal</DialogTitle>
@@ -83,6 +83,7 @@ export function CreateWeeklyGoalDialog({
                 maxLength={255}
                 required
                 autoFocus
+                data-test-id="weekly-goal-title-input"
               />
             </div>
 
@@ -97,13 +98,13 @@ export function CreateWeeklyGoalDialog({
                 </p>
               ) : (
                 <Select value={selectedGoalId} onValueChange={setSelectedGoalId}>
-                  <SelectTrigger id="long-term-goal">
+                  <SelectTrigger id="long-term-goal" data-test-id="weekly-goal-longterm-select">
                     <SelectValue placeholder="Select a long-term goal (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">None</SelectItem>
+                    <SelectItem value="__none__" data-test-id="longterm-goal-option-none">None</SelectItem>
                     {availableLongTermGoals.map((goal) => (
-                      <SelectItem key={goal.id} value={goal.id}>
+                      <SelectItem key={goal.id} value={goal.id} data-test-id={`longterm-goal-option-${goal.title}`}>
                         <div className="flex items-center gap-2">
                           <Badge className={GOAL_CATEGORY_COLORS[goal.category] || 'bg-gray-500 text-white'}>
                             {getCategoryLabel(goal.category)}
@@ -119,10 +120,10 @@ export function CreateWeeklyGoalDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} data-test-id="create-weekly-goal-cancel-button">
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim()}>
+            <Button type="submit" disabled={!title.trim()} data-test-id="create-weekly-goal-submit-button">
               Create Goal
             </Button>
           </DialogFooter>

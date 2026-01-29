@@ -17,9 +17,9 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.locator('input[type="email"]');
-    this.passwordInput = page.locator('input[type="password"]');
-    this.loginButton = page.locator('button[type="submit"]');
+    this.emailInput = page.getByTestId('login-email-input');
+    this.passwordInput = page.getByTestId('login-password-input');
+    this.loginButton = page.getByTestId('login-submit-button');
     this.errorMessage = page.locator('[role="alert"]');
     this.emailError = page.locator('#email-error');
     this.passwordError = page.locator('#password-error');
@@ -40,8 +40,30 @@ export class LoginPage {
    * @param password - User password
    */
   async login(email: string, password: string) {
-    await this.emailInput.fill(email);
-    await this.passwordInput.fill(password);
+    // Clear fields first by clicking and selecting all
+    await this.emailInput.click();
+    await this.emailInput.clear();
+    await this.passwordInput.click();
+    await this.passwordInput.clear();
+    
+    // Use pressSequentially for more reliable input with controlled React components
+    await this.emailInput.pressSequentially(email, { delay: 50 });
+    await this.passwordInput.pressSequentially(password, { delay: 50 });
+    
+    // Wait for React state to stabilize
+    await this.page.waitForTimeout(300);
+    
+    // Verify fields contain the expected values before submitting
+    await this.page.waitForFunction(
+      ({ email, password }) => {
+        const emailInput = document.querySelector<HTMLInputElement>('[data-test-id="login-email-input"]');
+        const passwordInput = document.querySelector<HTMLInputElement>('[data-test-id="login-password-input"]');
+        return emailInput?.value === email && passwordInput?.value === password;
+      },
+      { email, password },
+      { timeout: 5000 }
+    );
+    
     await this.loginButton.click();
   }
 
@@ -85,5 +107,51 @@ export class LoginPage {
    */
   async getPasswordValidationMessage() {
     return await this.passwordInput.evaluate((el: HTMLInputElement) => el.validationMessage);
+  }
+
+  /**
+   * Fill in the email field with proper synchronization
+   * @param email - Email value to enter
+   */
+  async fillEmail(email: string) {
+    await this.emailInput.click();
+    await this.emailInput.clear();
+    await this.emailInput.pressSequentially(email, { delay: 50 });
+    
+    // Wait for React state to update
+    await this.page.waitForTimeout(200);
+    
+    // Verify the value is set
+    await this.page.waitForFunction(
+      ({ email }) => {
+        const emailInput = document.querySelector<HTMLInputElement>('[data-test-id="login-email-input"]');
+        return emailInput?.value === email;
+      },
+      { email },
+      { timeout: 3000 }
+    );
+  }
+
+  /**
+   * Fill in the password field with proper synchronization
+   * @param password - Password value to enter
+   */
+  async fillPassword(password: string) {
+    await this.passwordInput.click();
+    await this.passwordInput.clear();
+    await this.passwordInput.pressSequentially(password, { delay: 50 });
+    
+    // Wait for React state to update
+    await this.page.waitForTimeout(200);
+    
+    // Verify the value is set
+    await this.page.waitForFunction(
+      ({ password }) => {
+        const passwordInput = document.querySelector<HTMLInputElement>('[data-test-id="login-password-input"]');
+        return passwordInput?.value === password;
+      },
+      { password },
+      { timeout: 3000 }
+    );
   }
 }

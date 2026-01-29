@@ -225,6 +225,7 @@ export function TaskItem({
     <div
       ref={setNodeRef}
       style={style}
+      data-test-id={`task-item-${task.title}`}
       className={cn(
         'group flex items-center gap-2 rounded-md border bg-card p-2 hover:bg-accent/50 transition-colors',
         task.status === 'completed' && 'opacity-60',
@@ -384,6 +385,7 @@ export function TaskItem({
             <button
               className="opacity-0 group-hover:opacity-100 p-1 hover:bg-accent rounded transition-opacity"
               aria-label="Task options"
+              data-test-id={`task-menu-${task.title}`}
             >
               <MoreVertical className="h-4 w-4" />
             </button>
@@ -481,6 +483,7 @@ export function TaskItem({
           <DropdownMenuItem
             onClick={handleDelete}
             className="text-destructive focus:text-destructive"
+            data-test-id={`task-delete-menu-item-${task.title}`}
           >
             <Trash2 className="mr-2 h-4 w-4 text-destructive" />
             Delete Task
@@ -509,7 +512,7 @@ export function TaskItem({
           setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
         }
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" data-test-id={`task-delete-confirmation-dialog-${task.title}`}>
           <DialogHeader>
             <DialogTitle>{confirmDialog.title}</DialogTitle>
             <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
@@ -520,12 +523,14 @@ export function TaskItem({
               onClick={() =>
                 setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
               }
+              data-test-id={`task-delete-cancel-button-${task.title}`}
             >
               Cancel
             </Button>
             <Button
               variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
               onClick={confirmDialog.onConfirm}
+              data-test-id={`task-delete-confirm-button-${task.title}`}
             >
               Confirm
             </Button>

@@ -53,6 +53,7 @@ export function InlineAddTask({
         placeholder={placeholder}
         className="h-9"
         maxLength={255}
+        data-test-id="inline-task-title-input"
       />
       
       <Button
@@ -60,6 +61,7 @@ export function InlineAddTask({
         size="sm"
         disabled={!value.trim()}
         className="shrink-0"
+        data-test-id="inline-task-submit-button"
       >
         <Plus className="h-4 w-4" />
       </Button>

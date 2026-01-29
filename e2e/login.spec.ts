@@ -7,8 +7,6 @@ test.describe('Login Page', () => {
   test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
     await loginPage.goto();
-    await loginPage.emailInput.fill('');
-    await loginPage.passwordInput.fill('');
   });
 
   test('should display login form', async ({ page }) => {
@@ -22,11 +20,11 @@ test.describe('Login Page', () => {
   });
 
   test('should show validation errors for empty fields', async ({ page }) => {
-    // Try to submit without filling fields
-    await loginPage.emailInput.fill('');
-    await loginPage.passwordInput.fill('');
+    // Try to submit without filling fields - use helper methods to ensure clean state
+    await loginPage.fillEmail('');
+    await loginPage.fillPassword('');
     await loginPage.loginButton.click();
-
+    await page.waitForTimeout(500);
     // Check for validation error messages
     await expect(loginPage.emailError).toBeVisible();
     await expect(loginPage.emailError).toHaveText('Email is required');
@@ -35,16 +33,19 @@ test.describe('Login Page', () => {
   });
 
   test('should show validation error for invalid email format', async ({ page }) => {
-    // Enter invalid email
-    await loginPage.emailInput.fill('invalid-email');
-    await loginPage.passwordInput.fill('password123');
+    // Enter invalid email using helper methods for proper synchronization
+    await loginPage.fillEmail('invalid-email');
+    await loginPage.fillPassword('password123');
+    
+    // Click the button to trigger React validation
     await loginPage.loginButton.click();
-
-    // Check for HTML5 validation message on email input
-    // Browser prevents form submission and shows native validation
-    const validationMessage = await loginPage.getEmailValidationMessage();
-    expect(validationMessage).toBeTruthy();
-    expect(validationMessage).toContain('@');
+    
+    // Wait for React validation to process
+    await page.waitForTimeout(500);
+    
+    // Check for React validation error message
+    await expect(loginPage.emailError).toBeVisible();
+    await expect(loginPage.emailError).toHaveText('Please enter a valid email address');
   });
 
   test('should navigate to register page', async ({ page }) => {

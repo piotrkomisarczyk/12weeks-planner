@@ -109,6 +109,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
           onClick={handleLogout}
           disabled={isLoggingOut}
           className="text-destructive focus:text-destructive"
+          data-test-id="logout-button"
         >
           <LogOut className="mr-2 size-4" />
           <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>

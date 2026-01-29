@@ -77,7 +77,7 @@ export function AdHocSection({
             <div className="flex-1 min-w-0">
               <AccordionTrigger className="hover:no-underline p-0">
                 <div className="text-left space-y-1 w-full">
-                  <h3 className="font-semibold text-base">Other Tasks</h3>
+                  <h3 className="font-semibold text-base" data-test-id="other-tasks-section">Other Tasks</h3>
                   {expandedValue !== 'other-tasks' && (
                     <p className="text-sm text-muted-foreground">
                       {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
@@ -148,6 +148,7 @@ export function AdHocSection({
                             onClick={() => setIsAddingTask(true)}
                             disabled={isAtTaskLimit || isReadOnly}
                             className="w-full mt-2"
+                            data-test-id="add-adhoc-task-button"
                           >
                             <Plus className="mr-2 h-4 w-4" />
                             Add Task {isAtTaskLimit && `(${tasks.length}/${MAX_AD_HOC_TASKS})`}

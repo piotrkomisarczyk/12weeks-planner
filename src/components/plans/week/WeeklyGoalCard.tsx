@@ -222,6 +222,7 @@ export function WeeklyGoalCard({
                       <TooltipTrigger asChild>
                         <h3
                           className="font-semibold text-base"
+                          data-test-id={`weekly-goal-title-${goal.title}`}
                           onDoubleClick={(e) => {
                             if (!isReadOnly) {
                               e.stopPropagation();
@@ -319,6 +320,7 @@ export function WeeklyGoalCard({
                       size="icon"
                       aria-label="Weekly goal actions"
                       onClick={(e) => e.stopPropagation()}
+                      data-test-id={`weekly-goal-menu-${goal.title}`}
                     >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -336,6 +338,7 @@ export function WeeklyGoalCard({
                   <DropdownMenuItem
                     onClick={handleDelete}
                     className="text-destructive focus:text-destructive"
+                    data-test-id={`weekly-goal-delete-menu-item-${goal.title}`}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete Goal
@@ -446,6 +449,7 @@ export function WeeklyGoalCard({
                             onClick={() => setIsAddingTask(true)}
                             disabled={isAtTaskLimit || isReadOnly}
                             className="w-full mt-2"
+                            data-test-id={`add-task-to-goal-${goal.title}`}
                           >
                             <Plus className="mr-2 h-4 w-4" />
                             Add Task {isAtTaskLimit && `(${totalTasks}/${MAX_TASKS_PER_GOAL})`}
@@ -497,7 +501,7 @@ export function WeeklyGoalCard({
           setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
         }
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" data-test-id={`weekly-goal-delete-confirmation-dialog-${goal.title}`}>
           <DialogHeader>
             <DialogTitle>{confirmDialog.title}</DialogTitle>
             <DialogDescription className="break-words">{confirmDialog.description}</DialogDescription>
@@ -508,12 +512,14 @@ export function WeeklyGoalCard({
               onClick={() =>
                 setConfirmDialog((prev) => ({ ...prev, isOpen: false }))
               }
+              data-test-id={`weekly-goal-delete-cancel-button-${goal.title}`}
             >
               Cancel
             </Button>
             <Button
               variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
               onClick={confirmDialog.onConfirm}
+              data-test-id={`weekly-goal-delete-confirm-button-${goal.title}`}
             >
               Confirm
             </Button>

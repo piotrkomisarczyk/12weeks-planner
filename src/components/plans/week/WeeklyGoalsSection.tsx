@@ -92,6 +92,7 @@ export function WeeklyGoalsSection({
                       onClick={() => setIsCreateDialogOpen(true)}
                       disabled
                       aria-disabled="true"
+                      data-test-id="add-weekly-goal-button"
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Add Weekly Goal
@@ -103,7 +104,7 @@ export function WeeklyGoalsSection({
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Button onClick={() => setIsCreateDialogOpen(true)} data-test-id="add-weekly-goal-button">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Weekly Goal
               </Button>

@@ -152,7 +152,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" data-test-id="login-form" noValidate>
         {/* Email Field */}
         <div className="space-y-2">
           <Label htmlFor="email">
@@ -167,6 +167,7 @@ export function LoginForm() {
             autoComplete="email"
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'email-error' : undefined}
+            data-test-id="login-email-input"
           />
           {errors.email && (
             <p id="email-error" className="text-sm text-destructive">
@@ -189,6 +190,7 @@ export function LoginForm() {
             autoComplete="current-password"
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? 'password-error' : undefined}
+            data-test-id="login-password-input"
           />
           {errors.password && (
             <p id="password-error" className="text-sm text-destructive">
@@ -212,6 +214,7 @@ export function LoginForm() {
           type="submit"
           className="w-full"
           disabled={isSubmitting}
+          data-test-id="login-submit-button"
         >
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </Button>

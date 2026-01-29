@@ -39,6 +39,9 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     
+    /* Custom test id attribute */
+    testIdAttribute: 'data-test-id',
+    
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     
@@ -47,6 +50,12 @@ export default defineConfig({
     
     /* Video on failure */
     video: 'retain-on-failure',
+    
+    /* Disable browser autocomplete to prevent interference with form filling */
+    contextOptions: {
+      // Disable credential storage
+      storageState: undefined,
+    },
   },
 
   /* Configure projects for major browsers */
