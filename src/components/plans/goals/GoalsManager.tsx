@@ -41,7 +41,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     try {
       await addGoal(data);
     } catch (error) {
-      // Error is handled by the hook and dialog
+      toast.error("Failed to add goal");
       throw error;
     }
   };

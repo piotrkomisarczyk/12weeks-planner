@@ -639,8 +639,6 @@ export function useDayPlan(
         if ((targetWeek === weekNumber || !targetWeek) && (targetDay === dayNumber || !targetDay)) {
           await fetchData();
         }
-      } catch (err) {
-        throw err;
       } finally {
         setIsSaving(false);
       }

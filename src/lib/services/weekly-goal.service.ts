@@ -453,30 +453,26 @@ export class WeeklyGoalService {
    * ```
    */
   async getWeeklyGoalsByGoalId(goalId: string, userId: string): Promise<WeeklyGoalDTO[]> {
-    try {
-      // Query with security check via join with long_term_goals table
-      // This ensures user_id verification at database level
-      const { data, error } = await this.supabase
-        .from("weekly_goals")
-        .select(
-          `
+    // Query with security check via join with long_term_goals table
+    // This ensures user_id verification at database level
+    const { data, error } = await this.supabase
+      .from("weekly_goals")
+      .select(
+        `
           *,
           long_term_goals!inner(user_id)
         `
-        )
-        .eq("long_term_goal_id", goalId)
-        .eq("long_term_goals.user_id", userId)
-        .order("week_number", { ascending: true })
-        .order("position", { ascending: true });
+      )
+      .eq("long_term_goal_id", goalId)
+      .eq("long_term_goals.user_id", userId)
+      .order("week_number", { ascending: true })
+      .order("position", { ascending: true });
 
-      if (error) {
-        throw new Error("Failed to fetch weekly goals");
-      }
-
-      // Remove the joined data from response
-      return (data || []).map(({ long_term_goals: _, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
-    } catch (error) {
-      throw error;
+    if (error) {
+      throw new Error("Failed to fetch weekly goals");
     }
+
+    // Remove the joined data from response
+    return (data || []).map(({ long_term_goals: _, ...weeklyGoal }) => weeklyGoal) as WeeklyGoalDTO[];
   }
 }
