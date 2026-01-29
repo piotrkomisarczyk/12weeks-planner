@@ -24,8 +24,8 @@ export class CreateWeeklyGoalDialog {
   /**
    * Wait for the dialog to be visible
    */
-  async waitForDialog() {
-    await this.dialog.waitFor({ state: "visible" });
+  async waitForDialog(timeout = 10000) {
+    await this.dialog.waitFor({ state: "visible", timeout });
   }
 
   /**
