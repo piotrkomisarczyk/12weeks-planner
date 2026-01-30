@@ -132,8 +132,8 @@ export class GoalService {
     }
 
     // Remove nested plans data from results
-    const goals = (data || []).map((item: any) => {
-      const { plans, ...goal } = item;
+    const goals = (data || []).map((item: { plans?: unknown }) => {
+      const { plans: _plans, ...goal } = item;
       return goal as GoalDTO;
     });
 
@@ -183,7 +183,7 @@ export class GoalService {
 
     // Remove nested plans data before returning
     if (data) {
-      const { plans, ...goal } = data as any;
+      const { plans: _plans, ...goal } = data as { plans?: unknown };
       return goal as GoalDTO;
     }
 

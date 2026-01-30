@@ -112,7 +112,7 @@ export class WeeklyReviewService {
 
     // Remove nested plans data before returning
     if (data) {
-      const { plans, ...weeklyReview } = data as any;
+      const { plans: _plans, ...weeklyReview } = data as { plans?: unknown };
       return weeklyReview as WeeklyReviewDTO;
     }
 

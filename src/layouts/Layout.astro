@@ -70,6 +70,7 @@ const userEmail = user?.email || "dev@example.com";
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
     <script is:inline>
+      /* eslint-disable */
       (() => {
         try {
           const stored = localStorage.getItem("theme");
@@ -81,6 +82,7 @@ const userEmail = user?.email || "dev@example.com";
           // If localStorage is unavailable, fall back to CSS defaults.
         }
       })();
+      /* eslint-enable */
     </script>
     <title>{title}</title>
   </head>

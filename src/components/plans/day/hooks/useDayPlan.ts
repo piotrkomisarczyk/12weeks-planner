@@ -154,8 +154,8 @@ export function useDayPlan(
       const weeklyGoals = weeklyGoalsData.data || [];
 
       // Filter milestones to only include those belonging to this plan's goals
-      const goalIds = new Set(longTermGoals.map((g: any) => g.id));
-      const milestones = allMilestones.filter((m: any) => goalIds.has(m.long_term_goal_id));
+      const goalIds = new Set(longTermGoals.map((g: { id: string }) => g.id));
+      const milestones = allMilestones.filter((m: { long_term_goal_id: string }) => goalIds.has(m.long_term_goal_id));
 
       // Map tasks to slots based on priority
       // Sort by priority (A > B > C) and position
@@ -201,23 +201,27 @@ export function useDayPlan(
 
       // Set metadata
       setMeta({
-        longTermGoals: longTermGoals.map((g: any) => ({
+        longTermGoals: longTermGoals.map((g: { id: string; title: string; category: string }) => ({
           id: g.id,
           title: g.title,
           category: g.category,
         })),
-        milestones: milestones.map((m: any) => ({
-          id: m.id,
-          title: m.title,
-          long_term_goal_id: m.long_term_goal_id,
-          due_date: m.due_date,
-        })),
-        weeklyGoals: weeklyGoals.map((wg: any) => ({
-          id: wg.id,
-          title: wg.title,
-          long_term_goal_id: wg.long_term_goal_id,
-          milestone_id: wg.milestone_id,
-        })),
+        milestones: milestones.map(
+          (m: { id: string; title: string; long_term_goal_id: string; due_date: string | null }) => ({
+            id: m.id,
+            title: m.title,
+            long_term_goal_id: m.long_term_goal_id,
+            due_date: m.due_date,
+          })
+        ),
+        weeklyGoals: weeklyGoals.map(
+          (wg: { id: string; title: string; long_term_goal_id: string | null; milestone_id: string | null }) => ({
+            id: wg.id,
+            title: wg.title,
+            long_term_goal_id: wg.long_term_goal_id,
+            milestone_id: wg.milestone_id,
+          })
+        ),
       });
 
       setStatus("success");
@@ -319,7 +323,7 @@ export function useDayPlan(
           const errorData = await response.json();
           // If validation failed, show specific validation messages
           if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
-            const messages = errorData.details.map((detail: any) => detail.message).join(", ");
+            const messages = errorData.details.map((detail: { message: string }) => detail.message).join(", ");
             throw new Error(messages);
           }
           throw new Error(errorData.error || "Failed to create task");
@@ -390,7 +394,7 @@ export function useDayPlan(
           const errorData = await response.json();
           // If validation failed, show specific validation messages
           if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
-            const messages = errorData.details.map((detail: any) => detail.message).join(", ");
+            const messages = errorData.details.map((detail: { message: string }) => detail.message).join(", ");
             throw new Error(messages);
           }
           throw new Error(errorData.error || "Failed to update task");
@@ -530,12 +534,18 @@ export function useDayPlan(
       if (data.slots.mostImportant?.id === taskId) {
         task = data.slots.mostImportant;
         sourceSlot = "most_important";
-      } else if (data.slots.secondary.find((t) => t.id === taskId)) {
-        task = data.slots.secondary.find((t) => t.id === taskId)!;
-        sourceSlot = "secondary";
-      } else if (data.slots.additional.find((t) => t.id === taskId)) {
-        task = data.slots.additional.find((t) => t.id === taskId)!;
-        sourceSlot = "additional";
+      } else {
+        const secondaryTask = data.slots.secondary.find((t) => t.id === taskId);
+        if (secondaryTask) {
+          task = secondaryTask;
+          sourceSlot = "secondary";
+        } else {
+          const additionalTask = data.slots.additional.find((t) => t.id === taskId);
+          if (additionalTask) {
+            task = additionalTask;
+            sourceSlot = "additional";
+          }
+        }
       }
 
       if (!task || !sourceSlot) return;
@@ -619,7 +629,7 @@ export function useDayPlan(
           const errorData = await response.json();
           // If validation failed, show specific validation messages
           if (errorData.details && Array.isArray(errorData.details) && errorData.details.length > 0) {
-            const messages = errorData.details.map((detail: any) => detail.message).join(", ");
+            const messages = errorData.details.map((detail: { message: string }) => detail.message).join(", ");
             throw new Error(messages);
           }
           throw new Error(errorData.error || "Failed to copy task");
@@ -629,8 +639,6 @@ export function useDayPlan(
         if ((targetWeek === weekNumber || !targetWeek) && (targetDay === dayNumber || !targetDay)) {
           await fetchData();
         }
-      } catch (err) {
-        throw err;
       } finally {
         setIsSaving(false);
       }

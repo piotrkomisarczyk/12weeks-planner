@@ -51,7 +51,7 @@ test.describe.serial("Weekly Goals Management", () => {
   test("should create weekly goal with task and ad-hoc task", async ({ page }) => {
     // Step 1: Login to the application
     await loginPage.goto();
-    await loginPage.login(testEmail!, testPassword!);
+    await loginPage.login(testEmail || "", testPassword || "");
 
     // Wait for successful login - should redirect to plans page
     await page.waitForURL(/.*plans/, { timeout: 10000 });
@@ -130,7 +130,7 @@ test.describe.serial("Weekly Goals Management", () => {
   test("should allow adding multiple tasks to a weekly goal", async ({ page }) => {
     // Login
     await loginPage.goto();
-    await loginPage.login(testEmail!, testPassword!);
+    await loginPage.login(testEmail || "", testPassword || "");
     await page.waitForURL(/.*plans/, { timeout: 10000 });
 
     // Navigate to Week page

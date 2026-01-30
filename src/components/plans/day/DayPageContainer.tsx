@@ -56,16 +56,14 @@ export function DayPageContainer({
   const isReadOnly = isPlanReadOnly(planStatus);
   const canChangeStatus = canChangeTaskStatus(planStatus);
 
-  // Drag and Drop sensors - conditionally disabled for read-only plans
-  const sensors = isReadOnly
-    ? []
-    : useSensors(
-        useSensor(PointerSensor, {
-          activationConstraint: {
-            distance: 8,
-          },
-        })
-      );
+  // Drag and Drop sensors - always call hooks, but conditionally use them
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Cleanup debounce timeout on unmount
   useEffect(() => {
@@ -158,12 +156,18 @@ export function DayPageContainer({
           if (data.slots.mostImportant?.id === id) {
             task = data.slots.mostImportant;
             currentSlot = "most_important";
-          } else if (data.slots.secondary.find((t) => t.id === id)) {
-            task = data.slots.secondary.find((t) => t.id === id)!;
-            currentSlot = "secondary";
-          } else if (data.slots.additional.find((t) => t.id === id)) {
-            task = data.slots.additional.find((t) => t.id === id)!;
-            currentSlot = "additional";
+          } else {
+            const secondaryTask = data.slots.secondary.find((t) => t.id === id);
+            if (secondaryTask) {
+              task = secondaryTask;
+              currentSlot = "secondary";
+            } else {
+              const additionalTask = data.slots.additional.find((t) => t.id === id);
+              if (additionalTask) {
+                task = additionalTask;
+                currentSlot = "additional";
+              }
+            }
           }
 
           if (!task || !currentSlot) return;
@@ -411,7 +415,7 @@ export function DayPageContainer({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+    <DndContext sensors={isReadOnly ? [] : sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">

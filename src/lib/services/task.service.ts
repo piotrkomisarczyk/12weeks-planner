@@ -126,9 +126,16 @@ export class TaskService {
       const dateString = taskDate.toISOString().split("T")[0];
 
       // Categorize by priority
-      const mostImportant = tasks.find((t: { priority: string }) => t.priority === "A") || null;
-      const secondary = tasks.filter((t: { priority: string }) => t.priority === "B");
-      const additional = tasks.filter((t: { priority: string }) => t.priority === "C");
+      interface TaskWithPriority {
+        priority: string;
+        id: string;
+        title: string;
+        status: string;
+        task_type: string;
+      }
+      const mostImportant = tasks.find((t: TaskWithPriority) => t.priority === "A") || null;
+      const secondary = tasks.filter((t: TaskWithPriority) => t.priority === "B");
+      const additional = tasks.filter((t: TaskWithPriority) => t.priority === "C");
 
       const dailyTasks: DailyTasksDTO = {
         date: dateString,
@@ -524,119 +531,112 @@ export class TaskService {
     userId: string,
     params: TasksByGoalParams
   ): Promise<{ data: TaskDTO[]; count: number }> {
-    try {
-      // Build base query for direct tasks (long_term_goal_id = goalId)
-      // Use INNER JOIN with long_term_goals to verify user ownership at database level
-      let directQuery = this.supabase
-        .from("tasks")
-        .select(
-          `
+    // Build base query for direct tasks (long_term_goal_id = goalId)
+    // Use INNER JOIN with long_term_goals to verify user ownership at database level
+    let directQuery = this.supabase
+      .from("tasks")
+      .select(
+        `
           *,
           long_term_goals!inner(user_id)
         `
-        )
-        .eq("long_term_goal_id", goalId)
-        .eq("long_term_goals.user_id", userId);
+      )
+      .eq("long_term_goal_id", goalId)
+      .eq("long_term_goals.user_id", userId);
 
-      // Apply optional filters to direct query
-      if (params.status) {
-        directQuery = directQuery.eq("status", params.status);
-      }
-      if (params.week_number !== undefined) {
-        directQuery = directQuery.eq("week_number", params.week_number);
-      }
+    // Apply optional filters to direct query
+    if (params.status) {
+      directQuery = directQuery.eq("status", params.status);
+    }
+    if (params.week_number !== undefined) {
+      directQuery = directQuery.eq("week_number", params.week_number);
+    }
 
-      const { data: directTasks, error: directError } = await directQuery;
+    const { data: directTasks, error: directError } = await directQuery;
 
-      if (directError) {
-        throw new Error("Failed to fetch direct tasks");
-      }
+    if (directError) {
+      throw new Error("Failed to fetch direct tasks");
+    }
 
-      let allTasks: any[] = directTasks || [];
+    type TaskWithDirectJoinData = TaskDTO & { long_term_goals?: unknown };
+    type TaskWithMilestoneJoinData = TaskDTO & { milestones?: unknown };
 
-      // Fetch milestone tasks if requested
-      if (params.include_milestone_tasks) {
-        const milestoneIds = await this.getMilestoneIdsByGoalId(goalId);
+    let allTasks: TaskDTO[] = (directTasks || []).map((task) => {
+      const { long_term_goals: _long_term_goals, ...cleanTask } = task as TaskWithDirectJoinData;
+      return cleanTask as TaskDTO;
+    });
 
-        if (milestoneIds.length > 0) {
-          // Build query for indirect tasks (via milestones)
-          // Use INNER JOIN to verify user ownership through milestone -> goal -> user chain
-          let milestoneQuery = this.supabase
-            .from("tasks")
-            .select(
-              `
+    // Fetch milestone tasks if requested
+    if (params.include_milestone_tasks) {
+      const milestoneIds = await this.getMilestoneIdsByGoalId(goalId);
+
+      if (milestoneIds.length > 0) {
+        // Build query for indirect tasks (via milestones)
+        // Use INNER JOIN to verify user ownership through milestone -> goal -> user chain
+        let milestoneQuery = this.supabase
+          .from("tasks")
+          .select(
+            `
               *,
               milestones!inner(
                 long_term_goal_id,
                 long_term_goals!inner(user_id)
               )
             `
-            )
-            .in("milestone_id", milestoneIds)
-            .eq("milestones.long_term_goals.user_id", userId);
+          )
+          .in("milestone_id", milestoneIds)
+          .eq("milestones.long_term_goals.user_id", userId);
 
-          // Apply same filters to milestone query
-          if (params.status) {
-            milestoneQuery = milestoneQuery.eq("status", params.status);
-          }
-          if (params.week_number !== undefined) {
-            milestoneQuery = milestoneQuery.eq("week_number", params.week_number);
-          }
-
-          const { data: milestoneTasks, error: milestoneError } = await milestoneQuery;
-
-          if (milestoneError) {
-            throw new Error("Failed to fetch milestone tasks");
-          }
-
-          // Merge and deduplicate tasks (a task could have both long_term_goal_id AND milestone_id)
-          const taskMap = new Map<string, TaskDTO>();
-
-          // Process all tasks and remove joined data
-          [...allTasks, ...(milestoneTasks || [])].forEach((task) => {
-            // Remove the joined data from response
-            const { milestones, long_term_goals, ...cleanTask } = task as any;
-            taskMap.set(cleanTask.id, cleanTask as TaskDTO);
-          });
-
-          allTasks = Array.from(taskMap.values());
-        } else {
-          // No milestones for this goal, just clean direct tasks
-          allTasks = allTasks.map((task) => {
-            const { long_term_goals, ...cleanTask } = task as any;
-            return cleanTask as TaskDTO;
-          });
+        // Apply same filters to milestone query
+        if (params.status) {
+          milestoneQuery = milestoneQuery.eq("status", params.status);
         }
-      } else {
-        // Remove joined data from direct tasks only
-        allTasks = allTasks.map((task) => {
-          const { long_term_goals, ...cleanTask } = task as any;
+        if (params.week_number !== undefined) {
+          milestoneQuery = milestoneQuery.eq("week_number", params.week_number);
+        }
+
+        const { data: milestoneTasks, error: milestoneError } = await milestoneQuery;
+
+        if (milestoneError) {
+          throw new Error("Failed to fetch milestone tasks");
+        }
+
+        // Clean milestone tasks and merge with direct tasks
+        const cleanedMilestoneTasks = (milestoneTasks || []).map((task) => {
+          const { milestones: _milestones, ...cleanTask } = task as TaskWithMilestoneJoinData;
           return cleanTask as TaskDTO;
         });
+
+        // Merge and deduplicate tasks (a task could have both long_term_goal_id AND milestone_id)
+        const taskMap = new Map<string, TaskDTO>();
+
+        [...allTasks, ...cleanedMilestoneTasks].forEach((task) => {
+          taskMap.set(task.id, task);
+        });
+
+        allTasks = Array.from(taskMap.values());
       }
-
-      // Sort by week_number and position
-      // Tasks with null week_number should appear at the end
-      allTasks.sort((a, b) => {
-        const weekA = a.week_number ?? 999;
-        const weekB = b.week_number ?? 999;
-        if (weekA !== weekB) return weekA - weekB;
-        return a.position - b.position;
-      });
-
-      // Get total count before pagination
-      const totalCount = allTasks.length;
-
-      // Apply pagination
-      const { limit = 50, offset = 0 } = params;
-      const paginatedTasks = allTasks.slice(offset, offset + limit);
-
-      return {
-        data: paginatedTasks,
-        count: totalCount,
-      };
-    } catch (error) {
-      throw error;
     }
+
+    // Sort by week_number and position
+    // Tasks with null week_number should appear at the end
+    allTasks.sort((a, b) => {
+      const weekA = a.week_number ?? 999;
+      const weekB = b.week_number ?? 999;
+      if (weekA !== weekB) return weekA - weekB;
+      return a.position - b.position;
+    });
+
+    // Get total count before pagination
+    const totalCount = allTasks.length;
+
+    // Apply pagination
+    const { limit = 50, offset = 0 } = params;
+    const paginatedTasks = allTasks.slice(offset, offset + limit);
+
+    return {
+      data: paginatedTasks,
+      count: totalCount,
+    };
   }
 }

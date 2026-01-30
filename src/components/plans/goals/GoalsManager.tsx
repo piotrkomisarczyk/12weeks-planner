@@ -33,7 +33,7 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
 
   const handleAddGoal = async (data: {
     title: string;
-    category: any;
+    category: string | null;
     description: string | null;
     progress_percentage: number;
     position: number;
@@ -41,12 +41,12 @@ export default function GoalsManager({ planContext }: GoalsManagerProps) {
     try {
       await addGoal(data);
     } catch (error) {
-      // Error is handled by the hook and dialog
+      toast.error("Failed to add goal");
       throw error;
     }
   };
 
-  const handleUpdateGoal = async (id: string, data: any) => {
+  const handleUpdateGoal = async (id: string, data: Partial<{ title: string; description: string | null }>) => {
     try {
       await updateGoal(id, data);
     } catch (error) {

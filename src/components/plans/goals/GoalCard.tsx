@@ -25,7 +25,7 @@ import { MilestoneManager } from "./milestones/MilestoneManager";
 import { GOAL_CATEGORIES, GOAL_CATEGORY_COLORS } from "@/types";
 import type { GoalDTO, GoalCategory, PlanStatus } from "@/types";
 import type { PlanContext } from "@/types";
-import { isPlanReadOnly, isPlanReady, canChangeGoalProgress, getDisabledTooltip } from "@/lib/utils";
+import { isPlanReadOnly, canChangeGoalProgress, getDisabledTooltip } from "@/lib/utils";
 
 interface GoalCardProps {
   goal: GoalDTO;

@@ -82,7 +82,6 @@ export function CreateWeeklyGoalDialog({
                 placeholder="e.g., Complete authentication module"
                 maxLength={255}
                 required
-                autoFocus
                 data-test-id="weekly-goal-title-input"
               />
             </div>

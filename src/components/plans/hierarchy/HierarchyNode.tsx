@@ -79,10 +79,27 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
   const handleTitleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onNavigate) {
       onNavigate(node.metadata.linkUrl);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onNavigate) {
+        onNavigate(node.metadata.linkUrl);
+      }
     }
   };
 
@@ -92,6 +109,10 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
         className="flex items-center py-2 px-2 hover:bg-muted/50 cursor-pointer rounded-md transition-colors"
         style={indentationStyle}
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-expanded={hasChildren ? isExpanded : undefined}
       >
         {/* Expand/Collapse Chevron */}
         <div className="w-4 h-4 mr-2 flex items-center justify-center">
@@ -120,6 +141,9 @@ export function HierarchyNode({ node, onNavigate }: HierarchyNodeProps) {
             !hasChildren && "cursor-pointer hover:underline"
           )}
           onClick={handleTitleClick}
+          onKeyDown={handleTitleKeyDown}
+          role="button"
+          tabIndex={0}
           title={node.title}
         >
           {node.title}

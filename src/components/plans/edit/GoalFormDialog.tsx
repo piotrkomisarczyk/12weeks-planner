@@ -132,7 +132,6 @@ export function GoalFormDialog({ open, onOpenChange, goal, onSubmit }: GoalFormD
               maxLength={255}
               className="w-full"
               aria-invalid={!!errors.title}
-              autoFocus
             />
             {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </div>

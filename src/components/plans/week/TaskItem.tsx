@@ -333,13 +333,16 @@ export function TaskItem({
       )}
 
       {/* Category Badge - Only for ad-hoc tasks with assigned goal */}
-      {isAdHoc && task.long_term_goal_id && getLongTermGoalCategory(task.long_term_goal_id) && (
-        <Badge
-          className={GOAL_CATEGORY_COLORS[getLongTermGoalCategory(task.long_term_goal_id)!] || "bg-gray-500 text-white"}
-        >
-          {getCategoryLabel(getLongTermGoalCategory(task.long_term_goal_id)!)}
-        </Badge>
-      )}
+      {(() => {
+        if (!isAdHoc || !task.long_term_goal_id) return null;
+        const category = getLongTermGoalCategory(task.long_term_goal_id);
+        if (!category) return null;
+        return (
+          <Badge className={GOAL_CATEGORY_COLORS[category] || "bg-gray-500 text-white"}>
+            {getCategoryLabel(category)}
+          </Badge>
+        );
+      })()}
 
       {/* Long-Term Goal Indicator */}
       {task.long_term_goal_id && (
