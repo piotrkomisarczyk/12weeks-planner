@@ -3,7 +3,7 @@
  * Individual milestone row with checkbox and delete action
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Trash2, CalendarIcon, Edit3, RotateCcw } from "lucide-react";
@@ -70,6 +70,13 @@ export function MilestoneItem({
     transition,
   };
 
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+    setEditTitle(milestone.title);
+    setEditDueDate(milestone.due_date ? new Date(milestone.due_date) : undefined);
+    setEditError("");
+  }, [milestone.title, milestone.due_date]);
+
   // Handle click outside to exit edit mode
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,7 +92,7 @@ export function MilestoneItem({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isEditing]);
+  }, [isEditing, handleCancelEdit]);
 
   const handleToggle = async () => {
     if (isToggling || isDeleting) return;
@@ -108,13 +115,6 @@ export function MilestoneItem({
   const handleEdit = () => {
     if (isToggling || isDeleting || isUpdating) return;
     setIsEditing(true);
-    setEditTitle(milestone.title);
-    setEditDueDate(milestone.due_date ? new Date(milestone.due_date) : undefined);
-    setEditError("");
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
     setEditTitle(milestone.title);
     setEditDueDate(milestone.due_date ? new Date(milestone.due_date) : undefined);
     setEditError("");

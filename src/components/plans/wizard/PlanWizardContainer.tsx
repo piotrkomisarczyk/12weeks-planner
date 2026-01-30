@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import type { PlanWizardState, GoalFormData, CreatePlanCommand, CreateGoalCommand } from "@/types";
+import type { PlanWizardState, GoalFormData, CreatePlanCommand, CreateGoalCommand, PlanDetailsData } from "@/types";
 import { WizardStepper } from "./WizardStepper";
 import { WizardControls } from "./WizardControls";
 import { PlanDetailsForm } from "./steps/PlanDetailsForm";
@@ -59,7 +59,7 @@ export function PlanWizardContainer() {
   });
 
   // Validate step 1 (Plan Details)
-  const validateStep1 = (): boolean => {
+  const validateStep1 = useCallback((): boolean => {
     const errors: Record<string, string> = {};
 
     if (!wizardState.details.name || wizardState.details.name.trim().length === 0) {
@@ -80,7 +80,7 @@ export function PlanWizardContainer() {
 
     setWizardState((prev) => ({ ...prev, errors }));
     return Object.keys(errors).length === 0;
-  };
+  }, [wizardState.details.name, wizardState.details.startDate]);
 
   // Validate step 2 (Goals)
   const validateStep2 = (): boolean => {
@@ -109,7 +109,7 @@ export function PlanWizardContainer() {
         setWizardState((prev) => ({ ...prev, step: 2, errors: {} }));
       }
     }
-  }, [wizardState]);
+  }, [wizardState, validateStep1]);
 
   // Handle back button
   const handleBack = useCallback(() => {
@@ -119,7 +119,7 @@ export function PlanWizardContainer() {
   }, [wizardState.step]);
 
   // Handle plan details change
-  const handleDetailsChange = useCallback((details: typeof wizardState.details) => {
+  const handleDetailsChange = useCallback((details: PlanDetailsData) => {
     setWizardState((prev) => ({ ...prev, details }));
   }, []);
 
@@ -196,7 +196,9 @@ export function PlanWizardContainer() {
 
         await fetch(`/api/v1/plans/${planId}`, {
           method: "DELETE",
-        }).catch(() => {});
+        }).catch(() => {
+          // Ignore deletion errors during rollback
+        });
 
         throw new Error("Error creating goals. The planner creation was rolled back.");
       }

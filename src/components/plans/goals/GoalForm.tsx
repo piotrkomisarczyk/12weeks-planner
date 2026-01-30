@@ -52,10 +52,14 @@ export function GoalForm({ title, category, description, onUpdate, disabled = fa
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const titleTimer = titleTimerRef.current;
+    const descriptionTimer = descriptionTimerRef.current;
+    const saveStatusTimer = saveStatusTimerRef.current;
+
     return () => {
-      if (titleTimerRef.current) clearTimeout(titleTimerRef.current);
-      if (descriptionTimerRef.current) clearTimeout(descriptionTimerRef.current);
-      if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+      if (titleTimer) clearTimeout(titleTimer);
+      if (descriptionTimer) clearTimeout(descriptionTimer);
+      if (saveStatusTimer) clearTimeout(saveStatusTimer);
     };
   }, []);
 

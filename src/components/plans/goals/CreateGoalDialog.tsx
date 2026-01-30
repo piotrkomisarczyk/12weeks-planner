@@ -157,7 +157,6 @@ export function CreateGoalDialog({
               placeholder="e.g., Launch new product"
               maxLength={255}
               aria-invalid={!!errors.title}
-              autoFocus
             />
             {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
           </div>

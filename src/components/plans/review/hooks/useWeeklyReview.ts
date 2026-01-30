@@ -46,10 +46,14 @@ export function useWeeklyReview({
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const whatWorkedTimer = whatWorkedTimerRef.current;
+    const whatDidNotWorkTimer = whatDidNotWorkTimerRef.current;
+    const whatToImproveTimer = whatToImproveTimerRef.current;
+
     return () => {
-      if (whatWorkedTimerRef.current) clearTimeout(whatWorkedTimerRef.current);
-      if (whatDidNotWorkTimerRef.current) clearTimeout(whatDidNotWorkTimerRef.current);
-      if (whatToImproveTimerRef.current) clearTimeout(whatToImproveTimerRef.current);
+      if (whatWorkedTimer) clearTimeout(whatWorkedTimer);
+      if (whatDidNotWorkTimer) clearTimeout(whatDidNotWorkTimer);
+      if (whatToImproveTimer) clearTimeout(whatToImproveTimer);
     };
   }, []);
 

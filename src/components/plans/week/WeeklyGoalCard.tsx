@@ -213,7 +213,6 @@ export function WeeklyGoalCard({
                       onKeyDown={handleTitleKeyDown}
                       className="h-8 font-semibold"
                       maxLength={255}
-                      autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
