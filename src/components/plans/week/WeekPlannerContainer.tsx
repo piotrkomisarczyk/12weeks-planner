@@ -52,16 +52,14 @@ export function WeekPlannerContainer({
   // Compute derived flags for plan status restrictions
   const isReadOnly = isPlanReadOnly(planStatus);
 
-  // Drag and Drop sensors - conditionally disabled for read-only plans
-  const sensors = isReadOnly
-    ? []
-    : useSensors(
-        useSensor(PointerSensor, {
-          activationConstraint: {
-            distance: 8,
-          },
-        })
-      );
+  // Drag and Drop sensors - always call hooks, but conditionally use them
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Navigation handler
   const handleNavigate = useCallback(
@@ -447,7 +445,7 @@ export function WeekPlannerContainer({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <WeekHeader weekNumber={weekNumber} startDate={planStartDate} planName={planName} onNavigate={handleNavigate} />
 
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+        <DndContext sensors={isReadOnly ? [] : sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
           <div className="space-y-6 pt-6">
             {/* Weekly Goals Section */}
             <WeeklyGoalsSection

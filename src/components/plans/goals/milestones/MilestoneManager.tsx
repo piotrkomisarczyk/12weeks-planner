@@ -68,16 +68,14 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
   const planStatus = planContext.status as PlanStatus;
   const isReadOnly = isPlanReadOnly(planStatus);
 
-  // Drag and Drop sensors - conditionally disabled for read-only plans
-  const sensors = isReadOnly
-    ? []
-    : useSensors(
-        useSensor(PointerSensor, {
-          activationConstraint: {
-            distance: 8,
-          },
-        })
-      );
+  // Drag and Drop sensors - always call hooks, but conditionally use them
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Track if milestones have been fetched for this goal
   const hasFetchedRef = useRef(false);
@@ -183,8 +181,6 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
     [milestones, reorderMilestones]
   );
 
-  const isDisabled = planContext.isArchived;
-
   return (
     <div className="space-y-4">
       <div>
@@ -205,7 +201,11 @@ export function MilestoneManager({ goalId, planContext, isGoalExpanded }: Milest
 
         {/* Milestone List */}
         {!isLoading && !error && (
-          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleReorderMilestones}>
+          <DndContext
+            sensors={isReadOnly ? [] : sensors}
+            collisionDetection={closestCorners}
+            onDragEnd={handleReorderMilestones}
+          >
             <MilestoneList
               milestones={milestones}
               onToggle={handleToggleMilestone}

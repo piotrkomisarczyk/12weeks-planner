@@ -56,16 +56,14 @@ export function DayPageContainer({
   const isReadOnly = isPlanReadOnly(planStatus);
   const canChangeStatus = canChangeTaskStatus(planStatus);
 
-  // Drag and Drop sensors - conditionally disabled for read-only plans
-  const sensors = isReadOnly
-    ? []
-    : useSensors(
-        useSensor(PointerSensor, {
-          activationConstraint: {
-            distance: 8,
-          },
-        })
-      );
+  // Drag and Drop sensors - always call hooks, but conditionally use them
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Cleanup debounce timeout on unmount
   useEffect(() => {
@@ -417,7 +415,7 @@ export function DayPageContainer({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+    <DndContext sensors={isReadOnly ? [] : sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
