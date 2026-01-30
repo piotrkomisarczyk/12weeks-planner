@@ -18,14 +18,14 @@ A web application for planning and monitoring long-term goals using a structured
 
 ### Key Features
 
-- **Hierarchical Goal Management**: Organize your work with a three-tier hierarchy (goals → milestones → weekly tasks → daily tasks)
+- **Hierarchical Goal Management**: Organize your work with a three-tier hierarchy (goals → milestones → weekly goals → daily tasks)
 - **Task Prioritization**: Categorize tasks using A/B/C priority levels to focus on what matters most
 - **Advanced Task States**: Track progress with multiple states (to-do, in progress, completed, cancelled, postponed)
 - **Visual Progress Tracking**: Monitor goal achievement with visual progress bars
 - **Weekly Reflections**: Build self-awareness through structured weekly summary questions
-- **Multiple Views**: Navigate between dashboard, goals, weekly planning, daily tasks, hierarchy view and weekly summaries
+- **Multiple Views**: Navigate between dashboard, goals, weekly planning, daily tasks, task hierarchy view and weekly summaries
 - **Privacy-Focused**: Personal planners with secure authentication - your data stays yours
-- **Bilingual Support**: Available in English and Polish
+- **Language Support**: Currently available only in English. In future also in Polish.
 
 ### Target Users
 
@@ -53,7 +53,7 @@ Individual users seeking an advanced, structured approach to goal planning beyon
 ### CI/CD & Hosting
 
 - **GitHub Actions** - Automated CI/CD pipelines
-- **DigitalOcean** - Application hosting via Docker containers
+- **Cloudflare Pages** - Application hosting and deployment platform
 
 ### Development Tools
 
@@ -176,22 +176,24 @@ Git hooks via Husky will automatically run linting on staged files before commit
 - Create 12-week planners starting from Monday of current week
 - Navigate between current and archived planners
 - Soft-delete archival system
+- View all infromation stored in active / ready / archived planners
 
 ✅ **Goal Management**
 
-- Create 1-5 goals per planner
+- Create 1-6 goals per planner
 - Add justifications for each goal
 - Define up to 5 milestone tasks per goal with deadlines
 - Manual progress tracking (0-100%)
 
 ✅ **Task Management**
 
-- Weekly planning with main task and subtasks
-- Ad-hoc tasks unrelated to goals
+- Weekly planning with weekly goals and tasks
+- Other tasks unrelated to goals
 - A/B/C prioritization system
 - Multiple task states (to-do, in progress, completed, cancelled, postponed)
-- Task assignment to specific days
-- Multi-day task copying with state history
+- Task assignment to specific days, goals, milestones and weekly goals
+- Multi-day task copying
+- Elastic approach to organization of tasks
 
 ✅ **Daily Task View**
 
@@ -207,16 +209,18 @@ Git hooks via Husky will automatically run linting on staged files before commit
 - Goal progress updates
 
 ✅ **Dashboard & Navigation**
-
-- Hierarchical task tree view (expand/collapse)
 - Quick links to all views
 - Progress visualization
+
+✅ **Hierarchy view**
+- Hierarchical task tree view (expand/collapse)
+- Filtering by weeks and completed tasks
 
 ✅ **Interface**
 
 - Responsive desktop design
 - SVG icons with ARIA labels
-- Bilingual support (English/Polish)
+- Language support (English)
 
 ### Not Included in MVP
 

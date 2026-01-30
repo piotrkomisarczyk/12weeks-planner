@@ -17,7 +17,7 @@ Backend:
 CI/CD i Hosting:
 
 - Github Actions - tworzenie pipeline'ów CI/CD
-- DigitalOcean - do hostowania aplikacji za pośrednictwem obrazu docker
+- Cloudflare Pages - platforma do hostowania i wdrażania aplikacji
 
 Testowanie:
 
