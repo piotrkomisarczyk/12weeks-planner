@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "dev:e2e": "astro dev --mode test",
+    "dev:e2e:prod": "astro dev --mode prod",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

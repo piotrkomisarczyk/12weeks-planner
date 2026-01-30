@@ -34,7 +34,6 @@ Pierwszy krok - weryfikacja jakości kodu:
     - `SUPABASE_KEY`
     - `PUBLIC_SUPABASE_URL`
     - `PUBLIC_SUPABASE_ANON_KEY`
-    - `OPENROUTER_API_KEY`
 - Wykorzystuje skrypt: `npm run test:e2e`
 - Instaluje tylko przeglądarkę Chromium: `npx playwright install --with-deps chromium`
 - Przechowuje Playwright report przez 7 dni
@@ -62,7 +61,6 @@ SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
 PUBLIC_SUPABASE_URL=your_public_supabase_url
 PUBLIC_SUPABASE_ANON_KEY=your_public_anon_key
-OPENROUTER_API_KEY=your_openrouter_key
 ```
 
 ## Wykorzystane Akcje GitHub

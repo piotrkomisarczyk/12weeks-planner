@@ -106,6 +106,8 @@ For detailed testing documentation, see [docs/TESTING.md](docs/TESTING.md).
    ```env
    PUBLIC_SUPABASE_URL=your_supabase_project_url
    PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_KEY=your_supabase_key
    ```
 
    You can find these values in your Supabase project settings under API.

@@ -3,9 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types.ts";
 
 // Use public env vars for client-side, private env vars for server-side
-const supabaseUrl = typeof window !== "undefined" ? import.meta.env.PUBLIC_SUPABASE_URL : import.meta.env.SUPABASE_URL;
-const supabaseAnonKey =
-  typeof window !== "undefined" ? import.meta.env.PUBLIC_SUPABASE_ANON_KEY : import.meta.env.SUPABASE_KEY;
+const supabaseUrl = typeof window !== "undefined" 
+? import.meta.env.PUBLIC_SUPABASE_URL 
+: import.meta.env.SUPABASE_URL;
+
+const supabaseAnonKey =  typeof window !== "undefined" 
+? import.meta.env.PUBLIC_SUPABASE_ANON_KEY 
+: import.meta.env.SUPABASE_KEY;
 
 export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
