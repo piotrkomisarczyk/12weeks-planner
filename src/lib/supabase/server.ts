@@ -29,16 +29,22 @@ function parseCookieHeader(cookieHeader: string): { name: string; value: string 
  * Must be called per-request with fresh context
  *
  * @param context - Astro context with headers and cookies
+ * @param runtime - Optional runtime environment (for Cloudflare)
  * @returns Supabase server client instance
  */
-export const createServerSupabaseClient = (context: { headers: Headers; cookies: AstroCookies }) => {
-  const supabaseUrl = import.meta.env.SUPABASE_URL;
-  const supabaseKey = import.meta.env.SUPABASE_KEY;
+export const createServerSupabaseClient = (
+  context: { headers: Headers; cookies: AstroCookies },
+  runtime?: { env?: Record<string, string> }
+) => {
+  // Try runtime env first (Cloudflare), fallback to import.meta.env (local dev)
+  const supabaseUrl = runtime?.env?.SUPABASE_URL ?? import.meta.env.SUPABASE_URL;
+  const supabaseKey = runtime?.env?.SUPABASE_KEY ?? import.meta.env.SUPABASE_KEY;
 
   const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
   const lastUrl = (str: string | undefined) => str?.slice(-16) ?? "undefined";
   console.log("[createServerSupabaseClient] URL:", lastUrl(supabaseUrl), "KEY:", last6(supabaseKey));
-  const supabase = createServerClient<Database>(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_KEY, {
+  
+  const supabase = createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookieOptions,
     cookies: {
       getAll() {
