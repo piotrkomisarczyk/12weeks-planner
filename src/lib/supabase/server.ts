@@ -37,12 +37,33 @@ export const createServerSupabaseClient = (
   runtime?: { env?: Record<string, string> }
 ) => {
   // Try runtime env first (Cloudflare), fallback to import.meta.env (local dev)
-  const supabaseUrl = runtime?.env?.SUPABASE_URL ?? import.meta.env.SUPABASE_URL;
-  const supabaseKey = runtime?.env?.SUPABASE_KEY ?? import.meta.env.SUPABASE_KEY;
+  // On Cloudflare, check both SUPABASE_URL and PUBLIC_SUPABASE_URL for compatibility
+  const supabaseUrl =
+    runtime?.env?.SUPABASE_URL ??
+    runtime?.env?.PUBLIC_SUPABASE_URL ??
+    import.meta.env.SUPABASE_URL ??
+    import.meta.env.PUBLIC_SUPABASE_URL;
+
+  const supabaseKey =
+    runtime?.env?.SUPABASE_KEY ??
+    runtime?.env?.SUPABASE_ANON_KEY ??
+    runtime?.env?.PUBLIC_SUPABASE_ANON_KEY ??
+    import.meta.env.SUPABASE_KEY ??
+    import.meta.env.SUPABASE_ANON_KEY ??
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
   const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
   const lastUrl = (str: string | undefined) => str?.slice(-16) ?? "undefined";
   console.log("[createServerSupabaseClient] URL:", lastUrl(supabaseUrl), "KEY:", last6(supabaseKey));
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      "Missing Supabase environment variables for server client.\n" +
+        `SUPABASE_URL: ${supabaseUrl ? "✓" : "✗"}\n` +
+        `SUPABASE_KEY: ${supabaseKey ? "✓" : "✗"}\n` +
+        "Please ensure these are set in your Cloudflare Pages environment variables."
+    );
+  }
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookieOptions,
