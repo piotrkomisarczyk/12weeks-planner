@@ -18,10 +18,6 @@ export function createClient() {
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-  const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
-  const last12 = (str: string | undefined) => str?.slice(-12) ?? "undefined";
-  console.log("[createBrowserClient] URL:", last12(supabaseUrl), "KEY:", last6(supabaseKey));
-
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(
       "Missing Supabase public environment variables. Please check your configuration.\n" +

@@ -16,10 +16,6 @@ function initializeClient(): SupabaseClientType<Database> {
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-  const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
-  const last12 = (str: string | undefined) => str?.slice(-12) ?? "undefined";
-  console.log("[supabase.client.ts] Initializing client - URL:", last12(supabaseUrl), "KEY:", last6(supabaseAnonKey));
-
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
       "Missing Supabase PUBLIC environment variables for client.\n" +
@@ -35,7 +31,6 @@ function initializeClient(): SupabaseClientType<Database> {
   }
 
   _supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
-  console.log("[supabase.client.ts] Client initialized successfully");
   return _supabaseClient;
 }
 

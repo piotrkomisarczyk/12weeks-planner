@@ -64,18 +64,6 @@ export const createServerSupabaseClient = (
     import.meta.env.SUPABASE_ANON_KEY ??
     import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-  // Debug logging (only show last few characters for security)
-  const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
-  const lastUrl = (str: string | undefined) => str?.slice(-16) ?? "undefined";
-
-  console.log(
-    "[createServerSupabaseClient]PUBLIC URL:",
-    lastUrl(getEnvString("PUBLIC_SUPABASE_URL")),
-    "KEY:",
-    last6(getEnvString("PUBLIC_SUPABASE_ANON_KEY"))
-  );
-  console.log("[createServerSupabaseClient] URL:", lastUrl(supabaseUrl), "KEY:", last6(supabaseKey));
-
   // Validate that we have the required environment variables
   if (!supabaseUrl || !supabaseKey) {
     const debugInfo = {
@@ -85,8 +73,6 @@ export const createServerSupabaseClient = (
       runtime_SUPABASE_ANON_KEY: getEnvString("SUPABASE_ANON_KEY") ? "✓" : "✗",
       runtime_PUBLIC_SUPABASE_ANON_KEY: getEnvString("PUBLIC_SUPABASE_ANON_KEY") ? "✓" : "✗",
     };
-
-    console.error("[createServerSupabaseClient] Environment variables check:", debugInfo);
 
     throw new Error(
       "Missing Supabase environment variables for server client.\n" +
@@ -111,6 +97,5 @@ export const createServerSupabaseClient = (
     },
   });
 
-  console.log("[createServerSupabaseClient] Supabase client created successfully");
   return supabase;
 };
