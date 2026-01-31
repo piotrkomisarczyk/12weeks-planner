@@ -47,7 +47,7 @@ export const getSupabaseClient = initializeClient;
 export const supabaseClient = new Proxy({} as SupabaseClientType<Database>, {
   get(_target, prop) {
     const client = initializeClient();
-    return (client as any)[prop];
+    return client[prop as keyof SupabaseClientType<Database>];
   },
 });
 
