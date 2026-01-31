@@ -39,17 +39,17 @@ export const createServerSupabaseClient = (
   // Priority order for environment variables:
   // 1. Runtime env (Cloudflare Pages) - preferred for server-side
   // 2. Build-time env (import.meta.env) - fallback for local dev
-  
+
   // For Cloudflare Pages, environment variables should be set as:
   // - SUPABASE_URL (or PUBLIC_SUPABASE_URL)
   // - SUPABASE_KEY (or SUPABASE_ANON_KEY or PUBLIC_SUPABASE_ANON_KEY)
-  
+
   // Helper to safely get string value from runtime env
   const getEnvString = (key: string): string | undefined => {
     const value = runtime?.env?.[key];
     return typeof value === "string" ? value : undefined;
   };
-  
+
   const supabaseUrl =
     getEnvString("SUPABASE_URL") ??
     getEnvString("PUBLIC_SUPABASE_URL") ??
@@ -78,9 +78,9 @@ export const createServerSupabaseClient = (
       runtime_SUPABASE_ANON_KEY: getEnvString("SUPABASE_ANON_KEY") ? "✓" : "✗",
       runtime_PUBLIC_SUPABASE_ANON_KEY: getEnvString("PUBLIC_SUPABASE_ANON_KEY") ? "✓" : "✗",
     };
-    
+
     console.error("[createServerSupabaseClient] Environment variables check:", debugInfo);
-    
+
     throw new Error(
       "Missing Supabase environment variables for server client.\n" +
         `SUPABASE_URL: ${supabaseUrl ? "✓" : "✗"}\n` +
@@ -103,7 +103,7 @@ export const createServerSupabaseClient = (
       },
     },
   });
-  
+
   console.log("[createServerSupabaseClient] Supabase client created successfully");
   return supabase;
 };
