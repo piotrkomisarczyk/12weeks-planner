@@ -6,24 +6,24 @@ on:
   workflow_dispatch:
 
 jobs:
-#  lint:
-#    name: Lint Code
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v6
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-#      - name: Setup Node.js
-#        uses: actions/setup-node@v6
-#        with:
-#          node-version-file: ".nvmrc"
-#          cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
 
-#      - name: Install dependencies
-#        run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-#      - name: Run ESLint
-#        run: npm run lint
+      - name: Run ESLint
+        run: npm run lint
 
   unit-tests:
     name: Unit Tests
@@ -87,8 +87,7 @@ jobs:
     name: Production Build
     runs-on: ubuntu-latest
     environment: integration
-#    needs: [lint, unit-tests, e2e-tests]
-    needs: [unit-tests, e2e-tests]
+    needs: [lint, unit-tests, e2e-tests]
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
