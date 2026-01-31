@@ -13,7 +13,15 @@ export function createClient() {
   if (client) {
     return client;
   }
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
+  const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
+  const last12 = (str: string | undefined) => str?.slice(-12) ?? "undefined";
+  console.log(
+    "[createBrowserClient] URL:", last12(supabaseUrl),
+    "KEY:", last6(supabaseKey)
+  );
   client = createBrowserClient<Database>(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
   return client;
