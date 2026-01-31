@@ -10,8 +10,8 @@ const getSupabaseUrl = () => {
     // Client-side: PUBLIC vars are embedded at build time
     return import.meta.env.PUBLIC_SUPABASE_URL;
   }
-  // Server-side: try runtime first, fallback to build-time
-  return import.meta.env.SUPABASE_URL;
+  // Server-side: try runtime first (process.env), fallback to build-time (import.meta.env)
+  return process.env.SUPABASE_URL || import.meta.env.SUPABASE_URL;
 };
 
 const getSupabaseKey = () => {
@@ -19,8 +19,8 @@ const getSupabaseKey = () => {
     // Client-side: PUBLIC vars are embedded at build time
     return import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   }
-  // Server-side: try runtime first, fallback to build-time
-  return import.meta.env.SUPABASE_KEY;
+  // Server-side: try runtime first (process.env), fallback to build-time (import.meta.env)
+  return process.env.SUPABASE_KEY || import.meta.env.SUPABASE_KEY;
 };
 
 const supabaseUrl = getSupabaseUrl();

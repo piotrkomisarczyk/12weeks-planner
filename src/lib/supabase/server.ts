@@ -76,6 +76,6 @@ export const createServerSupabaseClient = (
       },
     },
   });
-
+  console.log("[createServerSupabaseClient] Supabase client created !!!");
   return supabase;
 };
