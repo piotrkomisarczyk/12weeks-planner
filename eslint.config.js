@@ -6,6 +6,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import pluginReact from "eslint-plugin-react";
 import reactCompiler from "eslint-plugin-react-compiler";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import tseslint from "typescript-eslint";
@@ -28,6 +29,15 @@ const baseConfig = tseslint.config({
         caughtErrorsIgnorePattern: "^_",
       },
     ],
+  },
+});
+
+const nodeConfig = tseslint.config({
+  files: ["*.config.{js,mjs,cjs,ts}", "eslint.config.js"],
+  languageOptions: {
+    globals: {
+      ...globals.node,
+    },
   },
 });
 
@@ -67,6 +77,7 @@ const reactConfig = tseslint.config({
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
+  nodeConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],

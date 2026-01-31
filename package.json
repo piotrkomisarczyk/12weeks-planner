@@ -88,6 +88,7 @@
     "eslint-plugin-react": "7.37.4",
     "eslint-plugin-react-compiler": "19.0.0-beta-aeaed83-20250323",
     "eslint-plugin-react-hooks": "5.2.0",
+    "globals": "^17.2.0",
     "happy-dom": "^20.3.9",
     "husky": "9.1.7",
     "jsdom": "^27.4.0",
