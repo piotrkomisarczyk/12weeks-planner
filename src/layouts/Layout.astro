@@ -1,7 +1,6 @@
 ---
 import "../styles/global.css";
 import type { PlanSummary, PlanStatus } from "@/types";
-import { createServerClient } from "@supabase/ssr";
 import { PlanService } from "@/lib/services/plan.service";
 import TopNavigation from "@/components/navigation/TopNavigation.astro";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,20 +11,9 @@ interface Props {
 
 const { title = "12 Weeks Planner" } = Astro.props;
 
-// Initialize Supabase server client
-const supabase = createServerClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_KEY, {
-  cookies: {
-    get(key) {
-      return Astro.cookies.get(key)?.value;
-    },
-    set(key, value, options) {
-      Astro.cookies.set(key, value, options);
-    },
-    remove(key, options) {
-      Astro.cookies.delete(key, options);
-    },
-  },
-});
+// Use Supabase client from middleware (already created with proper env vars)
+// This ensures compatibility with Cloudflare Pages runtime environment
+const supabase = Astro.locals.supabase;
 
 // Get current user - middleware should have already verified authentication
 const {
