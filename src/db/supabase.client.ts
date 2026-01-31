@@ -33,7 +33,7 @@ console.log("[supabase.client.ts] URL:", last12(supabaseUrl), "KEY:", last6(supa
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
     "Missing Supabase environment variables. Please check your configuration.\n" +
-    `URL: ${supabaseUrl ? "✓" : "✗"}, KEY: ${supabaseAnonKey ? "✓" : "✗"}`
+      `URL: ${supabaseUrl ? "✓" : "✗"}, KEY: ${supabaseAnonKey ? "✓" : "✗"}`
   );
 }
 

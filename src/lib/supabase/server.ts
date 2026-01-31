@@ -43,7 +43,7 @@ export const createServerSupabaseClient = (
   const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
   const lastUrl = (str: string | undefined) => str?.slice(-16) ?? "undefined";
   console.log("[createServerSupabaseClient] URL:", lastUrl(supabaseUrl), "KEY:", last6(supabaseKey));
-  
+
   const supabase = createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookieOptions,
     cookies: {
