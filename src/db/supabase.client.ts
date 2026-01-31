@@ -8,12 +8,9 @@ const supabaseUrl = typeof window !== "undefined" ? import.meta.env.PUBLIC_SUPAB
 const supabaseAnonKey =
   typeof window !== "undefined" ? import.meta.env.PUBLIC_SUPABASE_ANON_KEY : import.meta.env.SUPABASE_KEY;
 
-  const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
-  const last12 = (str: string | undefined) => str?.slice(-12) ?? "undefined";
-  console.log(
-    "[supabase.client.ts] URL:", last12(supabaseUrl),
-    "KEY:", last6(supabaseAnonKey)
-  );
+const last6 = (str: string | undefined) => str?.slice(-6) ?? "undefined";
+const last12 = (str: string | undefined) => str?.slice(-12) ?? "undefined";
+console.log("[supabase.client.ts] URL:", last12(supabaseUrl), "KEY:", last6(supabaseAnonKey));
 export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 // Export SupabaseClient type with Database typing
